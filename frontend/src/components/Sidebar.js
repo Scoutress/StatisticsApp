@@ -22,6 +22,7 @@ const Sidebar = () => {
         <li><Link to="/statistics">Statistics</Link></li>
         <li><Link to="/dc-activity">DC Activity</Link></li>
         <li><Link to="/help-requests">Help Requests</Link></li>
+        <li><Link to="/playtime">Playtime</Link></li>
         <li>
           <span onClick={handleToggle} style={{ cursor: 'pointer' }}>Admins List</span>
           {isOpen && (

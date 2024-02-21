@@ -7,6 +7,7 @@ import AdminPanelComponent from './components/AdminPanelComponent';
 import StatisticsComponent from './components/StatisticsComponent';
 import DcActivity from './components/DcActivity';
 import HelpRequests from './components/HelpRequests';
+import Playtime from './components/Playtime'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/statistics" element={<StatisticsComponent />} />
             <Route path="/dc-activity" element={<DcActivity />} />
             <Route path="/help-requests" element={<HelpRequests />} />
+            <Route path="/playtime" element={<Playtime />} />
           </Routes>
         </div>
       </div>

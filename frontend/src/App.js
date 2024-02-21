@@ -5,6 +5,7 @@ import LoginComponent from './components/LoginComponent';
 import RegisterComponent from './components/RegisterComponent';
 import AdminPanelComponent from './components/AdminPanelComponent';
 import StatisticsComponent from './components/StatisticsComponent';
+import DcActivity from './components/DcActivity';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/register" element={<RegisterComponent />} />
             <Route path="/admin" element={<AdminPanelComponent />} />
             <Route path="/statistics" element={<StatisticsComponent />} />
+            <Route path="/dc-activity" element={<DcActivity />} />
           </Routes>
         </div>
       </div>

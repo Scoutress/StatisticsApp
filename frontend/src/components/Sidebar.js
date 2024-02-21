@@ -8,7 +8,8 @@ function Sidebar() {
         <li><Link to="/login">Login</Link></li>
         <li><Link to="/register">Register</Link></li>
         <li><Link to="/admin">Admin Panel</Link></li>
-        <li><Link to="/statistics">Statistics</Link></li> {/* Pridėta nuoroda */}
+        <li><Link to="/statistics">Statistics</Link></li>
+        <li><Link to="/dc-activity">DC Activity</Link></li>
       </ul>
     </div>
   );

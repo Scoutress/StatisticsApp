@@ -1,6 +1,6 @@
 import React from 'react';
 
-function StatisticsComponent() {
+function Statistics() {
   const styles = {
     table: {
       width: '100%',
@@ -58,4 +58,4 @@ function StatisticsComponent() {
   );
 }
 
-export default StatisticsComponent;
+export default Statistics;

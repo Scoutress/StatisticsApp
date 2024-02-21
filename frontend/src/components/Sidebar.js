@@ -10,6 +10,7 @@ function Sidebar() {
         <li><Link to="/admin">Admin Panel</Link></li>
         <li><Link to="/statistics">Statistics</Link></li>
         <li><Link to="/dc-activity">DC Activity</Link></li>
+        <li><Link to="/help-requests">Help Requests</Link></li>
       </ul>
     </div>
   );

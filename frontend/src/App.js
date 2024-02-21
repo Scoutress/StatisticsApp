@@ -6,6 +6,7 @@ import RegisterComponent from './components/RegisterComponent';
 import AdminPanelComponent from './components/AdminPanelComponent';
 import StatisticsComponent from './components/StatisticsComponent';
 import DcActivity from './components/DcActivity';
+import HelpRequests from './components/HelpRequests';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/admin" element={<AdminPanelComponent />} />
             <Route path="/statistics" element={<StatisticsComponent />} />
             <Route path="/dc-activity" element={<DcActivity />} />
+            <Route path="/help-requests" element={<HelpRequests />} />
           </Routes>
         </div>
       </div>

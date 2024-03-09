@@ -22,16 +22,18 @@
             <thead class="table-dark">
                 <tr>
                     <th>Username</th>
-                    <th>Level</th>
-                    <th>Join Date</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="tempEmployee : ${employees}">
                     <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.level}"></td>
-                    <td th:text="${tempEmployee.joinDate}"></td>
+                    <td th:text="${tempEmployee.firstName}"></td>
+                    <td th:text="${tempEmployee.lastName}"></td>
+                    <td th:text="${tempEmployee.email}"></td>
                     <td>
                         <a th:href="@{/employees/showFormForUpdate(employeeId=${tempEmployee.employeeId})}"
                             class="btn btn-info btm-sm">

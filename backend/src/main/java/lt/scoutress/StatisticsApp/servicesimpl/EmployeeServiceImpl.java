@@ -3,6 +3,7 @@ package lt.scoutress.StatisticsApp.servicesimpl;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.services.EmployeeService;
@@ -14,6 +15,8 @@ import java.util.List;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeRepository employeeRepository;
+    
+    @PersistenceContext
     private EntityManager entityManager;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository) {
@@ -33,7 +36,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee findById(int employeeId) {
-        Employee theEmployee = entityManager.find(Employee.class, employeeId);
-        return theEmployee;
+        Employee employee = entityManager.find(Employee.class, employeeId);
+        return employee;
     }
 }

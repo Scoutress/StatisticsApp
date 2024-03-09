@@ -17,34 +17,34 @@
     
             <div class="form-group">
                 <label for="level">Level:</label>
-                <input type="text" id="level" th:field="*{level}" class="form-control mb-4 w-25">
+                <input type="text" id="level" th:field="*{level}" class="form-control mb-4 w-25" placeholder="Helper">
                 <input type="checkbox" id="useHelper" onchange="updateLevel()"> Use Helper level
             </div>
     
             <div class="form-group">
                 <label for="joinDate">Join Date:</label>
-                <input type="text" id="joinDate" th:field="*{joinDate}" class="form-control mb-4 w-25">
+                <input type="text" id="joinDate" th:field="*{joinDate}" class="form-control mb-4 w-25" placeholder="2022-02-02">
                 <input type="checkbox" id="useToday" onchange="updateJoinDate()"> Use today's date
             </div>
     
             <div class="form-group">
                 <label for="username">Username:</label>
-                <input type="text" id="username" th:field="*{username}" class="form-control mb-4 w-25">
+                <input type="text" id="username" th:field="*{username}" class="form-control mb-4 w-25" placeholder="Username">
             </div>
     
             <div class="form-group">
                 <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" th:field="*{firstName}" class="form-control mb-4 w-25">
+                <input type="text" id="firstName" th:field="*{firstName}" class="form-control mb-4 w-25" placeholder="John">
             </div>
     
             <div class="form-group">
                 <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" th:field="*{lastName}" class="form-control mb-4 w-25">
+                <input type="text" id="lastName" th:field="*{lastName}" class="form-control mb-4 w-25" placeholder="Doe">
             </div>
     
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="text" id="email" th:field="*{email}" class="form-control mb-4 w-25">
+                <input type="text" id="email" th:field="*{email}" class="form-control mb-4 w-25" placeholder="johndoe@gmail.com">
             </div>
     
             <button type="submit" class="btn btn-info col-2">Save</button>

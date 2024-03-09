@@ -6,7 +6,9 @@ import lt.scoutress.StatisticsApp.entity.Employee;
 
 public interface EmployeeService {
 
-    List<Employee> getAllEmployees();
+    List<Employee> findAll();
 
     void addEmployee(Employee employee);
+
+    Employee findById(int employeeId);
 }

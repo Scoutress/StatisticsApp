@@ -13,7 +13,7 @@ import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.servicesimpl.EmployeeServiceImpl;
 
 @Controller
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 public class EmployeeController {
     
     private final EmployeeServiceImpl employeeService;
@@ -24,21 +24,22 @@ public class EmployeeController {
     
     @GetMapping("/list")
     public String getAllEmployees(Model model) {
-        List<Employee> employees = employeeService.getAllEmployees();
+        List<Employee> employees = employeeService.findAll();
         model.addAttribute("employees", employees);
         return "employee-list";
     }
 
-    @GetMapping("/new")
-    public String showEmployeeForm(Model model) {
-        model.addAttribute("newEmployee", new Employee());
-        return "employee-new-form";
+    @GetMapping("/showFormForAdd")
+    public String showFormForAdd(Model model) {
+        Employee employee = new Employee();
+        model.addAttribute("employee", employee);
+        return "employee-form";
     }
 
-    @PostMapping("/new")
-    public String addEmployee(@ModelAttribute("employee") Employee employee) {
+    @PostMapping("/save")
+    public String saveEmployee(@ModelAttribute("employee") Employee employee){
         employeeService.addEmployee(employee);
-        return "redirect:/employee/list";
+        return "redirect:/employees/list";
     }
 
 }

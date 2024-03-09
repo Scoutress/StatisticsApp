@@ -1,5 +1,7 @@
 package lt.scoutress.StatisticsApp.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +15,7 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
+    @Column(name = "employee_id")
     private Long employeeId;
 
     @Column(name = "username")
@@ -32,18 +34,18 @@ public class Employee {
     private String email;
 
     @Column(name = "join_date")
-    private String joinDate;
+    private LocalDate joinDate;
 
     public Employee() {
     }
 
-    public Employee(String username, String level, String firstName, String lastName, String email, String joinDate) {
+    public Employee(String username, String firstName, String lastName, String email) {
         this.username = username;
-        this.level = level;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.joinDate = joinDate;
+        this.level = "Helper";
+        this.joinDate = LocalDate.now();
     }
 
     public Long getEmployeeId() {
@@ -94,11 +96,11 @@ public class Employee {
         this.email = email;
     }
 
-    public String getJoinDate() {
+    public LocalDate getJoinDate() {
         return joinDate;
     }
 
-    public void setJoinDate(String joinDate) {
+    public void setJoinDate(LocalDate joinDate) {
         this.joinDate = joinDate;
     }
 

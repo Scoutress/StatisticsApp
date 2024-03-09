@@ -18,13 +18,16 @@
         <a th:href="@{/employees/showFormForAdd}" class="btn btn-primary btn-sm mb-3">
             Add Employee
         </a>
+        <a th:href="@{/main}" class="btn btn-danger btn-sm mb-3">
+            Back to Home
+        </a>
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
                     <th>Username</th>
                     <th>Level</th>
                     <th>Join Date</th>
-                    <th>Actions</th>
+                    <th>Productivity</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,12 +35,7 @@
                     <td th:text="${tempEmployee.username}"></td>
                     <td th:text="${tempEmployee.level}"></td>
                     <td th:text="${tempEmployee.joinDate}"></td>
-                    <td>
-                        <a th:href="@{/employees/showFormForUpdate(employeeId=${tempEmployee.employeeId})}"
-                            class="btn btn-info btm-sm">
-                            Edit
-                        </a>
-                    </td>
+                    <td></td>
                 </tr>
             </tbody>
         </table>

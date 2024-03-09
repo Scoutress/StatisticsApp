@@ -30,6 +30,13 @@ public class EmployeeController {
         return "employee-list";
     }
 
+    @GetMapping("/personal")
+    public String getAllEmployeesPersonalData(Model model) {
+        List<Employee> employees = employeeService.findAll();
+        model.addAttribute("employees", employees);
+        return "employee-personal-data";
+    }
+
     @GetMapping("/showFormForAdd")
     public String showFormForAdd(Model model) {
         Employee employee = new Employee();

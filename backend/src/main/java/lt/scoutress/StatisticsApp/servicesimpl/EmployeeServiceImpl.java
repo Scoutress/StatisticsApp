@@ -29,8 +29,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void addEmployee(Employee employee) {
-        employee.setLevel("Helper");
-        employee.setJoinDate(LocalDate.now());
+        // employee.setLevel("Helper");
+        // employee.setJoinDate(LocalDate.now());
         employeeRepository.save(employee);
     }
 
@@ -38,5 +38,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee findById(int employeeId) {
         Employee employee = entityManager.find(Employee.class, employeeId);
         return employee;
+    }
+
+    public void deleteById(int id) {
+        employeeRepository.deleteById(id);
     }
 }

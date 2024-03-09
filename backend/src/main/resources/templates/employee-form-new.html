@@ -4,27 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kaimux Employees</title>
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
 </head>
-    <body>
-        <div class="container">
-            <h3>Add Employee</h3>
-            <hr>
-            <form action="#" th:action="@{/employees/save}" th:object="${employee}" method="POST">
-                <input type="hidden" th:field="*{employeeId}">
-                <input type="text" th:field="*{username}" class="form-control mb-4 w-25" placeholder="Username">
-                <input type="text" th:field="*{firstName}" class="form-control mb-4 w-25" placeholder="First Name">
-                <input type="text" th:field="*{lastName}" class="form-control mb-4 w-25" placeholder="Last Name">
-                <input type="text" th:field="*{email}" class="form-control mb-4 w-25" placeholder="Email">
-                <button type="submit" class="btn btn-info col-2">Save</button>
-            </form>
-            <hr>
-            <a th:href="@{/employees/personal}">Back to employees list</a>
+<body>
+<div class="container">
+    <h3>Add Employee</h3>
+    <hr>
+    <form action="#" th:action="@{/employees/save}" th:object="${employee}" method="POST">
+        <input type="hidden" th:field="*{employeeId}">
+
+        <div class="form-group">
+            <label for="level">Level:</label>
+            <input type="text" id="level" th:field="*{level}" class="form-control mb-4 w-25">
+            <input type="checkbox" id="useHelper" onchange="updateLevel()"> Use Helper
         </div>
-    </body>
+
+        <div class="form-group">
+            <label for="joinDate">Join Date:</label>
+            <input type="text" id="joinDate" th:field="*{joinDate}" class="form-control mb-4 w-25">
+            <input type="checkbox" id="useToday" onchange="updateJoinDate()"> Use today
+        </div>
+
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" th:field="*{username}" class="form-control mb-4 w-25"
+                   placeholder="Username">
+        </div>
+
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" th:field="*{firstName}" class="form-control mb-4 w-25"
+                   placeholder="First Name">
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" th:field="*{lastName}" class="form-control mb-4 w-25"
+                   placeholder="Last Name">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="text" id="email" th:field="*{email}" class="form-control mb-4 w-25" placeholder="Email">
+        </div>
+
+        <button type="submit" class="btn btn-info col-2">Save</button>
+    </form>
+    <hr>
+    <a th:href="@{/employees/personal}">Back to employees list</a>
+</div>
+
+<script>
+    function updateLevel() {
+        var levelField = document.getElementById('level');
+        var useHelperCheckbox = document.getElementById('useHelper');
+        if (useHelperCheckbox.checked) {
+            levelField.value = 'Helper';
+        } else {
+            levelField.value = '';
+        }
+    }
+
+    function updateJoinDate() {
+        var joinDateField = document.getElementById('joinDate');
+        var useTodayCheckbox = document.getElementById('useToday');
+        if (useTodayCheckbox.checked) {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var yyyy = today.getFullYear();
+            today = yyyy + '-' + mm + '-' + dd;
+            joinDateField.value = today;
+        } else {
+            joinDateField.value = '';
+        }
+    }
+</script>
+</body>
 </html>

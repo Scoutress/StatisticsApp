@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp;
+package lt.scoutress.StatisticsApp.exceptions;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -3,6 +3,7 @@ package lt.scoutress.StatisticsApp.entity;
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
+import lt.scoutress.StatisticsApp.services.EmployeeService;
 
 @Entity
 @Table(name = "employee")

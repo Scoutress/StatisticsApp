@@ -14,26 +14,45 @@
 </head>
 <body>
     <div class="container">
-        <h3>Kaimux employees list</h3>
+        <h3>Kaimux employees productivity</h3>
         <hr>
         <a th:href="@{/main}" class="btn btn-danger btn-sm mb-3">
             Back to Home
+        </a>
+        <a th:href="@{/stats/calculation}" class="btn btn-primary btn-sm mb-3">
+            Calculation
         </a>
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
                     <th>Level</th>
                     <th>Username</th>
-                    <th>Join Date</th>
+                    <th>Activity/180d.</th>
+                    <th>Help req.</th>
+                    <th>Help req. comp.</th>
+                    <th>Dc tickets</th>
+                    <th>Dc tickets comp.</th>
+                    <th>Playtime</th>
+                    <th>AFK playtime</th>
                     <th>Productivity</th>
+                    <th>Recommendation</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="tempEmployee : ${employees}">
                     <td th:text="${tempEmployee.level}"></td>
                     <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.joinDate}"></td>
-                    <td></td>
+                    <!-- temporarily -->
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <td th:text="${tempEmployee.username}"></td>
+                    <!-- temporarily -->
                 </tr>
             </tbody>
         </table>

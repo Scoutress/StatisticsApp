@@ -1,29 +1,42 @@
 package lt.scoutress.StatisticsApp.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lt.scoutress.StatisticsApp.entity.HelpRequests;
+import lt.scoutress.StatisticsApp.services.StatisticsService;
+
 @Controller
 @RequestMapping("/stats")
 public class StatisticsController {
-    
-    @GetMapping("/help-requests")
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private final StatisticsService statisticsService;
+
+    @Autowired
+    public StatisticsController(StatisticsService statisticsService) {
+        this.statisticsService = statisticsService;
+    }
+
+    @GetMapping("/productivity")
     public String getHelpRequestsPage() {
-        return "help-requests";
+        return "productivity";
     }
 
     @GetMapping("/createTable")
     public String createTablePage() {
         return "create-table";
     }
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @PostMapping("/createTable")
     public String createTable(@RequestParam String username) {
@@ -74,5 +87,24 @@ public class StatisticsController {
         jdbcTemplate.execute(createPlaytimeTableQuery);
 
         return "redirect:/main";
+    }
+
+    @GetMapping("/calculation")
+    public String openHelpRequestsMain() {
+        return "stats-tables";
+    }
+
+    // @GetMapping("/employee")
+    // public String showEmployeeStats(Model model) {
+    //     List<HelpRequests> helpRequests = statisticsService.findAll();
+    //     model.addAttribute("helpRequests", helpRequests);
+    //     return "help-requests-employee";
+    // }
+
+    @GetMapping("/all-stats-Scoutress")
+    public String showAllEmployeeStats(Model model) {
+        List<HelpRequests> helpRequests = statisticsService.findAllHelpRequests();
+        model.addAttribute("helpRequests", helpRequests);
+        return "stats/stats-all-scoutress";
     }
 }

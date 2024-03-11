@@ -40,4 +40,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteById(int id) {
         employeeRepository.deleteById(id);
     }
+
+    @SuppressWarnings("null")
+    @Override
+    public Employee save(Employee employee) {
+        return employeeRepository.save(employee);
+    }
 }

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lt.scoutress.StatisticsApp.entity.Calculations;
 import lt.scoutress.StatisticsApp.entity.HelpRequests;
+import lt.scoutress.StatisticsApp.services.CalculationsService;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
 
 @Controller
@@ -22,9 +24,11 @@ public class StatisticsController {
     private JdbcTemplate jdbcTemplate;
 
     private final StatisticsService statisticsService;
+    private final CalculationsService calculationsService;
 
-    public StatisticsController(StatisticsService statisticsService) {
+    public StatisticsController(StatisticsService statisticsService, CalculationsService calculationsService) {
         this.statisticsService = statisticsService;
+        this.calculationsService = calculationsService;
     }
 
     @GetMapping("/productivity")
@@ -42,6 +46,7 @@ public class StatisticsController {
         String dcTable = username + "_dc";
         String helpTable = username + "_help";
         String playtimeTable = username + "_playtime";
+        String productivityTable = username + "_productivity";
 
         String createDcTableQuery = "CREATE TABLE " + dcTable + " ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY,"
@@ -85,6 +90,16 @@ public class StatisticsController {
                 + ")";
         jdbcTemplate.execute(createPlaytimeTableQuery);
 
+        String createProductivityTableQuery = "CREATE TABLE " + productivityTable + " ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY,"
+                + "days_since_join INT "
+                // + "help_answered INT,"
+                // + "help_count INT,"
+                // + "help_comparison DECIMAL(5,2),"
+                // + "help_percent DECIMAL(5,2)"
+                + ")";
+        jdbcTemplate.execute(createProductivityTableQuery);
+
         return "redirect:/main";
     }
 
@@ -98,5 +113,12 @@ public class StatisticsController {
         List<HelpRequests> helpRequests = statisticsService.findAllHelpRequests();
         model.addAttribute("helpRequests", helpRequests);
         return "stats/stats-all-scoutress";
+    }
+
+    @GetMapping("/calculations-Scoutress")
+    public String showStatsCalculation(Model model) {
+        List<Calculations> calculations = calculationsService.findCalculations();
+        model.addAttribute("calculations", calculations);
+        return "stats/calculations-scoutress";
     }
 }

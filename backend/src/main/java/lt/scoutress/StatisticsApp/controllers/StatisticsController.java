@@ -23,7 +23,6 @@ public class StatisticsController {
 
     private final StatisticsService statisticsService;
 
-    @Autowired
     public StatisticsController(StatisticsService statisticsService) {
         this.statisticsService = statisticsService;
     }
@@ -89,17 +88,10 @@ public class StatisticsController {
         return "redirect:/main";
     }
 
-    @GetMapping("/calculation")
+    @GetMapping("/allTables")
     public String openHelpRequestsMain() {
         return "stats-tables";
     }
-
-    // @GetMapping("/employee")
-    // public String showEmployeeStats(Model model) {
-    //     List<HelpRequests> helpRequests = statisticsService.findAll();
-    //     model.addAttribute("helpRequests", helpRequests);
-    //     return "help-requests-employee";
-    // }
 
     @GetMapping("/all-stats-Scoutress")
     public String showAllEmployeeStats(Model model) {

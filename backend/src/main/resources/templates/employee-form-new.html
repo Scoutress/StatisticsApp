@@ -29,6 +29,13 @@
             </div>
     
             <div class="form-group">
+                <label for="language">Language:</label>
+                <input type="text" id="language" th:field="*{language}" class="form-control mb-4 w-25" placeholder="LT">
+                <input type="checkbox" id="useLt" onchange="updateLanguage()"> Use LT
+                <input type="checkbox" id="useEn" onchange="updateLanguage()"> Use EN
+            </div>
+
+            <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" th:field="*{username}" class="form-control mb-4 w-25" placeholder="Username">
             </div>
@@ -77,6 +84,19 @@
             joinDateField.value = today;
         } else {
             joinDateField.value = '';
+        }
+    }
+
+    function updateLanguage(){
+        var languageField = document.getElementById('language');
+        var useLt = document.getElementById('useLt');
+        var useEn = document.getElementById('useEn')
+        if (useLt.checked) {
+            languageField.value = 'LT';
+        } else if (useEn.checked){
+            languageField.value = 'EN';
+        } else {
+            languageField.value = '';
         }
     }
 </script>

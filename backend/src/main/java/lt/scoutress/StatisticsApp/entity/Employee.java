@@ -19,6 +19,9 @@ public class Employee {
     @Column(name = "level")
     private String level;
 
+    @Column(name = "lang")
+    private String language;
+
     @Column(name = "first_name")
     private String firstName;
 
@@ -30,14 +33,18 @@ public class Employee {
 
     @Column(name = "join_date")
     private LocalDate joinDate;
-
-    public Employee(String username, String firstName, String lastName, String email) {
+    
+    public Employee(String username, String level, String language, String firstName, String lastName, String email,
+            LocalDate joinDate) {
         this.username = username;
+        this.level = level;
+        this.language = language;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.joinDate = joinDate;
     }
-    
+
     public Employee() {}
 
     public Integer getEmployeeId() {
@@ -95,4 +102,13 @@ public class Employee {
     public void setJoinDate(LocalDate joinDate) {
         this.joinDate = joinDate;
     }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
 }

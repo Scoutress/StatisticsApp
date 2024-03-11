@@ -32,6 +32,7 @@
                     <th>Last Name</th>
                     <th>Email</th>
                     <th>Join Date</th>
+                    <th>Language</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -44,6 +45,7 @@
                     <td th:text="${tempEmployee.lastName}"></td>
                     <td th:text="${tempEmployee.email}"></td>
                     <td th:text="${tempEmployee.joinDate}"></td>
+                    <td th:text="${tempEmployee.language}"></td>
                     <td>
                         <a th:href="@{/employees/showFormForUpdate(employeeId=${tempEmployee.employeeId})}"
                             class="btn btn-info btm-sm">

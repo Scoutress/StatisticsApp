@@ -114,7 +114,7 @@ public class StatisticsController {
     public String showAllEmployeeStats(Model model) {
         List<McTickets> helpRequests = statisticsService.findAllMcTickets();
         model.addAttribute("helpRequests", helpRequests);
-        return "stats/stats-all-scoutress";
+        return "stats/mc-tickets-scoutress";
     }
 
     @GetMapping("/calculations-Scoutress")

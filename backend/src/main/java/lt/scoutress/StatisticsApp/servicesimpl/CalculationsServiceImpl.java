@@ -49,7 +49,7 @@ public class CalculationsServiceImpl implements CalculationsService{
     }
 
     @Override
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 3600000) //Reloads once in hour
     public void calculateMcTicketsPerDay(){
         List<McTickets> mcTicketsWithNullInCount = mcTicketsRepository.findAll();
         for (McTickets mcTickets : mcTicketsWithNullInCount) {

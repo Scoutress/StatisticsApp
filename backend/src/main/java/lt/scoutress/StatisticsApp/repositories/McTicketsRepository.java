@@ -5,11 +5,10 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import lt.scoutress.StatisticsApp.entity.McTickets;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 
 @Repository
-public interface McTicketsRepository extends JpaRepository<McTickets, Integer> {
+public interface McTicketsRepository extends JpaRepository<McTicketsAnswered, Integer> {
 
-    McTickets findByDate(LocalDate minusDays);
-
+    McTicketsAnswered findByDate(LocalDate minusDays);
 }

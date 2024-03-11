@@ -7,14 +7,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import lt.scoutress.StatisticsApp.entity.Calculations;
-import lt.scoutress.StatisticsApp.entity.McTickets;
-import lt.scoutress.StatisticsApp.services.CalculationsService;
-import lt.scoutress.StatisticsApp.services.StatisticsService;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
+import lt.scoutress.StatisticsApp.services.McTicketsService;
 
 @Controller
 @RequestMapping("/stats")
@@ -23,12 +22,10 @@ public class StatisticsController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private final StatisticsService statisticsService;
-    private final CalculationsService calculationsService;
-
-    public StatisticsController(StatisticsService statisticsService, CalculationsService calculationsService) {
-        this.statisticsService = statisticsService;
-        this.calculationsService = calculationsService;
+    private final McTicketsService mcTicketsService;
+    
+    public StatisticsController(McTicketsService mcTicketsService) {
+        this.mcTicketsService = mcTicketsService;
     }
 
     @GetMapping("/productivity")
@@ -108,19 +105,23 @@ public class StatisticsController {
         return "stats-tables";
     }
 
-    //          Scoutress          //
-
-    @GetMapping("/mc-tickets-Scoutress")
-    public String showAllEmployeeStats(Model model) {
-        List<McTickets> helpRequests = statisticsService.findAllMcTickets();
-        model.addAttribute("helpRequests", helpRequests);
-        return "stats/mc-tickets-scoutress";
+    @GetMapping("/mcTicketsData")
+    public String getAllMcTicketsData(Model model) {
+        List<McTicketsAnswered> tickets = mcTicketsService.findAll();
+        model.addAttribute("tickets", tickets);
+        return "stats/mc-tickets-data";
     }
 
-    @GetMapping("/calculations-Scoutress")
-    public String showStatsCalculation(Model model) {
-        List<Calculations> calculations = calculationsService.findCalculations();
-        model.addAttribute("calculations", calculations);
-        return "stats/calculations-scoutress";
+    @GetMapping("/addMcTickets")
+    public String showAddMcTicketsForm(Model model) {
+        model.addAttribute("mcTickets", new McTicketsAnswered());
+        return "mc-tickets-add";
     }
+
+    @PostMapping("/saveMcTickets")
+    public String saveMcTickets(@ModelAttribute McTicketsAnswered mcTickets) {
+        mcTicketsService.save(mcTickets);
+        return "redirect:/stats/mcTicketsData";
+    }
+
 }

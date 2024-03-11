@@ -6,9 +6,10 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "scoutress_help")
-public class McTickets {
+public class OldMcTickets {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
@@ -30,7 +31,7 @@ public class McTickets {
     @Column(name = "help_sum")
     private Integer allThatDayTickets;
 
-    public McTickets(LocalDate date, Integer amountOfTickets, Integer countOfTickets, Double ticketComparison,
+    public OldMcTickets(LocalDate date, Integer amountOfTickets, Integer countOfTickets, Double ticketComparison,
             Double ticketComparisonPercent, Integer allThatDayTickets) {
         this.date = date;
         this.amountOfTickets = amountOfTickets;
@@ -40,7 +41,7 @@ public class McTickets {
         this.allThatDayTickets = allThatDayTickets;
     }
 
-    public McTickets(){}
+    public OldMcTickets(){}
 
     public LocalDate getDate() {
         return date;

@@ -1,19 +1,19 @@
 package lt.scoutress.StatisticsApp.entity;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "scoutress_help")
-public class HelpRequests {
+public class McTickets {
     
     @Id
     @Column(name = "id")
     private Integer id;
 
     @Column(name = "date")
-    private Date date;
+    private LocalDate date;
 
     @Column(name = "help_answered")
     private Integer amountOfTickets;
@@ -30,8 +30,8 @@ public class HelpRequests {
     @Column(name = "help_sum")
     private Integer allThatDayTickets;
 
-    public HelpRequests(Date date, Integer amountOfTickets, Integer countOfTickets, Double ticketComparison,
-        Double ticketComparisonPercent, Integer allThatDayTickets) {
+    public McTickets(LocalDate date, Integer amountOfTickets, Integer countOfTickets, Double ticketComparison,
+            Double ticketComparisonPercent, Integer allThatDayTickets) {
         this.date = date;
         this.amountOfTickets = amountOfTickets;
         this.countOfTickets = countOfTickets;
@@ -40,13 +40,13 @@ public class HelpRequests {
         this.allThatDayTickets = allThatDayTickets;
     }
 
-    public HelpRequests(){}
+    public McTickets(){}
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

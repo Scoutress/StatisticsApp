@@ -10,4 +10,6 @@ public interface CalculationsService {
 
     void calculateDaysSinceJoinAndSave();
 
+    void calculateMcTicketsPerDay();
+
 }

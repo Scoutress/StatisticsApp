@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import lt.scoutress.StatisticsApp.entity.Calculations;
-import lt.scoutress.StatisticsApp.entity.HelpRequests;
+import lt.scoutress.StatisticsApp.entity.McTickets;
 import lt.scoutress.StatisticsApp.services.CalculationsService;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
 
@@ -108,9 +108,11 @@ public class StatisticsController {
         return "stats-tables";
     }
 
-    @GetMapping("/all-stats-Scoutress")
+    //          Scoutress          //
+
+    @GetMapping("/mc-tickets-Scoutress")
     public String showAllEmployeeStats(Model model) {
-        List<HelpRequests> helpRequests = statisticsService.findAllHelpRequests();
+        List<McTickets> helpRequests = statisticsService.findAllMcTickets();
         model.addAttribute("helpRequests", helpRequests);
         return "stats/stats-all-scoutress";
     }

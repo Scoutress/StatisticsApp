@@ -4,17 +4,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import lt.scoutress.StatisticsApp.entity.HelpRequests;
-import lt.scoutress.StatisticsApp.repositories.HelpRequestsRepository;
+import lt.scoutress.StatisticsApp.entity.McTickets;
+import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private final HelpRequestsRepository helpRequestsRepository;
+    private final McTicketsRepository mcTicketsRepository;
 
-    public StatisticsServiceImpl(HelpRequestsRepository helpRequestsRepository) {
-        this.helpRequestsRepository = helpRequestsRepository;
+    public StatisticsServiceImpl(McTicketsRepository mcTicketsRepository) {
+        this.mcTicketsRepository = mcTicketsRepository;
     }
 
     @Override
@@ -23,7 +23,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<HelpRequests> findAllHelpRequests() {
-        return helpRequestsRepository.findAll();
+    public List<McTickets> findAllMcTickets() {
+        return mcTicketsRepository.findAll();
     }
 }

@@ -14,13 +14,16 @@
 </head>
 <body>
     <div class="container">
-        <h3>Kaimux employees productivity</h3>
+        <h3>Kaimux employees productivity - Minecraft tickets</h3>
         <hr>
         <a th:href="@{/main}" class="btn btn-danger btn-sm mb-3">
             Back to Home
         </a>
         <a th:href="@{/stats/allTables}" class="btn btn-primary btn-sm mb-3">
             All tables
+        </a>
+        <a th:href="@{/stats/mcTicketsCalc}" class="btn btn-primary btn-sm mb-3">
+            MC tickets calculations
         </a>
         <a th:href="@{/stats/addMcTickets}" class="btn btn-primary btn-sm mb-3">
             MC tickets add
@@ -29,7 +32,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>Date</th>
-                    <th>Tickets sum</th>
+                    <!-- <th>Tickets sum</th> -->
                     <th>Mboti212</th>
                     <th>Furija</th>
                     <th>Ernestasltu12</th>
@@ -51,7 +54,7 @@
             <tbody>
                 <tr th:each="ticket : ${tickets}">
                     <td th:text="${ticket.date}"></td>
-                    <td th:text="${ticket.mcTicketsSum}"></td>
+                    <!-- <td th:text="${ticket.mcTicketsSum}"></td> -->
                     <td th:text="${ticket.mboti212McTickets}"></td>
                     <td th:text="${ticket.furijaMcTickets}"></td>
                     <td th:text="${ticket.ernestasltu12McTickets}"></td>

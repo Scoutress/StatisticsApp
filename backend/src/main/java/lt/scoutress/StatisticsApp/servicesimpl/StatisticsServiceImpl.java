@@ -1,30 +1,31 @@
 package lt.scoutress.StatisticsApp.servicesimpl;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import lt.scoutress.StatisticsApp.entity.Calculations;
-import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.repositories.CalculationsRepository;
-import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
 
+    @Autowired
+    private EntityManager entityManager;
+
     private final CalculationsRepository calculationsRepository;
-    private final EmployeeRepository employeeRepository;
     private final McTicketsRepository mcTicketsRepository;
 
-    public StatisticsServiceImpl(CalculationsRepository calculationsRepository, EmployeeRepository employeeRepository, McTicketsRepository mcTicketsRepository){
+    public StatisticsServiceImpl(CalculationsRepository calculationsRepository, McTicketsRepository mcTicketsRepository){
         this.calculationsRepository = calculationsRepository;
-        this.employeeRepository = employeeRepository;
         this.mcTicketsRepository = mcTicketsRepository;
     }
 
@@ -49,55 +50,64 @@ public class StatisticsServiceImpl implements StatisticsService {
         return calculationsRepository.findAll();
     }
 
+    @Scheduled(fixedRate = 3600000)
     @Override
-    @Scheduled(fixedRate = 3600000) //Reloads once in hour
-    public void calculateDaysSinceJoinAndSave() {
-        LocalDate today = LocalDate.now();
-        List<Employee> employees = employeeRepository.findAll();
-
-        for (Employee employee : employees) {
-            LocalDate joinDate = employee.getJoinDate();
-            Long daysSinceJoinLong = ChronoUnit.DAYS.between(joinDate, today);
-            int daysSinceJoin = Math.toIntExact(daysSinceJoinLong);
-            employee.setDaysSinceJoin(daysSinceJoin);
-            employeeRepository.save(employee);
+    @Transactional
+    public void calculateTotalDailyMcTickets() {
+        List<String> columnNames = Arrays.asList("mboti212_daily", "furija_daily", "ernestasltu12_daily", 
+                                                "d0fka_daily", "melitaLove_daily", "libete_daily", 
+                                                "ariena_daily", "sharans_daily", "labashey_daily", 
+                                                "everly_daily", "richPica_daily", "shizo_daily", 
+                                                "ievius_daily", "bobsBuilder_daily", "plrxq_daily", 
+                                                "emsiukemiau_daily");
+    
+        StringBuilder queryBuilder = new StringBuilder("SELECT ");
+        for (int i = 0; i < columnNames.size(); i++) {
+            queryBuilder.append(columnNames.get(i));
+            if (i < columnNames.size() - 1) {
+                queryBuilder.append(", ");
+            }
+        }
+        queryBuilder.append(", date FROM mc_tickets_calculations");
+    
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = entityManager.createNativeQuery(queryBuilder.toString()).getResultList();
+    
+        for (Object[] row : results) {
+            Integer sum = 0;
+            for (int i = 0; i < row.length - 1; i++) {
+                if (row[i] != null) {
+                    sum += (Integer) row[i];
+                }
+            }
+          
+            entityManager.createNativeQuery(
+                "UPDATE mc_tickets_calculations SET daily_tickets_sum = :sum WHERE date = :date"
+            )
+            .setParameter("sum", sum)
+            .setParameter("date", row[row.length - 1])
+            .executeUpdate();
+    
         }
     }
 
-    // @Override
-    // @Scheduled(fixedRate = 3600000) //Reloads once in hour
-    // public void calculateMcTicketsPerDay() {
-    //     List<McTicketsAnswered> mcTicketsWithNullInCount = mcTicketsRepository.findAll();
-    //     for (McTicketsAnswered mcTickets : mcTicketsWithNullInCount) {
-    //         LocalDate tableDate = mcTickets.getDate();
-    //         McTicketsAnswered previousTableDay = mcTicketsRepository.findByDate(tableDate.minusDays(1));
 
-    //         if (previousTableDay != null) {
-    //             Integer mcTicketsAmount = mcTickets.getAmountOfTickets();
-    //             Integer mcTicketsAmountDayBefore = previousTableDay.getAmountOfTickets();
 
-    //             if (mcTicketsAmountDayBefore != null) {
-    //                 mcTickets.setCountOfTickets(mcTicketsAmount - mcTicketsAmountDayBefore);
-    //                 mcTicketsRepository.save(mcTickets);
-    //             }
-    //         }
-    //     }
-    // }
 
-    // @Scheduled(fixedRate = 3600000)
-    // public void calculateAndSaveTotals() {
-    //     List<McTicketsAnswered> tickets = findAllMcTickets();
-        
-    //     for (McTicketsAnswered ticket : tickets) {
-    //         int total = ticket.getMboti212McTickets() + ticket.getFurijaMcTickets() + ticket.getErnestasltu12McTickets()
-    //                 + ticket.getD0fkaMcTickets() + ticket.getMelitaLoveMcTickets() + ticket.getLibeteMcTickets()
-    //                 + ticket.getArienaMcTickets() + ticket.getSharansMcTickets() + ticket.getLabasheyMcTickets()
-    //                 + ticket.getEverlyMcTickets() + ticket.getRichPicaMcTickets() + ticket.getShizoMcTickets()
-    //                 + ticket.getIeviusMcTickets() + ticket.getBobsBuilderMcTickets() + ticket.getPlrxqMcTickets()
-    //                 + ticket.getEmsiukemiauMcTickets();
-            
-    //         ticket.setMcTicketsSum(total);
-    //         saveMcTickets(ticket);
-    //     }
-    // }
+
+
+
+
+
+    @Override
+    public void calculateDaysSinceJoinAndSave() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculateDaysSinceJoinAndSave'");
+    }
+
+    @Override
+    public void calculateMcTicketsPerDay() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calculateMcTicketsPerDay'");
+    }
 }

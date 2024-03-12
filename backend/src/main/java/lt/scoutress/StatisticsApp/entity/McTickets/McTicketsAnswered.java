@@ -16,9 +16,6 @@ public class McTicketsAnswered {
     @Column(name = "date")
     private LocalDate date;
 
-    @Column(name = "mc_tickets_sum")
-    private Integer mcTicketsSum;
-
     @Column(name = "itsvaidas_mc_tickets")
     private Integer itsVaidasMcTickets;
 
@@ -73,14 +70,13 @@ public class McTicketsAnswered {
     @Column(name = "emsiukemiau_mc_tickets")
     private Integer emsiukemiauMcTickets;
     
-    public McTicketsAnswered(LocalDate date, Integer mcTicketsSum, Integer itsVaidasMcTickets,
+    public McTicketsAnswered(LocalDate date, Integer itsVaidasMcTickets,
             Integer scoutressMcTickets, Integer mboti212McTickets, Integer furijaMcTickets,
             Integer ernestasltu12McTickets, Integer d0fkaMcTickets, Integer melitaLoveMcTickets,
             Integer libeteMcTickets, Integer arienaMcTickets, Integer sharansMcTickets, Integer labasheyMcTickets,
             Integer everlyMcTickets, Integer richPicaMcTickets, Integer shizoMcTickets, Integer ieviusMcTickets,
             Integer bobsBuilderMcTickets, Integer plrxqMcTickets, Integer emsiukemiauMcTickets) {
         this.date = date;
-        this.mcTicketsSum = mcTicketsSum;
         this.itsVaidasMcTickets = itsVaidasMcTickets;
         this.scoutressMcTickets = scoutressMcTickets;
         this.mboti212McTickets = mboti212McTickets;
@@ -109,14 +105,6 @@ public class McTicketsAnswered {
 
     public void setDate(LocalDate date) {
         this.date = date;
-    }
-
-    public Integer getMcTicketsSum() {
-        return mcTicketsSum;
-    }
-
-    public void setMcTicketsSum(Integer mcTicketsSum) {
-        this.mcTicketsSum = mcTicketsSum;
     }
 
     public Integer getItsVaidasMcTickets() {

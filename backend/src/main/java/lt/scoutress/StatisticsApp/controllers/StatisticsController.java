@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
 
 @Controller
@@ -124,4 +125,10 @@ public class StatisticsController {
         return "redirect:/stats/mcTicketsData";
     }
 
+    @GetMapping("/mcTicketsCalc")
+    public String getAllMcTicketsCalculations(Model model) {
+        List<McTicketsCalculations> tickets = mcTicketsService.findAllCalc();
+        model.addAttribute("tickets", tickets);
+        return "stats/mc-tickets-calculations";
+    }
 }

@@ -11,4 +11,6 @@ import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 public interface McTicketsRepository extends JpaRepository<McTicketsAnswered, Integer> {
 
     McTicketsAnswered findByDate(LocalDate minusDays);
+    
+    
 }

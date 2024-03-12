@@ -98,7 +98,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 3600000)
     public void calculateDaysSinceJoinAndSave() {
         LocalDate today = LocalDate.now();
         List<Employee> employees = employeeRepository.findAll();
@@ -111,4 +111,60 @@ public class StatisticsServiceImpl implements StatisticsService {
             employeeRepository.save(employee);
         }
     }
+
+    @Scheduled(fixedRate = 3600000)
+    @Override
+    @Transactional
+    public void calculateDailyTicketDifference() {
+        @SuppressWarnings("unchecked")
+        List<LocalDate> dates = entityManager.createNativeQuery(
+                "SELECT DISTINCT date FROM mc_tickets_answered WHERE date > '2023-06-01'", LocalDate.class)
+                .getResultList();
+
+        for (int i = 1; i < dates.size(); i++) {
+            LocalDate currentDay = dates.get(i);
+            LocalDate previousDay = dates.get(i - 1);
+
+            List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
+                                                    "libete", "ariena", "sharans", "labashey", "everly", "richpica",
+                                                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
+
+            for (String user : users) {
+                Long todayTickets = (Long) entityManager.createNativeQuery(
+                        "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :currentDay")
+                        .setParameter("currentDay", currentDay)
+                        .getSingleResult();
+            
+                Long yesterdayTickets = (Long) entityManager.createNativeQuery(
+                        "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :previousDay")
+                        .setParameter("previousDay", previousDay)
+                        .getSingleResult();
+            
+                Long ticketsDifference = todayTickets - yesterdayTickets;
+            
+                Number existingRecordCount = (Number) entityManager.createNativeQuery(
+                    "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :previousDay")
+                    .setParameter("previousDay", previousDay)
+                    .getSingleResult();
+
+                if (existingRecordCount.intValue() == 0) {
+                entityManager.createNativeQuery(
+                        "INSERT INTO mc_tickets_calculations (date, " + user + "_daily) VALUES (:previousDay, :ticketsDifference)")
+                        .setParameter("previousDay", previousDay)
+                        .setParameter("ticketsDifference", ticketsDifference)
+                        .executeUpdate();
+                } else {
+                entityManager.createNativeQuery(
+                        "UPDATE mc_tickets_calculations SET " + user + "_daily = :ticketsDifference WHERE date = :previousDay")
+                        .setParameter("ticketsDifference", ticketsDifference)
+                        .setParameter("previousDay", previousDay)
+                        .executeUpdate();
+                }
+            }
+        }
+    }
+
+
+
+
 }

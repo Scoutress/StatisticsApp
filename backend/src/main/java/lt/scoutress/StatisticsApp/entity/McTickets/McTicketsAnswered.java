@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "help_answered")
+@Table(name = "mc_tickets_answered")
 public class McTicketsAnswered {
     
     @Id
@@ -15,12 +15,6 @@ public class McTicketsAnswered {
 
     @Column(name = "date")
     private LocalDate date;
-
-    @Column(name = "itsvaidas_mc_tickets")
-    private Integer itsVaidasMcTickets;
-
-    @Column(name = "scoutress_mc_tickets")
-    private Integer scoutressMcTickets;
 
     @Column(name = "mboti212_mc_tickets")
     private Integer mboti212McTickets;
@@ -70,15 +64,12 @@ public class McTicketsAnswered {
     @Column(name = "emsiukemiau_mc_tickets")
     private Integer emsiukemiauMcTickets;
     
-    public McTicketsAnswered(LocalDate date, Integer itsVaidasMcTickets,
-            Integer scoutressMcTickets, Integer mboti212McTickets, Integer furijaMcTickets,
+    public McTicketsAnswered(LocalDate date, Integer mboti212McTickets, Integer furijaMcTickets,
             Integer ernestasltu12McTickets, Integer d0fkaMcTickets, Integer melitaLoveMcTickets,
             Integer libeteMcTickets, Integer arienaMcTickets, Integer sharansMcTickets, Integer labasheyMcTickets,
             Integer everlyMcTickets, Integer richPicaMcTickets, Integer shizoMcTickets, Integer ieviusMcTickets,
             Integer bobsBuilderMcTickets, Integer plrxqMcTickets, Integer emsiukemiauMcTickets) {
         this.date = date;
-        this.itsVaidasMcTickets = itsVaidasMcTickets;
-        this.scoutressMcTickets = scoutressMcTickets;
         this.mboti212McTickets = mboti212McTickets;
         this.furijaMcTickets = furijaMcTickets;
         this.ernestasltu12McTickets = ernestasltu12McTickets;
@@ -105,22 +96,6 @@ public class McTicketsAnswered {
 
     public void setDate(LocalDate date) {
         this.date = date;
-    }
-
-    public Integer getItsVaidasMcTickets() {
-        return itsVaidasMcTickets;
-    }
-
-    public void setItsVaidasMcTickets(Integer itsVaidasMcTickets) {
-        this.itsVaidasMcTickets = itsVaidasMcTickets;
-    }
-
-    public Integer getScoutressMcTickets() {
-        return scoutressMcTickets;
-    }
-
-    public void setScoutressMcTickets(Integer scoutressMcTickets) {
-        this.scoutressMcTickets = scoutressMcTickets;
     }
 
     public Integer getMboti212McTickets() {

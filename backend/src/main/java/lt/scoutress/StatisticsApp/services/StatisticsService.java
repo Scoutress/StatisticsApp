@@ -18,4 +18,6 @@ public interface StatisticsService {
     public void calculateDaysSinceJoinAndSave();
 
     public void calculateTotalDailyMcTickets();
+
+    public void calculateDailyTicketDifference();
 }

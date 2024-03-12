@@ -17,7 +17,5 @@ public interface StatisticsService {
 
     public void calculateDaysSinceJoinAndSave();
 
-    public void calculateMcTicketsPerDay();
-
     public void calculateTotalDailyMcTickets();
 }

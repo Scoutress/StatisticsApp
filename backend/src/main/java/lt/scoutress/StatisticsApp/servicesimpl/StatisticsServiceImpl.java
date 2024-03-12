@@ -1,5 +1,7 @@
 package lt.scoutress.StatisticsApp.servicesimpl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,8 +12,10 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lt.scoutress.StatisticsApp.entity.Calculations;
+import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.repositories.CalculationsRepository;
+import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
 
@@ -23,10 +27,12 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private final CalculationsRepository calculationsRepository;
     private final McTicketsRepository mcTicketsRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public StatisticsServiceImpl(CalculationsRepository calculationsRepository, McTicketsRepository mcTicketsRepository){
+    public StatisticsServiceImpl(CalculationsRepository calculationsRepository, McTicketsRepository mcTicketsRepository, EmployeeRepository employeeRepository){
         this.calculationsRepository = calculationsRepository;
         this.mcTicketsRepository = mcTicketsRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -91,23 +97,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
-
-
-
-
-
-
-
-
     @Override
+    @Scheduled(fixedRate = 60000)
     public void calculateDaysSinceJoinAndSave() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calculateDaysSinceJoinAndSave'");
-    }
+        LocalDate today = LocalDate.now();
+        List<Employee> employees = employeeRepository.findAll();
 
-    @Override
-    public void calculateMcTicketsPerDay() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calculateMcTicketsPerDay'");
+        for (Employee employee : employees) {
+            LocalDate joinDate = employee.getJoinDate();
+            Long daysSinceJoinLong = ChronoUnit.DAYS.between(joinDate, today);
+            int daysSinceJoin = Math.toIntExact(daysSinceJoinLong);
+            employee.setDaysSinceJoin(daysSinceJoin);
+            employeeRepository.save(employee);
+        }
     }
 }

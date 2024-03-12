@@ -24,7 +24,7 @@ public class McTicketsCalculations {
     private Integer mboti212Daily;
 
     @Column(name = "mboti212_ratio")
-    private Integer mboti212Ratio;
+    private Double mboti212Ratio;
 
     @Column(name = "mboti212_ratio_percent")
     private Double mboti212RatioPercent;
@@ -34,7 +34,7 @@ public class McTicketsCalculations {
     private Integer furijaDaily;
 
     @Column(name = "furija_ratio")
-    private Integer furijaRatio;
+    private Double furijaRatio;
 
     @Column(name = "furija_ratio_percent")
     private Double furijaRatioPercent;
@@ -44,7 +44,7 @@ public class McTicketsCalculations {
     private Integer ernestasltu12Daily;
 
     @Column(name = "ernestasltu12_ratio")
-    private Integer ernestasltu12Ratio;
+    private Double ernestasltu12Ratio;
 
     @Column(name = "ernestasltu12_ratio_percent")
     private Double ernestasltu12RatioPercent;
@@ -54,7 +54,7 @@ public class McTicketsCalculations {
     private Integer d0fkaDaily;
 
     @Column(name = "d0fka_ratio")
-    private Integer d0fkaRatio;
+    private Double d0fkaRatio;
 
     @Column(name = "d0fka_ratio_percent")
     private Double d0fkaRatioPercent;
@@ -64,7 +64,7 @@ public class McTicketsCalculations {
     private Integer melitaLoveDaily;
 
     @Column(name = "melitalove_ratio")
-    private Integer melitaLoveRatio;
+    private Double melitaLoveRatio;
 
     @Column(name = "melitalove_ratio_percent")
     private Double melitaLoveRatioPercent;
@@ -74,7 +74,7 @@ public class McTicketsCalculations {
     private Integer libeteDaily;
 
     @Column(name = "libete_ratio")
-    private Integer libeteRatio;
+    private Double libeteRatio;
 
     @Column(name = "libete_ratio_percent")
     private Double libeteRatioPercent;
@@ -84,7 +84,7 @@ public class McTicketsCalculations {
     private Integer arienaDaily;
 
     @Column(name = "ariena_ratio")
-    private Integer arienaRatio;
+    private Double arienaRatio;
 
     @Column(name = "ariena_ratio_percent")
     private Double arienaRatioPercent;
@@ -94,7 +94,7 @@ public class McTicketsCalculations {
     private Integer sharansDaily;
 
     @Column(name = "sharans_ratio")
-    private Integer sharansRatio;
+    private Double sharansRatio;
 
     @Column(name = "sharans_ratio_percent")
     private Double sharansRatioPercent;
@@ -104,7 +104,7 @@ public class McTicketsCalculations {
     private Integer labasheyDaily;
 
     @Column(name = "labashey_ratio")
-    private Integer labasheyRatio;
+    private Double labasheyRatio;
 
     @Column(name = "labashey_ratio_percent")
     private Double labasheyRatioPercent;
@@ -114,7 +114,7 @@ public class McTicketsCalculations {
     private Integer everlyDaily;
 
     @Column(name = "everly_ratio")
-    private Integer everlyRatio;
+    private Double everlyRatio;
 
     @Column(name = "everly_ratio_percent")
     private Double everlyRatioPercent;
@@ -124,7 +124,7 @@ public class McTicketsCalculations {
     private Integer richPicaDaily;
 
     @Column(name = "richpica_ratio")
-    private Integer richPicaRatio;
+    private Double richPicaRatio;
 
     @Column(name = "richpica_ratio_percent")
     private Double richPicaRatioPercent;
@@ -134,7 +134,7 @@ public class McTicketsCalculations {
     private Integer shizoDaily;
 
     @Column(name = "shizo_ratio")
-    private Integer shizoRatio;
+    private Double shizoRatio;
 
     @Column(name = "shizo_ratio_percent")
     private Double shizoRatioPercent;
@@ -144,7 +144,7 @@ public class McTicketsCalculations {
     private Integer ieviusDaily;
 
     @Column(name = "ievius_ratio")
-    private Integer ieviusRatio;
+    private Double ieviusRatio;
 
     @Column(name = "ievius_ratio_percent")
     private Double ieviusRatioPercent;
@@ -154,7 +154,7 @@ public class McTicketsCalculations {
     private Integer bobsBuilderDaily;
 
     @Column(name = "bobsbuilder_ratio")
-    private Integer bobsBuilderRatio;
+    private Double bobsBuilderRatio;
 
     @Column(name = "bobsbuilder_ratio_percent")
     private Double bobsBuilderRatioPercent;
@@ -164,7 +164,7 @@ public class McTicketsCalculations {
     private Integer plrxqDaily;
 
     @Column(name = "plrxq_ratio")
-    private Integer plrxqRatio;
+    private Double plrxqRatio;
 
     @Column(name = "plrxq_ratio_percent")
     private Double plrxqRatioPercent;
@@ -174,26 +174,26 @@ public class McTicketsCalculations {
     private Integer emsiukemiauDaily;
 
     @Column(name = "emsiukemiau_ratio")
-    private Integer emsiukemiauRatio;
+    private Double emsiukemiauRatio;
 
     @Column(name = "emsiukemiau_ratio_percent")
     private Double emsiukemiauRatioPercent;
 
     public McTicketsCalculations(){}
 
-    public McTicketsCalculations(LocalDate date, Integer dailyTicketsSum, Integer mboti212Daily, Integer mboti212Ratio,
-            Double mboti212RatioPercent, Integer furijaDaily, Integer furijaRatio, Double furijaRatioPercent,
-            Integer ernestasltu12Daily, Integer ernestasltu12Ratio, Double ernestasltu12RatioPercent,
-            Integer d0fkaDaily, Integer d0fkaRatio, Double d0fkaRatioPercent, Integer melitaLoveDaily,
-            Integer melitaLoveRatio, Double melitaLoveRatioPercent, Integer libeteDaily, Integer libeteRatio,
-            Double libeteRatioPercent, Integer arienaDaily, Integer arienaRatio, Double arienaRatioPercent,
-            Integer sharansDaily, Integer sharansRatio, Double sharansRatioPercent, Integer labasheyDaily,
-            Integer labasheyRatio, Double labasheyRatioPercent, Integer everlyDaily, Integer everlyRatio,
-            Double everlyRatioPercent, Integer richPicaDaily, Integer richPicaRatio, Double richPicaRatioPercent,
-            Integer shizoDaily, Integer shizoRatio, Double shizoRatioPercent, Integer ieviusDaily, Integer ieviusRatio,
-            Double ieviusRatioPercent, Integer bobsBuilderDaily, Integer bobsBuilderRatio,
-            Double bobsBuilderRatioPercent, Integer plrxqDaily, Integer plrxqRatio, Double plrxqRatioPercent,
-            Integer emsiukemiauDaily, Integer emsiukemiauRatio, Double emsiukemiauRatioPercent) {
+    public McTicketsCalculations(LocalDate date, Integer dailyTicketsSum, Integer mboti212Daily, Double mboti212Ratio,
+            Double mboti212RatioPercent, Integer furijaDaily, Double furijaRatio, Double furijaRatioPercent,
+            Integer ernestasltu12Daily, Double ernestasltu12Ratio, Double ernestasltu12RatioPercent, Integer d0fkaDaily,
+            Double d0fkaRatio, Double d0fkaRatioPercent, Integer melitaLoveDaily, Double melitaLoveRatio,
+            Double melitaLoveRatioPercent, Integer libeteDaily, Double libeteRatio, Double libeteRatioPercent,
+            Integer arienaDaily, Double arienaRatio, Double arienaRatioPercent, Integer sharansDaily,
+            Double sharansRatio, Double sharansRatioPercent, Integer labasheyDaily, Double labasheyRatio,
+            Double labasheyRatioPercent, Integer everlyDaily, Double everlyRatio, Double everlyRatioPercent,
+            Integer richPicaDaily, Double richPicaRatio, Double richPicaRatioPercent, Integer shizoDaily,
+            Double shizoRatio, Double shizoRatioPercent, Integer ieviusDaily, Double ieviusRatio,
+            Double ieviusRatioPercent, Integer bobsBuilderDaily, Double bobsBuilderRatio,
+            Double bobsBuilderRatioPercent, Integer plrxqDaily, Double plrxqRatio, Double plrxqRatioPercent,
+            Integer emsiukemiauDaily, Double emsiukemiauRatio, Double emsiukemiauRatioPercent) {
         this.date = date;
         this.dailyTicketsSum = dailyTicketsSum;
         this.mboti212Daily = mboti212Daily;
@@ -270,11 +270,11 @@ public class McTicketsCalculations {
         this.mboti212Daily = mboti212Daily;
     }
 
-    public Integer getMboti212Ratio() {
+    public Double getMboti212Ratio() {
         return mboti212Ratio;
     }
 
-    public void setMboti212Ratio(Integer mboti212Ratio) {
+    public void setMboti212Ratio(Double mboti212Ratio) {
         this.mboti212Ratio = mboti212Ratio;
     }
 
@@ -294,11 +294,11 @@ public class McTicketsCalculations {
         this.furijaDaily = furijaDaily;
     }
 
-    public Integer getFurijaRatio() {
+    public Double getFurijaRatio() {
         return furijaRatio;
     }
 
-    public void setFurijaRatio(Integer furijaRatio) {
+    public void setFurijaRatio(Double furijaRatio) {
         this.furijaRatio = furijaRatio;
     }
 
@@ -318,11 +318,11 @@ public class McTicketsCalculations {
         this.ernestasltu12Daily = ernestasltu12Daily;
     }
 
-    public Integer getErnestasltu12Ratio() {
+    public Double getErnestasltu12Ratio() {
         return ernestasltu12Ratio;
     }
 
-    public void setErnestasltu12Ratio(Integer ernestasltu12Ratio) {
+    public void setErnestasltu12Ratio(Double ernestasltu12Ratio) {
         this.ernestasltu12Ratio = ernestasltu12Ratio;
     }
 
@@ -342,11 +342,11 @@ public class McTicketsCalculations {
         this.d0fkaDaily = d0fkaDaily;
     }
 
-    public Integer getD0fkaRatio() {
+    public Double getD0fkaRatio() {
         return d0fkaRatio;
     }
 
-    public void setD0fkaRatio(Integer d0fkaRatio) {
+    public void setD0fkaRatio(Double d0fkaRatio) {
         this.d0fkaRatio = d0fkaRatio;
     }
 
@@ -366,11 +366,11 @@ public class McTicketsCalculations {
         this.melitaLoveDaily = melitaLoveDaily;
     }
 
-    public Integer getMelitaLoveRatio() {
+    public Double getMelitaLoveRatio() {
         return melitaLoveRatio;
     }
 
-    public void setMelitaLoveRatio(Integer melitaLoveRatio) {
+    public void setMelitaLoveRatio(Double melitaLoveRatio) {
         this.melitaLoveRatio = melitaLoveRatio;
     }
 
@@ -390,11 +390,11 @@ public class McTicketsCalculations {
         this.libeteDaily = libeteDaily;
     }
 
-    public Integer getLibeteRatio() {
+    public Double getLibeteRatio() {
         return libeteRatio;
     }
 
-    public void setLibeteRatio(Integer libeteRatio) {
+    public void setLibeteRatio(Double libeteRatio) {
         this.libeteRatio = libeteRatio;
     }
 
@@ -414,11 +414,11 @@ public class McTicketsCalculations {
         this.arienaDaily = arienaDaily;
     }
 
-    public Integer getArienaRatio() {
+    public Double getArienaRatio() {
         return arienaRatio;
     }
 
-    public void setArienaRatio(Integer arienaRatio) {
+    public void setArienaRatio(Double arienaRatio) {
         this.arienaRatio = arienaRatio;
     }
 
@@ -438,11 +438,11 @@ public class McTicketsCalculations {
         this.sharansDaily = sharansDaily;
     }
 
-    public Integer getSharansRatio() {
+    public Double getSharansRatio() {
         return sharansRatio;
     }
 
-    public void setSharansRatio(Integer sharansRatio) {
+    public void setSharansRatio(Double sharansRatio) {
         this.sharansRatio = sharansRatio;
     }
 
@@ -462,11 +462,11 @@ public class McTicketsCalculations {
         this.labasheyDaily = labasheyDaily;
     }
 
-    public Integer getLabasheyRatio() {
+    public Double getLabasheyRatio() {
         return labasheyRatio;
     }
 
-    public void setLabasheyRatio(Integer labasheyRatio) {
+    public void setLabasheyRatio(Double labasheyRatio) {
         this.labasheyRatio = labasheyRatio;
     }
 
@@ -486,11 +486,11 @@ public class McTicketsCalculations {
         this.everlyDaily = everlyDaily;
     }
 
-    public Integer getEverlyRatio() {
+    public Double getEverlyRatio() {
         return everlyRatio;
     }
 
-    public void setEverlyRatio(Integer everlyRatio) {
+    public void setEverlyRatio(Double everlyRatio) {
         this.everlyRatio = everlyRatio;
     }
 
@@ -510,11 +510,11 @@ public class McTicketsCalculations {
         this.richPicaDaily = richPicaDaily;
     }
 
-    public Integer getRichPicaRatio() {
+    public Double getRichPicaRatio() {
         return richPicaRatio;
     }
 
-    public void setRichPicaRatio(Integer richPicaRatio) {
+    public void setRichPicaRatio(Double richPicaRatio) {
         this.richPicaRatio = richPicaRatio;
     }
 
@@ -534,11 +534,11 @@ public class McTicketsCalculations {
         this.shizoDaily = shizoDaily;
     }
 
-    public Integer getShizoRatio() {
+    public Double getShizoRatio() {
         return shizoRatio;
     }
 
-    public void setShizoRatio(Integer shizoRatio) {
+    public void setShizoRatio(Double shizoRatio) {
         this.shizoRatio = shizoRatio;
     }
 
@@ -558,11 +558,11 @@ public class McTicketsCalculations {
         this.ieviusDaily = ieviusDaily;
     }
 
-    public Integer getIeviusRatio() {
+    public Double getIeviusRatio() {
         return ieviusRatio;
     }
 
-    public void setIeviusRatio(Integer ieviusRatio) {
+    public void setIeviusRatio(Double ieviusRatio) {
         this.ieviusRatio = ieviusRatio;
     }
 
@@ -582,11 +582,11 @@ public class McTicketsCalculations {
         this.bobsBuilderDaily = bobsBuilderDaily;
     }
 
-    public Integer getBobsBuilderRatio() {
+    public Double getBobsBuilderRatio() {
         return bobsBuilderRatio;
     }
 
-    public void setBobsBuilderRatio(Integer bobsBuilderRatio) {
+    public void setBobsBuilderRatio(Double bobsBuilderRatio) {
         this.bobsBuilderRatio = bobsBuilderRatio;
     }
 
@@ -606,11 +606,11 @@ public class McTicketsCalculations {
         this.plrxqDaily = plrxqDaily;
     }
 
-    public Integer getPlrxqRatio() {
+    public Double getPlrxqRatio() {
         return plrxqRatio;
     }
 
-    public void setPlrxqRatio(Integer plrxqRatio) {
+    public void setPlrxqRatio(Double plrxqRatio) {
         this.plrxqRatio = plrxqRatio;
     }
 
@@ -630,11 +630,11 @@ public class McTicketsCalculations {
         this.emsiukemiauDaily = emsiukemiauDaily;
     }
 
-    public Integer getEmsiukemiauRatio() {
+    public Double getEmsiukemiauRatio() {
         return emsiukemiauRatio;
     }
 
-    public void setEmsiukemiauRatio(Integer emsiukemiauRatio) {
+    public void setEmsiukemiauRatio(Double emsiukemiauRatio) {
         this.emsiukemiauRatio = emsiukemiauRatio;
     }
 
@@ -646,5 +646,4 @@ public class McTicketsCalculations {
         this.emsiukemiauRatioPercent = emsiukemiauRatioPercent;
     }
 
-    
 }

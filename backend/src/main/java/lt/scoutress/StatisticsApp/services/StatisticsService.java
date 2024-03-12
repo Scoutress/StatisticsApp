@@ -20,4 +20,6 @@ public interface StatisticsService {
     public void calculateTotalDailyMcTickets();
 
     public void calculateDailyTicketDifference();
+
+    public void calculateDailyTicketRatio();
 }

@@ -1,10 +1,10 @@
 package lt.scoutress.StatisticsApp.servicesimpl;
 
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
@@ -99,10 +99,10 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<Object[]> results = entityManager.createNativeQuery(queryBuilder.toString()).getResultList();
     
         for (Object[] row : results) {
-            Integer sum = 0;
+            Double sum = 0.0;
             for (int i = 0; i < row.length - 1; i++) {
                 if (row[i] != null) {
-                    sum += (Integer) row[i];
+                    sum += (Double) row[i];
                 }
             }
           
@@ -135,17 +135,17 @@ public class StatisticsServiceImpl implements StatisticsService {
                                                     "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
 
             for (String user : users) {
-                Long todayTickets = (Long) entityManager.createNativeQuery(
-                        "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :currentDay")
-                        .setParameter("currentDay", currentDay)
-                        .getSingleResult();
+                Double todayTickets = (Double) entityManager.createNativeQuery(
+                    "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :currentDay")
+                    .setParameter("currentDay", currentDay)
+                    .getSingleResult();
             
-                Long yesterdayTickets = (Long) entityManager.createNativeQuery(
-                        "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :previousDay")
-                        .setParameter("previousDay", previousDay)
-                        .getSingleResult();
+                Double yesterdayTickets = (Double) entityManager.createNativeQuery(
+                    "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :previousDay")
+                    .setParameter("previousDay", previousDay)
+                    .getSingleResult();
             
-                Long ticketsDifference = todayTickets - yesterdayTickets;
+                Double ticketsDifference = todayTickets - yesterdayTickets;
             
                 Number existingRecordCount = (Number) entityManager.createNativeQuery(
                     "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :previousDay")
@@ -170,91 +170,72 @@ public class StatisticsServiceImpl implements StatisticsService {
         System.out.println("Scheduled 3 is completed");
     }
 
-    @Override// UNFINISHED
+    @Override
     @Transactional
     @Scheduled(fixedRate = 3600000)
     @DependsOn("calculateDailyTicketDifference")
-    public void calculateDailyTicketRatio(){
+    public void calculateDailyTicketRatio() {
 
         @SuppressWarnings("unchecked")
         List<LocalDate> dates = entityManager.createNativeQuery(
                 "SELECT DISTINCT date FROM mc_tickets_calculations WHERE date > '2023-06-01'", LocalDate.class)
                 .getResultList();
-        
+
         for (int i = 1; i < dates.size(); i++) {
             LocalDate currentDay = dates.get(i);
 
             List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
-                                                    "libete", "ariena", "sharans", "labashey", "everly", "richpica",
-                                                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
+                    "libete", "ariena", "sharans", "labashey", "everly", "richpica",
+                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
 
-                for (String user : users) {
-                    Long currentDayTicketsDaily = (Long) entityManager.createNativeQuery(
+            for (String user : users) {
+                Double currentDayTicketsDaily = (Double) entityManager.createNativeQuery(
                         "SELECT COALESCE(" + user + "_daily, 0) FROM mc_tickets_calculations WHERE date = :currentDay")
                         .setParameter("currentDay", currentDay)
                         .getSingleResult();
 
-                    Long currentDayTicketsSum = (Long) entityManager.createNativeQuery(
+                Double currentDayTicketsSum = (Double) entityManager.createNativeQuery(
                         "SELECT COALESCE(daily_tickets_sum, 0) FROM mc_tickets_calculations WHERE date = :currentDay")
                         .setParameter("currentDay", currentDay)
                         .getSingleResult();
 
-                    double roundedNumber = 0;
+                double ticketsRatioNumber = 0;
+                double roundedTicketsRatio = 0;
 
-                    if (currentDayTicketsSum != 0) {
-                        String ticketsRatioStr = Double.toString((double) currentDayTicketsDaily / currentDayTicketsSum);
-                        if (ticketsRatioStr.contains(",")) {
-                            ticketsRatioStr = ticketsRatioStr.replace(',', '.');
-                        }
+                if (currentDayTicketsSum != 0) {
+                    double currentDayTicketsDailyDouble = currentDayTicketsDaily.doubleValue();
+                    double currentDayTicketsSumDouble = currentDayTicketsSum.doubleValue();
 
-                        //DEBUG
-                        if (ticketsRatioStr.contains(",")) {
-                            System.out.println("");
-                            System.out.println("Virs " + currentDayTicketsDaily);
-                            System.out.println("Apac " + currentDayTicketsSum);
-                            System.out.println(currentDay + " > " + ticketsRatioStr);
-                            System.out.println("");
-                        } else if (ticketsRatioStr.contains("-")){
-                            System.out.println("");
-                            System.out.println("Virs " + currentDayTicketsDaily);
-                            System.out.println("Apac " + currentDayTicketsSum);
-                            System.out.println(currentDay + " > " + ticketsRatioStr);
-                            System.out.println("");
-                        }
-                        ////////////////////////////////////////////
+                    ticketsRatioNumber = currentDayTicketsDailyDouble / currentDayTicketsSumDouble;
 
-                    //     double ticketsRatio = Double.parseDouble(ticketsRatioStr);
-                    //     System.out.println(currentDay + " > " + ticketsRatio);//////////////////////
-
-                    //     DecimalFormat df = new DecimalFormat("#.##");
-                    //     roundedNumber = Double.parseDouble(df.format(ticketsRatio));
-                    // }
-
-                    // System.out.println(currentDay + " > " + roundedNumber);///////////////////////
-
-                    // Double existingRecordCount = (Double) entityManager.createNativeQuery(
-                    //     "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :currentDay")
-                    //     .setParameter("currentDay", currentDay)
-                    //     .getSingleResult();
-
-                    // if (existingRecordCount.intValue() == 0) {
-                    // entityManager.createNativeQuery(
-                    //     "INSERT INTO mc_tickets_calculations (date, " + user + "_ratio) VALUES (:currentDay, :roundedNumber)")
-                    //     .setParameter("currentDay", currentDay)
-                    //     .setParameter("roundedNumber", roundedNumber)
-                    //     .executeUpdate();
-                    // } else {
-                    // entityManager.createNativeQuery(
-                    //     "UPDATE mc_tickets_calculations SET " + user + "_ratio = :roundedNumber WHERE date = :currentDay")
-                    //     .setParameter("roundedNumber", roundedNumber)
-                    //     .setParameter("currentDay", currentDay)
-                    //     .executeUpdate();
-                    }
+                    String roundedString = String.format(Locale.ENGLISH, "%.2f", ticketsRatioNumber);
+                    roundedTicketsRatio = Double.parseDouble(roundedString);
                 }
+
+                Long existingRecordCount = (Long) entityManager.createNativeQuery(
+                        "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :currentDay")
+                        .setParameter("currentDay", currentDay)
+                        .getSingleResult();
+
+                Double doubleExistingRecordCount = existingRecordCount.doubleValue();
+
+                if (doubleExistingRecordCount.intValue() == 0) {
+                    entityManager.createNativeQuery(
+                            "INSERT INTO mc_tickets_calculations (date, " + user + "_ratio) VALUES (:currentDay, :roundedTicketsRatio)")
+                            .setParameter("currentDay", currentDay)
+                            .setParameter("roundedTicketsRatio", roundedTicketsRatio)
+                            .executeUpdate();
+                } else {
+                    entityManager.createNativeQuery(
+                            "UPDATE mc_tickets_calculations SET " + user + "_ratio = :roundedTicketsRatio WHERE date = :currentDay")
+                            .setParameter("roundedTicketsRatio", roundedTicketsRatio)
+                            .setParameter("currentDay", currentDay)
+                            .executeUpdate();
+                }
+            }
         }
         System.out.println("Scheduled 4 is completed");
     }
-
 
 
 }

@@ -17,58 +17,58 @@ public class McTicketsAnswered {
     private LocalDate date;
 
     @Column(name = "mboti212_mc_tickets")
-    private Integer mboti212McTickets;
+    private Double mboti212McTickets;
 
     @Column(name = "furija_mc_tickets")
-    private Integer furijaMcTickets;
+    private Double furijaMcTickets;
 
     @Column(name = "ernestasltu12_mc_tickets")
-    private Integer ernestasltu12McTickets;
+    private Double ernestasltu12McTickets;
 
     @Column(name = "d0fka_mc_tickets")
-    private Integer d0fkaMcTickets;
+    private Double d0fkaMcTickets;
 
     @Column(name = "melitalove_mc_tickets")
-    private Integer melitaLoveMcTickets;
+    private Double melitaLoveMcTickets;
 
     @Column(name = "libete_mc_tickets")
-    private Integer libeteMcTickets;
+    private Double libeteMcTickets;
 
     @Column(name = "ariena_mc_tickets")
-    private Integer arienaMcTickets;
+    private Double arienaMcTickets;
 
     @Column(name = "sharans_mc_tickets")
-    private Integer sharansMcTickets;
+    private Double sharansMcTickets;
 
     @Column(name = "labashey_mc_tickets")
-    private Integer labasheyMcTickets;
+    private Double labasheyMcTickets;
 
     @Column(name = "everly_mc_tickets")
-    private Integer everlyMcTickets;
+    private Double everlyMcTickets;
 
     @Column(name = "richpica_mc_tickets")
-    private Integer richPicaMcTickets;
+    private Double richPicaMcTickets;
 
     @Column(name = "shizo_mc_tickets")
-    private Integer shizoMcTickets;
+    private Double shizoMcTickets;
 
     @Column(name = "ievius_mc_tickets")
-    private Integer ieviusMcTickets;
+    private Double ieviusMcTickets;
 
     @Column(name = "bobsbuilder_mc_tickets")
-    private Integer bobsBuilderMcTickets;
+    private Double bobsBuilderMcTickets;
 
     @Column(name = "plrxq_mc_tickets")
-    private Integer plrxqMcTickets;
+    private Double plrxqMcTickets;
 
     @Column(name = "emsiukemiau_mc_tickets")
-    private Integer emsiukemiauMcTickets;
-    
-    public McTicketsAnswered(LocalDate date, Integer mboti212McTickets, Integer furijaMcTickets,
-            Integer ernestasltu12McTickets, Integer d0fkaMcTickets, Integer melitaLoveMcTickets,
-            Integer libeteMcTickets, Integer arienaMcTickets, Integer sharansMcTickets, Integer labasheyMcTickets,
-            Integer everlyMcTickets, Integer richPicaMcTickets, Integer shizoMcTickets, Integer ieviusMcTickets,
-            Integer bobsBuilderMcTickets, Integer plrxqMcTickets, Integer emsiukemiauMcTickets) {
+    private Double emsiukemiauMcTickets;
+
+    public McTicketsAnswered(LocalDate date, Double mboti212McTickets, Double furijaMcTickets,
+            Double ernestasltu12McTickets, Double d0fkaMcTickets, Double melitaLoveMcTickets, Double libeteMcTickets,
+            Double arienaMcTickets, Double sharansMcTickets, Double labasheyMcTickets, Double everlyMcTickets,
+            Double richPicaMcTickets, Double shizoMcTickets, Double ieviusMcTickets, Double bobsBuilderMcTickets,
+            Double plrxqMcTickets, Double emsiukemiauMcTickets) {
         this.date = date;
         this.mboti212McTickets = mboti212McTickets;
         this.furijaMcTickets = furijaMcTickets;
@@ -88,7 +88,7 @@ public class McTicketsAnswered {
         this.emsiukemiauMcTickets = emsiukemiauMcTickets;
     }
 
-    public McTicketsAnswered(){}
+    public McTicketsAnswered() {}
 
     public LocalDate getDate() {
         return date;
@@ -98,132 +98,132 @@ public class McTicketsAnswered {
         this.date = date;
     }
 
-    public Integer getMboti212McTickets() {
+    public Double getMboti212McTickets() {
         return mboti212McTickets;
     }
 
-    public void setMboti212McTickets(Integer mboti212McTickets) {
+    public void setMboti212McTickets(Double mboti212McTickets) {
         this.mboti212McTickets = mboti212McTickets;
     }
 
-    public Integer getFurijaMcTickets() {
+    public Double getFurijaMcTickets() {
         return furijaMcTickets;
     }
 
-    public void setFurijaMcTickets(Integer furijaMcTickets) {
+    public void setFurijaMcTickets(Double furijaMcTickets) {
         this.furijaMcTickets = furijaMcTickets;
     }
 
-    public Integer getErnestasltu12McTickets() {
+    public Double getErnestasltu12McTickets() {
         return ernestasltu12McTickets;
     }
 
-    public void setErnestasltu12McTickets(Integer ernestasltu12McTickets) {
+    public void setErnestasltu12McTickets(Double ernestasltu12McTickets) {
         this.ernestasltu12McTickets = ernestasltu12McTickets;
     }
 
-    public Integer getD0fkaMcTickets() {
+    public Double getD0fkaMcTickets() {
         return d0fkaMcTickets;
     }
 
-    public void setD0fkaMcTickets(Integer d0fkaMcTickets) {
+    public void setD0fkaMcTickets(Double d0fkaMcTickets) {
         this.d0fkaMcTickets = d0fkaMcTickets;
     }
 
-    public Integer getMelitaLoveMcTickets() {
+    public Double getMelitaLoveMcTickets() {
         return melitaLoveMcTickets;
     }
 
-    public void setMelitaLoveMcTickets(Integer melitaLoveMcTickets) {
+    public void setMelitaLoveMcTickets(Double melitaLoveMcTickets) {
         this.melitaLoveMcTickets = melitaLoveMcTickets;
     }
 
-    public Integer getLibeteMcTickets() {
+    public Double getLibeteMcTickets() {
         return libeteMcTickets;
     }
 
-    public void setLibeteMcTickets(Integer libeteMcTickets) {
+    public void setLibeteMcTickets(Double libeteMcTickets) {
         this.libeteMcTickets = libeteMcTickets;
     }
 
-    public Integer getArienaMcTickets() {
+    public Double getArienaMcTickets() {
         return arienaMcTickets;
     }
 
-    public void setArienaMcTickets(Integer arienaMcTickets) {
+    public void setArienaMcTickets(Double arienaMcTickets) {
         this.arienaMcTickets = arienaMcTickets;
     }
 
-    public Integer getSharansMcTickets() {
+    public Double getSharansMcTickets() {
         return sharansMcTickets;
     }
 
-    public void setSharansMcTickets(Integer sharansMcTickets) {
+    public void setSharansMcTickets(Double sharansMcTickets) {
         this.sharansMcTickets = sharansMcTickets;
     }
 
-    public Integer getLabasheyMcTickets() {
+    public Double getLabasheyMcTickets() {
         return labasheyMcTickets;
     }
 
-    public void setLabasheyMcTickets(Integer labasheyMcTickets) {
+    public void setLabasheyMcTickets(Double labasheyMcTickets) {
         this.labasheyMcTickets = labasheyMcTickets;
     }
 
-    public Integer getEverlyMcTickets() {
+    public Double getEverlyMcTickets() {
         return everlyMcTickets;
     }
 
-    public void setEverlyMcTickets(Integer everlyMcTickets) {
+    public void setEverlyMcTickets(Double everlyMcTickets) {
         this.everlyMcTickets = everlyMcTickets;
     }
 
-    public Integer getRichPicaMcTickets() {
+    public Double getRichPicaMcTickets() {
         return richPicaMcTickets;
     }
 
-    public void setRichPicaMcTickets(Integer richPicaMcTickets) {
+    public void setRichPicaMcTickets(Double richPicaMcTickets) {
         this.richPicaMcTickets = richPicaMcTickets;
     }
 
-    public Integer getShizoMcTickets() {
+    public Double getShizoMcTickets() {
         return shizoMcTickets;
     }
 
-    public void setShizoMcTickets(Integer shizoMcTickets) {
+    public void setShizoMcTickets(Double shizoMcTickets) {
         this.shizoMcTickets = shizoMcTickets;
     }
 
-    public Integer getIeviusMcTickets() {
+    public Double getIeviusMcTickets() {
         return ieviusMcTickets;
     }
 
-    public void setIeviusMcTickets(Integer ieviusMcTickets) {
+    public void setIeviusMcTickets(Double ieviusMcTickets) {
         this.ieviusMcTickets = ieviusMcTickets;
     }
 
-    public Integer getBobsBuilderMcTickets() {
+    public Double getBobsBuilderMcTickets() {
         return bobsBuilderMcTickets;
     }
 
-    public void setBobsBuilderMcTickets(Integer bobsBuilderMcTickets) {
+    public void setBobsBuilderMcTickets(Double bobsBuilderMcTickets) {
         this.bobsBuilderMcTickets = bobsBuilderMcTickets;
     }
 
-    public Integer getPlrxqMcTickets() {
+    public Double getPlrxqMcTickets() {
         return plrxqMcTickets;
     }
 
-    public void setPlrxqMcTickets(Integer plrxqMcTickets) {
+    public void setPlrxqMcTickets(Double plrxqMcTickets) {
         this.plrxqMcTickets = plrxqMcTickets;
     }
 
-    public Integer getEmsiukemiauMcTickets() {
+    public Double getEmsiukemiauMcTickets() {
         return emsiukemiauMcTickets;
     }
 
-    public void setEmsiukemiauMcTickets(Integer emsiukemiauMcTickets) {
+    public void setEmsiukemiauMcTickets(Double emsiukemiauMcTickets) {
         this.emsiukemiauMcTickets = emsiukemiauMcTickets;
     }
-
+    
 }

@@ -124,8 +124,8 @@ public class StatisticsController {
 
     @PostMapping("/saveMcTickets")
     public String saveMcTickets(@ModelAttribute("mcTickets") McTicketsAnswered mcTickets) {
-        int sharansMcTickets = mcTickets.getSharansMcTickets();
-        int updatedSharansMcTickets = sharansMcTickets + 189;
+        Double sharansMcTickets = mcTickets.getSharansMcTickets();
+        Double updatedSharansMcTickets = sharansMcTickets + 189;
         mcTickets.setSharansMcTickets(updatedSharansMcTickets);
         mcTicketsRepository.save(mcTickets);
         return "redirect:/stats/mcTicketsData";

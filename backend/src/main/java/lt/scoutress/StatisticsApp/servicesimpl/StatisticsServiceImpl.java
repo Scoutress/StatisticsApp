@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.*;
@@ -59,7 +57,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
     
     @Override
-    @Scheduled(fixedRate = 3600000)
     public void calculateDaysSinceJoinAndSave() {
         LocalDate today = LocalDate.now();
         List<Employee> employees = employeeRepository.findAll();
@@ -76,8 +73,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     @Transactional
-    @Scheduled(fixedRate = 3600000)
-    @DependsOn("calculateDaysSinceJoinAndSave")
     public void calculateTotalDailyMcTickets() {
         List<String> columnNames = Arrays.asList("mboti212_daily", "furija_daily", "ernestasltu12_daily", 
                                                 "d0fka_daily", "melitaLove_daily", "libete_daily", 
@@ -118,8 +113,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     @Transactional
-    @Scheduled(fixedRate = 3600000)
-    @DependsOn("calculateTotalDailyMcTickets")
     public void calculateDailyTicketDifference() {
         @SuppressWarnings("unchecked")
         List<LocalDate> dates = entityManager.createNativeQuery(
@@ -172,8 +165,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     @Transactional
-    @Scheduled(fixedRate = 3600000)
-    @DependsOn("calculateDailyTicketDifference")
     public void calculateDailyTicketRatio() {
 
         @SuppressWarnings("unchecked")

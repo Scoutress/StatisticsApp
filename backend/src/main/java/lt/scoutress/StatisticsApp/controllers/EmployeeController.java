@@ -27,28 +27,28 @@ public class EmployeeController {
     public String getAllEmployees(Model model) {
         List<Employee> employees = employeeService.findAll();
         model.addAttribute("employees", employees);
-        return "employee-list";
+        return "employees/employee-list";
     }
 
     @GetMapping("/personal")
     public String getAllEmployeesPersonalData(Model model) {
         List<Employee> employees = employeeService.findAll();
         model.addAttribute("employees", employees);
-        return "employee-personal-data";
+        return "employees/employee-personal-data";
     }
 
     @GetMapping("/showFormForAdd")
     public String showFormForAdd(Model model) {
         Employee employee = new Employee();
         model.addAttribute("employee", employee);
-        return "employee-form-new";
+        return "add-data/employee-add";
     }
 
     @GetMapping("/showFormForUpdate")
     public String showFormForUpdate(@RequestParam("employeeId") int id, Model model){
         Employee employee = employeeService.findById(id);
         model.addAttribute("employee", employee);
-        return "employee-form-edit";
+        return "employees/employee-form-edit";
     }
 
     @PostMapping("/save")

@@ -19,20 +19,24 @@ public class ScheduledTasksConfig {
     @Scheduled(cron = "0 0 * * * *")
     public void runTask1() {
         statisticsServiceImpl.calculateDaysSinceJoinAndSave();
+        System.out.println("Scheduled 1 is completed");
     }
 
     @Scheduled(cron = "0 2 * * * *")
     public void runTask2() {
         statisticsServiceImpl.calculateTotalDailyMcTickets();
+        System.out.println("Scheduled 2 is completed");
     }
 
     @Scheduled(cron = "0 4 * * * *")
     public void runTask3() {
         statisticsServiceImpl.calculateDailyTicketDifference();
+        System.out.println("Scheduled 3 is completed");
     }
     
     @Scheduled(cron = "0 6 * * * *")
     public void runTask4() {
         statisticsServiceImpl.calculateDailyTicketRatio();
+        System.out.println("Scheduled 4 is completed");
     }
 }

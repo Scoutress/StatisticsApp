@@ -68,7 +68,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             employee.setDaysSinceJoin(daysSinceJoin);
             employeeRepository.save(employee);
         }
-        System.out.println("Scheduled 1 is completed");
     }
 
     @Override
@@ -108,7 +107,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             .setParameter("date", row[row.length - 1])
             .executeUpdate();
         }
-        System.out.println("Scheduled 2 is completed");
     }
 
     @Override
@@ -160,7 +158,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 }
             }
         }
-        System.out.println("Scheduled 3 is completed");
     }
 
     @Override
@@ -225,7 +222,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 }
             }
         }
-        System.out.println("Scheduled 4 is completed");
     }
 
 

@@ -34,12 +34,12 @@ public class StatisticsController {
 
     @GetMapping("/productivity")
     public String getHelpRequestsPage() {
-        return "productivity";
+        return "stats/productivity";
     }
 
     @GetMapping("/createTable")
     public String createTablePage() {
-        return "create-table";
+        return "add-data/create-table";
     }
 
     @PostMapping("/createTable")
@@ -106,7 +106,7 @@ public class StatisticsController {
 
     @GetMapping("/allTables")
     public String openHelpRequestsMain() {
-        return "stats-tables";
+        return "stats/stats-tables";
     }
 
     @GetMapping("/mcTicketsData")
@@ -119,7 +119,7 @@ public class StatisticsController {
     @GetMapping("/addMcTickets")
     public String showAddMcTicketsForm(Model model) {
         model.addAttribute("mcTickets", new McTicketsAnswered());
-        return "mc-tickets-add";
+        return "add-data/mc-tickets-add";
     }
 
     @PostMapping("/saveMcTickets")
@@ -135,6 +135,6 @@ public class StatisticsController {
     public String getAllMcTicketsCalculations(Model model) {
         List<McTicketsCalculations> tickets = mcTicketsService.findAllCalc();
         model.addAttribute("tickets", tickets);
-        return "stats/mc-tickets-calculations";
+        return "stats/mc-tickets-calc";
     }
 }

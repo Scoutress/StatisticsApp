@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "dc_messages_calc")
-public class DcMessageCalc {
+public class DcMessagesCalc {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,6 +15,9 @@ public class DcMessageCalc {
 
     @Column(name = "date")
     private LocalDate date;
+
+    @Column(name = "daily_msg_sum")
+    private Double dailyMsgSum;
 
     @Column(name = "mboti212_dc_msg_calc")
     private Double mboti212DcMsgCalc;
@@ -64,12 +67,15 @@ public class DcMessageCalc {
     @Column(name = "emsiukemiau_dc_msg_calc")
     private Double emsiukemiauDcMsgCalc;
 
-    public DcMessageCalc(LocalDate date, Double mboti212DcMsgCalc, Double furijaDcMsgCalc,
+    public DcMessagesCalc(){}
+
+    public DcMessagesCalc(LocalDate date, Double dailyMsgSum, Double mboti212DcMsgCalc, Double furijaDcMsgCalc,
             Double ernestasltu12DcMsgCalc, Double d0fkaDcMsgCalc, Double melitaLoveDcMsgCalc, Double libeteDcMsgCalc,
             Double arienaDcMsgCalc, Double sharansDcMsgCalc, Double labasheyDcMsgCalc, Double everlyDcMsgCalc,
             Double richPicaDcMsgCalc, Double shizoDcMsgCalc, Double ieviusDcMsgCalc, Double bobsBuilderDcMsgCalc,
             Double plrxqDcMsgCalc, Double emsiukemiauDcMsgCalc) {
         this.date = date;
+        this.dailyMsgSum = dailyMsgSum;
         this.mboti212DcMsgCalc = mboti212DcMsgCalc;
         this.furijaDcMsgCalc = furijaDcMsgCalc;
         this.ernestasltu12DcMsgCalc = ernestasltu12DcMsgCalc;
@@ -94,6 +100,14 @@ public class DcMessageCalc {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public Double getDailyMsgSum() {
+        return dailyMsgSum;
+    }
+
+    public void setDailyMsgSum(Double dailyMsgSum) {
+        this.dailyMsgSum = dailyMsgSum;
     }
 
     public Double getMboti212DcMsgCalc() {
@@ -224,5 +238,5 @@ public class DcMessageCalc {
         this.emsiukemiauDcMsgCalc = emsiukemiauDcMsgCalc;
     }
 
-    
+        
 }

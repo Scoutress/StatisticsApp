@@ -64,6 +64,8 @@ public class DcMessagesTexted {
     @Column(name = "emsiukemiau_dc_messages")
     private Double emsiukemiauDcMessages;
 
+    public DcMessagesTexted(){}
+
     public DcMessagesTexted(LocalDate date, Double mboti212DcMessages, Double furijaDcMessages,
             Double ernestasltu12DcMessages, Double d0fkaDcMessages, Double melitaLoveDcMessages,
             Double libeteDcMessages, Double arienaDcMessages, Double sharansDcMessages, Double labasheyDcMessages,

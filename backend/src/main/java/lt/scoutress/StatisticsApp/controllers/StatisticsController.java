@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
+import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
+import lt.scoutress.StatisticsApp.services.DcMessagesService;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
 
 @Controller
@@ -25,10 +28,12 @@ public class StatisticsController {
     private JdbcTemplate jdbcTemplate;
 
     private final McTicketsService mcTicketsService;
+    private final DcMessagesService dcMessagesService;
     private final McTicketsRepository mcTicketsRepository;
     
-    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository) {
+    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository, DcMessagesService dcMessagesService) {
         this.mcTicketsService = mcTicketsService;
+        this.dcMessagesService = dcMessagesService;
         this.mcTicketsRepository = mcTicketsRepository;
     }
 
@@ -136,5 +141,19 @@ public class StatisticsController {
         List<McTicketsCalculations> tickets = mcTicketsService.findAllCalc();
         model.addAttribute("tickets", tickets);
         return "stats/mc-tickets-calc";
+    }
+
+    @GetMapping("/dcMessagesData")
+    public String getAllDcMessagesData(Model model) {
+        List<DcMessagesTexted> messages = dcMessagesService.findAll();
+        model.addAttribute("messages", messages);
+        return "stats/dc-messages-data";
+    }
+
+    @GetMapping("/dcMessagesCalc")
+    public String getAllDcMessagesCalculations(Model model) {
+        List<DcMessagesCalc> messages = dcMessagesService.findAllCalc();
+        model.addAttribute("messages", messages);
+        return "stats/dc-messages-calc";
     }
 }

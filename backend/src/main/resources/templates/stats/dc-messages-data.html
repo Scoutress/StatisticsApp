@@ -22,9 +22,9 @@
         <a th:href="@{/stats/allTables}" class="btn btn-primary btn-sm mb-3">
             All tables
         </a>
-        <!-- <a th:href="@{/stats/dcMessagesCalc}" class="btn btn-primary btn-sm mb-3">
+        <a th:href="@{/stats/dcMessagesCalc}" class="btn btn-primary btn-sm mb-3">
             DC messages calculations
-        </a> -->
+        </a>
         <!-- <a th:href="@{/stats/addDcMessages}" class="btn btn-primary btn-sm mb-3">
             DC messages add
         </a> -->
@@ -51,24 +51,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="ticket : ${tickets}">
-                    <td th:text="${ticket.date}"></td>
-                    <td th:text="${ticket.mboti212McTickets}"></td>
-                    <td th:text="${ticket.furijaMcTickets}"></td>
-                    <td th:text="${ticket.ernestasltu12McTickets}"></td>
-                    <td th:text="${ticket.d0fkaMcTickets}"></td>
-                    <td th:text="${ticket.melitaLoveMcTickets}"></td>
-                    <td th:text="${ticket.libeteMcTickets}"></td>
-                    <td th:text="${ticket.arienaMcTickets}"></td>
-                    <td th:text="${ticket.sharansMcTickets}"></td>
-                    <td th:text="${ticket.labasheyMcTickets}"></td>
-                    <td th:text="${ticket.everlyMcTickets}"></td>
-                    <td th:text="${ticket.richPicaMcTickets}"></td>
-                    <td th:text="${ticket.shizoMcTickets}"></td>
-                    <td th:text="${ticket.ieviusMcTickets}"></td>
-                    <td th:text="${ticket.bobsBuilderMcTickets}"></td>
-                    <td th:text="${ticket.plrxqMcTickets}"></td>
-                    <td th:text="${ticket.emsiukemiauMcTickets}"></td>
+                <tr th:each="message : ${messages}">
+                    <td th:text="${message.date}"></td>
+                    <td th:text="${message.mboti212DcMessages}"></td>
+                    <td th:text="${message.furijaDcMessages}"></td>
+                    <td th:text="${message.ernestasltu12DcMessages}"></td>
+                    <td th:text="${message.d0fkaDcMessages}"></td>
+                    <td th:text="${message.melitaLoveDcMessages}"></td>
+                    <td th:text="${message.libeteDcMessages}"></td>
+                    <td th:text="${message.arienaDcMessages}"></td>
+                    <td th:text="${message.sharansDcMessages}"></td>
+                    <td th:text="${message.labasheyDcMessages}"></td>
+                    <td th:text="${message.everlyDcMessages}"></td>
+                    <td th:text="${message.richPicaDcMessages}"></td>
+                    <td th:text="${message.shizoDcMessages}"></td>
+                    <td th:text="${message.ieviusDcMessages}"></td>
+                    <td th:text="${message.bobsBuilderDcMessages}"></td>
+                    <td th:text="${message.plrxqDcMessages}"></td>
+                    <td th:text="${message.emsiukemiauDcMessages}"></td>
                 </tr>
             </tbody>
         </table>

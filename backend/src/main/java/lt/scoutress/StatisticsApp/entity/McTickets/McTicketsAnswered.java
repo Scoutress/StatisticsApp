@@ -28,7 +28,7 @@ public class McTicketsAnswered {
     @Column(name = "d0fka_mc_tickets")
     private Integer d0fkaMcTickets;
 
-    @Column(name = "melita_mc_tickets")
+    @Column(name = "melitalove_mc_tickets")
     private Integer melitaLoveMcTickets;
 
     @Column(name = "libete_mc_tickets")

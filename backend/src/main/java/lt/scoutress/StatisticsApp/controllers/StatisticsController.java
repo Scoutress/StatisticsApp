@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
+import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
 
 @Controller
@@ -24,9 +25,11 @@ public class StatisticsController {
     private JdbcTemplate jdbcTemplate;
 
     private final McTicketsService mcTicketsService;
+    private final McTicketsRepository mcTicketsRepository;
     
-    public StatisticsController(McTicketsService mcTicketsService) {
+    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository) {
         this.mcTicketsService = mcTicketsService;
+        this.mcTicketsRepository = mcTicketsRepository;
     }
 
     @GetMapping("/productivity")
@@ -120,8 +123,11 @@ public class StatisticsController {
     }
 
     @PostMapping("/saveMcTickets")
-    public String saveMcTickets(@ModelAttribute McTicketsAnswered mcTickets) {
-        mcTicketsService.save(mcTickets);
+    public String saveMcTickets(@ModelAttribute("mcTickets") McTicketsAnswered mcTickets) {
+        int sharansMcTickets = mcTickets.getSharansMcTickets();
+        int updatedSharansMcTickets = sharansMcTickets + 189;
+        mcTickets.setSharansMcTickets(updatedSharansMcTickets);
+        mcTicketsRepository.save(mcTickets);
         return "redirect:/stats/mcTicketsData";
     }
 

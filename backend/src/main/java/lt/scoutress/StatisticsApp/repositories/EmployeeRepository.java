@@ -23,5 +23,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "WHEN 'Helper' THEN 9 " +
             "ELSE 10 END")
     public List<Employee> findAllByOrderByLevel();
+
 }
 

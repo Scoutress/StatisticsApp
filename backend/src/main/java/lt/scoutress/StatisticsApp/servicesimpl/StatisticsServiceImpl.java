@@ -170,7 +170,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         System.out.println("Scheduled 3 is completed");
     }
 
-    @Override
+    @Override// UNFINISHED
     @Transactional
     @Scheduled(fixedRate = 3600000)
     @DependsOn("calculateDailyTicketDifference")

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
@@ -19,6 +20,7 @@ import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.DcMessagesService;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
+import lt.scoutress.StatisticsApp.services.ProductivityService;
 
 @Controller
 @RequestMapping("/stats")
@@ -29,16 +31,20 @@ public class StatisticsController {
 
     private final McTicketsService mcTicketsService;
     private final DcMessagesService dcMessagesService;
+    private final ProductivityService productivityService;
     private final McTicketsRepository mcTicketsRepository;
     
-    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository, DcMessagesService dcMessagesService) {
+    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository, DcMessagesService dcMessagesService, ProductivityService productivityService) {
         this.mcTicketsService = mcTicketsService;
         this.dcMessagesService = dcMessagesService;
+        this.productivityService = productivityService;
         this.mcTicketsRepository = mcTicketsRepository;
     }
 
     @GetMapping("/productivity")
-    public String getHelpRequestsPage() {
+    public String getHelpRequestsPage(Model model) {
+        List<Productivity> product = productivityService.findAll();
+        model.addAttribute("product", product);
         return "stats/productivity";
     }
 
@@ -156,4 +162,6 @@ public class StatisticsController {
         model.addAttribute("messages", messages);
         return "stats/dc-messages-calc";
     }
+
+    //
 }

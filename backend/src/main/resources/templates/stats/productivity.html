@@ -42,18 +42,18 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="tempEmployee : ${employees}">
-                    <td th:text="${tempEmployee.level}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.activityPerHalfYear}"></td>
-                    <td th:text="${tempEmployee.playtime}"></td>
-                    <!-- <td th:text="${tempEmployee.playtimeAfk}"></td> -->
-                    <td th:text="${tempEmployee.mcTickets}"></td>
-                    <td th:text="${tempEmployee.mcTicketsComp}"></td>
-                    <td th:text="${tempEmployee.dcMessages}"></td>
-                    <td th:text="${tempEmployee.dcMessagesComp}"></td>
-                    <td th:text="${tempEmployee.productivity}"></td>
-                    <td th:text="${tempEmployee.recommendation}"></td>
+                <tr th:each="product : ${product}">
+                    <td th:text="${product.level}"></td>
+                    <td th:text="${product.username}"></td>
+                    <td th:text="${product.activityPerHalfYear}"></td>
+                    <td th:text="${product.playtime}"></td>
+                    <!-- <td th:text="${product.playtimeAfk}"></td> -->
+                    <td th:text="${product.mcTickets}"></td>
+                    <td th:text="${product.mcTicketsComp}"></td>
+                    <td th:text="${product.dcMessages}"></td>
+                    <td th:text="${product.dcMessagesComp}"></td>
+                    <td th:text="${product.productivity}"></td>
+                    <td th:text="${product.recommendation}"></td>
                 </tr>
             </tbody>
         </table>

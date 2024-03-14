@@ -1,5 +1,7 @@
 package lt.scoutress.StatisticsApp.servicesimpl;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -344,6 +346,114 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
-    //dc activity - average daily messages
+    @Override
+    @Transactional
+    public void calculateAvgDailyDcMessages() {
+        Query sumQuery = entityManager.createNativeQuery(
+            "SELECT " +
+                "SUM(COALESCE(mboti212_dc_messages, 0)) AS sum_mboti212_dc_messages, " +
+                "SUM(COALESCE(furija_dc_messages, 0)) AS sum_furija_dc_messages, " +
+                "SUM(COALESCE(ernestasltu12_dc_messages, 0)) AS sum_ernestasltu12_dc_messages, " +
+                "SUM(COALESCE(d0fka_dc_messages, 0)) AS sum_d0fka_dc_messages, " +
+                "SUM(COALESCE(melitalove_dc_messages, 0)) AS sum_melitalove_dc_messages, " +
+                "SUM(COALESCE(libete_dc_messages, 0)) AS sum_libete_dc_messages, " +
+                "SUM(COALESCE(ariena_dc_messages, 0)) AS sum_ariena_dc_messages, " +
+                "SUM(COALESCE(sharans_dc_messages, 0)) AS sum_sharans_dc_messages, " +
+                "SUM(COALESCE(labashey_dc_messages, 0)) AS sum_labashey_dc_messages, " +
+                "SUM(COALESCE(everly_dc_messages, 0)) AS sum_everly_dc_messages, " +
+                "SUM(COALESCE(richpica_dc_messages, 0)) AS sum_richpica_dc_messages, " +
+                "SUM(COALESCE(shizo_dc_messages, 0)) AS sum_shizo_dc_messages, " +
+                "SUM(COALESCE(ievius_dc_messages, 0)) AS sum_ievius_dc_messages, " +
+                "SUM(COALESCE(bobsbuilder_dc_messages, 0)) AS sum_bobsbuilder_dc_messages, " +
+                "SUM(COALESCE(plrxq_dc_messages, 0)) AS sum_plrxq_dc_messages, " +
+                "SUM(COALESCE(emsiukemiau_dc_messages, 0)) AS sum_emsiukemiau_dc_messages " +
+            "FROM dc_messages_texted"
+        );
+
+        Query countQuery = entityManager.createNativeQuery(
+            "SELECT " +
+                "COUNT(mboti212_dc_messages) AS total_count_mboti212, " +
+                "COUNT(furija_dc_messages) AS total_count_furija_dc, " +
+                "COUNT(ernestasltu12_dc_messages) AS total_count_ernestasltu12, " +
+                "COUNT(d0fka_dc_messages) AS total_count_d0fka, " +
+                "COUNT(melitalove_dc_messages) AS total_count_melitalove, " +
+                "COUNT(libete_dc_messages) AS total_count_libete, " +
+                "COUNT(ariena_dc_messages) AS total_count_ariena, " +
+                "COUNT(sharans_dc_messages) AS total_count_sharans, " +
+                "COUNT(labashey_dc_messages) AS total_count_labashey, " +
+                "COUNT(everly_dc_messages) AS total_count_everly, " +
+                "COUNT(richpica_dc_messages) AS total_count_richpica, " +
+                "COUNT(shizo_dc_messages) AS total_count_shizo, " +
+                "COUNT(ievius_dc_messages) AS total_count_ievius, " +
+                "COUNT(bobsbuilder_dc_messages) AS total_count_bobsbuilder, " +
+                "COUNT(plrxq_dc_messages) AS total_count_plrxq, " +
+                "COUNT(emsiukemiau_dc_messages) AS total_count_emsiukemiau " +
+            "FROM dc_messages_texted"
+        );
+
+        Object[] sums = (Object[]) sumQuery.getSingleResult();
+        Object[] counts = (Object[])countQuery.getSingleResult();
+
+        double[] longAverages = new double[sums.length];
+
+        for (int i = 0; i < sums.length; i++) {
+            if (counts[i] != null && (long) counts[i] != 0) {
+                longAverages[i] = ((Number) sums[i]).doubleValue() / (long) counts[i];
+            } else {
+                longAverages[i] = 0;
+            }
+        }
+
+        DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.ENGLISH));
+
+        for (int i = 0; i < longAverages.length; i++) {
+            double average = longAverages[i];
+            String formattedAverage = df.format(average);
+            longAverages[i] = Double.parseDouble(formattedAverage);
+        }
+
+        Query updateQuery = entityManager.createNativeQuery(
+            "UPDATE productivity " +
+            "SET dc_messages = " +
+                "CASE " +
+                    "WHEN username = 'Mboti212' THEN :avg_mboti212_dc_messages " +
+                    "WHEN username = 'Furija' THEN :avg_furija_dc_messages " +
+                    "WHEN username = 'Ernestasltu12' THEN :avg_ernestasltu12_dc_messages " +
+                    "WHEN username = 'D0fka' THEN :avg_d0fka_dc_messages " +
+                    "WHEN username = 'MelitaLove' THEN :avg_melitalove_dc_messages " +
+                    "WHEN username = 'Libete' THEN :avg_libete_dc_messages " +
+                    "WHEN username = 'Ariena' THEN :avg_ariena_dc_messages " +
+                    "WHEN username = 'Sharans' THEN :avg_sharans_dc_messages " +
+                    "WHEN username = 'labashey' THEN :avg_labashey_dc_messages " +
+                    "WHEN username = 'everly' THEN :avg_everly_dc_messages " +
+                    "WHEN username = 'RichPica' THEN :avg_richpica_dc_messages " +
+                    "WHEN username = 'Shizo' THEN :avg_shizo_dc_messages " +
+                    "WHEN username = 'Ievius' THEN :avg_ievius_dc_messages " +
+                    "WHEN username = 'BobsBuilder' THEN :avg_bobsbuilder_dc_messages " +
+                    "WHEN username = 'plrxq' THEN :avg_plrxq_dc_messages " +
+                    "WHEN username = 'Emsiukemiau' THEN :avg_emsiukemiau_dc_messages " +
+                "END"
+        );
+
+        updateQuery.setParameter("avg_mboti212_dc_messages",        longAverages[0]);
+        updateQuery.setParameter("avg_furija_dc_messages",          longAverages[1]);
+        updateQuery.setParameter("avg_ernestasltu12_dc_messages",   longAverages[2]);
+        updateQuery.setParameter("avg_d0fka_dc_messages",           longAverages[3]);
+        updateQuery.setParameter("avg_melitalove_dc_messages",      longAverages[4]);
+        updateQuery.setParameter("avg_libete_dc_messages",          longAverages[5]);
+        updateQuery.setParameter("avg_ariena_dc_messages",          longAverages[6]);
+        updateQuery.setParameter("avg_sharans_dc_messages",         longAverages[7]);
+        updateQuery.setParameter("avg_labashey_dc_messages",        longAverages[8]);
+        updateQuery.setParameter("avg_everly_dc_messages",          longAverages[9]);
+        updateQuery.setParameter("avg_richpica_dc_messages",        longAverages[10]);
+        updateQuery.setParameter("avg_shizo_dc_messages",           longAverages[11]);
+        updateQuery.setParameter("avg_ievius_dc_messages",          longAverages[12]);
+        updateQuery.setParameter("avg_bobsbuilder_dc_messages",     longAverages[13]);
+        updateQuery.setParameter("avg_plrxq_dc_messages",           longAverages[14]);
+        updateQuery.setParameter("avg_emsiukemiau_dc_messages",     longAverages[15]);
+
+        updateQuery.executeUpdate();
+    }
+
     //dc activity comp. - average daily messages ratio
 }

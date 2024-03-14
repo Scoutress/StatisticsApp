@@ -167,10 +167,10 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         @SuppressWarnings("unchecked")
         List<LocalDate> dates = entityManager.createNativeQuery(
-                "SELECT DISTINCT date FROM mc_tickets_calculations WHERE date > '2023-06-01'", LocalDate.class)
+                "SELECT DISTINCT date FROM mc_tickets_calculations", LocalDate.class)
                 .getResultList();
 
-        for (int i = 1; i < dates.size(); i++) {
+        for (int i = 0; i < dates.size(); i++) {
             LocalDate currentDay = dates.get(i);
 
             List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
@@ -199,6 +199,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
                     String roundedString = String.format(Locale.ENGLISH, "%.2f", ticketsRatioNumber);
                     roundedTicketsRatio = Double.parseDouble(roundedString);
+                } else {
+                    ticketsRatioNumber = 0;
                 }
 
                 Long existingRecordCount = (Long) entityManager.createNativeQuery(
@@ -272,6 +274,72 @@ public class StatisticsServiceImpl implements StatisticsService {
                         .setParameter("sum", sum)
                         .setParameter("date", date)
                         .executeUpdate();
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void calculateDailyDcMessagesRatio() {
+
+        @SuppressWarnings("unchecked")
+        List<LocalDate> dates = entityManager.createNativeQuery(
+                "SELECT DISTINCT date FROM dc_messages_texted", LocalDate.class)
+                .getResultList();
+
+        for (int i = 0; i < dates.size(); i++) {
+            LocalDate currentDay = dates.get(i);
+
+            List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
+                    "libete", "ariena", "sharans", "labashey", "everly", "richpica",
+                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
+
+            for (String user : users) {
+                Double currentDayDcMessagesDaily = (Double) entityManager.createNativeQuery(
+                        "SELECT COALESCE(" + user + "_dc_messages, 0) FROM dc_messages_texted WHERE date = :currentDay")
+                        .setParameter("currentDay", currentDay)
+                        .getSingleResult();
+
+                Double currentDayDcMessagesSum = (Double) entityManager.createNativeQuery(
+                        "SELECT COALESCE(daily_msg_sum, 0) FROM dc_messages_calc WHERE date = :currentDay")
+                        .setParameter("currentDay", currentDay)
+                        .getSingleResult();
+
+                double dcMessagesRatioNumber = 0;
+                double roundedDcMessagesRatio = 0;
+
+                if (currentDayDcMessagesSum != 0) {
+                    double currentDayDcMessagesDailyDouble = currentDayDcMessagesDaily.doubleValue();
+                    double currentDayDcMessagesSumDouble = currentDayDcMessagesSum.doubleValue();
+
+                    dcMessagesRatioNumber = currentDayDcMessagesDailyDouble / currentDayDcMessagesSumDouble;
+
+                    String roundedString = String.format(Locale.ENGLISH, "%.2f", dcMessagesRatioNumber);
+                    roundedDcMessagesRatio = Double.parseDouble(roundedString);
+                } else {
+                    dcMessagesRatioNumber = 0;
+                }
+
+                Long existingRecordCount = (Long) entityManager.createNativeQuery(
+                        "SELECT COUNT(*) FROM dc_messages_calc WHERE date = :currentDay")
+                        .setParameter("currentDay", currentDay)
+                        .getSingleResult();
+
+                Double doubleExistingRecordCount = existingRecordCount.doubleValue();
+
+                if (doubleExistingRecordCount.intValue() == 0) {
+                    entityManager.createNativeQuery(
+                            "INSERT INTO dc_messages_calc (date, " + user + "_dc_msg_calc) VALUES (:currentDay, :roundedDcMessagesRatio)")
+                            .setParameter("currentDay", currentDay)
+                            .setParameter("roundedDcMessagesRatio", roundedDcMessagesRatio)
+                            .executeUpdate();
+                } else {
+                    entityManager.createNativeQuery(
+                            "UPDATE dc_messages_calc SET " + user + "_dc_msg_calc = :roundedDcMessagesRatio WHERE date = :currentDay")
+                            .setParameter("roundedDcMessagesRatio", roundedDcMessagesRatio)
+                            .setParameter("currentDay", currentDay)
+                            .executeUpdate();
+                }
             }
         }
     }

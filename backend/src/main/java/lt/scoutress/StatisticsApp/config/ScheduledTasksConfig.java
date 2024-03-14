@@ -45,4 +45,10 @@ public class ScheduledTasksConfig {
         statisticsServiceImpl.calculateTotalDailyDcMessages();
         System.out.println("Scheduled 5 is completed");
     }
+
+    @Scheduled(cron = "0 10 * * * *")
+    public void runTask6() {
+        statisticsServiceImpl.calculateDailyDcMessagesRatio();
+        System.out.println("Scheduled 6 is completed");
+    }
 }

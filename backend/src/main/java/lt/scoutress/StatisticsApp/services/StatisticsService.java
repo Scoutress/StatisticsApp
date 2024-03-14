@@ -24,4 +24,6 @@ public interface StatisticsService {
     public void calculateDailyTicketRatio();
 
     public void calculateTotalDailyDcMessages();
+
+    public void calculateDailyDcMessagesRatio();
 }

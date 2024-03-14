@@ -17,6 +17,7 @@ import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
+import lt.scoutress.StatisticsApp.repositories.DcMessagesRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.DcMessagesService;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
@@ -33,12 +34,14 @@ public class StatisticsController {
     private final DcMessagesService dcMessagesService;
     private final ProductivityService productivityService;
     private final McTicketsRepository mcTicketsRepository;
+    private final DcMessagesRepository dcMessagesRepository;
     
-    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository, DcMessagesService dcMessagesService, ProductivityService productivityService) {
+    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository, DcMessagesService dcMessagesService, ProductivityService productivityService, DcMessagesRepository dcMessagesRepository) {
         this.mcTicketsService = mcTicketsService;
         this.dcMessagesService = dcMessagesService;
         this.productivityService = productivityService;
         this.mcTicketsRepository = mcTicketsRepository;
+        this.dcMessagesRepository = dcMessagesRepository;
     }
 
     @GetMapping("/productivity")
@@ -163,5 +166,16 @@ public class StatisticsController {
         return "stats/dc-messages-calc";
     }
 
-    //
+    @GetMapping("/addDcMessages")
+    public String showAddDcMessagesForm(Model model) {
+        model.addAttribute("dcMessages", new DcMessagesTexted());
+        return "add-data/dc-messages-add";
+    }
+
+    @SuppressWarnings("null")
+    @PostMapping("/saveDcMessages")
+    public String saveDcMessages(@ModelAttribute("dcMessages") DcMessagesTexted dcMessages) {
+        dcMessagesRepository.save(dcMessages);
+        return "redirect:/stats/dcMessagesData";
+    }
 }

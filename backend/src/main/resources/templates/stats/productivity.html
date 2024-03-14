@@ -30,13 +30,13 @@
                 <tr>
                     <th>Level</th>
                     <th>Username</th>
-                    <th>Activity/180d.</th>
-                    <th>Help req.</th>
-                    <th>Help req. comp.</th>
-                    <th>Dc tickets</th>
-                    <th>Dc tickets comp.</th>
+                    <th>Activity /180d.</th>
                     <th>Playtime</th>
-                    <th>AFK playtime</th>
+                    <!-- <th>AFK playtime</th> -->
+                    <th>Mc tickets</th>
+                    <th>Mc tickets comp.</th>
+                    <th>Dc activity</th>
+                    <th>Dc activity comp.</th>
                     <th>Productivity</th>
                     <th>Recommendation</th>
                 </tr>
@@ -45,17 +45,15 @@
                 <tr th:each="tempEmployee : ${employees}">
                     <td th:text="${tempEmployee.level}"></td>
                     <td th:text="${tempEmployee.username}"></td>
-                    <!-- temporarily -->
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <td th:text="${tempEmployee.username}"></td>
-                    <!-- temporarily -->
+                    <td th:text="${tempEmployee.activityPerHalfYear}"></td>
+                    <td th:text="${tempEmployee.playtime}"></td>
+                    <!-- <td th:text="${tempEmployee.playtimeAfk}"></td> -->
+                    <td th:text="${tempEmployee.mcTickets}"></td>
+                    <td th:text="${tempEmployee.mcTicketsComp}"></td>
+                    <td th:text="${tempEmployee.dcMessages}"></td>
+                    <td th:text="${tempEmployee.dcMessagesComp}"></td>
+                    <td th:text="${tempEmployee.productivity}"></td>
+                    <td th:text="${tempEmployee.recommendation}"></td>
                 </tr>
             </tbody>
         </table>

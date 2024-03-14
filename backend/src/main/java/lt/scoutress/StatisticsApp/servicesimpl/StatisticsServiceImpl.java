@@ -344,5 +344,6 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
-    //
+    //dc activity - average daily messages
+    //dc activity comp. - average daily messages ratio
 }

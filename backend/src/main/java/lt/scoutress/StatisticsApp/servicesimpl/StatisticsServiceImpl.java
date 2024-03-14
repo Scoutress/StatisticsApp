@@ -3,6 +3,7 @@ package lt.scoutress.StatisticsApp.servicesimpl;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -224,5 +225,56 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
+    @Override
+    @Transactional
+    public void calculateTotalDailyDcMessages() {
+        List<String> columnNames = Arrays.asList("mboti212_dc_messages", "furija_dc_messages", "ernestasltu12_dc_messages",
+                "d0fka_dc_messages", "melitaLove_dc_messages", "libete_dc_messages", "ariena_dc_messages",
+                "sharans_dc_messages", "labashey_dc_messages", "everly_dc_messages", "richPica_dc_messages",
+                "shizo_dc_messages", "ievius_dc_messages", "bobsBuilder_dc_messages", "plrxq_dc_messages",
+                "emsiukemiau_dc_messages");
+    
+        StringBuilder queryBuilder = new StringBuilder("SELECT ");
+        for (int i = 0; i < columnNames.size(); i++) {
+            queryBuilder.append(columnNames.get(i));
+            if (i < columnNames.size() - 1) {
+                queryBuilder.append(", ");
+            }
+        }
+        queryBuilder.append(", date FROM dc_messages_texted");
+    
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = entityManager.createNativeQuery(queryBuilder.toString()).getResultList();
+    
+        for (Object[] row : results) {
+            Double sum = 0.0;
+            for (int i = 0; i < row.length - 1; i++) {
+                if (row[i] != null) {
+                    sum += (Double) row[i];
+                }
+            }
+    
+            Date date = (Date) row[row.length - 1];
+    
+            Query checkQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM dc_messages_calc WHERE date = :date");
+            checkQuery.setParameter("date", date);
+            Long count = (Long) checkQuery.getSingleResult();
 
+            if (count > 0) {
+                entityManager.createNativeQuery(
+                        "UPDATE dc_messages_calc SET daily_msg_sum = :sum WHERE date = :date")
+                        .setParameter("sum", sum)
+                        .setParameter("date", date)
+                        .executeUpdate();
+            } else {
+                entityManager.createNativeQuery(
+                        "INSERT INTO dc_messages_calc (daily_msg_sum, date) VALUES (:sum, :date)")
+                        .setParameter("sum", sum)
+                        .setParameter("date", date)
+                        .executeUpdate();
+            }
+        }
+    }
+
+    //
 }

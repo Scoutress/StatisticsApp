@@ -39,4 +39,10 @@ public class ScheduledTasksConfig {
         statisticsServiceImpl.calculateDailyTicketRatio();
         System.out.println("Scheduled 4 is completed");
     }
+
+    @Scheduled(cron = "0 8 * * * *")
+    public void runTask5() {
+        statisticsServiceImpl.calculateTotalDailyDcMessages();
+        System.out.println("Scheduled 5 is completed");
+    }
 }

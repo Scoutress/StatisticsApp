@@ -14,7 +14,7 @@ public class Productivity {
     @Column(name = "level")
     private String level;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     private String username;
 
     @Column(name = "activity_per_half_year")

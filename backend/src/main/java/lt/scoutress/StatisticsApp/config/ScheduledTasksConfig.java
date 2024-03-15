@@ -56,14 +56,20 @@ public class ScheduledTasksConfig {
     }
     
     @Scheduled(cron = "0 12 * * * *")
-    public void runTask8() {
+    public void runTask7() {
         productivityServiceImpl.copyUsernamesAndLevels();
         System.out.println("Scheduled task 7 is completed");
     }
     
     @Scheduled(cron = "0 14 * * * *")
-    public void runTask7() {
+    public void runTask8() {
         statisticsServiceImpl.calculateAvgDailyDcMessages();
         System.out.println("Scheduled task 8 is completed");
+    }
+
+    @Scheduled(cron = "0 16 * * * *")
+    public void runTask9() {
+        statisticsServiceImpl.calculateAvgDailyDcMessagesRatio();
+        System.out.println("Scheduled task 9 is completed");
     }
 }

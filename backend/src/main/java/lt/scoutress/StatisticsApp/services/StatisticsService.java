@@ -28,4 +28,6 @@ public interface StatisticsService {
     public void calculateDailyDcMessagesRatio();
 
     public void calculateAvgDailyDcMessages();
+
+    public void calculateAvgDailyDcMessagesRatio();
 }

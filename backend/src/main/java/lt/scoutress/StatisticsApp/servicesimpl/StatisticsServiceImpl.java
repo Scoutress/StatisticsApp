@@ -3,12 +3,12 @@ package lt.scoutress.StatisticsApp.servicesimpl;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -455,5 +455,53 @@ public class StatisticsServiceImpl implements StatisticsService {
         updateQuery.executeUpdate();
     }
 
-    //dc activity comp. - average daily messages ratio
+    @Override
+    @Transactional
+    public void calculateAvgDailyDcMessagesRatio() {
+        LocalDate oldestDate = LocalDate.of(2016, Month.JANUARY, 1);
+
+        List<String> usernameList = Arrays.asList(
+            "Mboti212", "Furija", "Ernestasltu12", "D0fka", "MelitaLove",
+            "Libete", "Ariena", "Sharans", "labashey", "everly",
+            "RichPica", "Shizo", "Ievius", "BobsBuilder", "plrxq",
+            "Emsiukemiau"
+        );
+
+        for (String username : usernameList) {
+            String usernameLower = username.toLowerCase();
+            String avgQuerySql = String.format("SELECT AVG(COALESCE(%s_dc_msg_calc, 0)) AS avg_%s_dc_msg_calc FROM dc_messages_calc WHERE date >= :date", usernameLower, usernameLower);
+
+            Query avgQuery = entityManager.createNativeQuery(avgQuerySql);
+            avgQuery.setParameter("date", oldestDate);
+            Double avgResultUnForm = ((Number) avgQuery.getSingleResult()).doubleValue();
+
+            String formattedAvgResult = String.format(Locale.ENGLISH, "%.2f", avgResultUnForm * 100);
+
+            if (formattedAvgResult.matches("\\d+\\.\\d{2}")) {
+                Double avgResult = Double.parseDouble(formattedAvgResult);
+
+                Query countQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM dc_messages_calc WHERE date >= :date");
+                countQuery.setParameter("date", oldestDate);
+                Long countResult = ((Number) countQuery.getSingleResult()).longValue();
+
+                if (countResult.intValue() > 0) {
+                    Query updateQuery = entityManager.createQuery(
+                            "UPDATE Productivity p " +
+                                    "SET p.dcMessagesComp = :avgDcMessagesComp " +
+                                    "WHERE p.username = :username"
+                    );
+
+                    updateQuery.setParameter("avgDcMessagesComp", avgResult);
+                    updateQuery.setParameter("username", username);
+                    updateQuery.executeUpdate();
+                } else {
+                    System.out.println("There is not newer data than " + oldestDate + " from user " + username);
+                }
+            } else {
+                System.out.println("Invalid average result format for user " + username + ": " + formattedAvgResult);
+                continue;
+            }
+        }
+    }
+
 }

@@ -30,4 +30,13 @@ public interface StatisticsService {
     public void calculateAvgDailyDcMessages();
 
     public void calculateAvgDailyDcMessagesRatio();
+
+    public void calculateAvgDailyMcTickets();
+
+    //public void calculateAvgDailyPlaytime();
+
+    //public void calculateAvgDailyMcTicketsRatio();
+
+    //public void calculatePlaytimeInLastHalfYear();
+    
 }

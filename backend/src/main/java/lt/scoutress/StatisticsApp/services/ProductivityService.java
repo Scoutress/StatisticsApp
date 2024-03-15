@@ -12,4 +12,30 @@ public interface ProductivityService {
     List<Employee> findAllByOrderByLevel();
     
     void copyUsernamesAndLevels();
+
+    //boolean isEnoughDaysForPromotion();
+
+    //boolean isPlaytimeInLastHalfYearOK();
+
+    //void calculateAvgPlaytimeWithCoef();
+    
+    //void calculateAvgAfkPlaytimeWithCoef(); //Later
+
+    //void calculateAvgMcTicketsWithCoef();
+
+    //void calculateAvgMcTicketsRatioWithCoef();
+
+    //void calculateAvgDcMessagesWithCoef();
+
+    //void calculateAvgDcMessagesRatioWithCoef();
+
+    //void calculateComplaintsValue(); //Later
+
+    //void calculateProductivity();
+
+    //void decidePromoteOrDemoteOrDismiss();
+
+
+
+    //add complaints table and calculations //later
 }

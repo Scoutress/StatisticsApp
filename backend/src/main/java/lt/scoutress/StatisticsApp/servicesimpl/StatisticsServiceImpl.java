@@ -504,4 +504,50 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
+    @Override
+    @Transactional
+    public void calculateAvgDailyMcTickets() {
+        Query usernameQuery = entityManager.createNativeQuery("SELECT username, join_date FROM employee");
+        
+        @SuppressWarnings("unchecked")
+        List<Object[]> usernamesAndJoinDates = usernameQuery.getResultList();
+
+        for (Object[] result : usernamesAndJoinDates) {
+            String username = (String) result[0];
+            java.sql.Date sqlDate = (java.sql.Date) result[1];
+            LocalDate joinDate = sqlDate.toLocalDate();
+
+            Query sumQuery = entityManager.createNativeQuery(
+                "SELECT SUM(COALESCE(" + username.toLowerCase() + "_daily, 0)) " +
+                "FROM mc_tickets_calculations"
+            );
+            Double sum = (Double) sumQuery.getSingleResult();
+            int sumValue = sum.intValue();
+
+            LocalDate startDate = LocalDate.of(2023, Month.JUNE, 2);
+            LocalDate endDate = LocalDate.now();
+
+            if (joinDate.isAfter(startDate)) {
+                startDate = joinDate;
+            }
+
+            long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+
+            double average = (double) sumValue / daysBetween;
+
+            String formattedAverage = String.format(Locale.ENGLISH, "%.2f", average);
+            double finalAverage = Double.parseDouble(formattedAverage);
+
+            Query updateQuery = entityManager.createNativeQuery(
+                "UPDATE productivity " +
+                "SET mc_tickets = :average " +
+                "WHERE username = :username"
+            );
+            updateQuery.setParameter("average", finalAverage);
+            updateQuery.setParameter("username", username);
+
+            updateQuery.executeUpdate();
+        }
+    }
+
 }

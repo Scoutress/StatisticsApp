@@ -36,9 +36,31 @@ public class Employee {
 
     @Column(name = "days_since_join")
     private Integer daysSinceJoin;
+
+    @Column(name = "survival_code")
+    private Integer survivalCode;
+
+    @Column(name = "skyblock_code")
+    private Integer skyblockCode;
+
+    @Column(name = "creative_code")
+    private Integer creativeCode;
+
+    @Column(name = "boxpvp_code")
+    private Integer boxpvpCode;
+
+    @Column(name = "prison_code")
+    private Integer prisonCode;
+
+    @Column(name = "events_code")
+    private Integer eventsCode;
     
-    public Employee(String username, String level, String language, String firstName, String lastName, String email,
-            LocalDate joinDate, Integer daysSinceJoin) {
+    public Employee() {}
+
+    public Employee(Integer employeeId, String username, String level, String language, String firstName,
+            String lastName, String email, LocalDate joinDate, Integer daysSinceJoin, Integer survivalCode,
+            Integer skyblockCode, Integer creativeCode, Integer boxpvpCode, Integer prisonCode, Integer eventsCode) {
+        this.employeeId = employeeId;
         this.username = username;
         this.level = level;
         this.language = language;
@@ -47,9 +69,13 @@ public class Employee {
         this.email = email;
         this.joinDate = joinDate;
         this.daysSinceJoin = daysSinceJoin;
+        this.survivalCode = survivalCode;
+        this.skyblockCode = skyblockCode;
+        this.creativeCode = creativeCode;
+        this.boxpvpCode = boxpvpCode;
+        this.prisonCode = prisonCode;
+        this.eventsCode = eventsCode;
     }
-
-    public Employee() {}
 
     public Integer getEmployeeId() {
         return employeeId;
@@ -73,6 +99,14 @@ public class Employee {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public String getFirstName() {
@@ -107,20 +141,60 @@ public class Employee {
         this.joinDate = joinDate;
     }
 
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
     public Integer getDaysSinceJoin() {
         return daysSinceJoin;
     }
 
     public void setDaysSinceJoin(Integer daysSinceJoin) {
         this.daysSinceJoin = daysSinceJoin;
+    }
+
+    public Integer getSurvivalCode() {
+        return survivalCode;
+    }
+
+    public void setSurvivalCode(Integer survivalCode) {
+        this.survivalCode = survivalCode;
+    }
+
+    public Integer getSkyblockCode() {
+        return skyblockCode;
+    }
+
+    public void setSkyblockCode(Integer skyblockCode) {
+        this.skyblockCode = skyblockCode;
+    }
+
+    public Integer getCreativeCode() {
+        return creativeCode;
+    }
+
+    public void setCreativeCode(Integer creativeCode) {
+        this.creativeCode = creativeCode;
+    }
+
+    public Integer getBoxpvpCode() {
+        return boxpvpCode;
+    }
+
+    public void setBoxpvpCode(Integer boxpvpCode) {
+        this.boxpvpCode = boxpvpCode;
+    }
+
+    public Integer getPrisonCode() {
+        return prisonCode;
+    }
+
+    public void setPrisonCode(Integer prisonCode) {
+        this.prisonCode = prisonCode;
+    }
+
+    public Integer getEventsCode() {
+        return eventsCode;
+    }
+
+    public void setEventsCode(Integer eventsCode) {
+        this.eventsCode = eventsCode;
     }
 
 }

@@ -24,5 +24,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "ELSE 10 END")
     public List<Employee> findAllByOrderByLevel();
 
+    public Employee findByUsername(String username);
+
 }
 

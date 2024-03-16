@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 import lt.scoutress.StatisticsApp.entity.playtime.Playtime;
 import lt.scoutress.StatisticsApp.repositories.PlaytimeRepository;
-import lt.scoutress.StatisticsApp.services.PlaytimeService;
+import lt.scoutress.StatisticsApp.services.playtime.PlaytimeService;
 
 @Service
 public class PlaytimeServiceImpl implements PlaytimeService{
 
-    public final PlaytimeRepository playtimeRepository;
+    private final PlaytimeRepository playtimeRepository;
 
     public PlaytimeServiceImpl(PlaytimeRepository playtimeRepository) {
         this.playtimeRepository = playtimeRepository;

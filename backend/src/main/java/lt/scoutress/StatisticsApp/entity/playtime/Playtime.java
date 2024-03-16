@@ -1,4 +1,5 @@
 package lt.scoutress.StatisticsApp.entity.playtime;
+
 import jakarta.persistence.*;
 
 @Entity

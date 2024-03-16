@@ -17,12 +17,10 @@ import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
-import lt.scoutress.StatisticsApp.entity.playtime.Playtime;
 import lt.scoutress.StatisticsApp.repositories.DcMessagesRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.DcMessagesService;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
-import lt.scoutress.StatisticsApp.services.PlaytimeService;
 import lt.scoutress.StatisticsApp.services.ProductivityService;
 
 @Controller
@@ -34,15 +32,16 @@ public class StatisticsController {
 
     private final McTicketsService mcTicketsService;
     private final DcMessagesService dcMessagesService;
-    private final PlaytimeService playtimeService;
     private final ProductivityService productivityService;
     private final McTicketsRepository mcTicketsRepository;
     private final DcMessagesRepository dcMessagesRepository;
     
-    public StatisticsController(McTicketsService mcTicketsService, McTicketsRepository mcTicketsRepository, DcMessagesService dcMessagesService, ProductivityService productivityService, DcMessagesRepository dcMessagesRepository, PlaytimeService playtimeService) {
+    public StatisticsController(JdbcTemplate jdbcTemplate, McTicketsService mcTicketsService,
+            DcMessagesService dcMessagesService, ProductivityService productivityService,
+            McTicketsRepository mcTicketsRepository, DcMessagesRepository dcMessagesRepository) {
+        this.jdbcTemplate = jdbcTemplate;
         this.mcTicketsService = mcTicketsService;
         this.dcMessagesService = dcMessagesService;
-        this.playtimeService = playtimeService;
         this.productivityService = productivityService;
         this.mcTicketsRepository = mcTicketsRepository;
         this.dcMessagesRepository = dcMessagesRepository;
@@ -183,10 +182,4 @@ public class StatisticsController {
         return "redirect:/stats/dcMessagesData";
     }
 
-    @GetMapping("/playtime")
-    public String getAllPlaytimeData(Model model) {
-        List<Playtime> playtime = playtimeService.findAll();
-        model.addAttribute("playtime", playtime);
-        return "stats/playtime-data";
-    }
 }

@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import lt.scoutress.StatisticsApp.servicesimpl.PlaytimeDBCodesServiceImpl;
 import lt.scoutress.StatisticsApp.servicesimpl.ProductivityServiceImpl;
 import lt.scoutress.StatisticsApp.servicesimpl.StatisticsServiceImpl;
 
@@ -13,10 +14,13 @@ public class ScheduledTasksConfig {
 
     private final StatisticsServiceImpl statisticsServiceImpl;
     private final ProductivityServiceImpl productivityServiceImpl;
+    private final PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl;
 
-    public ScheduledTasksConfig(StatisticsServiceImpl statisticsServiceImpl, ProductivityServiceImpl productivityServiceImpl) {
+    public ScheduledTasksConfig(StatisticsServiceImpl statisticsServiceImpl,
+            ProductivityServiceImpl productivityServiceImpl, PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl) {
         this.statisticsServiceImpl = statisticsServiceImpl;
         this.productivityServiceImpl = productivityServiceImpl;
+        this.playtimeDBCodesServiceImpl = playtimeDBCodesServiceImpl;
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -77,5 +81,11 @@ public class ScheduledTasksConfig {
     public void runTask10() {
         statisticsServiceImpl.calculateAvgDailyMcTickets();
         System.out.println("Scheduled task 10 is completed");
+    }
+
+    @Scheduled(cron = "0 20 * * * *")
+    public void runTask11() {
+        playtimeDBCodesServiceImpl.copyDBUsernames();
+        System.out.println("Scheduled task 11 is completed");
     }
 }

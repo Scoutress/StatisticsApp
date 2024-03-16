@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="container">
-        <h3>Kaimux employees productivity - Discord messages calculations</h3>
+        <h3>Kaimux employees productivity - Minecraft playtime</h3>
         <hr>
         <a th:href="@{/main}" class="btn btn-danger btn-sm mb-3">
             Back to Home
@@ -22,14 +22,20 @@
         <a th:href="@{/stats/allTables}" class="btn btn-primary btn-sm mb-3">
             All tables
         </a>
-        <a th:href="@{/stats/dcMessagesData}" class="btn btn-primary btn-sm mb-3">
-            DC messages data
-        </a>
+        <!-- <a th:href="@{/stats/playtimeData}" class="btn btn-primary btn-sm mb-3">
+            MC playtime data
+        </a> -->
+        <!-- <a th:href="@{/stats/playtimeCalc}" class="btn btn-primary btn-sm mb-3">
+            MC playtime calculations
+        </a> -->
+        <!-- <a th:href="@{/stats/addPlaytime}" class="btn btn-primary btn-sm mb-3">
+            MC playtime add
+        </a> -->
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
-                    <th>Date</th>
-                    <th>Msg sum</th>
+                    <th>Year</th>
+                    <th>Number of week</th>
                     <th>Mboti212</th>
                     <th>Furija</th>
                     <th>Ernestasltu12</th>
@@ -49,25 +55,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="message : ${messages}">
-                    <td th:text="${message.date}"></td>
-                    <td th:text="${message.dailyMsgSum}"></td>
-                    <td th:text="${message.mboti212DcMsgCalc}"></td>
-                    <td th:text="${message.furijaDcMsgCalc}"></td>
-                    <td th:text="${message.ernestasltu12DcMsgCalc}"></td>
-                    <td th:text="${message.d0fkaDcMsgCalc}"></td>
-                    <td th:text="${message.melitaLoveDcMsgCalc}"></td>
-                    <td th:text="${message.libeteDcMsgCalc}"></td>
-                    <td th:text="${message.arienaDcMsgCalc}"></td>
-                    <td th:text="${message.sharansDcMsgCalc}"></td>
-                    <td th:text="${message.labasheyDcMsgCalc}"></td>
-                    <td th:text="${message.everlyDcMsgCalc}"></td>
-                    <td th:text="${message.richPicaDcMsgCalc}"></td>
-                    <td th:text="${message.shizoDcMsgCalc}"></td>
-                    <td th:text="${message.ieviusDcMsgCalc}"></td>
-                    <td th:text="${message.bobsBuilderDcMsgCalc}"></td>
-                    <td th:text="${message.plrxqDcMsgCalc}"></td>
-                    <td th:text="${message.emsiukemiauDcMsgCalc}"></td>
+                <tr th:each="play : ${playtime}">
+                    <td th:text="${play.year}"></td>
+                    <td th:text="${play.numberOfWeek}"></td>
+                    <td th:text="${play.furijaPlaytime}"></td>
+                    <td th:text="${play.ernestasltu12Playtime}"></td>
+                    <td th:text="${play.d0fkaPlaytime}"></td>
+                    <td th:text="${play.melitaLovePlaytime}"></td>
+                    <td th:text="${play.libetePlaytime}"></td>
+                    <td th:text="${play.arienaPlaytime}"></td>
+                    <td th:text="${play.sharansPlaytime}"></td>
+                    <td th:text="${play.labasheyPlaytime}"></td>
+                    <td th:text="${play.everlyPlaytime}"></td>
+                    <td th:text="${play.richPicaPlaytime}"></td>
+                    <td th:text="${play.shizoPlaytime}"></td>
+                    <td th:text="${play.ieviusPlaytime}"></td>
+                    <td th:text="${play.bobsBuilderPlaytime}"></td>
+                    <td th:text="${play.plrxqPlaytime}"></td>
+                    <td th:text="${play.emsiukemiauPlaytime}"></td>
                 </tr>
             </tbody>
         </table>

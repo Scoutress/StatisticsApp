@@ -3,8 +3,8 @@ package lt.scoutress.StatisticsApp.entity.playtime;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "playtime_data_all_survival")
-public class PlaytimeDataAllSurvival {
+@Table(name = "playtime_data_all_events")
+public class PlaytimeDataAllEvents {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -191,9 +191,9 @@ public class PlaytimeDataAllSurvival {
     @Column(name = "emsiukemiau_diff")
     private Integer emsiukemiauDiff;
 
-    public PlaytimeDataAllSurvival(){}
+    public PlaytimeDataAllEvents(){}
 
-    public PlaytimeDataAllSurvival(Integer id, Integer itsVaidasOn, Integer itsVaidasOff, Integer itsVaidasDiff,
+    public PlaytimeDataAllEvents(Integer id, Integer itsVaidasOn, Integer itsVaidasOff, Integer itsVaidasDiff,
             Integer scoutressOn, Integer scoutressOff, Integer scoutressDiff, Integer mboti212On, Integer mboti212Off,
             Integer mboti212Diff, Integer furijaOn, Integer furijaOff, Integer furijaDiff, Integer ernestasltu12On,
             Integer ernestasltu12Off, Integer ernestasltu12Diff, Integer d0fkaOn, Integer d0fkaOff, Integer d0fkaDiff,

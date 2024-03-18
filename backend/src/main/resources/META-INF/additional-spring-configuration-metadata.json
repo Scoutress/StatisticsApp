@@ -1,0 +1,62 @@
+{"properties": [
+  {
+    "name": "sqlite.url.survival",
+    "type": "java.lang.String",
+    "description": "A description for 'sqlite.url.survival'"
+  },
+  {
+    "name": "sqlite.url.skyblock",
+    "type": "java.lang.String",
+    "description": "A description for 'sqlite.url.skyblock'"
+  },
+  {
+    "name": "sqlite.url.creative",
+    "type": "java.lang.String",
+    "description": "A description for 'sqlite.url.creative'"
+  },
+  {
+    "name": "sqlite.url.boxpvp",
+    "type": "java.lang.String",
+    "description": "A description for 'sqlite.url.boxpvp'"
+  },
+  {
+    "name": "sqlite.url.prison",
+    "type": "java.lang.String",
+    "description": "A description for 'sqlite.url.prison'"
+  },
+  {
+    "name": "sqlite.url.events",
+    "type": "java.lang.String",
+    "description": "A description for 'sqlite.url.events'"
+  },
+  {
+    "name": "mysql.table.survival",
+    "type": "java.lang.String",
+    "description": "A description for 'mysql.table.survival'"
+  },
+  {
+    "name": "mysql.table.skyblock",
+    "type": "java.lang.String",
+    "description": "A description for 'mysql.table.skyblock'"
+  },
+  {
+    "name": "mysql.table.creative",
+    "type": "java.lang.String",
+    "description": "A description for 'mysql.table.creative'"
+  },
+  {
+    "name": "mysql.table.boxpvp",
+    "type": "java.lang.String",
+    "description": "A description for 'mysql.table.boxpvp'"
+  },
+  {
+    "name": "mysql.table.prison",
+    "type": "java.lang.String",
+    "description": "A description for 'mysql.table.prison'"
+  },
+  {
+    "name": "mysql.table.events",
+    "type": "java.lang.String",
+    "description": "A description for 'mysql.table.events'"
+  }
+]}

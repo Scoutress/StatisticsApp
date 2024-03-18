@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import lt.scoutress.StatisticsApp.services.playtime.DataTransferService;
 import lt.scoutress.StatisticsApp.servicesimpl.PlaytimeDBCodesServiceImpl;
 import lt.scoutress.StatisticsApp.servicesimpl.ProductivityServiceImpl;
 import lt.scoutress.StatisticsApp.servicesimpl.StatisticsServiceImpl;
@@ -16,14 +15,12 @@ public class ScheduledTasksConfig {
     private final StatisticsServiceImpl statisticsServiceImpl;
     private final ProductivityServiceImpl productivityServiceImpl;
     private final PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl;
-    private final DataTransferService dataTransferService;
 
     public ScheduledTasksConfig(StatisticsServiceImpl statisticsServiceImpl,
-            ProductivityServiceImpl productivityServiceImpl, PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl, DataTransferService dataTransferService) {
+            ProductivityServiceImpl productivityServiceImpl, PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl) {
         this.statisticsServiceImpl = statisticsServiceImpl;
         this.productivityServiceImpl = productivityServiceImpl;
         this.playtimeDBCodesServiceImpl = playtimeDBCodesServiceImpl;
-        this.dataTransferService = dataTransferService;
     }
     // For copy-paste (testing)
     // @Scheduled(cron = "0 * * * * *")
@@ -97,9 +94,4 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 11 is completed");
     }
 
-    // @Scheduled(cron = "0 * * * * *") //Change to button
-    public void runTask12() {
-        dataTransferService.transferDataFromSQLiteToMySQL();
-        System.out.println("Scheduled task 12 is completed TESTING");
-    }
 }

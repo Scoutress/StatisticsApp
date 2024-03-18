@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import lt.scoutress.StatisticsApp.entity.playtime.Playtime;
 import lt.scoutress.StatisticsApp.entity.playtime.PlaytimeDBCodes;
-import lt.scoutress.StatisticsApp.services.playtime.DataTransferService;
 import lt.scoutress.StatisticsApp.services.playtime.PlaytimeDBCodesService;
 import lt.scoutress.StatisticsApp.services.playtime.PlaytimeService;
 
@@ -22,12 +20,10 @@ import lt.scoutress.StatisticsApp.services.playtime.PlaytimeService;
 public class PlaytimeController {
     
     private final PlaytimeService playtimeService;
-    private final DataTransferService dataTransferService;
     private final PlaytimeDBCodesService playtimeDBCodesService;
 
-    public PlaytimeController(PlaytimeService playtimeService, PlaytimeDBCodesService playtimeDBCodesService, DataTransferService dataTransferService) {
+    public PlaytimeController(PlaytimeService playtimeService, PlaytimeDBCodesService playtimeDBCodesService) {
         this.playtimeService = playtimeService;
-        this.dataTransferService = dataTransferService;
         this.playtimeDBCodesService = playtimeDBCodesService;
     }
 
@@ -58,10 +54,10 @@ public class PlaytimeController {
         return "redirect:/playtime/employeeCodes";
     }
 
-    @RequestMapping(value = "/transferData", method = {RequestMethod.GET, RequestMethod.POST})
-    public String transferData() {
-        dataTransferService.transferDataFromSQLiteToMySQL();
-        return "redirect:/playtime/employeeCodes";
-    }
+    // @RequestMapping(value = "/transferData", method = {RequestMethod.GET, RequestMethod.POST})
+    // public String transferData() {
+    //     //dataTransferService.transferDataFromSQLiteToMySQL();
+    //     return "redirect:/playtime/employeeCodes";
+    // }
 
 }

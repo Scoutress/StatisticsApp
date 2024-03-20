@@ -1,6 +1,7 @@
 package lt.scoutress.StatisticsApp.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 import lt.scoutress.StatisticsApp.repositories.DcMessagesRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.DcMessagesService;
@@ -128,22 +129,32 @@ public class StatisticsController {
 
     @GetMapping("/mcTicketsData")
     public String getAllMcTicketsData(Model model) {
-        List<McTicketsAnswered> tickets = mcTicketsService.findAll();
-        model.addAttribute("tickets", tickets);
-        return "stats/mc-tickets-data";
+        List<McTicketsCounting> tickets = mcTicketsService.findAll();
+        model.addAttribute("mcTickets", tickets);
+        return "stats/mc-tickets/mc-tickets-data";
     }
 
     @GetMapping("/addMcTickets")
     public String showAddMcTicketsForm(Model model) {
-        model.addAttribute("mcTickets", new McTicketsAnswered());
-        return "add-data/mc-tickets-add";
+        model.addAttribute("mcTickets", new McTicketsCounting());
+        return "stats/mc-tickets/mc-tickets-add";
     }
 
+    @GetMapping("/showFormForUpdate")
+    public String showFormForUpdate(@RequestParam("id") int id, Model model){
+        Optional<McTicketsCounting> mcTicketsCountingOptional = mcTicketsService.findById(id);
+        if (mcTicketsCountingOptional.isPresent()) {
+            McTicketsCounting mcTicketsCounting = mcTicketsCountingOptional.get();
+            model.addAttribute("mcTickets", mcTicketsCounting);
+        } else {
+            System.out.println("Klaida");
+        }
+        return "stats/mc-tickets/mc-tickets-form-edit";
+    }
+
+    @SuppressWarnings("null")
     @PostMapping("/saveMcTickets")
-    public String saveMcTickets(@ModelAttribute("mcTickets") McTicketsAnswered mcTickets) {
-        Double sharansMcTickets = mcTickets.getSharansMcTickets();
-        Double updatedSharansMcTickets = sharansMcTickets + 189;
-        mcTickets.setSharansMcTickets(updatedSharansMcTickets);
+    public String saveMcTickets(@ModelAttribute("mcTickets") McTicketsCounting mcTickets) {
         mcTicketsRepository.save(mcTickets);
         return "redirect:/stats/mcTicketsData";
     }
@@ -152,7 +163,7 @@ public class StatisticsController {
     public String getAllMcTicketsCalculations(Model model) {
         List<McTicketsCalculations> tickets = mcTicketsService.findAllCalc();
         model.addAttribute("tickets", tickets);
-        return "stats/mc-tickets-calc";
+        return "stats/mc-tickets/mc-tickets-calc";
     }
 
     @GetMapping("/dcMessagesData")

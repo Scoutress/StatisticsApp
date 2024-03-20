@@ -1,11 +1,12 @@
 package lt.scoutress.StatisticsApp.servicesimpl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 import lt.scoutress.StatisticsApp.repositories.McTicketsCalcRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
@@ -22,18 +23,23 @@ public class McTicketsServiceImpl implements McTicketsService{
     }
 
     @Override
-    public List<McTicketsAnswered> findAll() {
+    public List<McTicketsCounting> findAll() {
         return mcTicketsRepository.findAll();
     }
 
-    @SuppressWarnings("null")
-    @Override
-    public void save(McTicketsAnswered mcTickets) {
-        mcTicketsRepository.save(mcTickets);
-    }
+    // @SuppressWarnings("null")
+    // @Override
+    // public void save(McTicketsAnswered mcTickets) {
+    //     mcTicketsRepository.save(mcTickets);
+    // }
 
     @Override
     public List<McTicketsCalculations> findAllCalc() {
         return mcTicketsCalcRepository.findAll();
+    }
+
+    @Override
+    public Optional<McTicketsCounting> findById(int id) {
+        return mcTicketsRepository.findById(id);
     }
 }

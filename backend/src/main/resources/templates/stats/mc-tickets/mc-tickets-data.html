@@ -48,27 +48,34 @@
                     <th>BobsBuilder</th>
                     <th>plrxq</th>
                     <th>Emsiukemiau</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="ticket : ${tickets}">
+                <tr th:each="ticket : ${mcTickets}">
                     <td th:text="${ticket.date}"></td>
-                    <td th:text="${ticket.mboti212McTickets}"></td>
-                    <td th:text="${ticket.furijaMcTickets}"></td>
-                    <td th:text="${ticket.ernestasltu12McTickets}"></td>
-                    <td th:text="${ticket.d0fkaMcTickets}"></td>
-                    <td th:text="${ticket.melitaLoveMcTickets}"></td>
-                    <td th:text="${ticket.libeteMcTickets}"></td>
-                    <td th:text="${ticket.arienaMcTickets}"></td>
-                    <td th:text="${ticket.sharansMcTickets}"></td>
-                    <td th:text="${ticket.labasheyMcTickets}"></td>
-                    <td th:text="${ticket.everlyMcTickets}"></td>
-                    <td th:text="${ticket.richPicaMcTickets}"></td>
-                    <td th:text="${ticket.shizoMcTickets}"></td>
-                    <td th:text="${ticket.ieviusMcTickets}"></td>
-                    <td th:text="${ticket.bobsBuilderMcTickets}"></td>
-                    <td th:text="${ticket.plrxqMcTickets}"></td>
-                    <td th:text="${ticket.emsiukemiauMcTickets}"></td>
+                    <td th:text="${ticket.mboti212}"></td>
+                    <td th:text="${ticket.furija}"></td>
+                    <td th:text="${ticket.ernestasltu12}"></td>
+                    <td th:text="${ticket.d0fka}"></td>
+                    <td th:text="${ticket.melitalove}"></td>
+                    <td th:text="${ticket.libete}"></td>
+                    <td th:text="${ticket.ariena}"></td>
+                    <td th:text="${ticket.sharans}"></td>
+                    <td th:text="${ticket.labashey}"></td>
+                    <td th:text="${ticket.everly}"></td>
+                    <td th:text="${ticket.richpica}"></td>
+                    <td th:text="${ticket.shizo}"></td>
+                    <td th:text="${ticket.ievius}"></td>
+                    <td th:text="${ticket.bobsbuilder}"></td>
+                    <td th:text="${ticket.plrxq}"></td>
+                    <td th:text="${ticket.emsiukemiau}"></td>
+                    <td>
+                        <a th:href="@{/stats/showFormForUpdate(id=${ticket.id})}"
+                            class="btn btn-info btn-sm">
+                            Edit
+                        </a>
+                    </td>
                 </tr>
             </tbody>
         </table>

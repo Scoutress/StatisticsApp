@@ -3,23 +3,17 @@ package lt.scoutress.StatisticsApp.services;
 import java.util.List;
 
 import lt.scoutress.StatisticsApp.entity.Calculations;
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 
 public interface StatisticsService {
     
-    public String showForm();
+    public List<McTicketsCounting> findAllMcTickets();
 
-    public List<McTicketsAnswered> findAllMcTickets();
-
-    public void saveMcTickets(McTicketsAnswered mcTickets);
-
-    public List<Calculations> findCalculations();
+    public void saveMcTickets(McTicketsCounting mcTickets);
 
     public void calculateDaysSinceJoinAndSave();
 
     public void calculateTotalDailyMcTickets();
-
-    public void calculateDailyTicketDifference();
 
     public void calculateDailyTicketRatio();
 
@@ -38,5 +32,9 @@ public interface StatisticsService {
     //public void calculateAvgDailyMcTicketsRatio();
 
     //public void calculatePlaytimeInLastHalfYear();
+
+    
+    public List<Calculations> findCalculations();
+
     
 }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,8 @@ import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lt.scoutress.StatisticsApp.entity.Calculations;
 import lt.scoutress.StatisticsApp.entity.Employee;
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 import lt.scoutress.StatisticsApp.repositories.CalculationsRepository;
 import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
@@ -39,26 +41,21 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public String showForm() {
-        return null;
+    public List<Calculations> findCalculations() {
+        return calculationsRepository.findAll();
     }
 
     @Override
-    public List<McTicketsAnswered> findAllMcTickets() {
+    public List<McTicketsCounting> findAllMcTickets() {
         return mcTicketsRepository.findAll();
     }
 
     @SuppressWarnings("null")
     @Override
-    public void saveMcTickets(McTicketsAnswered mcTickets) {
+    public void saveMcTickets(McTicketsCounting mcTickets) {
         mcTicketsRepository.save(mcTickets);
     }
 
-    @Override
-    public List<Calculations> findCalculations() {
-        return calculationsRepository.findAll();
-    }
-    
     @Override
     public void calculateDaysSinceJoinAndSave() {
         LocalDate today = LocalDate.now();
@@ -76,89 +73,41 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     @Transactional
     public void calculateTotalDailyMcTickets() {
-        List<String> columnNames = Arrays.asList("mboti212_daily", "furija_daily", "ernestasltu12_daily", 
-                                                "d0fka_daily", "melitaLove_daily", "libete_daily", 
-                                                "ariena_daily", "sharans_daily", "labashey_daily", 
-                                                "everly_daily", "richPica_daily", "shizo_daily", 
-                                                "ievius_daily", "bobsBuilder_daily", "plrxq_daily", 
-                                                "emsiukemiau_daily");
-    
-        StringBuilder queryBuilder = new StringBuilder("SELECT ");
-        for (int i = 0; i < columnNames.size(); i++) {
-            queryBuilder.append(columnNames.get(i));
-            if (i < columnNames.size() - 1) {
-                queryBuilder.append(", ");
-            }
-        }
-        queryBuilder.append(", date FROM mc_tickets_calculations");
-    
+        Query query = entityManager.createQuery("SELECT m FROM McTicketsCounting m");
+
         @SuppressWarnings("unchecked")
-        List<Object[]> results = entityManager.createNativeQuery(queryBuilder.toString()).getResultList();
-    
-        for (Object[] row : results) {
+        List<McTicketsCounting> mcTicketsCounts = query.getResultList();
+
+        for (McTicketsCounting mcTicketsCount : mcTicketsCounts) {
             Double sum = 0.0;
-            for (int i = 0; i < row.length - 1; i++) {
-                if (row[i] != null) {
-                    sum += (Double) row[i];
-                }
-            }
-          
-            entityManager.createNativeQuery(
-                "UPDATE mc_tickets_calculations SET daily_tickets_sum = :sum WHERE date = :date"
-            )
-            .setParameter("sum", sum)
-            .setParameter("date", row[row.length - 1])
-            .executeUpdate();
-        }
-    }
 
-    @Override
-    @Transactional
-    public void calculateDailyTicketDifference() {
-        @SuppressWarnings("unchecked")
-        List<LocalDate> dates = entityManager.createNativeQuery(
-                "SELECT DISTINCT date FROM mc_tickets_answered WHERE date > '2023-06-01'", LocalDate.class)
-                .getResultList();
+            sum += (mcTicketsCount.getMboti212() != null) ? mcTicketsCount.getMboti212() : 0.0;
+            sum += (mcTicketsCount.getFurija() != null) ? mcTicketsCount.getFurija() : 0.0;
+            sum += (mcTicketsCount.getErnestasltu12() != null) ? mcTicketsCount.getErnestasltu12() : 0.0;
+            sum += (mcTicketsCount.getD0fka() != null) ? mcTicketsCount.getD0fka() : 0.0;
+            sum += (mcTicketsCount.getMelitalove() != null) ? mcTicketsCount.getMelitalove() : 0.0;
+            sum += (mcTicketsCount.getLibete() != null) ? mcTicketsCount.getLibete() : 0.0;
+            sum += (mcTicketsCount.getAriena() != null) ? mcTicketsCount.getAriena() : 0.0;
+            sum += (mcTicketsCount.getSharans() != null) ? mcTicketsCount.getSharans() : 0.0;
+            sum += (mcTicketsCount.getLabashey() != null) ? mcTicketsCount.getLabashey() : 0.0;
+            sum += (mcTicketsCount.getEverly() != null) ? mcTicketsCount.getEverly() : 0.0;
+            sum += (mcTicketsCount.getRichpica() != null) ? mcTicketsCount.getRichpica() : 0.0;
+            sum += (mcTicketsCount.getShizo() != null) ? mcTicketsCount.getShizo() : 0.0;
+            sum += (mcTicketsCount.getIevius() != null) ? mcTicketsCount.getIevius() : 0.0;
+            sum += (mcTicketsCount.getBobsbuilder() != null) ? mcTicketsCount.getBobsbuilder() : 0.0;
+            sum += (mcTicketsCount.getPlrxq() != null) ? mcTicketsCount.getPlrxq() : 0.0;
+            sum += (mcTicketsCount.getEmsiukemiau() != null) ? mcTicketsCount.getEmsiukemiau() : 0.0;
 
-        for (int i = 1; i < dates.size(); i++) {
-            LocalDate currentDay = dates.get(i);
-            LocalDate previousDay = dates.get(i - 1);
+            McTicketsCalculations mcTicketsCalculations = new McTicketsCalculations();
+            mcTicketsCalculations.setId(mcTicketsCount.getId());
+            mcTicketsCalculations.setDailyTicketsSum(sum);
 
-            List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
-                                                    "libete", "ariena", "sharans", "labashey", "everly", "richpica",
-                                                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
-
-            for (String user : users) {
-                Double todayTickets = (Double) entityManager.createNativeQuery(
-                    "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :currentDay")
-                    .setParameter("currentDay", currentDay)
-                    .getSingleResult();
-            
-                Double yesterdayTickets = (Double) entityManager.createNativeQuery(
-                    "SELECT COALESCE(" + user + "_mc_tickets, 0) FROM mc_tickets_answered WHERE date = :previousDay")
-                    .setParameter("previousDay", previousDay)
-                    .getSingleResult();
-            
-                Double ticketsDifference = todayTickets - yesterdayTickets;
-            
-                Number existingRecordCount = (Number) entityManager.createNativeQuery(
-                    "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :previousDay")
-                    .setParameter("previousDay", previousDay)
-                    .getSingleResult();
-
-                if (existingRecordCount.intValue() == 0) {
-                entityManager.createNativeQuery(
-                        "INSERT INTO mc_tickets_calculations (date, " + user + "_daily) VALUES (:previousDay, :ticketsDifference)")
-                        .setParameter("previousDay", previousDay)
-                        .setParameter("ticketsDifference", ticketsDifference)
-                        .executeUpdate();
-                } else {
-                entityManager.createNativeQuery(
-                        "UPDATE mc_tickets_calculations SET " + user + "_daily = :ticketsDifference WHERE date = :previousDay")
-                        .setParameter("ticketsDifference", ticketsDifference)
-                        .setParameter("previousDay", previousDay)
-                        .executeUpdate();
-                }
+            McTicketsCalculations existingCalculations = entityManager.find(McTicketsCalculations.class, mcTicketsCount.getId());
+            if (existingCalculations != null) {
+                existingCalculations.setDailyTicketsSum(sum);
+                existingCalculations.setDate(mcTicketsCount.getDate());
+            } else {
+                entityManager.merge(mcTicketsCalculations);
             }
         }
     }
@@ -166,64 +115,72 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     @Transactional
     public void calculateDailyTicketRatio() {
+        Query countQuery = entityManager.createQuery("SELECT m FROM McTicketsCounting m");
+        Query calculationsQuery = entityManager.createQuery("SELECT m FROM McTicketsCalculations m");
 
         @SuppressWarnings("unchecked")
-        List<LocalDate> dates = entityManager.createNativeQuery(
-                "SELECT DISTINCT date FROM mc_tickets_calculations", LocalDate.class)
-                .getResultList();
+        List<McTicketsCounting> mcTicketsCountings = countQuery.getResultList();
 
-        for (int i = 0; i < dates.size(); i++) {
-            LocalDate currentDay = dates.get(i);
+        @SuppressWarnings("unchecked")
+        List<McTicketsCalculations> mcTicketsCalculations = calculationsQuery.getResultList();
 
-            List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
-                    "libete", "ariena", "sharans", "labashey", "everly", "richpica",
-                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
+        for (McTicketsCounting mcTicketsCounting : mcTicketsCountings) {
+            for (McTicketsCalculations mcTicketsCalculation : mcTicketsCalculations) {
+                double dailyTicketsSum = mcTicketsCalculation.getDailyTicketsSum();
 
-            for (String user : users) {
-                Double currentDayTicketsDaily = (Double) entityManager.createNativeQuery(
-                        "SELECT COALESCE(" + user + "_daily, 0) FROM mc_tickets_calculations WHERE date = :currentDay")
-                        .setParameter("currentDay", currentDay)
-                        .getSingleResult();
+                if (dailyTicketsSum != 0) {
+                    double mboti212Ratio = mcTicketsCounting.getMboti212() / dailyTicketsSum;
+                    double furijaRatio = mcTicketsCounting.getFurija() / dailyTicketsSum;
+                    double ernestasltu12Ratio = mcTicketsCounting.getErnestasltu12() / dailyTicketsSum;
+                    double d0fkaRatio = mcTicketsCounting.getD0fka() / dailyTicketsSum;
+                    double melitaLoveRatio = mcTicketsCounting.getMelitalove() / dailyTicketsSum;
+                    double libeteRatio = mcTicketsCounting.getLibete() / dailyTicketsSum;
+                    double arienaRatio = mcTicketsCounting.getAriena() / dailyTicketsSum;
+                    double sharansRatio = mcTicketsCounting.getSharans() / dailyTicketsSum;
+                    double labasheyRatio = mcTicketsCounting.getLabashey() / dailyTicketsSum;
+                    double everlyRatio = mcTicketsCounting.getEverly() / dailyTicketsSum;
+                    double richPicaRatio = mcTicketsCounting.getRichpica() / dailyTicketsSum;
+                    double shizoRatio = mcTicketsCounting.getShizo() / dailyTicketsSum;
+                    double ieviusRatio = mcTicketsCounting.getIevius() / dailyTicketsSum;
+                    double bobsBuilderRatio = mcTicketsCounting.getBobsbuilder() / dailyTicketsSum;
+                    double plrxqRatio = mcTicketsCounting.getPlrxq() / dailyTicketsSum;
+                    double emsiukemiauRatio = mcTicketsCounting.getEmsiukemiau() / dailyTicketsSum;
 
-                Double currentDayTicketsSum = (Double) entityManager.createNativeQuery(
-                        "SELECT COALESCE(daily_tickets_sum, 0) FROM mc_tickets_calculations WHERE date = :currentDay")
-                        .setParameter("currentDay", currentDay)
-                        .getSingleResult();
+                    mboti212Ratio = Math.round(mboti212Ratio * 100.0) / 100.0;
+                    furijaRatio = Math.round(furijaRatio * 100.0) / 100.0;
+                    ernestasltu12Ratio = Math.round(ernestasltu12Ratio * 100.0) / 100.0;
+                    d0fkaRatio = Math.round(d0fkaRatio * 100.0) / 100.0;
+                    melitaLoveRatio = Math.round(melitaLoveRatio * 100.0) / 100.0;
+                    libeteRatio = Math.round(libeteRatio * 100.0) / 100.0;
+                    arienaRatio = Math.round(arienaRatio * 100.0) / 100.0;
+                    sharansRatio = Math.round(sharansRatio * 100.0) / 100.0;
+                    labasheyRatio = Math.round(labasheyRatio * 100.0) / 100.0;
+                    everlyRatio = Math.round(everlyRatio * 100.0) / 100.0;
+                    richPicaRatio = Math.round(richPicaRatio * 100.0) / 100.0;
+                    shizoRatio = Math.round(shizoRatio * 100.0) / 100.0;
+                    ieviusRatio = Math.round(ieviusRatio * 100.0) / 100.0;
+                    bobsBuilderRatio = Math.round(bobsBuilderRatio * 100.0) / 100.0;
+                    plrxqRatio = Math.round(plrxqRatio * 100.0) / 100.0;
+                    emsiukemiauRatio = Math.round(emsiukemiauRatio * 100.0) / 100.0;
 
-                double ticketsRatioNumber = 0;
-                double roundedTicketsRatio = 0;
-
-                if (currentDayTicketsSum != 0) {
-                    double currentDayTicketsDailyDouble = currentDayTicketsDaily.doubleValue();
-                    double currentDayTicketsSumDouble = currentDayTicketsSum.doubleValue();
-
-                    ticketsRatioNumber = currentDayTicketsDailyDouble / currentDayTicketsSumDouble;
-
-                    String roundedString = String.format(Locale.ENGLISH, "%.2f", ticketsRatioNumber);
-                    roundedTicketsRatio = Double.parseDouble(roundedString);
-                } else {
-                    ticketsRatioNumber = 0;
-                }
-
-                Long existingRecordCount = (Long) entityManager.createNativeQuery(
-                        "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :currentDay")
-                        .setParameter("currentDay", currentDay)
-                        .getSingleResult();
-
-                Double doubleExistingRecordCount = existingRecordCount.doubleValue();
-
-                if (doubleExistingRecordCount.intValue() == 0) {
-                    entityManager.createNativeQuery(
-                            "INSERT INTO mc_tickets_calculations (date, " + user + "_ratio) VALUES (:currentDay, :roundedTicketsRatio)")
-                            .setParameter("currentDay", currentDay)
-                            .setParameter("roundedTicketsRatio", roundedTicketsRatio)
-                            .executeUpdate();
-                } else {
-                    entityManager.createNativeQuery(
-                            "UPDATE mc_tickets_calculations SET " + user + "_ratio = :roundedTicketsRatio WHERE date = :currentDay")
-                            .setParameter("roundedTicketsRatio", roundedTicketsRatio)
-                            .setParameter("currentDay", currentDay)
-                            .executeUpdate();
+                    mcTicketsCalculation.setMboti212Ratio(mboti212Ratio);
+                    mcTicketsCalculation.setFurijaRatio(furijaRatio);
+                    mcTicketsCalculation.setErnestasltu12Ratio(ernestasltu12Ratio);
+                    mcTicketsCalculation.setD0fkaRatio(d0fkaRatio);
+                    mcTicketsCalculation.setMelitaLoveRatio(melitaLoveRatio);
+                    mcTicketsCalculation.setLibeteRatio(libeteRatio);
+                    mcTicketsCalculation.setArienaRatio(arienaRatio);
+                    mcTicketsCalculation.setSharansRatio(sharansRatio);
+                    mcTicketsCalculation.setLabasheyRatio(labasheyRatio);
+                    mcTicketsCalculation.setEverlyRatio(everlyRatio);
+                    mcTicketsCalculation.setRichPicaRatio(richPicaRatio);
+                    mcTicketsCalculation.setShizoRatio(shizoRatio);
+                    mcTicketsCalculation.setIeviusRatio(ieviusRatio);
+                    mcTicketsCalculation.setBobsBuilderRatio(bobsBuilderRatio);
+                    mcTicketsCalculation.setPlrxqRatio(plrxqRatio);
+                    mcTicketsCalculation.setEmsiukemiauRatio(emsiukemiauRatio);
+                    
+                    entityManager.merge(mcTicketsCalculation);
                 }
             }
         }
@@ -518,8 +475,8 @@ public class StatisticsServiceImpl implements StatisticsService {
             LocalDate joinDate = sqlDate.toLocalDate();
 
             Query sumQuery = entityManager.createNativeQuery(
-                "SELECT SUM(COALESCE(" + username.toLowerCase() + "_daily, 0)) " +
-                "FROM mc_tickets_calculations"
+                "SELECT SUM(COALESCE(" + username.toLowerCase() + ", 0)) " +
+                "FROM mc_tickets_count"
             );
             Double sum = (Double) sumQuery.getSingleResult();
             int sumValue = sum.intValue();
@@ -549,5 +506,4 @@ public class StatisticsServiceImpl implements StatisticsService {
             updateQuery.executeUpdate();
         }
     }
-
 }

@@ -1,16 +1,19 @@
 package lt.scoutress.StatisticsApp.services;
 
 import java.util.List;
+import java.util.Optional;
 
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAnswered;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 
 public interface McTicketsService {
 
-    List<McTicketsAnswered> findAll();
+    List<McTicketsCounting> findAll();
 
     List<McTicketsCalculations> findAllCalc();
 
-    void save(McTicketsAnswered mcTickets);
+    Optional<McTicketsCounting> findById(int id);
+
+    // void save(McTicketsAnswered mcTickets);
     
 }

@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-StatisticsAppApplication<StatisticsApp>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "lt.scoutress.StatisticsApp.StatisticsAppApplication",
+            "projectName": "StatisticsApp",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

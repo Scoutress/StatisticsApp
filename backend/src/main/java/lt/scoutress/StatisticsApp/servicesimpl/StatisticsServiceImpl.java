@@ -115,75 +115,77 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     @Transactional
     public void calculateDailyTicketRatio() {
-        Query countQuery = entityManager.createQuery("SELECT m FROM McTicketsCounting m");
-        Query calculationsQuery = entityManager.createQuery("SELECT m FROM McTicketsCalculations m");
 
         @SuppressWarnings("unchecked")
-        List<McTicketsCounting> mcTicketsCountings = countQuery.getResultList();
+        List<LocalDate> dates = entityManager.createNativeQuery(
+                "SELECT DISTINCT date FROM mc_tickets_calculations", LocalDate.class)
+                .getResultList();
 
-        @SuppressWarnings("unchecked")
-        List<McTicketsCalculations> mcTicketsCalculations = calculationsQuery.getResultList();
+                for (int i = 1; i < dates.size(); i++) {
+                    LocalDate currentDay = dates.get(i);
+        
+                    List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove", "libete", "ariena", "sharans", "labashey", "everly", "richpica",
+                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
 
-        for (McTicketsCounting mcTicketsCounting : mcTicketsCountings) {
-            for (McTicketsCalculations mcTicketsCalculation : mcTicketsCalculations) {
-                double dailyTicketsSum = mcTicketsCalculation.getDailyTicketsSum();
+                    for (String user : users) {
+                        Double currentDayTicketsDaily = (Double) entityManager.createNativeQuery(
+                            "SELECT COALESCE(" + user + ", 0) FROM mc_tickets_count WHERE date = :currentDay")
+                            .setParameter("currentDay", currentDay)
+                            .getSingleResult();
+                        Double currentDayTicketsSum = (Double) entityManager.createNativeQuery(
+                            "SELECT COALESCE(daily_tickets_sum, 0) FROM mc_tickets_calculations WHERE date = :currentDay")
+                            .setParameter("currentDay", currentDay)
+                            .getSingleResult();
+                        double ticketsRatioNumber = 0;
 
-                if (dailyTicketsSum != 0) {
-                    double mboti212Ratio = mcTicketsCounting.getMboti212() / dailyTicketsSum;
-                    double furijaRatio = mcTicketsCounting.getFurija() / dailyTicketsSum;
-                    double ernestasltu12Ratio = mcTicketsCounting.getErnestasltu12() / dailyTicketsSum;
-                    double d0fkaRatio = mcTicketsCounting.getD0fka() / dailyTicketsSum;
-                    double melitaLoveRatio = mcTicketsCounting.getMelitalove() / dailyTicketsSum;
-                    double libeteRatio = mcTicketsCounting.getLibete() / dailyTicketsSum;
-                    double arienaRatio = mcTicketsCounting.getAriena() / dailyTicketsSum;
-                    double sharansRatio = mcTicketsCounting.getSharans() / dailyTicketsSum;
-                    double labasheyRatio = mcTicketsCounting.getLabashey() / dailyTicketsSum;
-                    double everlyRatio = mcTicketsCounting.getEverly() / dailyTicketsSum;
-                    double richPicaRatio = mcTicketsCounting.getRichpica() / dailyTicketsSum;
-                    double shizoRatio = mcTicketsCounting.getShizo() / dailyTicketsSum;
-                    double ieviusRatio = mcTicketsCounting.getIevius() / dailyTicketsSum;
-                    double bobsBuilderRatio = mcTicketsCounting.getBobsbuilder() / dailyTicketsSum;
-                    double plrxqRatio = mcTicketsCounting.getPlrxq() / dailyTicketsSum;
-                    double emsiukemiauRatio = mcTicketsCounting.getEmsiukemiau() / dailyTicketsSum;
+                double roundedTicketsRatio = 0;
 
-                    mboti212Ratio = Math.round(mboti212Ratio * 100.0) / 100.0;
-                    furijaRatio = Math.round(furijaRatio * 100.0) / 100.0;
-                    ernestasltu12Ratio = Math.round(ernestasltu12Ratio * 100.0) / 100.0;
-                    d0fkaRatio = Math.round(d0fkaRatio * 100.0) / 100.0;
-                    melitaLoveRatio = Math.round(melitaLoveRatio * 100.0) / 100.0;
-                    libeteRatio = Math.round(libeteRatio * 100.0) / 100.0;
-                    arienaRatio = Math.round(arienaRatio * 100.0) / 100.0;
-                    sharansRatio = Math.round(sharansRatio * 100.0) / 100.0;
-                    labasheyRatio = Math.round(labasheyRatio * 100.0) / 100.0;
-                    everlyRatio = Math.round(everlyRatio * 100.0) / 100.0;
-                    richPicaRatio = Math.round(richPicaRatio * 100.0) / 100.0;
-                    shizoRatio = Math.round(shizoRatio * 100.0) / 100.0;
-                    ieviusRatio = Math.round(ieviusRatio * 100.0) / 100.0;
-                    bobsBuilderRatio = Math.round(bobsBuilderRatio * 100.0) / 100.0;
-                    plrxqRatio = Math.round(plrxqRatio * 100.0) / 100.0;
-                    emsiukemiauRatio = Math.round(emsiukemiauRatio * 100.0) / 100.0;
+                if (currentDayTicketsSum != 0) {
+                    double currentDayTicketsDailyDouble = currentDayTicketsDaily.doubleValue();
+                    double currentDayTicketsSumDouble = currentDayTicketsSum.doubleValue();
 
-                    mcTicketsCalculation.setMboti212Ratio(mboti212Ratio);
-                    mcTicketsCalculation.setFurijaRatio(furijaRatio);
-                    mcTicketsCalculation.setErnestasltu12Ratio(ernestasltu12Ratio);
-                    mcTicketsCalculation.setD0fkaRatio(d0fkaRatio);
-                    mcTicketsCalculation.setMelitaLoveRatio(melitaLoveRatio);
-                    mcTicketsCalculation.setLibeteRatio(libeteRatio);
-                    mcTicketsCalculation.setArienaRatio(arienaRatio);
-                    mcTicketsCalculation.setSharansRatio(sharansRatio);
-                    mcTicketsCalculation.setLabasheyRatio(labasheyRatio);
-                    mcTicketsCalculation.setEverlyRatio(everlyRatio);
-                    mcTicketsCalculation.setRichPicaRatio(richPicaRatio);
-                    mcTicketsCalculation.setShizoRatio(shizoRatio);
-                    mcTicketsCalculation.setIeviusRatio(ieviusRatio);
-                    mcTicketsCalculation.setBobsBuilderRatio(bobsBuilderRatio);
-                    mcTicketsCalculation.setPlrxqRatio(plrxqRatio);
-                    mcTicketsCalculation.setEmsiukemiauRatio(emsiukemiauRatio);
-                    
-                    entityManager.merge(mcTicketsCalculation);
+                    ticketsRatioNumber = currentDayTicketsDailyDouble / currentDayTicketsSumDouble;
+
+                    String roundedString = String.format(Locale.ENGLISH, "%.2f", ticketsRatioNumber);
+                    roundedTicketsRatio = Double.parseDouble(roundedString);
+                }
+
+                Long existingRecordCount = (Long) entityManager.createNativeQuery(
+                        "SELECT COUNT(*) FROM mc_tickets_calculations WHERE date = :currentDay")
+                        .setParameter("currentDay", currentDay)
+                        .getSingleResult();
+
+                Double doubleExistingRecordCount = existingRecordCount.doubleValue();
+
+                if (doubleExistingRecordCount.intValue() == 0) {
+                    entityManager.createNativeQuery(
+                            "INSERT INTO mc_tickets_calculations (date, " + user + "_ratio) VALUES (:currentDay, :roundedTicketsRatio)")
+                            .setParameter("currentDay", currentDay)
+                            .setParameter("roundedTicketsRatio", roundedTicketsRatio)
+                            .executeUpdate();
+
+                            if (roundedTicketsRatio > 1) {
+                                System.out.println(user);
+                                System.out.println(currentDay);
+                                System.out.println(roundedTicketsRatio);
+                            }
+                            
+                } else {
+                    entityManager.createNativeQuery(
+                            "UPDATE mc_tickets_calculations SET " + user + "_ratio = :roundedTicketsRatio WHERE date = :currentDay")
+                            .setParameter("roundedTicketsRatio", roundedTicketsRatio)
+                            .setParameter("currentDay", currentDay)
+                            .executeUpdate();
+
+                            
+                            if (roundedTicketsRatio > 1) {
+                                System.out.println(user);
+                                System.out.println(currentDay);
+                                System.out.println(roundedTicketsRatio);
+                            }
                 }
             }
-        }
+        }    
     }
 
     @Override

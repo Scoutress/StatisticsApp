@@ -120,4 +120,11 @@ public class ScheduledTasksConfig {
     //     System.out.println("Scheduled task 11 is completed");
     // }
 
+    @Scheduled(cron = "0 18 * * * *")
+    @Scheduled(cron = "0 48 * * * *")
+    public void runTask10() {
+        System.out.println("Scheduled task 10 is started");
+        statisticsServiceImpl.migrateSurvivalPlaytimeData();
+        System.out.println("Scheduled task 10 is completed");
+    }
 }

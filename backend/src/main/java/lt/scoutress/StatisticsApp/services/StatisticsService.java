@@ -27,6 +27,8 @@ public interface StatisticsService {
 
     public void calculateAvgDailyMcTickets();
 
+    public void migrateSurvivalPlaytimeData();
+
     //public void calculateAvgDailyPlaytime();
 
     //public void calculateAvgDailyMcTicketsRatio();

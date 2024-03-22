@@ -508,4 +508,55 @@ public class StatisticsServiceImpl implements StatisticsService {
             updateQuery.executeUpdate();
         }
     }
+
+    @Override
+    @Transactional
+    public void migrateSurvivalPlaytimeData() {
+        Query query = entityManager.createQuery("SELECT p.username, p.survival FROM PlaytimeDBCodes p");
+        
+        @SuppressWarnings("unchecked")
+        List<Object[]> usernamesAndSurvivalCodes = query.getResultList();
+
+        for (Object[] usernameAndSurvivalCode : usernamesAndSurvivalCodes) {
+            String username = (String) usernameAndSurvivalCode[0];
+            String survivalCode = (String) usernameAndSurvivalCode[1];
+
+            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Survival c WHERE c.user = :survivalCode AND c.action IN (0, 1)");
+            timeQuery.setParameter("survivalCode", survivalCode);
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> timeAndActionValues = timeQuery.getResultList();
+
+            createAndSaveSurvivalPlaytimeDataTable(username);
+
+            for (Object[] timeAndAction : timeAndActionValues) {
+                int time = (int) timeAndAction[0];
+                int action = (int) timeAndAction[1];
+
+                if (action == 1) {
+                    saveTimeToSurvivalConnect(username, time);
+                } else if (action == 0) {
+                    saveTimeToSurvivalDisconnect(username, time);
+                }
+            }
+        }
+    }
+
+    private void createAndSaveSurvivalPlaytimeDataTable(String username) {
+        String tableName = "pt_data_surv_" + username;
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        entityManager.createNativeQuery(createTableQuery).executeUpdate();
+    }
+
+    private void saveTimeToSurvivalConnect(String username, int time) {
+        String tableName = "pt_data_surv_" + username;
+        String insertQuery = "INSERT INTO " + tableName + " (connect) VALUES (:time)";
+        entityManager.createNativeQuery(insertQuery).setParameter("time", time).executeUpdate();
+    }
+
+    private void saveTimeToSurvivalDisconnect(String username, int time) {
+        String tableName = "pt_data_surv_" + username;
+        String updateQuery = "UPDATE " + tableName + " SET disconnect = :time WHERE disconnect IS NULL";
+        entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
+    }
 }

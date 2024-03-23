@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import lt.scoutress.StatisticsApp.servicesimpl.PlaytimeDBCodesServiceImpl;
+import lt.scoutress.StatisticsApp.servicesimpl.PlaytimeServiceImpl;
 import lt.scoutress.StatisticsApp.servicesimpl.ProductivityServiceImpl;
 import lt.scoutress.StatisticsApp.servicesimpl.StatisticsServiceImpl;
 
@@ -14,13 +15,13 @@ public class ScheduledTasksConfig {
 
     private final StatisticsServiceImpl statisticsServiceImpl;
     private final ProductivityServiceImpl productivityServiceImpl;
-    //private final PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl;
+    private final PlaytimeServiceImpl playtimeServiceImpl;
 
     public ScheduledTasksConfig(StatisticsServiceImpl statisticsServiceImpl,
-            ProductivityServiceImpl productivityServiceImpl, PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl) {
+            ProductivityServiceImpl productivityServiceImpl, PlaytimeDBCodesServiceImpl playtimeDBCodesServiceImpl, PlaytimeServiceImpl playtimeServiceImpl) {
         this.statisticsServiceImpl = statisticsServiceImpl;
         this.productivityServiceImpl = productivityServiceImpl;
-        //this.playtimeDBCodesServiceImpl = playtimeDBCodesServiceImpl;
+        this.playtimeServiceImpl = playtimeServiceImpl;
     }
 
     //1. Calculate days since join
@@ -124,7 +125,12 @@ public class ScheduledTasksConfig {
     @Scheduled(cron = "0 48 * * * *")
     public void runTask10() {
         System.out.println("Scheduled task 10 is started");
-        statisticsServiceImpl.migrateSurvivalPlaytimeData();
+        playtimeServiceImpl.migrateSurvivalPlaytimeData();
+        playtimeServiceImpl.migrateSkyblockPlaytimeData();
+        playtimeServiceImpl.migrateCreativePlaytimeData();
+        playtimeServiceImpl.migrateBoxpvpPlaytimeData();
+        playtimeServiceImpl.migratePrisonPlaytimeData();
+        playtimeServiceImpl.migrateEventsPlaytimeData();
         System.out.println("Scheduled task 10 is completed");
     }
 }

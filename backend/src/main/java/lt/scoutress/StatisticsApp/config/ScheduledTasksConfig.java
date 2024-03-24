@@ -133,4 +133,12 @@ public class ScheduledTasksConfig {
         playtimeServiceImpl.migrateEventsPlaytimeData();
         System.out.println("Scheduled task 10 is completed");
     }
+
+    // @Scheduled(cron = "0 * * * * *")
+    // @Scheduled(cron = "0 48 * * * *")
+    public void runTask11() {
+        System.out.println("Scheduled task 11 is started");
+        playtimeServiceImpl.convertTimestampToDateSurvival();
+        System.out.println("Scheduled task 11 is completed");
+    }
 }

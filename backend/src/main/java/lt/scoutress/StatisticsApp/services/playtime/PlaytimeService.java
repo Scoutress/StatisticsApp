@@ -19,4 +19,6 @@ public interface PlaytimeService {
     public void migratePrisonPlaytimeData();
 
     public void migrateEventsPlaytimeData();
+
+    public void convertTimestampToDateSurvival();
 }

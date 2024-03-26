@@ -386,8 +386,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     @Override
     @Transactional
     public void convertTimestampToDateSurvival() {
-        Query tablesQuery = entityManager
-            .createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema = kaimuxstatistics AND table_name LIKE 'pt_data_surv_%'");
+        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_surv_%'");
 
         @SuppressWarnings("unchecked")
         List<String> tableNames = tablesQuery.getResultList();
@@ -462,7 +461,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         int disconnectMin = disconnectDateTime.getMinute();
         int disconnectSec = disconnectDateTime.getSecond();
     
-        LocalDateTime midnightEpochDate = LocalDateTime.of(connectYear, connectMonth, connectDay + 1, 0, 0, 0);
+        LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
         int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
     
         int playtime = (disconnectSeconds - connectSeconds) / 3600;
@@ -486,7 +485,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
         String insertQuery = "INSERT INTO pt_data_calc_surv_" + tableName + " (" +
                 "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_dateTime, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_date, " +
                 "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
                 "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
                 ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +

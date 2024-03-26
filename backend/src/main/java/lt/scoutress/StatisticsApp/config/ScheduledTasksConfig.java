@@ -134,8 +134,8 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 10 is completed");
     }
 
-    // @Scheduled(cron = "0 * * * * *")
-    // @Scheduled(cron = "0 48 * * * *")
+    @Scheduled(cron = "0 20 * * * *")
+    @Scheduled(cron = "0 50 * * * *")
     public void runTask11() {
         System.out.println("Scheduled task 11 is started");
         playtimeServiceImpl.convertTimestampToDateSurvival();

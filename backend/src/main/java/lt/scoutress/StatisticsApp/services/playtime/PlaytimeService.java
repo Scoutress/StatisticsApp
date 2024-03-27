@@ -21,4 +21,14 @@ public interface PlaytimeService {
     public void migrateEventsPlaytimeData();
 
     public void convertTimestampToDateSurvival();
+
+    public void convertTimestampToDateSkyblock();
+
+    public void convertTimestampToDateCreative();
+
+    public void convertTimestampToDateBoxpvp();
+
+    public void convertTimestampToDatePrison();
+
+    public void convertTimestampToDateEvents();
 }

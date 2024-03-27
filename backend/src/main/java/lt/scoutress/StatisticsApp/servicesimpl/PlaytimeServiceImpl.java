@@ -431,7 +431,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                 "disconnect_hour INT, " +
                 "disconnect_min INT, " +
                 "disconnect_sec INT, " +
-                "disconnect_date DATE, " +
+                "disconnect_datetime DATETIME, " +
                 "is_passed_midnight BOOLEAN, " +
                 "midnight_epoch INT, " +
                 "playtime INT, " +
@@ -485,7 +485,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
         String insertQuery = "INSERT INTO pt_data_calc_surv_" + tableName + " (" +
                 "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_date, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
                 "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
                 "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
                 ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
@@ -514,5 +514,675 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                 .setParameter("playtimeAfterMidnight", playtimeAfterMidnight)
                 .setParameter("allPlaytime", allPlaytime)
                 .executeUpdate();
-    }    
+    }
+
+    //  Skyblock
+    @Override
+    @Transactional
+    public void convertTimestampToDateSkyblock() {
+        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_sky_%'");
+
+        @SuppressWarnings("unchecked")
+        List<String> tableNames = tablesQuery.getResultList();
+
+        for (String tableName : tableNames) {
+            Query query = entityManager.createNativeQuery("SELECT connect, disconnect FROM " + tableName);
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = query.getResultList();
+
+            for (Object[] result : results) {
+            Integer connectSeconds = (Integer) result[0];
+            Integer disconnectSeconds = (Integer) result[1];
+
+            LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            createTableIfNotExistsSkyblock(tableName);
+            updateTableSkyblock(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
+            }
+        }
+    }
+
+    private void createTableIfNotExistsSkyblock(String tableName) {
+        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_sky_" + tableName + "'");
+    
+        Long tableExists = (Long) checkTableQuery.getSingleResult();
+    
+        if (tableExists == 0) {
+            String createTableQuery = "CREATE TABLE pt_data_calc_sky_" + tableName + " (" +
+                "connect_year INT, " +
+                "connect_month INT, " +
+                "connect_day INT, " +
+                "connect_hour INT, " +
+                "connect_min INT, " +
+                "connect_sec INT, " +
+                "connect_datetime DATETIME, " +
+                "connect_weeknum INT, " +
+                "disconnect_year INT, " +
+                "disconnect_month INT, " +
+                "disconnect_day INT, " +
+                "disconnect_hour INT, " +
+                "disconnect_min INT, " +
+                "disconnect_sec INT, " +
+                "disconnect_datetime DATETIME, " +
+                "is_passed_midnight BOOLEAN, " +
+                "midnight_epoch INT, " +
+                "playtime INT, " +
+                "playtime_before_midnight INT, " +
+                "playtime_after_midnight INT, " +
+                "all_playtime INT)";
+    
+            Query createTable = entityManager.createNativeQuery(createTableQuery);
+    
+            createTable.executeUpdate();
+        }
+    }
+    
+    private void updateTableSkyblock(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds, Integer disconnectSeconds, String tableName) {
+        int connectYear = connectDateTime.getYear();
+        int connectMonth = connectDateTime.getMonthValue();
+        int connectDay = connectDateTime.getDayOfMonth();
+        int connectHour = connectDateTime.getHour();
+        int connectMin = connectDateTime.getMinute();
+        int connectSec = connectDateTime.getSecond();
+        int connectWeekNum = connectDateTime.get(WeekFields.ISO.weekOfWeekBasedYear());
+    
+        int disconnectYear = disconnectDateTime.getYear();
+        int disconnectMonth = disconnectDateTime.getMonthValue();
+        int disconnectDay = disconnectDateTime.getDayOfMonth();
+        int disconnectHour = disconnectDateTime.getHour();
+        int disconnectMin = disconnectDateTime.getMinute();
+        int disconnectSec = disconnectDateTime.getSecond();
+    
+        LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
+        int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
+    
+        int playtime = (disconnectSeconds - connectSeconds) / 3600;
+    
+        boolean isPassedMidnight;
+        int playtimeBeforeMidnight;
+        int playtimeAfterMidnight;
+        int allPlaytime;
+    
+        if (midnightEpoch > connectSeconds && midnightEpoch < disconnectSeconds) {
+            isPassedMidnight = true;
+            playtimeBeforeMidnight = midnightEpoch - connectSeconds;
+            playtimeAfterMidnight = disconnectSeconds - midnightEpoch;
+            allPlaytime = playtimeBeforeMidnight + playtimeAfterMidnight;
+        } else {
+            isPassedMidnight = false;
+            playtimeBeforeMidnight = 0;
+            playtimeAfterMidnight = 0;
+            allPlaytime = disconnectSeconds - connectSeconds;
+        }
+    
+        String insertQuery = "INSERT INTO pt_data_calc_sky_" + tableName + " (" +
+                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+    
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("connectYear", connectYear)
+                .setParameter("connectMonth", connectMonth)
+                .setParameter("connectDay", connectDay)
+                .setParameter("connectHour", connectHour)
+                .setParameter("connectMin", connectMin)
+                .setParameter("connectSec", connectSec)
+                .setParameter("connectDateTime", connectDateTime)
+                .setParameter("connectWeekNum", connectWeekNum)
+                .setParameter("disconnectYear", disconnectYear)
+                .setParameter("disconnectMonth", disconnectMonth)
+                .setParameter("disconnectDay", disconnectDay)
+                .setParameter("disconnectHour", disconnectHour)
+                .setParameter("disconnectMin", disconnectMin)
+                .setParameter("disconnectSec", disconnectSec)
+                .setParameter("disconnectDateTime", disconnectDateTime)
+                .setParameter("isPassedMidnight", isPassedMidnight)
+                .setParameter("midnightEpoch", midnightEpoch)
+                .setParameter("playtime", playtime)
+                .setParameter("playtimeBeforeMidnight", playtimeBeforeMidnight)
+                .setParameter("playtimeAfterMidnight", playtimeAfterMidnight)
+                .setParameter("allPlaytime", allPlaytime)
+                .executeUpdate();
+    }
+
+    //  Creative
+    @Override
+    @Transactional
+    public void convertTimestampToDateCreative() {
+        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_creat_%'");
+
+        @SuppressWarnings("unchecked")
+        List<String> tableNames = tablesQuery.getResultList();
+
+        for (String tableName : tableNames) {
+            Query query = entityManager.createNativeQuery("SELECT connect, disconnect FROM " + tableName);
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = query.getResultList();
+
+            for (Object[] result : results) {
+            Integer connectSeconds = (Integer) result[0];
+            Integer disconnectSeconds = (Integer) result[1];
+
+            LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            createTableIfNotExistsCreative(tableName);
+            updateTableCreative(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
+            }
+        }
+    }
+
+    private void createTableIfNotExistsCreative(String tableName) {
+        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_creat_" + tableName + "'");
+    
+        Long tableExists = (Long) checkTableQuery.getSingleResult();
+    
+        if (tableExists == 0) {
+            String createTableQuery = "CREATE TABLE pt_data_calc_creat_" + tableName + " (" +
+                "connect_year INT, " +
+                "connect_month INT, " +
+                "connect_day INT, " +
+                "connect_hour INT, " +
+                "connect_min INT, " +
+                "connect_sec INT, " +
+                "connect_datetime DATETIME, " +
+                "connect_weeknum INT, " +
+                "disconnect_year INT, " +
+                "disconnect_month INT, " +
+                "disconnect_day INT, " +
+                "disconnect_hour INT, " +
+                "disconnect_min INT, " +
+                "disconnect_sec INT, " +
+                "disconnect_datetime DATETIME, " +
+                "is_passed_midnight BOOLEAN, " +
+                "midnight_epoch INT, " +
+                "playtime INT, " +
+                "playtime_before_midnight INT, " +
+                "playtime_after_midnight INT, " +
+                "all_playtime INT)";
+    
+            Query createTable = entityManager.createNativeQuery(createTableQuery);
+    
+            createTable.executeUpdate();
+        }
+    }
+    
+    private void updateTableCreative(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds, Integer disconnectSeconds, String tableName) {
+        int connectYear = connectDateTime.getYear();
+        int connectMonth = connectDateTime.getMonthValue();
+        int connectDay = connectDateTime.getDayOfMonth();
+        int connectHour = connectDateTime.getHour();
+        int connectMin = connectDateTime.getMinute();
+        int connectSec = connectDateTime.getSecond();
+        int connectWeekNum = connectDateTime.get(WeekFields.ISO.weekOfWeekBasedYear());
+    
+        int disconnectYear = disconnectDateTime.getYear();
+        int disconnectMonth = disconnectDateTime.getMonthValue();
+        int disconnectDay = disconnectDateTime.getDayOfMonth();
+        int disconnectHour = disconnectDateTime.getHour();
+        int disconnectMin = disconnectDateTime.getMinute();
+        int disconnectSec = disconnectDateTime.getSecond();
+    
+        LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
+        int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
+    
+        int playtime = (disconnectSeconds - connectSeconds) / 3600;
+    
+        boolean isPassedMidnight;
+        int playtimeBeforeMidnight;
+        int playtimeAfterMidnight;
+        int allPlaytime;
+    
+        if (midnightEpoch > connectSeconds && midnightEpoch < disconnectSeconds) {
+            isPassedMidnight = true;
+            playtimeBeforeMidnight = midnightEpoch - connectSeconds;
+            playtimeAfterMidnight = disconnectSeconds - midnightEpoch;
+            allPlaytime = playtimeBeforeMidnight + playtimeAfterMidnight;
+        } else {
+            isPassedMidnight = false;
+            playtimeBeforeMidnight = 0;
+            playtimeAfterMidnight = 0;
+            allPlaytime = disconnectSeconds - connectSeconds;
+        }
+    
+        String insertQuery = "INSERT INTO pt_data_calc_creat_" + tableName + " (" +
+                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+    
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("connectYear", connectYear)
+                .setParameter("connectMonth", connectMonth)
+                .setParameter("connectDay", connectDay)
+                .setParameter("connectHour", connectHour)
+                .setParameter("connectMin", connectMin)
+                .setParameter("connectSec", connectSec)
+                .setParameter("connectDateTime", connectDateTime)
+                .setParameter("connectWeekNum", connectWeekNum)
+                .setParameter("disconnectYear", disconnectYear)
+                .setParameter("disconnectMonth", disconnectMonth)
+                .setParameter("disconnectDay", disconnectDay)
+                .setParameter("disconnectHour", disconnectHour)
+                .setParameter("disconnectMin", disconnectMin)
+                .setParameter("disconnectSec", disconnectSec)
+                .setParameter("disconnectDateTime", disconnectDateTime)
+                .setParameter("isPassedMidnight", isPassedMidnight)
+                .setParameter("midnightEpoch", midnightEpoch)
+                .setParameter("playtime", playtime)
+                .setParameter("playtimeBeforeMidnight", playtimeBeforeMidnight)
+                .setParameter("playtimeAfterMidnight", playtimeAfterMidnight)
+                .setParameter("allPlaytime", allPlaytime)
+                .executeUpdate();
+    }
+
+    //  Boxpvp
+    @Override
+    @Transactional
+    public void convertTimestampToDateBoxpvp() {
+        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_box_%'");
+
+        @SuppressWarnings("unchecked")
+        List<String> tableNames = tablesQuery.getResultList();
+
+        for (String tableName : tableNames) {
+            Query query = entityManager.createNativeQuery("SELECT connect, disconnect FROM " + tableName);
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = query.getResultList();
+
+            for (Object[] result : results) {
+            Integer connectSeconds = (Integer) result[0];
+            Integer disconnectSeconds = (Integer) result[1];
+
+            LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            createTableIfNotExistsBoxpvp(tableName);
+            updateTableBoxpvp(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
+            }
+        }
+    }
+
+    private void createTableIfNotExistsBoxpvp(String tableName) {
+        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_box_" + tableName + "'");
+    
+        Long tableExists = (Long) checkTableQuery.getSingleResult();
+    
+        if (tableExists == 0) {
+            String createTableQuery = "CREATE TABLE pt_data_calc_box_" + tableName + " (" +
+                "connect_year INT, " +
+                "connect_month INT, " +
+                "connect_day INT, " +
+                "connect_hour INT, " +
+                "connect_min INT, " +
+                "connect_sec INT, " +
+                "connect_datetime DATETIME, " +
+                "connect_weeknum INT, " +
+                "disconnect_year INT, " +
+                "disconnect_month INT, " +
+                "disconnect_day INT, " +
+                "disconnect_hour INT, " +
+                "disconnect_min INT, " +
+                "disconnect_sec INT, " +
+                "disconnect_datetime DATETIME, " +
+                "is_passed_midnight BOOLEAN, " +
+                "midnight_epoch INT, " +
+                "playtime INT, " +
+                "playtime_before_midnight INT, " +
+                "playtime_after_midnight INT, " +
+                "all_playtime INT)";
+    
+            Query createTable = entityManager.createNativeQuery(createTableQuery);
+    
+            createTable.executeUpdate();
+        }
+    }
+    
+    private void updateTableBoxpvp(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds, Integer disconnectSeconds, String tableName) {
+        int connectYear = connectDateTime.getYear();
+        int connectMonth = connectDateTime.getMonthValue();
+        int connectDay = connectDateTime.getDayOfMonth();
+        int connectHour = connectDateTime.getHour();
+        int connectMin = connectDateTime.getMinute();
+        int connectSec = connectDateTime.getSecond();
+        int connectWeekNum = connectDateTime.get(WeekFields.ISO.weekOfWeekBasedYear());
+    
+        int disconnectYear = disconnectDateTime.getYear();
+        int disconnectMonth = disconnectDateTime.getMonthValue();
+        int disconnectDay = disconnectDateTime.getDayOfMonth();
+        int disconnectHour = disconnectDateTime.getHour();
+        int disconnectMin = disconnectDateTime.getMinute();
+        int disconnectSec = disconnectDateTime.getSecond();
+    
+        LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
+        int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
+    
+        int playtime = (disconnectSeconds - connectSeconds) / 3600;
+    
+        boolean isPassedMidnight;
+        int playtimeBeforeMidnight;
+        int playtimeAfterMidnight;
+        int allPlaytime;
+    
+        if (midnightEpoch > connectSeconds && midnightEpoch < disconnectSeconds) {
+            isPassedMidnight = true;
+            playtimeBeforeMidnight = midnightEpoch - connectSeconds;
+            playtimeAfterMidnight = disconnectSeconds - midnightEpoch;
+            allPlaytime = playtimeBeforeMidnight + playtimeAfterMidnight;
+        } else {
+            isPassedMidnight = false;
+            playtimeBeforeMidnight = 0;
+            playtimeAfterMidnight = 0;
+            allPlaytime = disconnectSeconds - connectSeconds;
+        }
+    
+        String insertQuery = "INSERT INTO pt_data_calc_box_" + tableName + " (" +
+                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+    
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("connectYear", connectYear)
+                .setParameter("connectMonth", connectMonth)
+                .setParameter("connectDay", connectDay)
+                .setParameter("connectHour", connectHour)
+                .setParameter("connectMin", connectMin)
+                .setParameter("connectSec", connectSec)
+                .setParameter("connectDateTime", connectDateTime)
+                .setParameter("connectWeekNum", connectWeekNum)
+                .setParameter("disconnectYear", disconnectYear)
+                .setParameter("disconnectMonth", disconnectMonth)
+                .setParameter("disconnectDay", disconnectDay)
+                .setParameter("disconnectHour", disconnectHour)
+                .setParameter("disconnectMin", disconnectMin)
+                .setParameter("disconnectSec", disconnectSec)
+                .setParameter("disconnectDateTime", disconnectDateTime)
+                .setParameter("isPassedMidnight", isPassedMidnight)
+                .setParameter("midnightEpoch", midnightEpoch)
+                .setParameter("playtime", playtime)
+                .setParameter("playtimeBeforeMidnight", playtimeBeforeMidnight)
+                .setParameter("playtimeAfterMidnight", playtimeAfterMidnight)
+                .setParameter("allPlaytime", allPlaytime)
+                .executeUpdate();
+    }
+
+    //  Prison
+    @Override
+    @Transactional
+    public void convertTimestampToDatePrison() {
+        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_pris_%'");
+
+        @SuppressWarnings("unchecked")
+        List<String> tableNames = tablesQuery.getResultList();
+
+        for (String tableName : tableNames) {
+            Query query = entityManager.createNativeQuery("SELECT connect, disconnect FROM " + tableName);
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = query.getResultList();
+
+            for (Object[] result : results) {
+            Integer connectSeconds = (Integer) result[0];
+            Integer disconnectSeconds = (Integer) result[1];
+
+            LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            createTableIfNotExistsPrison(tableName);
+            updateTablePrison(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
+            }
+        }
+    }
+
+    private void createTableIfNotExistsPrison(String tableName) {
+        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_pris_" + tableName + "'");
+    
+        Long tableExists = (Long) checkTableQuery.getSingleResult();
+    
+        if (tableExists == 0) {
+            String createTableQuery = "CREATE TABLE pt_data_calc_pris_" + tableName + " (" +
+                "connect_year INT, " +
+                "connect_month INT, " +
+                "connect_day INT, " +
+                "connect_hour INT, " +
+                "connect_min INT, " +
+                "connect_sec INT, " +
+                "connect_datetime DATETIME, " +
+                "connect_weeknum INT, " +
+                "disconnect_year INT, " +
+                "disconnect_month INT, " +
+                "disconnect_day INT, " +
+                "disconnect_hour INT, " +
+                "disconnect_min INT, " +
+                "disconnect_sec INT, " +
+                "disconnect_datetime DATETIME, " +
+                "is_passed_midnight BOOLEAN, " +
+                "midnight_epoch INT, " +
+                "playtime INT, " +
+                "playtime_before_midnight INT, " +
+                "playtime_after_midnight INT, " +
+                "all_playtime INT)";
+    
+            Query createTable = entityManager.createNativeQuery(createTableQuery);
+    
+            createTable.executeUpdate();
+        }
+    }
+    
+    private void updateTablePrison(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds, Integer disconnectSeconds, String tableName) {
+        int connectYear = connectDateTime.getYear();
+        int connectMonth = connectDateTime.getMonthValue();
+        int connectDay = connectDateTime.getDayOfMonth();
+        int connectHour = connectDateTime.getHour();
+        int connectMin = connectDateTime.getMinute();
+        int connectSec = connectDateTime.getSecond();
+        int connectWeekNum = connectDateTime.get(WeekFields.ISO.weekOfWeekBasedYear());
+    
+        int disconnectYear = disconnectDateTime.getYear();
+        int disconnectMonth = disconnectDateTime.getMonthValue();
+        int disconnectDay = disconnectDateTime.getDayOfMonth();
+        int disconnectHour = disconnectDateTime.getHour();
+        int disconnectMin = disconnectDateTime.getMinute();
+        int disconnectSec = disconnectDateTime.getSecond();
+    
+        LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
+        int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
+    
+        int playtime = (disconnectSeconds - connectSeconds) / 3600;
+    
+        boolean isPassedMidnight;
+        int playtimeBeforeMidnight;
+        int playtimeAfterMidnight;
+        int allPlaytime;
+    
+        if (midnightEpoch > connectSeconds && midnightEpoch < disconnectSeconds) {
+            isPassedMidnight = true;
+            playtimeBeforeMidnight = midnightEpoch - connectSeconds;
+            playtimeAfterMidnight = disconnectSeconds - midnightEpoch;
+            allPlaytime = playtimeBeforeMidnight + playtimeAfterMidnight;
+        } else {
+            isPassedMidnight = false;
+            playtimeBeforeMidnight = 0;
+            playtimeAfterMidnight = 0;
+            allPlaytime = disconnectSeconds - connectSeconds;
+        }
+    
+        String insertQuery = "INSERT INTO pt_data_calc_pris_" + tableName + " (" +
+                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+    
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("connectYear", connectYear)
+                .setParameter("connectMonth", connectMonth)
+                .setParameter("connectDay", connectDay)
+                .setParameter("connectHour", connectHour)
+                .setParameter("connectMin", connectMin)
+                .setParameter("connectSec", connectSec)
+                .setParameter("connectDateTime", connectDateTime)
+                .setParameter("connectWeekNum", connectWeekNum)
+                .setParameter("disconnectYear", disconnectYear)
+                .setParameter("disconnectMonth", disconnectMonth)
+                .setParameter("disconnectDay", disconnectDay)
+                .setParameter("disconnectHour", disconnectHour)
+                .setParameter("disconnectMin", disconnectMin)
+                .setParameter("disconnectSec", disconnectSec)
+                .setParameter("disconnectDateTime", disconnectDateTime)
+                .setParameter("isPassedMidnight", isPassedMidnight)
+                .setParameter("midnightEpoch", midnightEpoch)
+                .setParameter("playtime", playtime)
+                .setParameter("playtimeBeforeMidnight", playtimeBeforeMidnight)
+                .setParameter("playtimeAfterMidnight", playtimeAfterMidnight)
+                .setParameter("allPlaytime", allPlaytime)
+                .executeUpdate();
+    }
+
+    //  Events
+    @Override
+    @Transactional
+    public void convertTimestampToDateEvents() {
+        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_eve_%'");
+
+        @SuppressWarnings("unchecked")
+        List<String> tableNames = tablesQuery.getResultList();
+
+        for (String tableName : tableNames) {
+            Query query = entityManager.createNativeQuery("SELECT connect, disconnect FROM " + tableName);
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = query.getResultList();
+
+            for (Object[] result : results) {
+            Integer connectSeconds = (Integer) result[0];
+            Integer disconnectSeconds = (Integer) result[1];
+
+            LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            createTableIfNotExistsEvents(tableName);
+            updateTableEvents(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
+            }
+        }
+    }
+
+    private void createTableIfNotExistsEvents(String tableName) {
+        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_eve_" + tableName + "'");
+    
+        Long tableExists = (Long) checkTableQuery.getSingleResult();
+    
+        if (tableExists == 0) {
+            String createTableQuery = "CREATE TABLE pt_data_calc_eve_" + tableName + " (" +
+                "connect_year INT, " +
+                "connect_month INT, " +
+                "connect_day INT, " +
+                "connect_hour INT, " +
+                "connect_min INT, " +
+                "connect_sec INT, " +
+                "connect_datetime DATETIME, " +
+                "connect_weeknum INT, " +
+                "disconnect_year INT, " +
+                "disconnect_month INT, " +
+                "disconnect_day INT, " +
+                "disconnect_hour INT, " +
+                "disconnect_min INT, " +
+                "disconnect_sec INT, " +
+                "disconnect_datetime DATETIME, " +
+                "is_passed_midnight BOOLEAN, " +
+                "midnight_epoch INT, " +
+                "playtime INT, " +
+                "playtime_before_midnight INT, " +
+                "playtime_after_midnight INT, " +
+                "all_playtime INT)";
+    
+            Query createTable = entityManager.createNativeQuery(createTableQuery);
+    
+            createTable.executeUpdate();
+        }
+    }
+    
+    private void updateTableEvents(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds, Integer disconnectSeconds, String tableName) {
+        int connectYear = connectDateTime.getYear();
+        int connectMonth = connectDateTime.getMonthValue();
+        int connectDay = connectDateTime.getDayOfMonth();
+        int connectHour = connectDateTime.getHour();
+        int connectMin = connectDateTime.getMinute();
+        int connectSec = connectDateTime.getSecond();
+        int connectWeekNum = connectDateTime.get(WeekFields.ISO.weekOfWeekBasedYear());
+    
+        int disconnectYear = disconnectDateTime.getYear();
+        int disconnectMonth = disconnectDateTime.getMonthValue();
+        int disconnectDay = disconnectDateTime.getDayOfMonth();
+        int disconnectHour = disconnectDateTime.getHour();
+        int disconnectMin = disconnectDateTime.getMinute();
+        int disconnectSec = disconnectDateTime.getSecond();
+    
+        LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
+        int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
+    
+        int playtime = (disconnectSeconds - connectSeconds) / 3600;
+    
+        boolean isPassedMidnight;
+        int playtimeBeforeMidnight;
+        int playtimeAfterMidnight;
+        int allPlaytime;
+    
+        if (midnightEpoch > connectSeconds && midnightEpoch < disconnectSeconds) {
+            isPassedMidnight = true;
+            playtimeBeforeMidnight = midnightEpoch - connectSeconds;
+            playtimeAfterMidnight = disconnectSeconds - midnightEpoch;
+            allPlaytime = playtimeBeforeMidnight + playtimeAfterMidnight;
+        } else {
+            isPassedMidnight = false;
+            playtimeBeforeMidnight = 0;
+            playtimeAfterMidnight = 0;
+            allPlaytime = disconnectSeconds - connectSeconds;
+        }
+    
+        String insertQuery = "INSERT INTO pt_data_calc_eve_" + tableName + " (" +
+                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+    
+        entityManager.createNativeQuery(insertQuery)
+                .setParameter("connectYear", connectYear)
+                .setParameter("connectMonth", connectMonth)
+                .setParameter("connectDay", connectDay)
+                .setParameter("connectHour", connectHour)
+                .setParameter("connectMin", connectMin)
+                .setParameter("connectSec", connectSec)
+                .setParameter("connectDateTime", connectDateTime)
+                .setParameter("connectWeekNum", connectWeekNum)
+                .setParameter("disconnectYear", disconnectYear)
+                .setParameter("disconnectMonth", disconnectMonth)
+                .setParameter("disconnectDay", disconnectDay)
+                .setParameter("disconnectHour", disconnectHour)
+                .setParameter("disconnectMin", disconnectMin)
+                .setParameter("disconnectSec", disconnectSec)
+                .setParameter("disconnectDateTime", disconnectDateTime)
+                .setParameter("isPassedMidnight", isPassedMidnight)
+                .setParameter("midnightEpoch", midnightEpoch)
+                .setParameter("playtime", playtime)
+                .setParameter("playtimeBeforeMidnight", playtimeBeforeMidnight)
+                .setParameter("playtimeAfterMidnight", playtimeAfterMidnight)
+                .setParameter("allPlaytime", allPlaytime)
+                .executeUpdate();
+    }
 }

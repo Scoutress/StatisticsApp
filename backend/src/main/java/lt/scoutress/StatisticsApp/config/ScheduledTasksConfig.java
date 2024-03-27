@@ -139,6 +139,11 @@ public class ScheduledTasksConfig {
     public void runTask11() {
         System.out.println("Scheduled task 11 is started");
         playtimeServiceImpl.convertTimestampToDateSurvival();
+        playtimeServiceImpl.convertTimestampToDateSkyblock();
+        playtimeServiceImpl.convertTimestampToDateCreative();
+        playtimeServiceImpl.convertTimestampToDateBoxpvp();
+        playtimeServiceImpl.convertTimestampToDatePrison();
+        playtimeServiceImpl.convertTimestampToDateEvents();
         System.out.println("Scheduled task 11 is completed");
     }
 }

@@ -7,6 +7,8 @@ Currently, the program is only intended for personal use with a local database.
 ---
 ## Project Status
 
+:construction: <sub>Work in Progress (WIP)</sub>
+
 ---
 ## History
 

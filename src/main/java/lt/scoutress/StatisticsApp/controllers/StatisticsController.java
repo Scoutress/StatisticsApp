@@ -18,11 +18,13 @@ import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
+import lt.scoutress.StatisticsApp.entity.coefficients.DcTicketsCoef;
 import lt.scoutress.StatisticsApp.repositories.DcMessagesRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.DcMessagesService;
 import lt.scoutress.StatisticsApp.services.McTicketsService;
 import lt.scoutress.StatisticsApp.services.ProductivityService;
+import lt.scoutress.StatisticsApp.services.coefficients.DcTicketsCoefService;
 
 @Controller
 @RequestMapping("/stats")
@@ -36,16 +38,19 @@ public class StatisticsController {
     private final ProductivityService productivityService;
     private final McTicketsRepository mcTicketsRepository;
     private final DcMessagesRepository dcMessagesRepository;
+    private final DcTicketsCoefService dcTicketsCoefService;
     
     public StatisticsController(JdbcTemplate jdbcTemplate, McTicketsService mcTicketsService,
             DcMessagesService dcMessagesService, ProductivityService productivityService,
-            McTicketsRepository mcTicketsRepository, DcMessagesRepository dcMessagesRepository) {
+            McTicketsRepository mcTicketsRepository, DcMessagesRepository dcMessagesRepository, 
+            DcTicketsCoefService dcTicketsCoefService) {
         this.jdbcTemplate = jdbcTemplate;
         this.mcTicketsService = mcTicketsService;
         this.dcMessagesService = dcMessagesService;
         this.productivityService = productivityService;
         this.mcTicketsRepository = mcTicketsRepository;
         this.dcMessagesRepository = dcMessagesRepository;
+        this.dcTicketsCoefService = dcTicketsCoefService;
     }
 
     @GetMapping("/productivity")
@@ -193,4 +198,10 @@ public class StatisticsController {
         return "redirect:/stats/dcMessagesData";
     }
 
+    @GetMapping("/showDcTicketsCoef")
+    public String showDcTicketsCoef(Model model) {
+        List<DcTicketsCoef> coefficients = dcTicketsCoefService.findAll();
+        model.addAttribute("coefficients", coefficients);
+        return "coefficients/dc-tickets-coef";
+    }
 }

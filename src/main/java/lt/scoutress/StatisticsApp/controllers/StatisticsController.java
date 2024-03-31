@@ -39,6 +39,7 @@ public class StatisticsController {
     private final McTicketsRepository mcTicketsRepository;
     private final DcMessagesRepository dcMessagesRepository;
     private final DcTicketsCoefService dcTicketsCoefService;
+    private static final int DC_TICKETS_COEF_ID = 1;
     
     public StatisticsController(JdbcTemplate jdbcTemplate, McTicketsService mcTicketsService,
             DcMessagesService dcMessagesService, ProductivityService productivityService,
@@ -203,5 +204,19 @@ public class StatisticsController {
         List<DcTicketsCoef> coefficients = dcTicketsCoefService.findAll();
         model.addAttribute("coefficients", coefficients);
         return "coefficients/dc-tickets-coef";
+    }
+
+    @GetMapping("/showFormForDcTicketsCoefUpdate")
+    public String showFormForDcTicketsCoefUpdate(Model model) {
+        DcTicketsCoef dcTicketsCoef = dcTicketsCoefService.findById(DC_TICKETS_COEF_ID);
+        model.addAttribute("dcTicketsCoef", dcTicketsCoef);
+        return "coefficients/dc-tickets-coef-edit";
+    }
+
+    @PostMapping("/saveDcTicketsCoeffs")
+    public String saveDcTicketsCoeffs(@ModelAttribute("dcTicketsCoef") DcTicketsCoef dcTicketsCoef) {
+        dcTicketsCoef.setId(DC_TICKETS_COEF_ID);
+        dcTicketsCoefService.save(dcTicketsCoef);
+        return "redirect:/stats/showDcTicketsCoef";
     }
 }

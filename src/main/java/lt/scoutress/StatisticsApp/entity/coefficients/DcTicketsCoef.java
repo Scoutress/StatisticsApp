@@ -25,6 +25,15 @@ public class DcTicketsCoef {
     @Column(name = "manager")
     private Double manager;
 
+    // Values by possible topics
+
+    // Unassigned - 1 topic
+    // Support    - 3 topics - can see 4 topics
+    // ChatMod    - 1 topic  - can see 5 topics
+    // Overseer   - 0 topic  - can see 5 topics
+    // Organizer  - 1 topic  - can see 6 topics
+    // Manager    - 3 topics - can see 9 topics
+
     public DcTicketsCoef(){}
 
     public DcTicketsCoef(Integer id, Double support, Double chatmod, Double overseer, Double organizer,

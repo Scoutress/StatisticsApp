@@ -38,6 +38,12 @@ public class Productivity {
     @Column(name = "dc_messages_comp")
     private Double dcMessagesComp;
 
+    @Column(name = "dc_tickets")
+    private Double dcTickets;
+
+    @Column(name = "dc_tickets_comp")
+    private Double dcTicketsComp;
+
     @Column(name = "productivity")
     private Double productivity;
 
@@ -46,9 +52,10 @@ public class Productivity {
 
     public Productivity(){}
 
-    public Productivity(String level, String username, Double activityPerHalfYear, Double playtime, Double playtimeAfk,
-            Double mcTickets, Double mcTicketsComp, Double dcMessages, Double dcMessagesComp, Double productivity,
-            Double recommendation) {
+    public Productivity(Integer id, String level, String username, Double activityPerHalfYear, Double playtime,
+            Double playtimeAfk, Double mcTickets, Double mcTicketsComp, Double dcMessages, Double dcMessagesComp,
+            Double dcTickets, Double dcTicketsComp, Double productivity, Double recommendation) {
+        this.id = id;
         this.level = level;
         this.username = username;
         this.activityPerHalfYear = activityPerHalfYear;
@@ -58,8 +65,18 @@ public class Productivity {
         this.mcTicketsComp = mcTicketsComp;
         this.dcMessages = dcMessages;
         this.dcMessagesComp = dcMessagesComp;
+        this.dcTickets = dcTickets;
+        this.dcTicketsComp = dcTicketsComp;
         this.productivity = productivity;
         this.recommendation = recommendation;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getLevel() {
@@ -134,6 +151,22 @@ public class Productivity {
         this.dcMessagesComp = dcMessagesComp;
     }
 
+    public Double getDcTickets() {
+        return dcTickets;
+    }
+
+    public void setDcTickets(Double dcTickets) {
+        this.dcTickets = dcTickets;
+    }
+
+    public Double getDcTicketsComp() {
+        return dcTicketsComp;
+    }
+
+    public void setDcTicketsComp(Double dcTicketsComp) {
+        this.dcTicketsComp = dcTicketsComp;
+    }
+
     public Double getProductivity() {
         return productivity;
     }
@@ -149,6 +182,4 @@ public class Productivity {
     public void setRecommendation(Double recommendation) {
         this.recommendation = recommendation;
     }
-
-    
 }

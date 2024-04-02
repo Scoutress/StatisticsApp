@@ -125,17 +125,28 @@ public class ScheduledTasksConfig {
     @Scheduled(cron = "0 48 * * * *")
     public void runTask10() {
         System.out.println("Scheduled task 10 is started");
+        System.out.println("Survival:");
         playtimeServiceImpl.migrateSurvivalPlaytimeData();
+        System.out.println("");
+        System.out.println("Skyblock:");
         playtimeServiceImpl.migrateSkyblockPlaytimeData();
+        System.out.println("");
+        System.out.println("Creative:");
         playtimeServiceImpl.migrateCreativePlaytimeData();
+        System.out.println("");
+        System.out.println("Boxpvp:");
         playtimeServiceImpl.migrateBoxpvpPlaytimeData();
+        System.out.println("");
+        System.out.println("Prison");
         playtimeServiceImpl.migratePrisonPlaytimeData();
+        System.out.println("");
+        System.out.println("Events:");
         playtimeServiceImpl.migrateEventsPlaytimeData();
         System.out.println("Scheduled task 10 is completed");
     }
 
-    @Scheduled(cron = "0 20 * * * *")
-    @Scheduled(cron = "0 50 * * * *")
+    // @Scheduled(cron = "0 20 * * * *")
+    // @Scheduled(cron = "0 50 * * * *")
     public void runTask11() {
         System.out.println("Scheduled task 11 is started");
         playtimeServiceImpl.convertTimestampToDateSurvival();

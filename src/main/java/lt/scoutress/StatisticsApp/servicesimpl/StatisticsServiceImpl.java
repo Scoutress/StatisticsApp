@@ -15,11 +15,9 @@ import org.springframework.stereotype.Service;
 
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
-import lt.scoutress.StatisticsApp.entity.Calculations;
 import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
-import lt.scoutress.StatisticsApp.repositories.CalculationsRepository;
 import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
@@ -30,19 +28,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Autowired
     private EntityManager entityManager;
 
-    private final CalculationsRepository calculationsRepository;
     private final McTicketsRepository mcTicketsRepository;
     private final EmployeeRepository employeeRepository;
 
-    public StatisticsServiceImpl(CalculationsRepository calculationsRepository, McTicketsRepository mcTicketsRepository, EmployeeRepository employeeRepository){
-        this.calculationsRepository = calculationsRepository;
+    public StatisticsServiceImpl(EntityManager entityManager, McTicketsRepository mcTicketsRepository,
+            EmployeeRepository employeeRepository) {
+        this.entityManager = entityManager;
         this.mcTicketsRepository = mcTicketsRepository;
         this.employeeRepository = employeeRepository;
-    }
-
-    @Override
-    public List<Calculations> findCalculations() {
-        return calculationsRepository.findAll();
     }
 
     @Override

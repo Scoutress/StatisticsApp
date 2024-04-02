@@ -33,6 +33,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         return playtimeRepository.findAll();
     }
     
+    //  Migrating filtered data
+
     //  Survival
     @Override
     @Transactional
@@ -58,19 +60,44 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
             createAndSaveSurvivalPlaytimeDataTable(username);
     
+            //DEBUG
+            int lastDisconnectTimeSurvival = getLastDisconnectTimeSurvival(username);
+            int newConnectRowsCountSurvival = 0;
+            int newDisconnectRowsCountSurvival = 0;
+
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
             
                 if (time != null && action != null) {
-                    if (action == 1) {
-                        saveTimeToSurvivalConnect(username, time);
-                    } else if (action == 0) {
-                        saveTimeToSurvivalDisconnect(username, time);
+                    boolean exists = checkIfRecordExistsSurvival(username, time);
+
+                    if (!exists) {
+                        if (action == 1 && time > lastDisconnectTimeSurvival) {
+                            saveTimeToSurvivalConnect(username, time);
+                            newConnectRowsCountSurvival++;
+                        } else if (action == 0 && time > lastDisconnectTimeSurvival) {
+                            saveTimeToSurvivalDisconnect(username, time);
+                            newDisconnectRowsCountSurvival++;
+                        }
                     }
                 }
-            }            
+            } 
+
+            System.out.println("Added " + username + " >>> " + newConnectRowsCountSurvival + "/" + newDisconnectRowsCountSurvival);
+            if (newConnectRowsCountSurvival != newDisconnectRowsCountSurvival) {
+                System.out.println("<> Error " + username);
+            }
         }
+    }
+
+    private boolean checkIfRecordExistsSurvival(String username, int time) {
+        String tableName = "pt_data_surv_" + username;
+        String checkRecordQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE connect = :time OR disconnect = :time";
+        Long count = (Long) entityManager.createNativeQuery(checkRecordQuery)
+                .setParameter("time", time)
+                .getSingleResult();
+        return count != null && count.intValue() > 0;
     }
 
     private void createAndSaveSurvivalPlaytimeDataTable(String username) {
@@ -91,6 +118,12 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
     }
 
+    private int getLastDisconnectTimeSurvival(String username) {
+        String tableName = "pt_data_surv_" + username;
+        String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        return lastDisconnectTime != null ? lastDisconnectTime : 0;
+    }
         
     //  Skyblock
     @Override
@@ -100,36 +133,60 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndSkyblockCodes = query.getResultList();
-    
+
         for (Object[] usernameAndSkyblockCode : usernamesAndSkyblockCodes) {
             String username = (String) usernameAndSkyblockCode[0];
             String skyblockCode = (String) usernameAndSkyblockCode[1];
-    
+
             if (skyblockCode == null || skyblockCode.isEmpty()) {
                 continue;
             }
 
             Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Skyblock c WHERE c.user = :skyblockCode AND c.action IN (0, 1)");
             timeQuery.setParameter("skyblockCode", skyblockCode);
-    
+
             @SuppressWarnings("unchecked")
             List<Object[]> timeAndActionValues = timeQuery.getResultList();
-    
+
             createAndSaveSkyblockPlaytimeDataTable(username);
-    
+
+            int lastDisconnectTimeSkyblock = getLastDisconnectTimeSkyblock(username);
+            int newConnectRowsCountSkyblock = 0;
+            int newDisconnectRowsCountSkyblock = 0;
+
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
             
                 if (time != null && action != null) {
-                    if (action == 1) {
-                        saveTimeToSkyblockConnect(username, time);
-                    } else if (action == 0) {
-                        saveTimeToSkyblockDisconnect(username, time);
+                    boolean exists = checkIfRecordExistsSkyblock(username, time);
+
+                    if (!exists) {
+                        if (action == 1 && time > lastDisconnectTimeSkyblock) {
+                            saveTimeToSkyblockConnect(username, time);
+                            newConnectRowsCountSkyblock++;
+                        } else if (action == 0 && time > lastDisconnectTimeSkyblock) {
+                            saveTimeToSkyblockDisconnect(username, time);
+                            newDisconnectRowsCountSkyblock++;
+                        }
                     }
                 }
+            } 
+
+            System.out.println("Added " + username + " >>> " + newConnectRowsCountSkyblock + "/" + newDisconnectRowsCountSkyblock);
+            if (newConnectRowsCountSkyblock != newDisconnectRowsCountSkyblock) {
+                System.out.println("<> Error " + username);
             }
         }
+    }
+
+    private boolean checkIfRecordExistsSkyblock(String username, int time) {
+        String tableName = "pt_data_sky_" + username;
+        String checkRecordQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE connect = :time OR disconnect = :time";
+        Long count = (Long) entityManager.createNativeQuery(checkRecordQuery)
+                .setParameter("time", time)
+                .getSingleResult();
+        return count != null && count.intValue() > 0;
     }
 
     private void createAndSaveSkyblockPlaytimeDataTable(String username) {
@@ -150,6 +207,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
     }
 
+    private int getLastDisconnectTimeSkyblock(String username) {
+        String tableName = "pt_data_sky_" + username;
+        String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        return lastDisconnectTime != null ? lastDisconnectTime : 0;
+    }
+
     //  Creative
     @Override
     @Transactional
@@ -157,9 +221,9 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         Query query = entityManager.createQuery("SELECT p.username, p.creative FROM PlaytimeDBCodes p");
         
         @SuppressWarnings("unchecked")
-        List<Object[]> usernamesAndCreatieveCodes = query.getResultList();
+        List<Object[]> usernamesAndCreativeCodes = query.getResultList();
     
-        for (Object[] usernameAndCreativeCode : usernamesAndCreatieveCodes) {
+        for (Object[] usernameAndCreativeCode : usernamesAndCreativeCodes) {
             String username = (String) usernameAndCreativeCode[0];
             String creativeCode = (String) usernameAndCreativeCode[1];
     
@@ -175,19 +239,44 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
             createAndSaveCreativePlaytimeDataTable(username);
     
+            //DEBUG
+            int lastDisconnectTimeCreative = getLastDisconnectTimeCreative(username);
+            int newConnectRowsCountCreative = 0;
+            int newDisconnectRowsCountCreative = 0;
+
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
             
                 if (time != null && action != null) {
-                    if (action == 1) {
-                        saveTimeToCreativeConnect(username, time);
-                    } else if (action == 0) {
-                        saveTimeToCreativeDisconnect(username, time);
+                    boolean exists = checkIfRecordExistsCreative(username, time);
+
+                    if (!exists) {
+                        if (action == 1 && time > lastDisconnectTimeCreative) {
+                            saveTimeToCreativeConnect(username, time);
+                            newConnectRowsCountCreative++;
+                        } else if (action == 0 && time > lastDisconnectTimeCreative) {
+                            saveTimeToCreativeDisconnect(username, time);
+                            newDisconnectRowsCountCreative++;
+                        }
                     }
                 }
+            } 
+
+            System.out.println("Added " + username + " >>> " + newConnectRowsCountCreative + "/" + newDisconnectRowsCountCreative);
+            if (newConnectRowsCountCreative != newDisconnectRowsCountCreative) {
+                System.out.println("<> Error " + username);
             }
         }
+    }
+
+    private boolean checkIfRecordExistsCreative(String username, int time) {
+        String tableName = "pt_data_creat_" + username;
+        String checkRecordQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE connect = :time OR disconnect = :time";
+        Long count = (Long) entityManager.createNativeQuery(checkRecordQuery)
+                .setParameter("time", time)
+                .getSingleResult();
+        return count != null && count.intValue() > 0;
     }
 
     private void createAndSaveCreativePlaytimeDataTable(String username) {
@@ -206,6 +295,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         String tableName = "pt_data_creat_" + username;
         String updateQuery = "UPDATE " + tableName + " SET disconnect = :time WHERE disconnect IS NULL";
         entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
+    }
+
+    private int getLastDisconnectTimeCreative(String username) {
+        String tableName = "pt_data_creat_" + username;
+        String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
     //  Boxpvp
@@ -233,19 +329,44 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
             createAndSaveBoxpvpPlaytimeDataTable(username);
     
+            //DEBUG
+            int lastDisconnectTimeBoxpvp = getLastDisconnectTimeBoxpvp(username);
+            int newConnectRowsCountBoxpvp = 0;
+            int newDisconnectRowsCountBoxpvp = 0;
+
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
             
                 if (time != null && action != null) {
-                    if (action == 1) {
-                        saveTimeToBoxpvpConnect(username, time);
-                    } else if (action == 0) {
-                        saveTimeToBoxpvpDisconnect(username, time);
+                    boolean exists = checkIfRecordExistsBoxpvp(username, time);
+
+                    if (!exists) {
+                        if (action == 1 && time > lastDisconnectTimeBoxpvp) {
+                            saveTimeToBoxpvpConnect(username, time);
+                            newConnectRowsCountBoxpvp++;
+                        } else if (action == 0 && time > lastDisconnectTimeBoxpvp) {
+                            saveTimeToBoxpvpDisconnect(username, time);
+                            newDisconnectRowsCountBoxpvp++;
+                        }
                     }
                 }
+            } 
+
+            System.out.println("Added " + username + " >>> " + newConnectRowsCountBoxpvp + "/" + newDisconnectRowsCountBoxpvp);
+            if (newConnectRowsCountBoxpvp != newDisconnectRowsCountBoxpvp) {
+                System.out.println("<> Error " + username);
             }
         }
+    }
+
+    private boolean checkIfRecordExistsBoxpvp(String username, int time) {
+        String tableName = "pt_data_box_" + username;
+        String checkRecordQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE connect = :time OR disconnect = :time";
+        Long count = (Long) entityManager.createNativeQuery(checkRecordQuery)
+                .setParameter("time", time)
+                .getSingleResult();
+        return count != null && count.intValue() > 0;
     }
 
     private void createAndSaveBoxpvpPlaytimeDataTable(String username) {
@@ -264,6 +385,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         String tableName = "pt_data_box_" + username;
         String updateQuery = "UPDATE " + tableName + " SET disconnect = :time WHERE disconnect IS NULL";
         entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
+    }
+
+    private int getLastDisconnectTimeBoxpvp(String username) {
+        String tableName = "pt_data_box_" + username;
+        String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
     //  Prison
@@ -291,19 +419,44 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
             createAndSavePrisonPlaytimeDataTable(username);
     
+            //DEBUG
+            int lastDisconnectTimePrison = getLastDisconnectTimePrison(username);
+            int newConnectRowsCountPrison = 0;
+            int newDisconnectRowsCountPrison = 0;
+
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
             
                 if (time != null && action != null) {
-                    if (action == 1) {
-                        saveTimeToPrisonConnect(username, time);
-                    } else if (action == 0) {
-                        saveTimeToPrisonDisconnect(username, time);
+                    boolean exists = checkIfRecordExistsPrison(username, time);
+
+                    if (!exists) {
+                        if (action == 1 && time > lastDisconnectTimePrison) {
+                            saveTimeToPrisonConnect(username, time);
+                            newConnectRowsCountPrison++;
+                        } else if (action == 0 && time > lastDisconnectTimePrison) {
+                            saveTimeToPrisonDisconnect(username, time);
+                            newDisconnectRowsCountPrison++;
+                        }
                     }
                 }
+            } 
+
+            System.out.println("Added " + username + " >>> " + newConnectRowsCountPrison + "/" + newDisconnectRowsCountPrison);
+            if (newConnectRowsCountPrison != newDisconnectRowsCountPrison) {
+                System.out.println("<> Error " + username);
             }
         }
+    }
+
+    private boolean checkIfRecordExistsPrison(String username, int time) {
+        String tableName = "pt_data_pris_" + username;
+        String checkRecordQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE connect = :time OR disconnect = :time";
+        Long count = (Long) entityManager.createNativeQuery(checkRecordQuery)
+                .setParameter("time", time)
+                .getSingleResult();
+        return count != null && count.intValue() > 0;
     }
 
     private void createAndSavePrisonPlaytimeDataTable(String username) {
@@ -322,6 +475,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         String tableName = "pt_data_pris_" + username;
         String updateQuery = "UPDATE " + tableName + " SET disconnect = :time WHERE disconnect IS NULL";
         entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
+    }
+
+    private int getLastDisconnectTimePrison(String username) {
+        String tableName = "pt_data_pris_" + username;
+        String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
     //  Events
@@ -349,19 +509,44 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     
             createAndSaveEventsPlaytimeDataTable(username);
     
+            //DEBUG
+            int lastDisconnectTimeEvents = getLastDisconnectTimeEvents(username);
+            int newConnectRowsCountEvents = 0;
+            int newDisconnectRowsCountEvents = 0;
+
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
             
                 if (time != null && action != null) {
-                    if (action == 1) {
-                        saveTimeToEventsConnect(username, time);
-                    } else if (action == 0) {
-                        saveTimeToEventsDisconnect(username, time);
+                    boolean exists = checkIfRecordExistsEvents(username, time);
+
+                    if (!exists) {
+                        if (action == 1 && time > lastDisconnectTimeEvents) {
+                            saveTimeToEventsConnect(username, time);
+                            newConnectRowsCountEvents++;
+                        } else if (action == 0 && time > lastDisconnectTimeEvents) {
+                            saveTimeToEventsDisconnect(username, time);
+                            newDisconnectRowsCountEvents++;
+                        }
                     }
                 }
+            } 
+
+            System.out.println("Added " + username + " >>> " + newConnectRowsCountEvents + "/" + newDisconnectRowsCountEvents);
+            if (newConnectRowsCountEvents != newDisconnectRowsCountEvents) {
+                System.out.println("<> Error " + username);
             }
         }
+    }
+
+    private boolean checkIfRecordExistsEvents(String username, int time) {
+        String tableName = "pt_data_eve_" + username;
+        String checkRecordQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE connect = :time OR disconnect = :time";
+        Long count = (Long) entityManager.createNativeQuery(checkRecordQuery)
+                .setParameter("time", time)
+                .getSingleResult();
+        return count != null && count.intValue() > 0;
     }
 
     private void createAndSaveEventsPlaytimeDataTable(String username) {
@@ -382,66 +567,76 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         entityManager.createNativeQuery(updateQuery).setParameter("time", time).executeUpdate();
     }
 
+    private int getLastDisconnectTimeEvents(String username) {
+        String tableName = "pt_data_eve_" + username;
+        String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        return lastDisconnectTime != null ? lastDisconnectTime : 0;
+    }
+
+    //  Timestamp to Date convertion
+
     //  Survival
     @Override
     @Transactional
     public void convertTimestampToDateSurvival() {
         Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_surv_%'");
-
+    
         @SuppressWarnings("unchecked")
         List<String> tableNames = tablesQuery.getResultList();
-
+    
         for (String tableName : tableNames) {
             Query query = entityManager.createNativeQuery("SELECT connect, disconnect FROM " + tableName);
-
+    
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
-
+    
             for (Object[] result : results) {
-            Integer connectSeconds = (Integer) result[0];
-            Integer disconnectSeconds = (Integer) result[1];
-
-            LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
-            LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-            createTableIfNotExistsSurvival(tableName);
-            updateTableSurvival(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
+                Integer connectSeconds = (Integer) result[0];
+                Integer disconnectSeconds = (Integer) result[1];
+    
+                LocalDateTime connectDateTime = Instant.ofEpochSecond(connectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+    
+                createTableIfNotExistsSurvival(tableName);
+                updateTableSurvival(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
             }
         }
     }
 
     private void createTableIfNotExistsSurvival(String tableName) {
-        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_surv_" + tableName + "'");
+        String realTableName = tableName.substring("pt_data_surv_".length());
+        String newTableName = "pt_data_calc_surv_" + realTableName;
     
-        Long tableExists = (Long) checkTableQuery.getSingleResult();
+        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
+                                           .getSingleResult()
+                                           .equals(1L);
     
-        if (tableExists == 0) {
-            String createTableQuery = "CREATE TABLE pt_data_calc_surv_" + tableName + " (" +
-                "connect_year INT, " +
-                "connect_month INT, " +
-                "connect_day INT, " +
-                "connect_hour INT, " +
-                "connect_min INT, " +
-                "connect_sec INT, " +
-                "connect_datetime DATETIME, " +
-                "connect_weeknum INT, " +
-                "disconnect_year INT, " +
-                "disconnect_month INT, " +
-                "disconnect_day INT, " +
-                "disconnect_hour INT, " +
-                "disconnect_min INT, " +
-                "disconnect_sec INT, " +
-                "disconnect_datetime DATETIME, " +
-                "is_passed_midnight BOOLEAN, " +
-                "midnight_epoch INT, " +
-                "playtime INT, " +
-                "playtime_before_midnight INT, " +
-                "playtime_after_midnight INT, " +
-                "all_playtime INT)";
+        if (!tableExists) {
+            String createTableQuery = "CREATE TABLE " + newTableName + " (" +
+                    "connect_year INT, " +
+                    "connect_month INT, " +
+                    "connect_day INT, " +
+                    "connect_hour INT, " +
+                    "connect_min INT, " +
+                    "connect_sec INT, " +
+                    "connect_datetime DATETIME, " +
+                    "connect_weeknum INT, " +
+                    "disconnect_year INT, " +
+                    "disconnect_month INT, " +
+                    "disconnect_day INT, " +
+                    "disconnect_hour INT, " +
+                    "disconnect_min INT, " +
+                    "disconnect_sec INT, " +
+                    "disconnect_datetime DATETIME, " +
+                    "is_passed_midnight BOOLEAN, " +
+                    "midnight_epoch INT, " +
+                    "playtime INT, " +
+                    "playtime_before_midnight INT, " +
+                    "playtime_after_midnight INT, " +
+                    "all_playtime INT)";
     
-            Query createTable = entityManager.createNativeQuery(createTableQuery);
-    
-            createTable.executeUpdate();
+            entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
     
@@ -482,15 +677,17 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             playtimeAfterMidnight = 0;
             allPlaytime = disconnectSeconds - connectSeconds;
         }
+
+        String realTableName = tableName.substring("pt_data_surv_".length());
     
-        String insertQuery = "INSERT INTO pt_data_calc_surv_" + tableName + " (" +
-                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
-    
+        String insertQuery = "INSERT INTO pt_data_calc_surv_" + realTableName + " (" +
+            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
                 .setParameter("connectMonth", connectMonth)
@@ -545,37 +742,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     }
 
     private void createTableIfNotExistsSkyblock(String tableName) {
-        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_sky_" + tableName + "'");
+        String realTableName = tableName.substring("pt_data_sky_".length());
+        String newTableName = "pt_data_calc_sky_" + realTableName;
     
-        Long tableExists = (Long) checkTableQuery.getSingleResult();
+        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
+                                           .getSingleResult()
+                                           .equals(1L);
     
-        if (tableExists == 0) {
-            String createTableQuery = "CREATE TABLE pt_data_calc_sky_" + tableName + " (" +
-                "connect_year INT, " +
-                "connect_month INT, " +
-                "connect_day INT, " +
-                "connect_hour INT, " +
-                "connect_min INT, " +
-                "connect_sec INT, " +
-                "connect_datetime DATETIME, " +
-                "connect_weeknum INT, " +
-                "disconnect_year INT, " +
-                "disconnect_month INT, " +
-                "disconnect_day INT, " +
-                "disconnect_hour INT, " +
-                "disconnect_min INT, " +
-                "disconnect_sec INT, " +
-                "disconnect_datetime DATETIME, " +
-                "is_passed_midnight BOOLEAN, " +
-                "midnight_epoch INT, " +
-                "playtime INT, " +
-                "playtime_before_midnight INT, " +
-                "playtime_after_midnight INT, " +
-                "all_playtime INT)";
+        if (!tableExists) {
+            String createTableQuery = "CREATE TABLE " + newTableName + " (" +
+                    "connect_year INT, " +
+                    "connect_month INT, " +
+                    "connect_day INT, " +
+                    "connect_hour INT, " +
+                    "connect_min INT, " +
+                    "connect_sec INT, " +
+                    "connect_datetime DATETIME, " +
+                    "connect_weeknum INT, " +
+                    "disconnect_year INT, " +
+                    "disconnect_month INT, " +
+                    "disconnect_day INT, " +
+                    "disconnect_hour INT, " +
+                    "disconnect_min INT, " +
+                    "disconnect_sec INT, " +
+                    "disconnect_datetime DATETIME, " +
+                    "is_passed_midnight BOOLEAN, " +
+                    "midnight_epoch INT, " +
+                    "playtime INT, " +
+                    "playtime_before_midnight INT, " +
+                    "playtime_after_midnight INT, " +
+                    "all_playtime INT)";
     
-            Query createTable = entityManager.createNativeQuery(createTableQuery);
-    
-            createTable.executeUpdate();
+            entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
     
@@ -617,14 +815,16 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             allPlaytime = disconnectSeconds - connectSeconds;
         }
     
-        String insertQuery = "INSERT INTO pt_data_calc_sky_" + tableName + " (" +
-                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+        String realTableName = tableName.substring("pt_data_sky_".length());
     
+        String insertQuery = "INSERT INTO pt_data_calc_sky_" + realTableName + " (" +
+            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
                 .setParameter("connectMonth", connectMonth)
@@ -679,37 +879,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     }
 
     private void createTableIfNotExistsCreative(String tableName) {
-        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_creat_" + tableName + "'");
+        String realTableName = tableName.substring("pt_data_creat_".length());
+        String newTableName = "pt_data_calc_creat_" + realTableName;
     
-        Long tableExists = (Long) checkTableQuery.getSingleResult();
+        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
+                                           .getSingleResult()
+                                           .equals(1L);
     
-        if (tableExists == 0) {
-            String createTableQuery = "CREATE TABLE pt_data_calc_creat_" + tableName + " (" +
-                "connect_year INT, " +
-                "connect_month INT, " +
-                "connect_day INT, " +
-                "connect_hour INT, " +
-                "connect_min INT, " +
-                "connect_sec INT, " +
-                "connect_datetime DATETIME, " +
-                "connect_weeknum INT, " +
-                "disconnect_year INT, " +
-                "disconnect_month INT, " +
-                "disconnect_day INT, " +
-                "disconnect_hour INT, " +
-                "disconnect_min INT, " +
-                "disconnect_sec INT, " +
-                "disconnect_datetime DATETIME, " +
-                "is_passed_midnight BOOLEAN, " +
-                "midnight_epoch INT, " +
-                "playtime INT, " +
-                "playtime_before_midnight INT, " +
-                "playtime_after_midnight INT, " +
-                "all_playtime INT)";
+        if (!tableExists) {
+            String createTableQuery = "CREATE TABLE " + newTableName + " (" +
+                    "connect_year INT, " +
+                    "connect_month INT, " +
+                    "connect_day INT, " +
+                    "connect_hour INT, " +
+                    "connect_min INT, " +
+                    "connect_sec INT, " +
+                    "connect_datetime DATETIME, " +
+                    "connect_weeknum INT, " +
+                    "disconnect_year INT, " +
+                    "disconnect_month INT, " +
+                    "disconnect_day INT, " +
+                    "disconnect_hour INT, " +
+                    "disconnect_min INT, " +
+                    "disconnect_sec INT, " +
+                    "disconnect_datetime DATETIME, " +
+                    "is_passed_midnight BOOLEAN, " +
+                    "midnight_epoch INT, " +
+                    "playtime INT, " +
+                    "playtime_before_midnight INT, " +
+                    "playtime_after_midnight INT, " +
+                    "all_playtime INT)";
     
-            Query createTable = entityManager.createNativeQuery(createTableQuery);
-    
-            createTable.executeUpdate();
+            entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
     
@@ -751,14 +952,16 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             allPlaytime = disconnectSeconds - connectSeconds;
         }
     
-        String insertQuery = "INSERT INTO pt_data_calc_creat_" + tableName + " (" +
-                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+        String realTableName = tableName.substring("pt_data_creat_".length());
     
+        String insertQuery = "INSERT INTO pt_data_calc_creat_" + realTableName + " (" +
+            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
                 .setParameter("connectMonth", connectMonth)
@@ -813,37 +1016,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     }
 
     private void createTableIfNotExistsBoxpvp(String tableName) {
-        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_box_" + tableName + "'");
+        String realTableName = tableName.substring("pt_data_box_".length());
+        String newTableName = "pt_data_calc_box_" + realTableName;
     
-        Long tableExists = (Long) checkTableQuery.getSingleResult();
+        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
+                                           .getSingleResult()
+                                           .equals(1L);
     
-        if (tableExists == 0) {
-            String createTableQuery = "CREATE TABLE pt_data_calc_box_" + tableName + " (" +
-                "connect_year INT, " +
-                "connect_month INT, " +
-                "connect_day INT, " +
-                "connect_hour INT, " +
-                "connect_min INT, " +
-                "connect_sec INT, " +
-                "connect_datetime DATETIME, " +
-                "connect_weeknum INT, " +
-                "disconnect_year INT, " +
-                "disconnect_month INT, " +
-                "disconnect_day INT, " +
-                "disconnect_hour INT, " +
-                "disconnect_min INT, " +
-                "disconnect_sec INT, " +
-                "disconnect_datetime DATETIME, " +
-                "is_passed_midnight BOOLEAN, " +
-                "midnight_epoch INT, " +
-                "playtime INT, " +
-                "playtime_before_midnight INT, " +
-                "playtime_after_midnight INT, " +
-                "all_playtime INT)";
+        if (!tableExists) {
+            String createTableQuery = "CREATE TABLE " + newTableName + " (" +
+                    "connect_year INT, " +
+                    "connect_month INT, " +
+                    "connect_day INT, " +
+                    "connect_hour INT, " +
+                    "connect_min INT, " +
+                    "connect_sec INT, " +
+                    "connect_datetime DATETIME, " +
+                    "connect_weeknum INT, " +
+                    "disconnect_year INT, " +
+                    "disconnect_month INT, " +
+                    "disconnect_day INT, " +
+                    "disconnect_hour INT, " +
+                    "disconnect_min INT, " +
+                    "disconnect_sec INT, " +
+                    "disconnect_datetime DATETIME, " +
+                    "is_passed_midnight BOOLEAN, " +
+                    "midnight_epoch INT, " +
+                    "playtime INT, " +
+                    "playtime_before_midnight INT, " +
+                    "playtime_after_midnight INT, " +
+                    "all_playtime INT)";
     
-            Query createTable = entityManager.createNativeQuery(createTableQuery);
-    
-            createTable.executeUpdate();
+            entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
     
@@ -885,14 +1089,16 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             allPlaytime = disconnectSeconds - connectSeconds;
         }
     
-        String insertQuery = "INSERT INTO pt_data_calc_box_" + tableName + " (" +
-                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+        String realTableName = tableName.substring("pt_data_box_".length());
     
+        String insertQuery = "INSERT INTO pt_data_calc_box_" + realTableName + " (" +
+            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
                 .setParameter("connectMonth", connectMonth)
@@ -947,37 +1153,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     }
 
     private void createTableIfNotExistsPrison(String tableName) {
-        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_pris_" + tableName + "'");
+        String realTableName = tableName.substring("pt_data_pris_".length());
+        String newTableName = "pt_data_calc_pris_" + realTableName;
     
-        Long tableExists = (Long) checkTableQuery.getSingleResult();
+        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
+                                           .getSingleResult()
+                                           .equals(1L);
     
-        if (tableExists == 0) {
-            String createTableQuery = "CREATE TABLE pt_data_calc_pris_" + tableName + " (" +
-                "connect_year INT, " +
-                "connect_month INT, " +
-                "connect_day INT, " +
-                "connect_hour INT, " +
-                "connect_min INT, " +
-                "connect_sec INT, " +
-                "connect_datetime DATETIME, " +
-                "connect_weeknum INT, " +
-                "disconnect_year INT, " +
-                "disconnect_month INT, " +
-                "disconnect_day INT, " +
-                "disconnect_hour INT, " +
-                "disconnect_min INT, " +
-                "disconnect_sec INT, " +
-                "disconnect_datetime DATETIME, " +
-                "is_passed_midnight BOOLEAN, " +
-                "midnight_epoch INT, " +
-                "playtime INT, " +
-                "playtime_before_midnight INT, " +
-                "playtime_after_midnight INT, " +
-                "all_playtime INT)";
+        if (!tableExists) {
+            String createTableQuery = "CREATE TABLE " + newTableName + " (" +
+                    "connect_year INT, " +
+                    "connect_month INT, " +
+                    "connect_day INT, " +
+                    "connect_hour INT, " +
+                    "connect_min INT, " +
+                    "connect_sec INT, " +
+                    "connect_datetime DATETIME, " +
+                    "connect_weeknum INT, " +
+                    "disconnect_year INT, " +
+                    "disconnect_month INT, " +
+                    "disconnect_day INT, " +
+                    "disconnect_hour INT, " +
+                    "disconnect_min INT, " +
+                    "disconnect_sec INT, " +
+                    "disconnect_datetime DATETIME, " +
+                    "is_passed_midnight BOOLEAN, " +
+                    "midnight_epoch INT, " +
+                    "playtime INT, " +
+                    "playtime_before_midnight INT, " +
+                    "playtime_after_midnight INT, " +
+                    "all_playtime INT)";
     
-            Query createTable = entityManager.createNativeQuery(createTableQuery);
-    
-            createTable.executeUpdate();
+            entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
     
@@ -1019,14 +1226,16 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             allPlaytime = disconnectSeconds - connectSeconds;
         }
     
-        String insertQuery = "INSERT INTO pt_data_calc_pris_" + tableName + " (" +
-                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+        String realTableName = tableName.substring("pt_data_pris_".length());
     
+        String insertQuery = "INSERT INTO pt_data_calc_pris_" + realTableName + " (" +
+            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
                 .setParameter("connectMonth", connectMonth)
@@ -1081,37 +1290,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     }
 
     private void createTableIfNotExistsEvents(String tableName) {
-        Query checkTableQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = 'pt_data_calc_eve_" + tableName + "'");
+        String realTableName = tableName.substring("pt_data_eve_".length());
+        String newTableName = "pt_data_calc_eve_" + realTableName;
     
-        Long tableExists = (Long) checkTableQuery.getSingleResult();
+        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
+                                           .getSingleResult()
+                                           .equals(1L);
     
-        if (tableExists == 0) {
-            String createTableQuery = "CREATE TABLE pt_data_calc_eve_" + tableName + " (" +
-                "connect_year INT, " +
-                "connect_month INT, " +
-                "connect_day INT, " +
-                "connect_hour INT, " +
-                "connect_min INT, " +
-                "connect_sec INT, " +
-                "connect_datetime DATETIME, " +
-                "connect_weeknum INT, " +
-                "disconnect_year INT, " +
-                "disconnect_month INT, " +
-                "disconnect_day INT, " +
-                "disconnect_hour INT, " +
-                "disconnect_min INT, " +
-                "disconnect_sec INT, " +
-                "disconnect_datetime DATETIME, " +
-                "is_passed_midnight BOOLEAN, " +
-                "midnight_epoch INT, " +
-                "playtime INT, " +
-                "playtime_before_midnight INT, " +
-                "playtime_after_midnight INT, " +
-                "all_playtime INT)";
+        if (!tableExists) {
+            String createTableQuery = "CREATE TABLE " + newTableName + " (" +
+                    "connect_year INT, " +
+                    "connect_month INT, " +
+                    "connect_day INT, " +
+                    "connect_hour INT, " +
+                    "connect_min INT, " +
+                    "connect_sec INT, " +
+                    "connect_datetime DATETIME, " +
+                    "connect_weeknum INT, " +
+                    "disconnect_year INT, " +
+                    "disconnect_month INT, " +
+                    "disconnect_day INT, " +
+                    "disconnect_hour INT, " +
+                    "disconnect_min INT, " +
+                    "disconnect_sec INT, " +
+                    "disconnect_datetime DATETIME, " +
+                    "is_passed_midnight BOOLEAN, " +
+                    "midnight_epoch INT, " +
+                    "playtime INT, " +
+                    "playtime_before_midnight INT, " +
+                    "playtime_after_midnight INT, " +
+                    "all_playtime INT)";
     
-            Query createTable = entityManager.createNativeQuery(createTableQuery);
-    
-            createTable.executeUpdate();
+            entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
     
@@ -1153,14 +1363,16 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             allPlaytime = disconnectSeconds - connectSeconds;
         }
     
-        String insertQuery = "INSERT INTO pt_data_calc_eve_" + tableName + " (" +
-                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+        String realTableName = tableName.substring("pt_data_eve_".length());
     
+        String insertQuery = "INSERT INTO pt_data_calc_eve_" + realTableName + " (" +
+            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
+            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
+            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
+            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
+            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
+            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
                 .setParameter("connectMonth", connectMonth)

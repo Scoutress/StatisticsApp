@@ -2,7 +2,6 @@ package lt.scoutress.StatisticsApp.services;
 
 import java.util.List;
 
-import lt.scoutress.StatisticsApp.entity.Calculations;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 
 public interface StatisticsService {
@@ -33,8 +32,4 @@ public interface StatisticsService {
 
     //public void calculatePlaytimeInLastHalfYear();
 
-    
-    public List<Calculations> findCalculations();
-
-    
 }

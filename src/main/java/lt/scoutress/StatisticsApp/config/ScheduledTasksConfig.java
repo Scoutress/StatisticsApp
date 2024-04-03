@@ -64,7 +64,7 @@ public class ScheduledTasksConfig {
         statisticsServiceImpl.calculateTotalDailyMcTickets();
         System.out.println("Scheduled task 3 is completed");
     }
-    
+
     @Scheduled(cron = "0 6 * * * *")
     @Scheduled(cron = "0 36 * * * *")
     public void runTask4() {
@@ -88,7 +88,7 @@ public class ScheduledTasksConfig {
         statisticsServiceImpl.calculateDailyDcMessagesRatio();
         System.out.println("Scheduled task 6 is completed");
     }
-    
+
     @Scheduled(cron = "0 12 * * * *")
     @Scheduled(cron = "0 42 * * * *")
     public void runTask7() {
@@ -145,8 +145,8 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 10 is completed");
     }
 
-    // @Scheduled(cron = "0 20 * * * *")
-    // @Scheduled(cron = "0 50 * * * *")
+    @Scheduled(cron = "0 20 * * * *")
+    @Scheduled(cron = "0 50 * * * *")
     public void runTask11() {
         System.out.println("Scheduled task 11 is started");
         playtimeServiceImpl.convertTimestampToDateSurvival();
@@ -164,5 +164,13 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 12 is started");
         productivityServiceImpl.calculateActivityPerHalfYear();
         System.out.println("Scheduled task 12 is completed");
+    }
+
+    @Scheduled(cron = "0 22 * * * *")
+    @Scheduled(cron = "0 52 * * * *")
+    public void runTask13() {
+        System.out.println("Scheduled task 13 is started");
+        productivityServiceImpl.checkIfEmployeeHasEnoughDaysForPromotion();
+        System.out.println("Scheduled task 13 is completed");
     }
 }

@@ -15,7 +15,7 @@ public interface ProductivityService {
 
     void calculateActivityPerHalfYear();
 
-    //boolean isEnoughDaysForPromotion();
+    void checkIfEmployeeHasEnoughDaysForPromotion();
 
     //boolean isPlaytimeInLastHalfYearOK();
 

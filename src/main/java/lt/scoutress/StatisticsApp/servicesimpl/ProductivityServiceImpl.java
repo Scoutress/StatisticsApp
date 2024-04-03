@@ -14,6 +14,7 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.entity.Productivity;
+import lt.scoutress.StatisticsApp.entity.ProductivityCalc;
 import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.repositories.ProductivityRepository;
 import lt.scoutress.StatisticsApp.services.ProductivityService;
@@ -51,25 +52,38 @@ public class ProductivityServiceImpl implements ProductivityService{
             String username = employee.getUsername();
             String level = employee.getLevel();
 
-            Productivity existingRecord = entityManager.createQuery("SELECT p FROM Productivity p WHERE p.username = :username", Productivity.class)
+            ProductivityCalc existingProductivityCalcRecord = entityManager.createQuery("SELECT pc FROM ProductivityCalc pc WHERE pc.username = :username", ProductivityCalc.class)
                 .setParameter("username", username)
                 .getResultList()
                 .stream()
                 .findFirst()
                 .orElse(null);
 
-            if (existingRecord == null) {
-                Productivity newRecord = new Productivity();
-                newRecord.setUsername(username);
-                if (level != null && !level.isEmpty()) {
-                    newRecord.setLevel(level);
-                }
-                entityManager.persist(newRecord);
+            if (existingProductivityCalcRecord == null) {
+                ProductivityCalc newProductivityCalcRecord = new ProductivityCalc();
+                newProductivityCalcRecord.setUsername(username);
+                newProductivityCalcRecord.setLevel(level);
+                entityManager.persist(newProductivityCalcRecord);
             } else {
-                if (level != null && !level.isEmpty()) {
-                    existingRecord.setLevel(level);
-                    entityManager.merge(existingRecord);
-                }
+                existingProductivityCalcRecord.setLevel(level);
+                entityManager.merge(existingProductivityCalcRecord);
+            }
+
+            Productivity existingProductivityRecord = entityManager.createQuery("SELECT p FROM Productivity p WHERE p.username = :username", Productivity.class)
+                .setParameter("username", username)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+            if (existingProductivityRecord == null) {
+                Productivity newProductivityRecord = new Productivity();
+                newProductivityRecord.setUsername(username);
+                newProductivityRecord.setLevel(level);
+                entityManager.persist(newProductivityRecord);
+            } else {
+                existingProductivityRecord.setLevel(level);
+                entityManager.merge(existingProductivityRecord);
             }
         }
     }
@@ -145,5 +159,46 @@ public class ProductivityServiceImpl implements ProductivityService{
         query.setParameter("username", username);
         query.setParameter("totalActivity", parsedTotalActivity);
         query.executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void checkIfEmployeeHasEnoughDaysForPromotion() {
+        Query query = entityManager.createQuery("SELECT pc.username, pc.level FROM ProductivityCalc pc");
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> resultList = query.getResultList();
+        
+        for (Object[] result : resultList) {
+            String username = (String) result[0];
+            String level = (String) result[1];
+            
+            boolean hasEnoughDaysForPromotion = isEnoughDaysForPromotion(username, level);
+            
+            Query updateQuery = entityManager.createQuery("UPDATE ProductivityCalc pc SET pc.isEnoughDaysForPromotion = :hasEnoughDaysForPromotion WHERE pc.username = :username");
+            updateQuery.setParameter("hasEnoughDaysForPromotion", hasEnoughDaysForPromotion);
+            updateQuery.setParameter("username", username);
+            updateQuery.executeUpdate();
+        }
+    }
+
+    private boolean isEnoughDaysForPromotion(String username, String level) {
+        Query daysSinceJoinQuery = entityManager.createQuery("SELECT e.daysSinceJoin FROM Employee e WHERE e.username = :username");
+        daysSinceJoinQuery.setParameter("username", username);
+        int daysSinceJoin = (int) daysSinceJoinQuery.getSingleResult();
+
+        boolean enoughDaysForPromotion = false;
+
+        if (level.equals("Helper")) {
+            enoughDaysForPromotion = daysSinceJoin > 30;
+        } else if (level.equals("Support")) {
+            enoughDaysForPromotion = daysSinceJoin > 90;
+        } else if (level.equals("ChatMod")) {
+            enoughDaysForPromotion = daysSinceJoin > 210;
+        } else if (level.equals("Overseer")) {
+            enoughDaysForPromotion = daysSinceJoin > 570;
+        }
+        
+        return enoughDaysForPromotion;
     }
 }

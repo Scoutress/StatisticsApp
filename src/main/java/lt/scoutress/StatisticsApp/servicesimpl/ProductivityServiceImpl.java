@@ -28,7 +28,7 @@ public class ProductivityServiceImpl implements ProductivityService{
 
     @Override
     public List<Productivity> findAll() {
-        return productivityRepository.findAll();
+        return productivityRepository.findAllByLevel();
     }
 
     @Override

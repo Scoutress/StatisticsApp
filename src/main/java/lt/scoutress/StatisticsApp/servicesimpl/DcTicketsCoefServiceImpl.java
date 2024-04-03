@@ -32,7 +32,6 @@ public class DcTicketsCoefServiceImpl implements DcTicketsCoefService{
         return dcTicketsCoef;
     }
 
-    @SuppressWarnings("null")
     @Override
     public DcTicketsCoef save(DcTicketsCoef dcTicketsCoef) {
         return dcTicketsCoefRepository.save(dcTicketsCoef);

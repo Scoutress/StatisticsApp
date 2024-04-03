@@ -43,7 +43,6 @@ public class StatisticsServiceImpl implements StatisticsService {
         return mcTicketsRepository.findAll();
     }
 
-    @SuppressWarnings("null")
     @Override
     public void saveMcTickets(McTicketsCounting mcTickets) {
         mcTicketsRepository.save(mcTickets);

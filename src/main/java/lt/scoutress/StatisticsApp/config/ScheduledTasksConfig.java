@@ -157,4 +157,12 @@ public class ScheduledTasksConfig {
         playtimeServiceImpl.convertTimestampToDateEvents();
         System.out.println("Scheduled task 11 is completed");
     }
+
+    @Scheduled(cron = "0 20 * * * *")
+    @Scheduled(cron = "0 50 * * * *")
+    public void runTask12() {
+        System.out.println("Scheduled task 12 is started");
+        productivityServiceImpl.calculateActivityPerHalfYear();
+        System.out.println("Scheduled task 12 is completed");
+    }
 }

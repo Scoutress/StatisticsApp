@@ -158,7 +158,6 @@ public class StatisticsController {
         return "stats/mc-tickets/mc-tickets-form-edit";
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/saveMcTickets")
     public String saveMcTickets(@ModelAttribute("mcTickets") McTicketsCounting mcTickets) {
         mcTicketsRepository.save(mcTickets);
@@ -192,7 +191,6 @@ public class StatisticsController {
         return "add-data/dc-messages-add";
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/saveDcMessages")
     public String saveDcMessages(@ModelAttribute("dcMessages") DcMessagesTexted dcMessages) {
         dcMessagesRepository.save(dcMessages);

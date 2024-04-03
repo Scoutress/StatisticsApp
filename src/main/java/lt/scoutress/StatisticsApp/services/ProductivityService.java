@@ -13,6 +13,8 @@ public interface ProductivityService {
     
     void copyUsernamesAndLevels();
 
+    void calculateActivityPerHalfYear();
+
     //boolean isEnoughDaysForPromotion();
 
     //boolean isPlaytimeInLastHalfYearOK();

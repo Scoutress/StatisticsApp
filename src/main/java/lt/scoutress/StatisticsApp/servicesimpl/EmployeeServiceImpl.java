@@ -25,7 +25,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.findAllByOrderByLevel();
     }
 
-    @SuppressWarnings("null")
     @Override
     public void addEmployee(Employee employee) {
         employeeRepository.save(employee);
@@ -41,7 +40,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-    @SuppressWarnings("null")
     @Override
     public Employee save(Employee employee) {
         return employeeRepository.save(employee);

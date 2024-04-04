@@ -173,4 +173,12 @@ public class ScheduledTasksConfig {
         productivityServiceImpl.checkIfEmployeeHasEnoughDaysForPromotion();
         System.out.println("Scheduled task 13 is completed");
     }
+
+    @Scheduled(cron = "0 24 * * * *")
+    @Scheduled(cron = "0 54 * * * *")
+    public void runTask14() {
+        System.out.println("Scheduled task 14 is started");
+        productivityServiceImpl.checkIfEmployeeLastHalfYearPlaytimeIsOK();
+        System.out.println("Scheduled task 14 is completed");
+    }
 }

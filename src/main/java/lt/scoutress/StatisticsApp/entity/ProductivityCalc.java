@@ -21,17 +21,17 @@ public class ProductivityCalc {
     private Boolean isEnoughDaysForPromotion;
 
     @Column(name = "is_playtime_in_last_half_year_ok")
-    private Boolean isPlaytimeInLastHalfYearOK;
+    private Boolean isPlaytimeInLastHalfYearOk;
 
     public ProductivityCalc(){}
 
     public ProductivityCalc(Integer id, String username, String level, Boolean isEnoughDaysForPromotion,
-            Boolean isPlaytimeInLastHalfYearOK) {
+            Boolean isPlaytimeInLastHalfYearOk) {
         this.id = id;
         this.username = username;
         this.level = level;
         this.isEnoughDaysForPromotion = isEnoughDaysForPromotion;
-        this.isPlaytimeInLastHalfYearOK = isPlaytimeInLastHalfYearOK;
+        this.isPlaytimeInLastHalfYearOk = isPlaytimeInLastHalfYearOk;
     }
 
     public Integer getId() {
@@ -66,11 +66,11 @@ public class ProductivityCalc {
         this.isEnoughDaysForPromotion = isEnoughDaysForPromotion;
     }
 
-    public Boolean getIsPlaytimeInLastHalfYearOK() {
-        return isPlaytimeInLastHalfYearOK;
+    public Boolean getIsPlaytimeInLastHalfYearOk() {
+        return isPlaytimeInLastHalfYearOk;
     }
 
-    public void setIsPlaytimeInLastHalfYearOK(Boolean isPlaytimeInLastHalfYearOK) {
-        this.isPlaytimeInLastHalfYearOK = isPlaytimeInLastHalfYearOK;
+    public void setIsPlaytimeInLastHalfYearOk(Boolean isPlaytimeInLastHalfYearOk) {
+        this.isPlaytimeInLastHalfYearOk = isPlaytimeInLastHalfYearOk;
     }
 }

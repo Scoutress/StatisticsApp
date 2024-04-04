@@ -17,7 +17,7 @@ public interface ProductivityService {
 
     void checkIfEmployeeHasEnoughDaysForPromotion();
 
-    //boolean isPlaytimeInLastHalfYearOK();
+    void checkIfEmployeeLastHalfYearPlaytimeIsOK();
 
     //void calculateAvgPlaytimeWithCoef();
     

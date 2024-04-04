@@ -201,4 +201,36 @@ public class ProductivityServiceImpl implements ProductivityService{
         
         return enoughDaysForPromotion;
     }
+
+    @Override
+    @Transactional
+    public void checkIfEmployeeLastHalfYearPlaytimeIsOK(){
+        Query query = entityManager.createQuery("SELECT pc.username, pc.level FROM ProductivityCalc pc");
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> resultList = query.getResultList();
+        
+        for (Object[] result : resultList) {
+            String username = (String) result[0];
+            
+            boolean hasOkPlaytimeInLastHalfYear = isPlaytimeInLastHalfYearOK(username);
+            
+            Query updateQuery = entityManager.createQuery("UPDATE ProductivityCalc pc SET pc.isPlaytimeInLastHalfYearOk = :hasOkPlaytimeInLastHalfYear WHERE pc.username = :username");
+            updateQuery.setParameter("hasOkPlaytimeInLastHalfYear", hasOkPlaytimeInLastHalfYear);
+            updateQuery.setParameter("username", username);
+            updateQuery.executeUpdate();
+        }
+    }
+
+    private boolean isPlaytimeInLastHalfYearOK(String username){
+        Query lastHalfYearPlaytimeQuery = entityManager.createQuery("SELECT e.activityPerHalfYear FROM Productivity e WHERE e.username = :username");
+        lastHalfYearPlaytimeQuery.setParameter("username", username);
+        Double lastHalfYearPlaytime = (Double) lastHalfYearPlaytimeQuery.getSingleResult();
+
+        if (lastHalfYearPlaytime > 2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

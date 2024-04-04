@@ -20,15 +20,13 @@ public interface PlaytimeService {
 
     public void migrateEventsPlaytimeData();
 
-    public void convertTimestampToDateSurvival();
+    // New methods
+    // 1
+    //public void migratePlaytimeData();
 
-    public void convertTimestampToDateSkyblock();
+    // 2
+    public void convertTimestampToDate();
 
-    public void convertTimestampToDateCreative();
-
-    public void convertTimestampToDateBoxpvp();
-
-    public void convertTimestampToDatePrison();
-
-    public void convertTimestampToDateEvents();
+    // 3
+    public void calculateDailyPlaytimePerServerPerEmployee();
 }

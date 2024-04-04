@@ -149,36 +149,44 @@ public class ScheduledTasksConfig {
     @Scheduled(cron = "0 50 * * * *")
     public void runTask11() {
         System.out.println("Scheduled task 11 is started");
-        playtimeServiceImpl.convertTimestampToDateSurvival();
-        playtimeServiceImpl.convertTimestampToDateSkyblock();
-        playtimeServiceImpl.convertTimestampToDateCreative();
-        playtimeServiceImpl.convertTimestampToDateBoxpvp();
-        playtimeServiceImpl.convertTimestampToDatePrison();
-        playtimeServiceImpl.convertTimestampToDateEvents();
+        playtimeServiceImpl.convertTimestampToDate();
         System.out.println("Scheduled task 11 is completed");
     }
 
-    @Scheduled(cron = "0 20 * * * *")
-    @Scheduled(cron = "0 50 * * * *")
+    @Scheduled(cron = "0 22 * * * *")
+    @Scheduled(cron = "0 52 * * * *")
     public void runTask12() {
         System.out.println("Scheduled task 12 is started");
         productivityServiceImpl.calculateActivityPerHalfYear();
         System.out.println("Scheduled task 12 is completed");
     }
 
-    @Scheduled(cron = "0 22 * * * *")
-    @Scheduled(cron = "0 52 * * * *")
+    @Scheduled(cron = "0 24 * * * *")
+    @Scheduled(cron = "0 54 * * * *")
     public void runTask13() {
         System.out.println("Scheduled task 13 is started");
         productivityServiceImpl.checkIfEmployeeHasEnoughDaysForPromotion();
         System.out.println("Scheduled task 13 is completed");
     }
 
-    @Scheduled(cron = "0 24 * * * *")
-    @Scheduled(cron = "0 54 * * * *")
+    @Scheduled(cron = "0 26 * * * *")
+    @Scheduled(cron = "0 56 * * * *")
     public void runTask14() {
         System.out.println("Scheduled task 14 is started");
         productivityServiceImpl.checkIfEmployeeLastHalfYearPlaytimeIsOK();
         System.out.println("Scheduled task 14 is completed");
+    }
+
+    // @Scheduled(cron = "0 * * * * *")
+    // @Scheduled(cron = "15 * * * * *")
+    // @Scheduled(cron = "30 * * * * *")
+    // @Scheduled(cron = "45 * * * * *")
+
+    // @Scheduled(cron = "0 28 * * * *")
+    // @Scheduled(cron = "0 58 * * * *")
+    public void runTask15() {
+        System.out.println("Scheduled task 15 is started");
+        playtimeServiceImpl.calculateDailyPlaytimePerServerPerEmployee();
+        System.out.println("Scheduled task 15 is completed");
     }
 }

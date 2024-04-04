@@ -141,12 +141,12 @@ public class ProductivityServiceImpl implements ProductivityService{
 
     private List<String> getTableNames(String username) {
         List<String> tableNames = new ArrayList<>();
-        tableNames.add("pt_data_calc_surv_" + username);
-        tableNames.add("pt_data_calc_sky_" + username);
-        tableNames.add("pt_data_calc_creat_" + username);
-        tableNames.add("pt_data_calc_box_" + username);
-        tableNames.add("pt_data_calc_pris_" + username);
-        tableNames.add("pt_data_calc_eve_" + username);
+        tableNames.add("pt_data_calc_survival_" + username);
+        tableNames.add("pt_data_calc_skyblock_" + username);
+        tableNames.add("pt_data_calc_creative_" + username);
+        tableNames.add("pt_data_calc_boxpvp_" + username);
+        tableNames.add("pt_data_calc_prison_" + username);
+        tableNames.add("pt_data_calc_events_" + username);
         return tableNames;
     }
 

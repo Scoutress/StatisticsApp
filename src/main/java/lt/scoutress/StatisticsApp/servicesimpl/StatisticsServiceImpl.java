@@ -5,6 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,8 @@ import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCalculations;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
 import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.repositories.McTicketsRepository;
+import lt.scoutress.StatisticsApp.services.EmployeeService;
+import lt.scoutress.StatisticsApp.services.McTicketsService;
 import lt.scoutress.StatisticsApp.services.StatisticsService;
 
 @Service
@@ -30,12 +33,16 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private final McTicketsRepository mcTicketsRepository;
     private final EmployeeRepository employeeRepository;
+    private final EmployeeService employeeService;
+    private final McTicketsService mcTicketsService;
 
     public StatisticsServiceImpl(EntityManager entityManager, McTicketsRepository mcTicketsRepository,
-            EmployeeRepository employeeRepository) {
+            EmployeeRepository employeeRepository, EmployeeService employeeService, McTicketsService mcTicketsService) {
         this.entityManager = entityManager;
         this.mcTicketsRepository = mcTicketsRepository;
         this.employeeRepository = employeeRepository;
+        this.employeeService = employeeService;
+        this.mcTicketsService = mcTicketsService;
     }
 
     @Override
@@ -65,42 +72,42 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     @Transactional
     public void calculateTotalDailyMcTickets() {
-        Query query = entityManager.createQuery("SELECT m FROM McTicketsCounting m");
+        List<Employee> employees = employeeService.getAllEmployees();
+        
+        LocalDate oldestDate = mcTicketsService.getOldestDate();
+        LocalDate newestDate = mcTicketsService.getNewestDate();
+        LocalDate currentDate = oldestDate;
 
-        @SuppressWarnings("unchecked")
-        List<McTicketsCounting> mcTicketsCounts = query.getResultList();
+        while (!currentDate.isAfter(newestDate)) {
+            List<String> usernames = new ArrayList<>();
 
-        for (McTicketsCounting mcTicketsCount : mcTicketsCounts) {
-            Double sum = 0.0;
+            for (Employee employee : employees) {
+                usernames.add(employee.getUsername());
+            }
 
-            sum += (mcTicketsCount.getMboti212() != null) ? mcTicketsCount.getMboti212() : 0.0;
-            sum += (mcTicketsCount.getFurija() != null) ? mcTicketsCount.getFurija() : 0.0;
-            sum += (mcTicketsCount.getErnestasltu12() != null) ? mcTicketsCount.getErnestasltu12() : 0.0;
-            sum += (mcTicketsCount.getD0fka() != null) ? mcTicketsCount.getD0fka() : 0.0;
-            sum += (mcTicketsCount.getMelitalove() != null) ? mcTicketsCount.getMelitalove() : 0.0;
-            sum += (mcTicketsCount.getLibete() != null) ? mcTicketsCount.getLibete() : 0.0;
-            sum += (mcTicketsCount.getAriena() != null) ? mcTicketsCount.getAriena() : 0.0;
-            sum += (mcTicketsCount.getSharans() != null) ? mcTicketsCount.getSharans() : 0.0;
-            sum += (mcTicketsCount.getLabashey() != null) ? mcTicketsCount.getLabashey() : 0.0;
-            sum += (mcTicketsCount.getEverly() != null) ? mcTicketsCount.getEverly() : 0.0;
-            sum += (mcTicketsCount.getRichpica() != null) ? mcTicketsCount.getRichpica() : 0.0;
-            sum += (mcTicketsCount.getShizo() != null) ? mcTicketsCount.getShizo() : 0.0;
-            sum += (mcTicketsCount.getIevius() != null) ? mcTicketsCount.getIevius() : 0.0;
-            sum += (mcTicketsCount.getBobsbuilder() != null) ? mcTicketsCount.getBobsbuilder() : 0.0;
-            sum += (mcTicketsCount.getPlrxq() != null) ? mcTicketsCount.getPlrxq() : 0.0;
-            sum += (mcTicketsCount.getEmsiukemiau() != null) ? mcTicketsCount.getEmsiukemiau() : 0.0;
+            LocalDate date = currentDate;
+
+            double totalTicketsSum = 0.0;
+
+            for (String username : usernames) {
+                String lowercaseUsername = username.toLowerCase();
+
+                if (mcTicketsService.columnExists(lowercaseUsername)) {
+                    Double ticketsCount = mcTicketsService.getTicketsCountByUsernameAndDate(lowercaseUsername, currentDate);
+
+                    if (ticketsCount != null) {
+                        totalTicketsSum += ticketsCount;
+                    }
+                }
+            }
 
             McTicketsCalculations mcTicketsCalculations = new McTicketsCalculations();
-            mcTicketsCalculations.setId(mcTicketsCount.getId());
-            mcTicketsCalculations.setDailyTicketsSum(sum);
+            mcTicketsCalculations.setDate(date);
+            mcTicketsCalculations.setDailyTicketsSum(totalTicketsSum);
 
-            McTicketsCalculations existingCalculations = entityManager.find(McTicketsCalculations.class, mcTicketsCount.getId());
-            if (existingCalculations != null) {
-                existingCalculations.setDailyTicketsSum(sum);
-                existingCalculations.setDate(mcTicketsCount.getDate());
-            } else {
-                entityManager.merge(mcTicketsCalculations);
-            }
+            mcTicketsService.saveMcTicketsCalculations(mcTicketsCalculations);
+
+            currentDate = currentDate.plusDays(1);
         }
     }
 
@@ -117,7 +124,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                     LocalDate currentDay = dates.get(i);
         
                     List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove", "libete", "ariena", "sharans", "labashey", "everly", "richpica",
-                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
+                    "shizo", "bobsbuilder", "plrxq", "emsiukemiau");
 
                     for (String user : users) {
                         Double currentDayTicketsDaily = (Double) entityManager.createNativeQuery(
@@ -169,7 +176,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                             .setParameter("currentDay", currentDay)
                             .executeUpdate();
 
-                            
                             if (roundedTicketsRatio > 1) {
                                 System.out.println(user);
                                 System.out.println(currentDay);
@@ -186,7 +192,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<String> columnNames = Arrays.asList("mboti212_dc_messages", "furija_dc_messages", "ernestasltu12_dc_messages",
                 "d0fka_dc_messages", "melitaLove_dc_messages", "libete_dc_messages", "ariena_dc_messages",
                 "sharans_dc_messages", "labashey_dc_messages", "everly_dc_messages", "richPica_dc_messages",
-                "shizo_dc_messages", "ievius_dc_messages", "bobsBuilder_dc_messages", "plrxq_dc_messages",
+                "shizo_dc_messages", "bobsBuilder_dc_messages", "plrxq_dc_messages",
                 "emsiukemiau_dc_messages");
     
         StringBuilder queryBuilder = new StringBuilder("SELECT ");
@@ -245,7 +251,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
             List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove",
                     "libete", "ariena", "sharans", "labashey", "everly", "richpica",
-                    "shizo", "ievius", "bobsbuilder", "plrxq", "emsiukemiau");
+                    "shizo", "bobsbuilder", "plrxq", "emsiukemiau");
 
             for (String user : users) {
                 Double currentDayDcMessagesDaily = (Double) entityManager.createNativeQuery(
@@ -314,7 +320,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 "SUM(COALESCE(everly_dc_messages, 0)) AS sum_everly_dc_messages, " +
                 "SUM(COALESCE(richpica_dc_messages, 0)) AS sum_richpica_dc_messages, " +
                 "SUM(COALESCE(shizo_dc_messages, 0)) AS sum_shizo_dc_messages, " +
-                "SUM(COALESCE(ievius_dc_messages, 0)) AS sum_ievius_dc_messages, " +
                 "SUM(COALESCE(bobsbuilder_dc_messages, 0)) AS sum_bobsbuilder_dc_messages, " +
                 "SUM(COALESCE(plrxq_dc_messages, 0)) AS sum_plrxq_dc_messages, " +
                 "SUM(COALESCE(emsiukemiau_dc_messages, 0)) AS sum_emsiukemiau_dc_messages " +
@@ -335,7 +340,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                 "COUNT(everly_dc_messages) AS total_count_everly, " +
                 "COUNT(richpica_dc_messages) AS total_count_richpica, " +
                 "COUNT(shizo_dc_messages) AS total_count_shizo, " +
-                "COUNT(ievius_dc_messages) AS total_count_ievius, " +
                 "COUNT(bobsbuilder_dc_messages) AS total_count_bobsbuilder, " +
                 "COUNT(plrxq_dc_messages) AS total_count_plrxq, " +
                 "COUNT(emsiukemiau_dc_messages) AS total_count_emsiukemiau " +
@@ -379,7 +383,6 @@ public class StatisticsServiceImpl implements StatisticsService {
                     "WHEN username = 'everly' THEN :avg_everly_dc_messages " +
                     "WHEN username = 'RichPica' THEN :avg_richpica_dc_messages " +
                     "WHEN username = 'Shizo' THEN :avg_shizo_dc_messages " +
-                    "WHEN username = 'Ievius' THEN :avg_ievius_dc_messages " +
                     "WHEN username = 'BobsBuilder' THEN :avg_bobsbuilder_dc_messages " +
                     "WHEN username = 'plrxq' THEN :avg_plrxq_dc_messages " +
                     "WHEN username = 'Emsiukemiau' THEN :avg_emsiukemiau_dc_messages " +
@@ -398,10 +401,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         updateQuery.setParameter("avg_everly_dc_messages",          longAverages[9]);
         updateQuery.setParameter("avg_richpica_dc_messages",        longAverages[10]);
         updateQuery.setParameter("avg_shizo_dc_messages",           longAverages[11]);
-        updateQuery.setParameter("avg_ievius_dc_messages",          longAverages[12]);
-        updateQuery.setParameter("avg_bobsbuilder_dc_messages",     longAverages[13]);
-        updateQuery.setParameter("avg_plrxq_dc_messages",           longAverages[14]);
-        updateQuery.setParameter("avg_emsiukemiau_dc_messages",     longAverages[15]);
+        updateQuery.setParameter("avg_bobsbuilder_dc_messages",     longAverages[12]);
+        updateQuery.setParameter("avg_plrxq_dc_messages",           longAverages[13]);
+        updateQuery.setParameter("avg_emsiukemiau_dc_messages",     longAverages[14]);
 
         updateQuery.executeUpdate();
     }
@@ -414,7 +416,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<String> usernameList = Arrays.asList(
             "Mboti212", "Furija", "Ernestasltu12", "D0fka", "MelitaLove",
             "Libete", "Ariena", "Sharans", "labashey", "everly",
-            "RichPica", "Shizo", "Ievius", "BobsBuilder", "plrxq",
+            "RichPica", "Shizo", "BobsBuilder", "plrxq",
             "Emsiukemiau"
         );
 

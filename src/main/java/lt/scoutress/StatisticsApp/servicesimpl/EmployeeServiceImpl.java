@@ -44,4 +44,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee save(Employee employee) {
         return employeeRepository.save(employee);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Employee> getAllEmployees() {
+        Query query = entityManager.createQuery("SELECT e FROM Employee e");
+        return query.getResultList();
+    }
 }

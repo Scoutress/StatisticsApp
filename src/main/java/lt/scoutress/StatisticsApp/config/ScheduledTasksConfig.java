@@ -65,48 +65,53 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 3 is completed");
     }
 
-    @Scheduled(cron = "0 6 * * * *")
-    @Scheduled(cron = "0 36 * * * *")
+    // @Scheduled(cron = "0 * * * * *")
+    // @Scheduled(cron = "15 * * * * *")
+    // @Scheduled(cron = "30 * * * * *")
+    // @Scheduled(cron = "45 * * * * *")
+
+    // @Scheduled(cron = "0 6 * * * *")
+    // @Scheduled(cron = "0 36 * * * *")
     public void runTask4() {
         System.out.println("Scheduled task 4 is started");
         statisticsServiceImpl.calculateDailyTicketRatio();
         System.out.println("Scheduled task 4 is completed");
     }
 
-    @Scheduled(cron = "0 8 * * * *")
-    @Scheduled(cron = "0 38 * * * *")
+    // @Scheduled(cron = "0 8 * * * *")
+    // @Scheduled(cron = "0 38 * * * *")
     public void runTask5() {
         System.out.println("Scheduled task 5 is started");
         statisticsServiceImpl.calculateTotalDailyDcMessages();
         System.out.println("Scheduled task 5 is completed");
     }
 
-    @Scheduled(cron = "0 10 * * * *")
-    @Scheduled(cron = "0 40 * * * *")
+    // @Scheduled(cron = "0 10 * * * *")
+    // @Scheduled(cron = "0 40 * * * *")
     public void runTask6() {
         System.out.println("Scheduled task 6 is started");
         statisticsServiceImpl.calculateDailyDcMessagesRatio();
         System.out.println("Scheduled task 6 is completed");
     }
 
-    @Scheduled(cron = "0 12 * * * *")
-    @Scheduled(cron = "0 42 * * * *")
+    // @Scheduled(cron = "0 12 * * * *")
+    // @Scheduled(cron = "0 42 * * * *")
     public void runTask7() {
         System.out.println("Scheduled task 7 is started");
         statisticsServiceImpl.calculateAvgDailyDcMessages();
         System.out.println("Scheduled task 7 is completed");
     }
 
-    @Scheduled(cron = "0 14 * * * *")
-    @Scheduled(cron = "0 44 * * * *")
+    // @Scheduled(cron = "0 14 * * * *")
+    // @Scheduled(cron = "0 44 * * * *")
     public void runTask8() {
         System.out.println("Scheduled task 8 is started");
         statisticsServiceImpl.calculateAvgDailyDcMessagesRatio();
         System.out.println("Scheduled task 8 is completed");
     }
 
-    @Scheduled(cron = "0 16 * * * *")
-    @Scheduled(cron = "0 46 * * * *")
+    // @Scheduled(cron = "0 16 * * * *")
+    // @Scheduled(cron = "0 46 * * * *")
     public void runTask9() {
         System.out.println("Scheduled task 9 is started");
         statisticsServiceImpl.calculateAvgDailyMcTickets();
@@ -121,8 +126,8 @@ public class ScheduledTasksConfig {
     //     System.out.println("Scheduled task 11 is completed");
     // }
 
-    @Scheduled(cron = "0 18 * * * *")
-    @Scheduled(cron = "0 48 * * * *")
+    // @Scheduled(cron = "0 18 * * * *")
+    // @Scheduled(cron = "0 48 * * * *")
     public void runTask10() {
         System.out.println("Scheduled task 10 is started");
         System.out.println("Survival:");
@@ -145,32 +150,32 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 10 is completed");
     }
 
-    @Scheduled(cron = "0 20 * * * *")
-    @Scheduled(cron = "0 50 * * * *")
+    // @Scheduled(cron = "0 20 * * * *")
+    // @Scheduled(cron = "0 50 * * * *")
     public void runTask11() {
         System.out.println("Scheduled task 11 is started");
         playtimeServiceImpl.convertTimestampToDate();
         System.out.println("Scheduled task 11 is completed");
     }
 
-    @Scheduled(cron = "0 22 * * * *")
-    @Scheduled(cron = "0 52 * * * *")
+    // @Scheduled(cron = "0 22 * * * *")
+    // @Scheduled(cron = "0 52 * * * *")
     public void runTask12() {
         System.out.println("Scheduled task 12 is started");
         productivityServiceImpl.calculateActivityPerHalfYear();
         System.out.println("Scheduled task 12 is completed");
     }
 
-    @Scheduled(cron = "0 24 * * * *")
-    @Scheduled(cron = "0 54 * * * *")
+    // @Scheduled(cron = "0 24 * * * *")
+    // @Scheduled(cron = "0 54 * * * *")
     public void runTask13() {
         System.out.println("Scheduled task 13 is started");
         productivityServiceImpl.checkIfEmployeeHasEnoughDaysForPromotion();
         System.out.println("Scheduled task 13 is completed");
     }
 
-    @Scheduled(cron = "0 26 * * * *")
-    @Scheduled(cron = "0 56 * * * *")
+    // @Scheduled(cron = "0 26 * * * *")
+    // @Scheduled(cron = "0 56 * * * *")
     public void runTask14() {
         System.out.println("Scheduled task 14 is started");
         productivityServiceImpl.checkIfEmployeeLastHalfYearPlaytimeIsOK();

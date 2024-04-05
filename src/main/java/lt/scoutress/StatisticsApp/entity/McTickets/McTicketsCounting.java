@@ -16,12 +16,6 @@ public class McTicketsCounting {
     @Column(name = "date")
     private LocalDate date;
 
-    @Column(name = "itsvaidas")
-    private Double itsvaidas;
-
-    @Column(name = "scoutress")
-    private Double scoutress;
-
     @Column(name = "mboti212")
     private Double mboti212;
 
@@ -58,9 +52,6 @@ public class McTicketsCounting {
     @Column(name = "shizo")
     private Double shizo;
 
-    @Column(name = "ievius")
-    private Double ievius;
-
     @Column(name = "bobsbuilder")
     private Double bobsbuilder;
 
@@ -72,14 +63,12 @@ public class McTicketsCounting {
 
     public McTicketsCounting(){}
 
-    public McTicketsCounting(Integer id, LocalDate date, Double itsvaidas, Double scoutress, Double mboti212,
+    public McTicketsCounting(Integer id, LocalDate date, Double mboti212,
             Double furija, Double ernestasltu12, Double d0fka, Double melitalove, Double libete, Double ariena,
-            Double sharans, Double labashey, Double everly, Double richpica, Double shizo, Double ievius,
+            Double sharans, Double labashey, Double everly, Double richpica, Double shizo,
             Double bobsbuilder, Double plrxq, Double emsiukemiau) {
         this.id = id;
         this.date = date;
-        this.itsvaidas = itsvaidas;
-        this.scoutress = scoutress;
         this.mboti212 = mboti212;
         this.furija = furija;
         this.ernestasltu12 = ernestasltu12;
@@ -92,7 +81,6 @@ public class McTicketsCounting {
         this.everly = everly;
         this.richpica = richpica;
         this.shizo = shizo;
-        this.ievius = ievius;
         this.bobsbuilder = bobsbuilder;
         this.plrxq = plrxq;
         this.emsiukemiau = emsiukemiau;
@@ -112,22 +100,6 @@ public class McTicketsCounting {
 
     public void setDate(LocalDate date) {
         this.date = date;
-    }
-
-    public Double getItsvaidas() {
-        return itsvaidas;
-    }
-
-    public void setItsvaidas(Double itsvaidas) {
-        this.itsvaidas = itsvaidas;
-    }
-
-    public Double getScoutress() {
-        return scoutress;
-    }
-
-    public void setScoutress(Double scoutress) {
-        this.scoutress = scoutress;
     }
 
     public Double getMboti212() {
@@ -224,14 +196,6 @@ public class McTicketsCounting {
 
     public void setShizo(Double shizo) {
         this.shizo = shizo;
-    }
-
-    public Double getIevius() {
-        return ievius;
-    }
-
-    public void setIevius(Double ievius) {
-        this.ievius = ievius;
     }
 
     public Double getBobsbuilder() {

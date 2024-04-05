@@ -1,5 +1,6 @@
 package lt.scoutress.StatisticsApp.services;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,13 @@ public interface McTicketsService {
 
     Optional<McTicketsCounting> findById(int id);
 
-    // void save(McTicketsAnswered mcTickets);
-    
+    LocalDate getOldestDate();
+
+    LocalDate getNewestDate();
+
+    boolean columnExists(String lowercaseUsername);
+
+    Double getTicketsCountByUsernameAndDate(String lowercaseUsername, LocalDate currentDate);
+
+    void saveMcTicketsCalculations(McTicketsCalculations mcTicketsCalculations);
 }

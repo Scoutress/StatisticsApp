@@ -33,15 +33,13 @@
                 <tr>
                     <th>Level</th>
                     <th>Username</th>
-                    <th>Activity /180d.</th>
-                    <th>Playtime</th>
+                    <th>Playtime /180d.</th>
+                    <th>Avg. playtime /1d.</th>
                     <th>AFK playtime</th>
-                    <th>Mc tickets</th>
-                    <th>Mc tickets comp. %</th>
-                    <th>Dc activity</th>
-                    <th>Dc activity comp. %</th>
-                    <th>Dc tickets</th>
-                    <th>Dc tickets comp. %</th>
+                    <th>Avg. mc tickets /1d.</th>
+                    <th>Mc tickets ratio, %</th>
+                    <th>Avg. dc tickets /1d.</th>
+                    <th>Dc tickets ratio, %</th>
                     <th>Productivity</th>
                     <th>Recommendation</th>
                 </tr>
@@ -55,8 +53,6 @@
                     <td th:text="${product.playtimeAfk}"></td>
                     <td th:text="${product.mcTickets}"></td>
                     <td th:text="${product.mcTicketsComp}"></td>
-                    <td th:text="${product.dcMessages}"></td>
-                    <td th:text="${product.dcMessagesComp}"></td>
                     <td th:text="${product.dcTickets}"></td>
                     <td th:text="${product.dcTicketsComp}"></td>
                     <td th:text="${product.productivity}"></td>

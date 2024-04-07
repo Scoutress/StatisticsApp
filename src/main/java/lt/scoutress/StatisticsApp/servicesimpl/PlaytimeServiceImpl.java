@@ -837,6 +837,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         double playtimeDouble = (double) playtime / 3600.0;
 
         //String updateQuery = "UPDATE daily_playtime SET " + column + " = :playtime WHERE date = :dailyPlaytimeDate";
+        @SuppressWarnings("unused")
         String sqlQuery = "INSERT INTO daily_playtime (date, " + column + ") VALUES (:dailyPlaytimeDate, :playtime)" + " ON DUPLICATE KEY UPDATE " + column + " = :playtime";
 
         Date date = java.sql.Date.valueOf(dailyPlaytimeDate.getDate());

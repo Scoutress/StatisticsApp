@@ -62,4 +62,11 @@ public class EmployeeController {
         employeeService.deleteById(id);
         return "redirect:/employees/personal";
     }
+
+    @GetMapping("/promotions")
+    public String getAllEmployeesPromotionsData(Model model) {
+        List<Employee> employees = employeeService.findAll();
+        model.addAttribute("employees", employees);
+        return "employees/employee-promotions";
+    }
 }

@@ -120,15 +120,20 @@ public class StatisticsServiceImpl implements StatisticsService {
                 "SELECT DISTINCT date FROM mc_tickets_calculations", LocalDate.class)
                 .getResultList();
 
-                for (int i = 1; i < dates.size(); i++) {
+                for (int i = 0; i < dates.size(); i++){
                     LocalDate currentDay = dates.get(i);
         
-                    List<String> users = Arrays.asList("mboti212", "furija", "ernestasltu12", "d0fka", "melitalove", "libete", "ariena", "sharans", "labashey", "everly", "richpica",
-                    "shizo", "bobsbuilder", "plrxq", "emsiukemiau");
+                    List<Employee> employees = employeeService.getAllEmployees();
 
-                    for (String user : users) {
+                    List<String> usernames = new ArrayList<>();
+
+                    for (Employee employee : employees) {
+                        usernames.add(employee.getUsername());
+                    }
+
+                    for (String username : usernames) {
                         Double currentDayTicketsDaily = (Double) entityManager.createNativeQuery(
-                            "SELECT COALESCE(" + user + ", 0) FROM mc_tickets_count WHERE date = :currentDay")
+                            "SELECT COALESCE(" + username + ", 0) FROM mc_tickets_count WHERE date = :currentDay")
                             .setParameter("currentDay", currentDay)
                             .getSingleResult();
                         Double currentDayTicketsSum = (Double) entityManager.createNativeQuery(
@@ -139,7 +144,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
                 double roundedTicketsRatio = 0;
 
-                if (currentDayTicketsSum != 0) {
+                if (currentDayTicketsSum != null) {
                     double currentDayTicketsDailyDouble = currentDayTicketsDaily.doubleValue();
                     double currentDayTicketsSumDouble = currentDayTicketsSum.doubleValue();
 
@@ -158,26 +163,26 @@ public class StatisticsServiceImpl implements StatisticsService {
 
                 if (doubleExistingRecordCount.intValue() == 0) {
                     entityManager.createNativeQuery(
-                            "INSERT INTO mc_tickets_calculations (date, " + user + "_ratio) VALUES (:currentDay, :roundedTicketsRatio)")
+                            "INSERT INTO mc_tickets_calculations (date, " + username + "_ratio) VALUES (:currentDay, :roundedTicketsRatio)")
                             .setParameter("currentDay", currentDay)
                             .setParameter("roundedTicketsRatio", roundedTicketsRatio)
                             .executeUpdate();
 
                             if (roundedTicketsRatio > 1) {
-                                System.out.println(user);
+                                System.out.println(username);
                                 System.out.println(currentDay);
                                 System.out.println(roundedTicketsRatio);
                             }
                             
                 } else {
                     entityManager.createNativeQuery(
-                            "UPDATE mc_tickets_calculations SET " + user + "_ratio = :roundedTicketsRatio WHERE date = :currentDay")
+                            "UPDATE mc_tickets_calculations SET " + username + "_ratio = :roundedTicketsRatio WHERE date = :currentDay")
                             .setParameter("roundedTicketsRatio", roundedTicketsRatio)
                             .setParameter("currentDay", currentDay)
                             .executeUpdate();
 
                             if (roundedTicketsRatio > 1) {
-                                System.out.println(user);
+                                System.out.println(username);
                                 System.out.println(currentDay);
                                 System.out.println(roundedTicketsRatio);
                             }

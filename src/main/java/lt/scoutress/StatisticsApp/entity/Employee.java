@@ -54,12 +54,25 @@ public class Employee {
 
     @Column(name = "events_code")
     private Integer eventsCode;
+
+    @Column(name = "to_support")
+    private LocalDate toSupport;
+
+    @Column(name = "to_chatmod")
+    private LocalDate toChatmod;
+
+    @Column(name = "to_overseer")
+    private LocalDate toOverseer;
+
+    @Column(name = "to_manager")
+    private LocalDate toManager;
     
     public Employee() {}
 
     public Employee(Integer employeeId, String username, String level, String language, String firstName,
             String lastName, String email, LocalDate joinDate, Integer daysSinceJoin, Integer survivalCode,
-            Integer skyblockCode, Integer creativeCode, Integer boxpvpCode, Integer prisonCode, Integer eventsCode) {
+            Integer skyblockCode, Integer creativeCode, Integer boxpvpCode, Integer prisonCode, Integer eventsCode,
+            LocalDate toSupport, LocalDate toChatmod, LocalDate toOverseer, LocalDate toManager) {
         this.employeeId = employeeId;
         this.username = username;
         this.level = level;
@@ -75,6 +88,10 @@ public class Employee {
         this.boxpvpCode = boxpvpCode;
         this.prisonCode = prisonCode;
         this.eventsCode = eventsCode;
+        this.toSupport = toSupport;
+        this.toChatmod = toChatmod;
+        this.toOverseer = toOverseer;
+        this.toManager = toManager;
     }
 
     public Integer getEmployeeId() {
@@ -197,4 +214,35 @@ public class Employee {
         this.eventsCode = eventsCode;
     }
 
+    public LocalDate getToSupport() {
+        return toSupport;
+    }
+
+    public void setToSupport(LocalDate toSupport) {
+        this.toSupport = toSupport;
+    }
+
+    public LocalDate getToChatmod() {
+        return toChatmod;
+    }
+
+    public void setToChatmod(LocalDate toChatmod) {
+        this.toChatmod = toChatmod;
+    }
+
+    public LocalDate getToOverseer() {
+        return toOverseer;
+    }
+
+    public void setToOverseer(LocalDate toOverseer) {
+        this.toOverseer = toOverseer;
+    }
+
+    public LocalDate getToManager() {
+        return toManager;
+    }
+
+    public void setToManager(LocalDate toManager) {
+        this.toManager = toManager;
+    }
 }

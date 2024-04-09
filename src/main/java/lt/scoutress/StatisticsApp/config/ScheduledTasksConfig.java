@@ -6,23 +6,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lt.scoutress.StatisticsApp.entity.Employee;
-import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
+import lt.scoutress.StatisticsApp.servicesimpl.McTicketsServiceImpl;
 
 @Configuration
 @EnableScheduling
 public class ScheduledTasksConfig {
 
-    private final EntityManager entityManager;
     private final EmployeeRepository employeeRepository;
+    private final McTicketsServiceImpl mcTicketsServiceImpl;
 
-    public ScheduledTasksConfig(EmployeeRepository employeeRepository, EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public ScheduledTasksConfig(EmployeeRepository employeeRepository, McTicketsServiceImpl mcTicketsServiceImpl) {
         this.employeeRepository = employeeRepository;
+        this.mcTicketsServiceImpl = mcTicketsServiceImpl;
     }
 
     // For copy-paste (DEBUG)
@@ -38,18 +36,8 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 1 is started");
         List<Employee> employees = employeeRepository.findAll();
         for (Employee employee : employees) {
-            calculateMcTicketsAvgDaily(employee);
+            mcTicketsServiceImpl.calculateMcTicketsAvgDaily(employee);
         }
         System.out.println("Scheduled task 1 is completed");
-    }
-
-    public void calculateMcTicketsAvgDaily(Employee employee) {
-        List<McTickets> mcTickets = employee.getMcTickets();
-        if (mcTickets != null && !mcTickets.isEmpty()) {
-            double totalMcTicketsCount = mcTickets.stream().mapToInt(McTickets::getMcTicketsCount).sum();
-            double averageMcTicketsCount = totalMcTicketsCount / mcTickets.size();
-            McTicketsAvgDaily mcTicketsAvgDaily = new McTicketsAvgDaily(employee, averageMcTicketsCount);
-            entityManager.persist(mcTicketsAvgDaily);
-        }
     }
 }

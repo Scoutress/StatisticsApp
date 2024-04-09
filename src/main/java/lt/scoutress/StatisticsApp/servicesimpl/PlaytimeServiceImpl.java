@@ -24,7 +24,7 @@ import lt.scoutress.StatisticsApp.repositories.PlaytimeRepository;
 import lt.scoutress.StatisticsApp.services.playtime.PlaytimeService;
 
 @Service
-public class PlaytimeServiceImpl implements PlaytimeService{
+public class PlaytimeServiceImpl implements PlaytimeService {
 
     @Autowired
     private EntityManager entityManager;
@@ -41,35 +41,36 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     public List<Playtime> findAll() {
         return playtimeRepository.findAll();
     }
-    
-    //  Migrating filtered data
 
-    //  Survival
+    // Migrating filtered data
+
+    // Survival
     @Override
     @Transactional
     public void migrateSurvivalPlaytimeData() {
         Query query = entityManager.createQuery("SELECT p.username, p.survival FROM PlaytimeDBCodes p");
-        
+
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndSurvivalCodes = query.getResultList();
-    
+
         for (Object[] usernameAndSurvivalCode : usernamesAndSurvivalCodes) {
             String username = (String) usernameAndSurvivalCode[0];
             String survivalCode = (String) usernameAndSurvivalCode[1];
-    
+
             if (survivalCode == null || survivalCode.isEmpty()) {
                 continue;
             }
 
-            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Survival c WHERE c.user = :survivalCode AND c.action IN (0, 1)");
+            Query timeQuery = entityManager.createQuery(
+                    "SELECT c.time, c.action FROM Survival c WHERE c.user = :survivalCode AND c.action IN (0, 1)");
             timeQuery.setParameter("survivalCode", survivalCode);
-    
+
             @SuppressWarnings("unchecked")
             List<Object[]> timeAndActionValues = timeQuery.getResultList();
-    
+
             createAndSaveSurvivalPlaytimeDataTable(username);
-    
-            //DEBUG
+
+            // DEBUG
             int lastDisconnectTimeSurvival = getLastDisconnectTimeSurvival(username);
             int newConnectRowsCountSurvival = 0;
             int newDisconnectRowsCountSurvival = 0;
@@ -77,7 +78,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
-            
+
                 if (time != null && action != null) {
                     boolean exists = checkIfRecordExistsSurvival(username, time);
 
@@ -91,9 +92,10 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                         }
                     }
                 }
-            } 
+            }
 
-            System.out.println("Added " + username + " >>> " + newConnectRowsCountSurvival + "/" + newDisconnectRowsCountSurvival);
+            System.out.println(
+                    "Added " + username + " >>> " + newConnectRowsCountSurvival + "/" + newDisconnectRowsCountSurvival);
             if (newConnectRowsCountSurvival != newDisconnectRowsCountSurvival) {
                 System.out.println("<> Error " + username);
             }
@@ -111,7 +113,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
     private void createAndSaveSurvivalPlaytimeDataTable(String username) {
         String tableName = "pt_data_survival_" + username;
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
         entityManager.createNativeQuery(createTableQuery).executeUpdate();
     }
 
@@ -130,16 +133,17 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private int getLastDisconnectTimeSurvival(String username) {
         String tableName = "pt_data_survival_" + username;
         String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
-        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery)
+                .getSingleResult();
         return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
-        
-    //  Skyblock
+
+    // Skyblock
     @Override
     @Transactional
     public void migrateSkyblockPlaytimeData() {
         Query query = entityManager.createQuery("SELECT p.username, p.skyblock FROM PlaytimeDBCodes p");
-        
+
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndSkyblockCodes = query.getResultList();
 
@@ -151,7 +155,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                 continue;
             }
 
-            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Skyblock c WHERE c.user = :skyblockCode AND c.action IN (0, 1)");
+            Query timeQuery = entityManager.createQuery(
+                    "SELECT c.time, c.action FROM Skyblock c WHERE c.user = :skyblockCode AND c.action IN (0, 1)");
             timeQuery.setParameter("skyblockCode", skyblockCode);
 
             @SuppressWarnings("unchecked")
@@ -166,7 +171,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
-            
+
                 if (time != null && action != null) {
                     boolean exists = checkIfRecordExistsSkyblock(username, time);
 
@@ -180,9 +185,10 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                         }
                     }
                 }
-            } 
+            }
 
-            System.out.println("Added " + username + " >>> " + newConnectRowsCountSkyblock + "/" + newDisconnectRowsCountSkyblock);
+            System.out.println(
+                    "Added " + username + " >>> " + newConnectRowsCountSkyblock + "/" + newDisconnectRowsCountSkyblock);
             if (newConnectRowsCountSkyblock != newDisconnectRowsCountSkyblock) {
                 System.out.println("<> Error " + username);
             }
@@ -200,7 +206,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
     private void createAndSaveSkyblockPlaytimeDataTable(String username) {
         String tableName = "pt_data_skyblock_" + username;
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
         entityManager.createNativeQuery(createTableQuery).executeUpdate();
     }
 
@@ -219,36 +226,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private int getLastDisconnectTimeSkyblock(String username) {
         String tableName = "pt_data_skyblock_" + username;
         String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
-        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery)
+                .getSingleResult();
         return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
-    //  Creative
+    // Creative
     @Override
     @Transactional
     public void migrateCreativePlaytimeData() {
         Query query = entityManager.createQuery("SELECT p.username, p.creative FROM PlaytimeDBCodes p");
-        
+
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndCreativeCodes = query.getResultList();
-    
+
         for (Object[] usernameAndCreativeCode : usernamesAndCreativeCodes) {
             String username = (String) usernameAndCreativeCode[0];
             String creativeCode = (String) usernameAndCreativeCode[1];
-    
+
             if (creativeCode == null || creativeCode.isEmpty()) {
                 continue;
             }
 
-            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Creative c WHERE c.user = :creativeCode AND c.action IN (0, 1)");
+            Query timeQuery = entityManager.createQuery(
+                    "SELECT c.time, c.action FROM Creative c WHERE c.user = :creativeCode AND c.action IN (0, 1)");
             timeQuery.setParameter("creativeCode", creativeCode);
-    
+
             @SuppressWarnings("unchecked")
             List<Object[]> timeAndActionValues = timeQuery.getResultList();
-    
+
             createAndSaveCreativePlaytimeDataTable(username);
-    
-            //DEBUG
+
+            // DEBUG
             int lastDisconnectTimeCreative = getLastDisconnectTimeCreative(username);
             int newConnectRowsCountCreative = 0;
             int newDisconnectRowsCountCreative = 0;
@@ -256,7 +265,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
-            
+
                 if (time != null && action != null) {
                     boolean exists = checkIfRecordExistsCreative(username, time);
 
@@ -270,9 +279,10 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                         }
                     }
                 }
-            } 
+            }
 
-            System.out.println("Added " + username + " >>> " + newConnectRowsCountCreative + "/" + newDisconnectRowsCountCreative);
+            System.out.println(
+                    "Added " + username + " >>> " + newConnectRowsCountCreative + "/" + newDisconnectRowsCountCreative);
             if (newConnectRowsCountCreative != newDisconnectRowsCountCreative) {
                 System.out.println("<> Error " + username);
             }
@@ -290,7 +300,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
     private void createAndSaveCreativePlaytimeDataTable(String username) {
         String tableName = "pt_data_creative_" + username;
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
         entityManager.createNativeQuery(createTableQuery).executeUpdate();
     }
 
@@ -309,36 +320,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private int getLastDisconnectTimeCreative(String username) {
         String tableName = "pt_data_creative_" + username;
         String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
-        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery)
+                .getSingleResult();
         return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
-    //  Boxpvp
+    // Boxpvp
     @Override
     @Transactional
     public void migrateBoxpvpPlaytimeData() {
         Query query = entityManager.createQuery("SELECT p.username, p.boxpvp FROM PlaytimeDBCodes p");
-        
+
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndBoxpvpCodes = query.getResultList();
-    
+
         for (Object[] usernameAndBoxpvpCode : usernamesAndBoxpvpCodes) {
             String username = (String) usernameAndBoxpvpCode[0];
             String boxpvpCode = (String) usernameAndBoxpvpCode[1];
-    
+
             if (boxpvpCode == null || boxpvpCode.isEmpty()) {
                 continue;
             }
 
-            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Boxpvp c WHERE c.user = :boxpvpCode AND c.action IN (0, 1)");
+            Query timeQuery = entityManager.createQuery(
+                    "SELECT c.time, c.action FROM Boxpvp c WHERE c.user = :boxpvpCode AND c.action IN (0, 1)");
             timeQuery.setParameter("boxpvpCode", boxpvpCode);
-    
+
             @SuppressWarnings("unchecked")
             List<Object[]> timeAndActionValues = timeQuery.getResultList();
-    
+
             createAndSaveBoxpvpPlaytimeDataTable(username);
-    
-            //DEBUG
+
+            // DEBUG
             int lastDisconnectTimeBoxpvp = getLastDisconnectTimeBoxpvp(username);
             int newConnectRowsCountBoxpvp = 0;
             int newDisconnectRowsCountBoxpvp = 0;
@@ -346,7 +359,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
-            
+
                 if (time != null && action != null) {
                     boolean exists = checkIfRecordExistsBoxpvp(username, time);
 
@@ -360,9 +373,10 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                         }
                     }
                 }
-            } 
+            }
 
-            System.out.println("Added " + username + " >>> " + newConnectRowsCountBoxpvp + "/" + newDisconnectRowsCountBoxpvp);
+            System.out.println(
+                    "Added " + username + " >>> " + newConnectRowsCountBoxpvp + "/" + newDisconnectRowsCountBoxpvp);
             if (newConnectRowsCountBoxpvp != newDisconnectRowsCountBoxpvp) {
                 System.out.println("<> Error " + username);
             }
@@ -380,7 +394,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
     private void createAndSaveBoxpvpPlaytimeDataTable(String username) {
         String tableName = "pt_data_boxpvp_" + username;
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
         entityManager.createNativeQuery(createTableQuery).executeUpdate();
     }
 
@@ -399,36 +414,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private int getLastDisconnectTimeBoxpvp(String username) {
         String tableName = "pt_data_boxpvp_" + username;
         String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
-        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery)
+                .getSingleResult();
         return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
-    //  Prison
+    // Prison
     @Override
     @Transactional
     public void migratePrisonPlaytimeData() {
         Query query = entityManager.createQuery("SELECT p.username, p.prison FROM PlaytimeDBCodes p");
-        
+
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndPrisonCodes = query.getResultList();
-    
+
         for (Object[] usernameAndPrisonCode : usernamesAndPrisonCodes) {
             String username = (String) usernameAndPrisonCode[0];
             String prisonCode = (String) usernameAndPrisonCode[1];
-    
+
             if (prisonCode == null || prisonCode.isEmpty()) {
                 continue;
             }
 
-            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Prison c WHERE c.user = :prisonCode AND c.action IN (0, 1)");
+            Query timeQuery = entityManager.createQuery(
+                    "SELECT c.time, c.action FROM Prison c WHERE c.user = :prisonCode AND c.action IN (0, 1)");
             timeQuery.setParameter("prisonCode", prisonCode);
-    
+
             @SuppressWarnings("unchecked")
             List<Object[]> timeAndActionValues = timeQuery.getResultList();
-    
+
             createAndSavePrisonPlaytimeDataTable(username);
-    
-            //DEBUG
+
+            // DEBUG
             int lastDisconnectTimePrison = getLastDisconnectTimePrison(username);
             int newConnectRowsCountPrison = 0;
             int newDisconnectRowsCountPrison = 0;
@@ -436,7 +453,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
-            
+
                 if (time != null && action != null) {
                     boolean exists = checkIfRecordExistsPrison(username, time);
 
@@ -450,9 +467,10 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                         }
                     }
                 }
-            } 
+            }
 
-            System.out.println("Added " + username + " >>> " + newConnectRowsCountPrison + "/" + newDisconnectRowsCountPrison);
+            System.out.println(
+                    "Added " + username + " >>> " + newConnectRowsCountPrison + "/" + newDisconnectRowsCountPrison);
             if (newConnectRowsCountPrison != newDisconnectRowsCountPrison) {
                 System.out.println("<> Error " + username);
             }
@@ -470,7 +488,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
     private void createAndSavePrisonPlaytimeDataTable(String username) {
         String tableName = "pt_data_prison_" + username;
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
         entityManager.createNativeQuery(createTableQuery).executeUpdate();
     }
 
@@ -489,36 +508,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private int getLastDisconnectTimePrison(String username) {
         String tableName = "pt_data_prison_" + username;
         String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
-        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery)
+                .getSingleResult();
         return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
-    //  Events
+    // Events
     @Override
     @Transactional
     public void migrateEventsPlaytimeData() {
         Query query = entityManager.createQuery("SELECT p.username, p.events FROM PlaytimeDBCodes p");
-        
+
         @SuppressWarnings("unchecked")
         List<Object[]> usernamesAndEventsCodes = query.getResultList();
-    
+
         for (Object[] usernameAndEventsCode : usernamesAndEventsCodes) {
             String username = (String) usernameAndEventsCode[0];
             String eventsCode = (String) usernameAndEventsCode[1];
-    
+
             if (eventsCode == null || eventsCode.isEmpty()) {
                 continue;
             }
 
-            Query timeQuery = entityManager.createQuery("SELECT c.time, c.action FROM Events c WHERE c.user = :eventsCode AND c.action IN (0, 1)");
+            Query timeQuery = entityManager.createQuery(
+                    "SELECT c.time, c.action FROM Events c WHERE c.user = :eventsCode AND c.action IN (0, 1)");
             timeQuery.setParameter("eventsCode", eventsCode);
-    
+
             @SuppressWarnings("unchecked")
             List<Object[]> timeAndActionValues = timeQuery.getResultList();
-    
+
             createAndSaveEventsPlaytimeDataTable(username);
-    
-            //DEBUG
+
+            // DEBUG
             int lastDisconnectTimeEvents = getLastDisconnectTimeEvents(username);
             int newConnectRowsCountEvents = 0;
             int newDisconnectRowsCountEvents = 0;
@@ -526,7 +547,7 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             for (Object[] timeAndAction : timeAndActionValues) {
                 Integer time = (Integer) timeAndAction[0];
                 Integer action = (Integer) timeAndAction[1];
-            
+
                 if (time != null && action != null) {
                     boolean exists = checkIfRecordExistsEvents(username, time);
 
@@ -540,9 +561,10 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                         }
                     }
                 }
-            } 
+            }
 
-            System.out.println("Added " + username + " >>> " + newConnectRowsCountEvents + "/" + newDisconnectRowsCountEvents);
+            System.out.println(
+                    "Added " + username + " >>> " + newConnectRowsCountEvents + "/" + newDisconnectRowsCountEvents);
             if (newConnectRowsCountEvents != newDisconnectRowsCountEvents) {
                 System.out.println("<> Error " + username);
             }
@@ -560,7 +582,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
     private void createAndSaveEventsPlaytimeDataTable(String username) {
         String tableName = "pt_data_events_" + username;
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, connect INT, disconnect INT)";
         entityManager.createNativeQuery(createTableQuery).executeUpdate();
     }
 
@@ -579,12 +602,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private int getLastDisconnectTimeEvents(String username) {
         String tableName = "pt_data_events_" + username;
         String getLastDisconnectTimeQuery = "SELECT MAX(disconnect) FROM " + tableName;
-        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery).getSingleResult();
+        Integer lastDisconnectTime = (Integer) entityManager.createNativeQuery(getLastDisconnectTimeQuery)
+                .getSingleResult();
         return lastDisconnectTime != null ? lastDisconnectTime : 0;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////
-    //  Timestamp to Date convertion
+    // Timestamp to Date convertion
 
     @Override
     @Transactional
@@ -592,12 +616,30 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     public void convertTimestampToDate() {
         List<List<String>> allTablesNamesLists = new ArrayList<>();
 
-        allTablesNamesLists.add(entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_survival_%'").getResultList());
-        allTablesNamesLists.add(entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_skyblock_%'").getResultList());
-        allTablesNamesLists.add(entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_creative_%'").getResultList());
-        allTablesNamesLists.add(entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_boxpvp_%'")  .getResultList());
-        allTablesNamesLists.add(entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_prison_%'")  .getResultList());
-        allTablesNamesLists.add(entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_events_%'")  .getResultList());
+        allTablesNamesLists.add(entityManager
+                .createNativeQuery(
+                        "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_survival_%'")
+                .getResultList());
+        allTablesNamesLists.add(entityManager
+                .createNativeQuery(
+                        "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_skyblock_%'")
+                .getResultList());
+        allTablesNamesLists.add(entityManager
+                .createNativeQuery(
+                        "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_creative_%'")
+                .getResultList());
+        allTablesNamesLists.add(entityManager
+                .createNativeQuery(
+                        "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_boxpvp_%'")
+                .getResultList());
+        allTablesNamesLists.add(entityManager
+                .createNativeQuery(
+                        "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_prison_%'")
+                .getResultList());
+        allTablesNamesLists.add(entityManager
+                .createNativeQuery(
+                        "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_data_events_%'")
+                .getResultList());
 
         List<String> allTablesNames = new ArrayList<>();
         for (List<String> tablesNames : allTablesNamesLists) {
@@ -610,11 +652,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             List<Object[]> results = query.getResultList();
 
             for (Object[] result : results) {
-                Integer connectSeconds    = (Integer) result[0];
+                Integer connectSeconds = (Integer) result[0];
                 Integer disconnectSeconds = (Integer) result[1];
 
-                LocalDateTime connectDateTime    = Instant.ofEpochSecond(connectSeconds)   .atZone(ZoneId.systemDefault()).toLocalDateTime();
-                LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                LocalDateTime connectDateTime = Instant.ofEpochSecond(connectSeconds).atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+                LocalDateTime disconnectDateTime = Instant.ofEpochSecond(disconnectSeconds)
+                        .atZone(ZoneId.systemDefault()).toLocalDateTime();
 
                 createTableIfNotExists(tableName);
                 updateTable(connectDateTime, disconnectDateTime, connectSeconds, disconnectSeconds, tableName);
@@ -625,11 +669,13 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private void createTableIfNotExists(String tableName) {
         String partialTableName = tableName.substring("pt_data_".length());
         String newTableName = "pt_calc_" + partialTableName;
-    
-        boolean tableExists = entityManager.createNativeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '" + newTableName + "'")
-                                           .getSingleResult()
-                                           .equals(1L);
-    
+
+        boolean tableExists = entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kaimuxstatistics' AND table_name = '"
+                        + newTableName + "'")
+                .getSingleResult()
+                .equals(1L);
+
         if (!tableExists) {
             String createTableQuery = "CREATE TABLE " + newTableName + " (" +
                     "connect_year INT, " +
@@ -653,37 +699,38 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                     "playtime_before_midnight INT, " +
                     "playtime_after_midnight INT, " +
                     "all_playtime INT)";
-    
+
             entityManager.createNativeQuery(createTableQuery).executeUpdate();
         }
     }
 
-    private void updateTable(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds, Integer disconnectSeconds, String tableName) {
-        int connectYear    = connectDateTime.getYear();
-        int connectMonth   = connectDateTime.getMonthValue();
-        int connectDay     = connectDateTime.getDayOfMonth();
-        int connectHour    = connectDateTime.getHour();
-        int connectMin     = connectDateTime.getMinute();
-        int connectSec     = connectDateTime.getSecond();
+    private void updateTable(LocalDateTime connectDateTime, LocalDateTime disconnectDateTime, Integer connectSeconds,
+            Integer disconnectSeconds, String tableName) {
+        int connectYear = connectDateTime.getYear();
+        int connectMonth = connectDateTime.getMonthValue();
+        int connectDay = connectDateTime.getDayOfMonth();
+        int connectHour = connectDateTime.getHour();
+        int connectMin = connectDateTime.getMinute();
+        int connectSec = connectDateTime.getSecond();
         int connectWeekNum = connectDateTime.get(WeekFields.ISO.weekOfWeekBasedYear());
-    
-        int disconnectYear  = disconnectDateTime.getYear();
+
+        int disconnectYear = disconnectDateTime.getYear();
         int disconnectMonth = disconnectDateTime.getMonthValue();
-        int disconnectDay   = disconnectDateTime.getDayOfMonth();
-        int disconnectHour  = disconnectDateTime.getHour();
-        int disconnectMin   = disconnectDateTime.getMinute();
-        int disconnectSec   = disconnectDateTime.getSecond();
-    
+        int disconnectDay = disconnectDateTime.getDayOfMonth();
+        int disconnectHour = disconnectDateTime.getHour();
+        int disconnectMin = disconnectDateTime.getMinute();
+        int disconnectSec = disconnectDateTime.getSecond();
+
         LocalDateTime midnightEpochDate = connectDateTime.toLocalDate().plusDays(1).atStartOfDay();
         int midnightEpoch = (int) midnightEpochDate.toEpochSecond(java.time.OffsetDateTime.now().getOffset());
-    
+
         double playtime = ((double) (disconnectSeconds - connectSeconds)) / 3600.0;
-    
+
         boolean isPassedMidnight;
         int playtimeBeforeMidnight;
         int playtimeAfterMidnight;
         int allPlaytime;
-    
+
         if (midnightEpoch > connectSeconds && midnightEpoch < disconnectSeconds) {
             isPassedMidnight = true;
             playtimeBeforeMidnight = midnightEpoch - connectSeconds;
@@ -698,24 +745,30 @@ public class PlaytimeServiceImpl implements PlaytimeService{
 
         String partialTableName = tableName.substring("pt_data_".length());
 
-        String checkDuplicateQuery = "SELECT COUNT(*) FROM pt_calc_" + partialTableName + " WHERE connect_datetime = :connectDateTime AND disconnect_datetime = :disconnectDateTime";
-    
+        String checkDuplicateQuery = "SELECT COUNT(*) FROM pt_calc_" + partialTableName
+                + " WHERE connect_datetime = :connectDateTime AND disconnect_datetime = :disconnectDateTime";
+
         Number duplicateCount = (Number) entityManager.createNativeQuery(checkDuplicateQuery)
                 .setParameter("connectDateTime", connectDateTime)
                 .setParameter("disconnectDateTime", disconnectDateTime)
                 .getSingleResult();
-        
+
         if (duplicateCount.intValue() > 0) {
             return;
         }
-    
+
         String insertQuery = "INSERT INTO pt_calc_" + partialTableName + " (" +
-            "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, " +
-            "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, " +
-            "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) " +
-            "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, " +
-            ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, " +
-            ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
+                "connect_year, connect_month, connect_day, connect_hour, connect_min, connect_sec, connect_datetime, connect_weeknum, "
+                +
+                "disconnect_year, disconnect_month, disconnect_day, disconnect_hour, disconnect_min, disconnect_sec, disconnect_datetime, "
+                +
+                "is_passed_midnight, midnight_epoch, playtime, playtime_before_midnight, playtime_after_midnight, all_playtime) "
+                +
+                "VALUES (:connectYear, :connectMonth, :connectDay, :connectHour, :connectMin, :connectSec, :connectDateTime, :connectWeekNum, "
+                +
+                ":disconnectYear, :disconnectMonth, :disconnectDay, :disconnectHour, :disconnectMin, :disconnectSec, :disconnectDateTime, "
+                +
+                ":isPassedMidnight, :midnightEpoch, :playtime, :playtimeBeforeMidnight, :playtimeAfterMidnight, :allPlaytime)";
 
         entityManager.createNativeQuery(insertQuery)
                 .setParameter("connectYear", connectYear)
@@ -747,24 +800,40 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     @Override
     @Transactional
     public void calculateDailyPlaytimePerServerPerEmployee() {
-        entityManager.createNativeQuery("UPDATE daily_playtime SET ariena_boxpvp = NULL, ariena_creative = NULL, ariena_events = NULL, ariena_prison = NULL, " +
-                "ariena_skyblock = NULL, ariena_survival = NULL, bobsbuilder_boxpvp = NULL, bobsbuilder_creative = NULL, bobsbuilder_events = NULL, " +
-                "bobsbuilder_prison = NULL, bobsbuilder_skyblock = NULL, bobsbuilder_survival = NULL, d0fka_boxpvp = NULL, d0fka_creative = NULL, " +
-                "d0fka_events = NULL, d0fka_prison = NULL, d0fka_skyblock = NULL, d0fka_survival = NULL, emsiukemiau_boxpvp = NULL, emsiukemiau_creative = NULL, " +
-                "emsiukemiau_events = NULL, emsiukemiau_prison = NULL, emsiukemiau_skyblock = NULL, emsiukemiau_survival = NULL, ernestasltu12_boxpvp = NULL, " +
-                "ernestasltu12_creative = NULL, ernestasltu12_events = NULL, ernestasltu12_prison = NULL, ernestasltu12_skyblock = NULL, ernestasltu12_survival = NULL, " +
-                "everly_boxpvp = NULL, everly_creative = NULL, everly_events = NULL, everly_prison = NULL, everly_skyblock = NULL, everly_survival = NULL, furija_boxpvp = NULL, " +
-                "furija_creative = NULL, furija_events = NULL, furija_prison = NULL, furija_skyblock = NULL, furija_survival = NULL, labashey_boxpvp = NULL, labashey_creative = NULL, " +
-                "labashey_events = NULL, labashey_prison = NULL, labashey_skyblock = NULL, labashey_survival = NULL, libete_boxpvp = NULL, libete_creative = NULL, libete_events = NULL, " +
-                "libete_prison = NULL, libete_skyblock = NULL, libete_survival = NULL, mboti212_boxpvp = NULL, mboti212_creative = NULL, mboti212_events = NULL, mboti212_prison = NULL, " +
-                "mboti212_skyblock = NULL, mboti212_survival = NULL, melitalove_boxpvp = NULL, melitalove_creative = NULL, melitalove_events = NULL, melitalove_prison = NULL, " +
-                "melitalove_skyblock = NULL, melitalove_survival = NULL, plrxq_boxpvp = NULL, plrxq_creative = NULL, plrxq_events = NULL, plrxq_prison = NULL, plrxq_skyblock = NULL, " +
-                "plrxq_survival = NULL, richpica_boxpvp = NULL, richpica_creative = NULL, richpica_events = NULL, richpica_prison = NULL, richpica_skyblock = NULL, richpica_survival = NULL, " +
-                "sharans_boxpvp = NULL, sharans_creative = NULL, sharans_events = NULL, sharans_prison = NULL, sharans_skyblock = NULL, sharans_survival = NULL, shizo_boxpvp = NULL, " +
-                "shizo_creative = NULL, shizo_events = NULL, shizo_prison = NULL, shizo_skyblock = NULL, shizo_survival = NULL")
+        entityManager.createNativeQuery(
+                "UPDATE daily_playtime SET ariena_boxpvp = NULL, ariena_creative = NULL, ariena_events = NULL, ariena_prison = NULL, "
+                        +
+                        "ariena_skyblock = NULL, ariena_survival = NULL, bobsbuilder_boxpvp = NULL, bobsbuilder_creative = NULL, bobsbuilder_events = NULL, "
+                        +
+                        "bobsbuilder_prison = NULL, bobsbuilder_skyblock = NULL, bobsbuilder_survival = NULL, d0fka_boxpvp = NULL, d0fka_creative = NULL, "
+                        +
+                        "d0fka_events = NULL, d0fka_prison = NULL, d0fka_skyblock = NULL, d0fka_survival = NULL, emsiukemiau_boxpvp = NULL, emsiukemiau_creative = NULL, "
+                        +
+                        "emsiukemiau_events = NULL, emsiukemiau_prison = NULL, emsiukemiau_skyblock = NULL, emsiukemiau_survival = NULL, ernestasltu12_boxpvp = NULL, "
+                        +
+                        "ernestasltu12_creative = NULL, ernestasltu12_events = NULL, ernestasltu12_prison = NULL, ernestasltu12_skyblock = NULL, ernestasltu12_survival = NULL, "
+                        +
+                        "everly_boxpvp = NULL, everly_creative = NULL, everly_events = NULL, everly_prison = NULL, everly_skyblock = NULL, everly_survival = NULL, furija_boxpvp = NULL, "
+                        +
+                        "furija_creative = NULL, furija_events = NULL, furija_prison = NULL, furija_skyblock = NULL, furija_survival = NULL, labashey_boxpvp = NULL, labashey_creative = NULL, "
+                        +
+                        "labashey_events = NULL, labashey_prison = NULL, labashey_skyblock = NULL, labashey_survival = NULL, libete_boxpvp = NULL, libete_creative = NULL, libete_events = NULL, "
+                        +
+                        "libete_prison = NULL, libete_skyblock = NULL, libete_survival = NULL, mboti212_boxpvp = NULL, mboti212_creative = NULL, mboti212_events = NULL, mboti212_prison = NULL, "
+                        +
+                        "mboti212_skyblock = NULL, mboti212_survival = NULL, melitalove_boxpvp = NULL, melitalove_creative = NULL, melitalove_events = NULL, melitalove_prison = NULL, "
+                        +
+                        "melitalove_skyblock = NULL, melitalove_survival = NULL, plrxq_boxpvp = NULL, plrxq_creative = NULL, plrxq_events = NULL, plrxq_prison = NULL, plrxq_skyblock = NULL, "
+                        +
+                        "plrxq_survival = NULL, richpica_boxpvp = NULL, richpica_creative = NULL, richpica_events = NULL, richpica_prison = NULL, richpica_skyblock = NULL, richpica_survival = NULL, "
+                        +
+                        "sharans_boxpvp = NULL, sharans_creative = NULL, sharans_events = NULL, sharans_prison = NULL, sharans_skyblock = NULL, sharans_survival = NULL, shizo_boxpvp = NULL, "
+                        +
+                        "shizo_creative = NULL, shizo_events = NULL, shizo_prison = NULL, shizo_skyblock = NULL, shizo_survival = NULL")
                 .executeUpdate();
 
-        Query tablesQuery = entityManager.createNativeQuery("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_calc_%'");
+        Query tablesQuery = entityManager.createNativeQuery(
+                "SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'pt_calc_%'");
 
         @SuppressWarnings("unchecked")
         List<String> tableNames = tablesQuery.getResultList();
@@ -773,7 +842,9 @@ public class PlaytimeServiceImpl implements PlaytimeService{
             String username = getUsernameFromTableName(tableName);
             String server = getServerFromTableName(tableName);
 
-            Query query = entityManager.createNativeQuery("SELECT connect_datetime, disconnect_datetime, is_passed_midnight, playtime_before_midnight, playtime_after_midnight, all_playtime FROM pt_calc_" + server + "_" + username);
+            Query query = entityManager.createNativeQuery(
+                    "SELECT connect_datetime, disconnect_datetime, is_passed_midnight, playtime_before_midnight, playtime_after_midnight, all_playtime FROM pt_calc_"
+                            + server + "_" + username);
 
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
@@ -789,7 +860,8 @@ public class PlaytimeServiceImpl implements PlaytimeService{
                 Integer playtimeAfterMidnight = (Integer) result[4];
                 Integer allPlaytime = (Integer) result[5];
 
-                updateDailyPlaytimeTable(username, connectDatetime, disconnectDatetime, isPassedMidnight, playtimeBeforeMidnight, playtimeAfterMidnight, allPlaytime, server);
+                updateDailyPlaytimeTable(username, connectDatetime, disconnectDatetime, isPassedMidnight,
+                        playtimeBeforeMidnight, playtimeAfterMidnight, allPlaytime, server);
             }
         }
     }
@@ -802,16 +874,20 @@ public class PlaytimeServiceImpl implements PlaytimeService{
         return tableName.split("_")[3];
     }
 
-    private void updateDailyPlaytimeTable(String username, LocalDateTime connectDatetime, LocalDateTime disconnectDatetime,
-                                        Boolean isPassedMidnight, Integer playtimeBeforeMidnight, Integer playtimeAfterMidnight, Integer allPlaytime, String server) {
+    private void updateDailyPlaytimeTable(String username, LocalDateTime connectDatetime,
+            LocalDateTime disconnectDatetime,
+            Boolean isPassedMidnight, Integer playtimeBeforeMidnight, Integer playtimeAfterMidnight,
+            Integer allPlaytime, String server) {
         LocalDate connectDate = connectDatetime.toLocalDate();
         LocalDate disconnectDate = disconnectDatetime.toLocalDate();
 
         if (!connectDate.equals(disconnectDate)) {
-            int firstDayPlaytime = (int) Duration.between(connectDatetime, connectDate.atStartOfDay().plusDays(1)).getSeconds();
+            int firstDayPlaytime = (int) Duration.between(connectDatetime, connectDate.atStartOfDay().plusDays(1))
+                    .getSeconds();
             updateDailyPlaytime(username, connectDate, firstDayPlaytime, server);
 
-            int secondDayPlaytime = (int) Duration.between(disconnectDate.atStartOfDay(), disconnectDatetime).getSeconds();
+            int secondDayPlaytime = (int) Duration.between(disconnectDate.atStartOfDay(), disconnectDatetime)
+                    .getSeconds();
             updateDailyPlaytime(username, disconnectDate, secondDayPlaytime, server);
         } else {
             updateDailyPlaytime(username, connectDate, allPlaytime, server);
@@ -836,18 +912,20 @@ public class PlaytimeServiceImpl implements PlaytimeService{
     private void setPlaytimeInColumn(DailyPlaytime dailyPlaytimeDate, String column, Integer playtime) {
         double playtimeDouble = (double) playtime / 3600.0;
 
-        //String updateQuery = "UPDATE daily_playtime SET " + column + " = :playtime WHERE date = :dailyPlaytimeDate";
+        // String updateQuery = "UPDATE daily_playtime SET " + column + " = :playtime
+        // WHERE date = :dailyPlaytimeDate";
         @SuppressWarnings("unused")
-        String sqlQuery = "INSERT INTO daily_playtime (date, " + column + ") VALUES (:dailyPlaytimeDate, :playtime)" + " ON DUPLICATE KEY UPDATE " + column + " = :playtime";
+        String sqlQuery = "INSERT INTO daily_playtime (date, " + column + ") VALUES (:dailyPlaytimeDate, :playtime)"
+                + " ON DUPLICATE KEY UPDATE " + column + " = :playtime";
 
         Date date = java.sql.Date.valueOf(dailyPlaytimeDate.getDate());
 
         // entityManager.createNativeQuery(updateQuery)
-        //         .setParameter("playtime", playtimeDouble)
-        //         .setParameter("dailyPlaytimeDate", date)
-        //         .executeUpdate();
-    
+        // .setParameter("playtime", playtimeDouble)
+        // .setParameter("dailyPlaytimeDate", date)
+        // .executeUpdate();
+
         // DEBUG
         System.out.println(column + " >> " + date + " >> " + playtimeDouble + " (" + playtime + ")");
-    }    
+    }
 }

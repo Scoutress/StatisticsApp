@@ -1,19 +1,22 @@
 package lt.scoutress.StatisticsApp.repositories;
 
-import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 
 @Repository
-public interface McTicketsRepository extends JpaRepository<McTicketsCounting, Integer> {
+public interface McTicketsRepository extends JpaRepository<McTickets, Integer> {
 
-    @Query("SELECT MIN(m.date) FROM McTicketsCounting m")
-    LocalDate findOldestDate();
+    default List<McTickets> getAllMcTickets() {
+        return findAll();
+    }
 
-    @Query("SELECT MAX(m.date) FROM McTicketsCounting m")
-    LocalDate findNewestDate();
+    // @Query("SELECT MIN(m.date) FROM McTicketsCounting m")
+    // LocalDate findOldestDate();
+
+    // @Query("SELECT MAX(m.date) FROM McTicketsCounting m")
+    // LocalDate findNewestDate();
 }

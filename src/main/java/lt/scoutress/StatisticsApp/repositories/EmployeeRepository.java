@@ -11,6 +11,10 @@ import lt.scoutress.StatisticsApp.entity.Employee;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
+    default List<Employee> getAllEmployees() {
+        return findAll();
+    }
+
     @Query("SELECT e FROM Employee e ORDER BY CASE e.level " +
             "WHEN 'Owner' THEN 1 " +
             "WHEN 'Coder' THEN 2 " +
@@ -22,9 +26,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "WHEN 'Support' THEN 8 " +
             "WHEN 'Helper' THEN 9 " +
             "ELSE 10 END")
-    public List<Employee> findAllByOrderByLevel();
+    List<Employee> findAllByOrderByLevel();
 
-    public Employee findByUsername(String username);
-
+    Employee findByUsername(String username);
 }
-

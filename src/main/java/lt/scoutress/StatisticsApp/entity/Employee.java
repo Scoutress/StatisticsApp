@@ -1,8 +1,12 @@
 package lt.scoutress.StatisticsApp.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 
 @Entity
 @Table(name = "employee")
@@ -10,8 +14,8 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "employee_id")
-    private Integer employeeId;
+    @Column(name = "id")
+    private Integer id;
 
     @Column(name = "username")
     private String username;
@@ -36,44 +40,19 @@ public class Employee {
 
     @Column(name = "days_since_join")
     private Integer daysSinceJoin;
-
-    @Column(name = "survival_code")
-    private Integer survivalCode;
-
-    @Column(name = "skyblock_code")
-    private Integer skyblockCode;
-
-    @Column(name = "creative_code")
-    private Integer creativeCode;
-
-    @Column(name = "boxpvp_code")
-    private Integer boxpvpCode;
-
-    @Column(name = "prison_code")
-    private Integer prisonCode;
-
-    @Column(name = "events_code")
-    private Integer eventsCode;
-
-    @Column(name = "to_support")
-    private LocalDate toSupport;
-
-    @Column(name = "to_chatmod")
-    private LocalDate toChatmod;
-
-    @Column(name = "to_overseer")
-    private LocalDate toOverseer;
-
-    @Column(name = "to_manager")
-    private LocalDate toManager;
     
+    @OneToMany(mappedBy = "employee", 
+               cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
+                          CascadeType.DETACH, CascadeType.REFRESH})
+    private List<McTickets> mcTickets;
+
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private McTicketsAvgDaily mcTicketsAvgDaily;
+
     public Employee() {}
 
-    public Employee(Integer employeeId, String username, String level, String language, String firstName,
-            String lastName, String email, LocalDate joinDate, Integer daysSinceJoin, Integer survivalCode,
-            Integer skyblockCode, Integer creativeCode, Integer boxpvpCode, Integer prisonCode, Integer eventsCode,
-            LocalDate toSupport, LocalDate toChatmod, LocalDate toOverseer, LocalDate toManager) {
-        this.employeeId = employeeId;
+    public Employee(String username, String level, String language, String firstName, String lastName, String email,
+            LocalDate joinDate, Integer daysSinceJoin) {
         this.username = username;
         this.level = level;
         this.language = language;
@@ -82,24 +61,14 @@ public class Employee {
         this.email = email;
         this.joinDate = joinDate;
         this.daysSinceJoin = daysSinceJoin;
-        this.survivalCode = survivalCode;
-        this.skyblockCode = skyblockCode;
-        this.creativeCode = creativeCode;
-        this.boxpvpCode = boxpvpCode;
-        this.prisonCode = prisonCode;
-        this.eventsCode = eventsCode;
-        this.toSupport = toSupport;
-        this.toChatmod = toChatmod;
-        this.toOverseer = toOverseer;
-        this.toManager = toManager;
     }
 
-    public Integer getEmployeeId() {
-        return employeeId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setEmployeeId(Integer employeeId) {
-        this.employeeId = employeeId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -166,83 +135,28 @@ public class Employee {
         this.daysSinceJoin = daysSinceJoin;
     }
 
-    public Integer getSurvivalCode() {
-        return survivalCode;
+    public List<McTickets> getMcTickets() {
+        return mcTickets;
     }
 
-    public void setSurvivalCode(Integer survivalCode) {
-        this.survivalCode = survivalCode;
+    public void setMcTickets(List<McTickets> mcTickets) {
+        this.mcTickets = mcTickets;
     }
 
-    public Integer getSkyblockCode() {
-        return skyblockCode;
+    @Override
+    public String toString() {
+        return "Employee [id=" + id + ", username=" + username + ", level=" + level + ", language=" + language
+                + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", joinDate=" + joinDate
+                + ", daysSinceJoin=" + daysSinceJoin + "]";
     }
 
-    public void setSkyblockCode(Integer skyblockCode) {
-        this.skyblockCode = skyblockCode;
-    }
+    public void add(McTickets tempMcTickets){
 
-    public Integer getCreativeCode() {
-        return creativeCode;
-    }
+        if(mcTickets == null){
+            mcTickets = new ArrayList<>();
+        }
+        mcTickets.add(tempMcTickets);
 
-    public void setCreativeCode(Integer creativeCode) {
-        this.creativeCode = creativeCode;
-    }
-
-    public Integer getBoxpvpCode() {
-        return boxpvpCode;
-    }
-
-    public void setBoxpvpCode(Integer boxpvpCode) {
-        this.boxpvpCode = boxpvpCode;
-    }
-
-    public Integer getPrisonCode() {
-        return prisonCode;
-    }
-
-    public void setPrisonCode(Integer prisonCode) {
-        this.prisonCode = prisonCode;
-    }
-
-    public Integer getEventsCode() {
-        return eventsCode;
-    }
-
-    public void setEventsCode(Integer eventsCode) {
-        this.eventsCode = eventsCode;
-    }
-
-    public LocalDate getToSupport() {
-        return toSupport;
-    }
-
-    public void setToSupport(LocalDate toSupport) {
-        this.toSupport = toSupport;
-    }
-
-    public LocalDate getToChatmod() {
-        return toChatmod;
-    }
-
-    public void setToChatmod(LocalDate toChatmod) {
-        this.toChatmod = toChatmod;
-    }
-
-    public LocalDate getToOverseer() {
-        return toOverseer;
-    }
-
-    public void setToOverseer(LocalDate toOverseer) {
-        this.toOverseer = toOverseer;
-    }
-
-    public LocalDate getToManager() {
-        return toManager;
-    }
-
-    public void setToManager(LocalDate toManager) {
-        this.toManager = toManager;
+        tempMcTickets.setEmployee(this);
     }
 }

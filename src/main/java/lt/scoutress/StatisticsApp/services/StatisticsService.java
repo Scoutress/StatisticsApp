@@ -1,30 +1,26 @@
 package lt.scoutress.StatisticsApp.services;
 
-import java.util.List;
-
-import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsCounting;
-
 public interface StatisticsService {
     
-    public List<McTicketsCounting> findAllMcTickets();
+    // public List<McTicketsCounting> findAllMcTickets();
 
-    public void saveMcTickets(McTicketsCounting mcTickets);
+    // public void saveMcTickets(McTicketsCounting mcTickets);
 
-    public void calculateDaysSinceJoinAndSave();
+    // public void calculateDaysSinceJoinAndSave();
 
-    public void calculateTotalDailyMcTickets();
+    // public void calculateTotalDailyMcTickets();
 
-    public void calculateDailyTicketRatio();
+    // public void calculateDailyTicketRatio();
 
-    public void calculateTotalDailyDcMessages();
+    // public void calculateTotalDailyDcMessages();
 
-    public void calculateDailyDcMessagesRatio();
+    // public void calculateDailyDcMessagesRatio();
 
-    public void calculateAvgDailyDcMessages();
+    // public void calculateAvgDailyDcMessages();
 
-    public void calculateAvgDailyDcMessagesRatio();
+    // public void calculateAvgDailyDcMessagesRatio();
 
-    public void calculateAvgDailyMcTickets();
+    // public void calculateAvgDailyMcTickets();
 
     //public void calculateAvgDailyPlaytime();
 

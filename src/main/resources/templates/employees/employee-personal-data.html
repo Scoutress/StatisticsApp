@@ -16,7 +16,7 @@
     <div class="container">
         <h3>Kaimux employee list</h3>
         <hr>
-        <a th:href="@{/employees/showFormForAdd}" class="btn btn-primary btn-sm mb-3">
+        <a th:href="@{/employees/add}" class="btn btn-primary btn-sm mb-3">
             Add Employee
         </a>
         <a th:href="@{/main}" class="btn btn-danger btn-sm mb-3">
@@ -47,8 +47,8 @@
                     <td th:text="${tempEmployee.joinDate}"></td>
                     <td th:text="${tempEmployee.language}"></td>
                     <td>
-                        <a th:href="@{/employees/showFormForUpdate(id=${tempEmployee.id})}"
-                            class="btn btn-info btm-sm">
+                        <a th:href="@{/employees/edit/{id}(id=${tempEmployee.id})}" 
+                           class="btn btn-info btm-sm">
                             Edit
                         </a>
                         <a th:href="@{/employees/delete(id=${tempEmployee.id})}"

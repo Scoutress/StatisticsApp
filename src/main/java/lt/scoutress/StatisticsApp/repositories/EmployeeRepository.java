@@ -1,6 +1,7 @@
 package lt.scoutress.StatisticsApp.Repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
     List<Employee> findAllByOrderByLevel();
 
     Employee findByUsername(String username);
+
+    Optional<Employee> findById(Long id);
 }

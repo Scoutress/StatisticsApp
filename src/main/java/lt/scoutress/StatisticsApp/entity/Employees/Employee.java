@@ -8,6 +8,7 @@ import java.util.List;
 import jakarta.persistence.*;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
 
 @Entity
 @Table(name = "employee")
@@ -39,15 +40,16 @@ public class Employee {
     @Column(name = "join_date", nullable = false)
     private LocalDate joinDate;
 
-    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
-                          CascadeType.DETACH, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<McTickets> mcTickets;
 
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private McTicketsAvgDaily mcTicketsAvgDaily;
 
-    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
-                          CascadeType.DETACH, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<McTicketsAvgDailyRatio> mcTicketsAvgDailyRatios = new ArrayList<>();
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmployeeCodes> employeeCodes = new ArrayList<>();
 
     public Employee() {}

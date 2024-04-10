@@ -1,8 +1,8 @@
-package lt.scoutress.StatisticsApp.services.playtime;
+package lt.scoutress.StatisticsApp.Services.playtime;
 
 import java.util.List;
 
-import lt.scoutress.StatisticsApp.entity.playtime.PlaytimeDBCodes;
+import lt.scoutress.StatisticsApp.entity.Playtime.PlaytimeDBCodes;
 
 public interface PlaytimeDBCodesService {
 

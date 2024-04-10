@@ -38,6 +38,7 @@
                     <th>AFK playtime</th>
                     <th>Avg. mc tickets /1d.</th>
                     <th>Mc tickets ratio, %</th>
+                    <th>Avg. Mc tickets /1h playtime</th>
                     <th>Avg. dc tickets /1d.</th>
                     <th>Dc tickets ratio, %</th>
                     <th>Productivity</th>
@@ -53,6 +54,7 @@
                     <td th:text="${product.playtimeAfk}"></td>
                     <td th:text="${product.mcTickets}"></td>
                     <td th:text="${product.mcTicketsComp}"></td>
+                    <td th:text="${product.mcTicketsPerHour}"></td>
                     <td th:text="${product.dcTickets}"></td>
                     <td th:text="${product.dcTicketsComp}"></td>
                     <td th:text="${product.productivity}"></td>

@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -12,12 +12,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
+import lt.scoutress.StatisticsApp.Repositories.ProductivityRepository;
+import lt.scoutress.StatisticsApp.Services.ProductivityService;
 import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.ProductivityCalc;
-import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
-import lt.scoutress.StatisticsApp.repositories.ProductivityRepository;
-import lt.scoutress.StatisticsApp.services.ProductivityService;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Service
 public class ProductivityServiceImpl implements ProductivityService{

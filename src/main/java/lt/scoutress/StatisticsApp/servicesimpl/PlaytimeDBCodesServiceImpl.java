@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import java.util.List;
 
@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import lt.scoutress.StatisticsApp.entity.Employee;
-import lt.scoutress.StatisticsApp.entity.playtime.PlaytimeDBCodes;
-import lt.scoutress.StatisticsApp.repositories.PlaytimeDBCodesRepository;
-import lt.scoutress.StatisticsApp.services.playtime.PlaytimeDBCodesService;
+import lt.scoutress.StatisticsApp.Repositories.PlaytimeDBCodesRepository;
+import lt.scoutress.StatisticsApp.Services.playtime.PlaytimeDBCodesService;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
+import lt.scoutress.StatisticsApp.entity.Playtime.PlaytimeDBCodes;
 
 @Service
 public class PlaytimeDBCodesServiceImpl implements PlaytimeDBCodesService{

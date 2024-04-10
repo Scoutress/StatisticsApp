@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.controllers;
+package lt.scoutress.StatisticsApp.Controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,11 +8,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import lt.scoutress.StatisticsApp.Services.McTickets.McTicketsService;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatioResponse;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyResponse;
-import lt.scoutress.StatisticsApp.services.McTickets.McTicketsService;
 
 @Controller
 @RequestMapping("/stats")

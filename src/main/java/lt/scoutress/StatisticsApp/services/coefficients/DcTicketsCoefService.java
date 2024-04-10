@@ -1,8 +1,8 @@
-package lt.scoutress.StatisticsApp.services.coefficients;
+package lt.scoutress.StatisticsApp.Services.coefficients;
 
 import java.util.List;
 
-import lt.scoutress.StatisticsApp.entity.coefficients.DcTicketsCoef;
+import lt.scoutress.StatisticsApp.entity.Coefficients.DcTicketsCoef;
 
 public interface DcTicketsCoefService {
 

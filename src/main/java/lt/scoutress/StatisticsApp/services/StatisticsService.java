@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.services;
+package lt.scoutress.StatisticsApp.Services;
 
 public interface StatisticsService {
     

@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Entity
 public class McTicketsAvgDaily {

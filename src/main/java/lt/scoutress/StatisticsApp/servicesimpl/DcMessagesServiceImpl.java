@@ -1,14 +1,14 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import lt.scoutress.StatisticsApp.Repositories.DcMessagesCalcRepository;
+import lt.scoutress.StatisticsApp.Repositories.DcMessagesRepository;
+import lt.scoutress.StatisticsApp.Services.DcMessagesService;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesCalc;
 import lt.scoutress.StatisticsApp.entity.DcMessages.DcMessagesTexted;
-import lt.scoutress.StatisticsApp.repositories.DcMessagesCalcRepository;
-import lt.scoutress.StatisticsApp.repositories.DcMessagesRepository;
-import lt.scoutress.StatisticsApp.services.DcMessagesService;
 
 @Service
 public class DcMessagesServiceImpl implements DcMessagesService{

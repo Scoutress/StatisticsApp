@@ -1,8 +1,8 @@
-package lt.scoutress.StatisticsApp.services;
-
-import lt.scoutress.StatisticsApp.entity.Employee;
+package lt.scoutress.StatisticsApp.Services;
 
 import java.util.List;
+
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 public interface EmployeeService {
 

@@ -10,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Entity
 public class McTickets {

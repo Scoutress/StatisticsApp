@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.config;
+package lt.scoutress.StatisticsApp.Config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

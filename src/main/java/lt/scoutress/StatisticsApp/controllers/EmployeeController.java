@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.controllers;
+package lt.scoutress.StatisticsApp.Controllers;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import lt.scoutress.StatisticsApp.entity.Employee;
-import lt.scoutress.StatisticsApp.servicesimpl.EmployeeServiceImpl;
+import lt.scoutress.StatisticsApp.Servicesimpl.EmployeeServiceImpl;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Controller
 @RequestMapping("/employees")

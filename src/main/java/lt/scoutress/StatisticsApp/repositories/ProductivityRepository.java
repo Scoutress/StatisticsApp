@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.repositories;
+package lt.scoutress.StatisticsApp.Repositories;
 
 import org.springframework.stereotype.Repository;
 

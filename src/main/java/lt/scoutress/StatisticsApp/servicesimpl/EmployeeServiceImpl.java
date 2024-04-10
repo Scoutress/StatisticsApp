@@ -1,11 +1,11 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.*;
-import lt.scoutress.StatisticsApp.entity.Employee;
-import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
-import lt.scoutress.StatisticsApp.services.EmployeeService;
+import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
+import lt.scoutress.StatisticsApp.Services.EmployeeService;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 import java.util.List;
 

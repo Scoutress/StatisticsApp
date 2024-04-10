@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.config;
+package lt.scoutress.StatisticsApp.Config;
 
 import java.util.List;
 
@@ -7,13 +7,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import jakarta.transaction.Transactional;
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgDailyRatioRepository;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsRepository;
+import lt.scoutress.StatisticsApp.Servicesimpl.McTickets.McTicketsServiceImpl;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
-import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
-import lt.scoutress.StatisticsApp.repositories.McTickets.McTicketsAvgDailyRatioRepository;
-import lt.scoutress.StatisticsApp.repositories.McTickets.McTicketsRepository;
-import lt.scoutress.StatisticsApp.servicesimpl.McTickets.McTicketsServiceImpl;
 
 @Configuration
 @EnableScheduling

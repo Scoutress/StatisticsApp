@@ -1,8 +1,8 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import org.springframework.stereotype.Service;
 
-import lt.scoutress.StatisticsApp.services.StatisticsService;
+import lt.scoutress.StatisticsApp.Services.StatisticsService;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {

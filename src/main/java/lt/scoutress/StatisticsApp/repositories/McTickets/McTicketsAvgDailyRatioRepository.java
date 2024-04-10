@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.repositories.McTickets;
+package lt.scoutress.StatisticsApp.Repositories.McTickets;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

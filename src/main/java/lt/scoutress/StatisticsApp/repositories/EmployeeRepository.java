@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.repositories;
+package lt.scoutress.StatisticsApp.Repositories;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {

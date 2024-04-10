@@ -1,9 +1,9 @@
-package lt.scoutress.StatisticsApp.services;
+package lt.scoutress.StatisticsApp.Services;
 
 import java.util.List;
 
-import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.entity.Productivity;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 public interface ProductivityService {
 

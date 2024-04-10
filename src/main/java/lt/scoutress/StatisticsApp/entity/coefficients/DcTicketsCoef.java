@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.entity.coefficients;
+package lt.scoutress.StatisticsApp.entity.Coefficients;
 
 import jakarta.persistence.*;
 

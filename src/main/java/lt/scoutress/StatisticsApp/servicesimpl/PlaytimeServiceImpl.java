@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-import lt.scoutress.StatisticsApp.entity.playtime.DailyPlaytime;
-import lt.scoutress.StatisticsApp.entity.playtime.Playtime;
-import lt.scoutress.StatisticsApp.repositories.DailyPlaytimeRepository;
-import lt.scoutress.StatisticsApp.repositories.PlaytimeRepository;
-import lt.scoutress.StatisticsApp.services.playtime.PlaytimeService;
+import lt.scoutress.StatisticsApp.Repositories.DailyPlaytimeRepository;
+import lt.scoutress.StatisticsApp.Repositories.PlaytimeRepository;
+import lt.scoutress.StatisticsApp.Services.playtime.PlaytimeService;
+import lt.scoutress.StatisticsApp.entity.Playtime.DailyPlaytime;
+import lt.scoutress.StatisticsApp.entity.Playtime.Playtime;
 
 @Service
 public class PlaytimeServiceImpl implements PlaytimeService {

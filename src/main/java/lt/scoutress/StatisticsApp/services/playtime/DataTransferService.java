@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.services.playtime;
+package lt.scoutress.StatisticsApp.Services.playtime;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,11 +1,11 @@
-package lt.scoutress.StatisticsApp.repositories.McTickets;
+package lt.scoutress.StatisticsApp.Repositories.McTickets;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 
 @Repository

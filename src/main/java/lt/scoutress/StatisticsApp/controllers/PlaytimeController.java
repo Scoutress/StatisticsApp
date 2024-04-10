@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.controllers;
+package lt.scoutress.StatisticsApp.Controllers;
 
 import java.util.List;
 
@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import lt.scoutress.StatisticsApp.entity.playtime.Playtime;
-import lt.scoutress.StatisticsApp.entity.playtime.PlaytimeDBCodes;
-import lt.scoutress.StatisticsApp.services.playtime.PlaytimeDBCodesService;
-import lt.scoutress.StatisticsApp.services.playtime.PlaytimeService;
+import lt.scoutress.StatisticsApp.Services.playtime.PlaytimeDBCodesService;
+import lt.scoutress.StatisticsApp.Services.playtime.PlaytimeService;
+import lt.scoutress.StatisticsApp.entity.Playtime.Playtime;
+import lt.scoutress.StatisticsApp.entity.Playtime.PlaytimeDBCodes;
 
 @Controller
 @RequestMapping("/playtime")

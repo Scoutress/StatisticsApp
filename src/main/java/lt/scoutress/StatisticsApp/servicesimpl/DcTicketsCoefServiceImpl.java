@@ -1,13 +1,13 @@
-package lt.scoutress.StatisticsApp.servicesimpl;
+package lt.scoutress.StatisticsApp.Servicesimpl;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
-import lt.scoutress.StatisticsApp.entity.coefficients.DcTicketsCoef;
-import lt.scoutress.StatisticsApp.repositories.DcTicketsCoefRepository;
-import lt.scoutress.StatisticsApp.services.coefficients.DcTicketsCoefService;
+import lt.scoutress.StatisticsApp.Repositories.DcTicketsCoefRepository;
+import lt.scoutress.StatisticsApp.Services.coefficients.DcTicketsCoefService;
+import lt.scoutress.StatisticsApp.entity.Coefficients.DcTicketsCoef;
 
 @Service
 public class DcTicketsCoefServiceImpl implements DcTicketsCoefService{

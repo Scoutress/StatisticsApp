@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.servicesimpl.McTickets;
+package lt.scoutress.StatisticsApp.Servicesimpl.McTickets;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,14 +8,14 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgDailyRatioRepository;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgValuesRepository;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsRepository;
+import lt.scoutress.StatisticsApp.Services.McTickets.McTicketsService;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
-import lt.scoutress.StatisticsApp.repositories.McTickets.McTicketsAvgDailyRatioRepository;
-import lt.scoutress.StatisticsApp.repositories.McTickets.McTicketsAvgValuesRepository;
-import lt.scoutress.StatisticsApp.repositories.McTickets.McTicketsRepository;
-import lt.scoutress.StatisticsApp.services.McTickets.McTicketsService;
 
 @Service
 public class McTicketsServiceImpl implements McTicketsService {

@@ -1,10 +1,8 @@
-package lt.scoutress.StatisticsApp.services.playtime;
+package lt.scoutress.StatisticsApp.Services.playtime;
 
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
-import lt.scoutress.StatisticsApp.entity.Employee;
-import lt.scoutress.StatisticsApp.repositories.EmployeeRepository;
+import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
 
 @Service
 public class SQLiteDBService {

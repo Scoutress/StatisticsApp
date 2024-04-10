@@ -1,6 +1,6 @@
 package lt.scoutress.StatisticsApp.entity.McTickets;
 
-import lt.scoutress.StatisticsApp.entity.Employee;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 public class McTicketsAvgDailyRatioResponse {
     private Integer id;

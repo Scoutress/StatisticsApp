@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.entity;
+package lt.scoutress.StatisticsApp.entity.Employees;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

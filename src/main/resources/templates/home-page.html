@@ -69,8 +69,22 @@
         </a> -->
     </div>
     <hr>
+
     <div class="container">
         <h3>New calculation system</h3>
+
+        <hr>
+        <h6>Employees</h6>
+        <a th:href="@{/employees/add}" class="btn btn-danger btn-sm mb-3">
+            Add Employee
+        </a>
+        <a th:href="@{/employees/list}" class="btn btn-danger btn-sm mb-3">
+            Employee list
+        </a>
+        <a th:href="@{/employees/codes}" class="btn btn-danger btn-sm mb-3">
+            DB codes
+        </a>
+
         <hr>
         <h6>Mc Tickets</h6>
         <a th:href="@{/stats/avgMcTickets}" class="btn btn-danger btn-sm mb-3">
@@ -79,6 +93,7 @@
         <a th:href="@{/stats/avgMcTicketsRatio}" class="btn btn-danger btn-sm mb-3">
             Mc Tickets Ratio
         </a>
+
     </div>
 </body>
 </html>

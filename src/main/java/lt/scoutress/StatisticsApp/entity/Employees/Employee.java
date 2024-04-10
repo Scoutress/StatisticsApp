@@ -2,6 +2,7 @@ package lt.scoutress.StatisticsApp.entity.Employees;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -17,42 +18,42 @@ public class Employee {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "level")
     private String level;
 
-    @Column(name = "lang")
+    @Column(name = "language", nullable = false)
     private String language;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "join_date")
+    @Column(name = "join_date", nullable = false)
     private LocalDate joinDate;
 
-    @Column(name = "days_since_join")
-    private Integer daysSinceJoin;
-    
-    @OneToMany(mappedBy = "employee", 
-               cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
+    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
                           CascadeType.DETACH, CascadeType.REFRESH})
     private List<McTickets> mcTickets;
 
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private McTicketsAvgDaily mcTicketsAvgDaily;
 
+    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
+                          CascadeType.DETACH, CascadeType.REFRESH})
+    private List<EmployeeCodes> employeeCodes = new ArrayList<>();
+
     public Employee() {}
 
     public Employee(String username, String level, String language, String firstName, String lastName, String email,
-            LocalDate joinDate, Integer daysSinceJoin) {
+            LocalDate joinDate) {
         this.username = username;
         this.level = level;
         this.language = language;
@@ -60,7 +61,6 @@ public class Employee {
         this.lastName = lastName;
         this.email = email;
         this.joinDate = joinDate;
-        this.daysSinceJoin = daysSinceJoin;
     }
 
     public Integer getId() {
@@ -127,14 +127,6 @@ public class Employee {
         this.joinDate = joinDate;
     }
 
-    public Integer getDaysSinceJoin() {
-        return daysSinceJoin;
-    }
-
-    public void setDaysSinceJoin(Integer daysSinceJoin) {
-        this.daysSinceJoin = daysSinceJoin;
-    }
-
     public List<McTickets> getMcTickets() {
         return mcTickets;
     }
@@ -146,8 +138,7 @@ public class Employee {
     @Override
     public String toString() {
         return "Employee [id=" + id + ", username=" + username + ", level=" + level + ", language=" + language
-                + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", joinDate=" + joinDate
-                + ", daysSinceJoin=" + daysSinceJoin + "]";
+                + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", joinDate=" + joinDate + "]";
     }
 
     public void add(McTickets tempMcTickets){
@@ -158,5 +149,14 @@ public class Employee {
         mcTickets.add(tempMcTickets);
 
         tempMcTickets.setEmployee(this);
+    }
+
+    @PostPersist
+    public void addDefaultEmployeeCodes() {
+        List<String> serverNames = Arrays.asList("Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events");
+        for (String serverName : serverNames) {
+            EmployeeCodes employeeCodes = new EmployeeCodes(this.getId(), serverName, null);
+            this.employeeCodes.add(employeeCodes);
+        }
     }
 }

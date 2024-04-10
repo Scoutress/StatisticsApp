@@ -38,4 +38,8 @@ public class StatisticsController {
         model.addAttribute("responses", responseList);
         return "stats/mc-tickets/mc-tickets-avg";
     }
+
+    //avgMcTicketsRatio
+
+    //avgMcTicketsPerPlaytime
 }

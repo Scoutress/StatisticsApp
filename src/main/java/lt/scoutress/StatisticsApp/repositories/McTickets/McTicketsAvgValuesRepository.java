@@ -13,4 +13,6 @@ public interface McTicketsAvgValuesRepository extends JpaRepository<McTicketsAvg
     default List<McTicketsAvgDaily> getAllMcTickets() {
         return findAll();
     }
+
+    McTicketsAvgDaily findByEmployeeId(Integer id);
 }

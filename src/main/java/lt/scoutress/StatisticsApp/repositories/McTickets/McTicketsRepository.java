@@ -1,4 +1,4 @@
-package lt.scoutress.StatisticsApp.repositories;
+package lt.scoutress.StatisticsApp.repositories.McTickets;
 
 import java.util.List;
 
@@ -13,10 +13,4 @@ public interface McTicketsRepository extends JpaRepository<McTickets, Integer> {
     default List<McTickets> getAllMcTickets() {
         return findAll();
     }
-
-    // @Query("SELECT MIN(m.date) FROM McTicketsCounting m")
-    // LocalDate findOldestDate();
-
-    // @Query("SELECT MAX(m.date) FROM McTicketsCounting m")
-    // LocalDate findNewestDate();
 }

@@ -18,7 +18,7 @@ public class McTicketsAvgDaily {
     @Column(name = "id")
     private Integer id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "employee_id")
     private Employee employee;
 

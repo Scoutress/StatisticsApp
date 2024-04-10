@@ -8,15 +8,18 @@ import jakarta.persistence.EntityManager;
 import lt.scoutress.StatisticsApp.entity.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
-import lt.scoutress.StatisticsApp.services.McTicketsService;
+import lt.scoutress.StatisticsApp.repositories.McTickets.McTicketsAvgValuesRepository;
+import lt.scoutress.StatisticsApp.services.McTickets.McTicketsService;
 
 @Service
 public class McTicketsServiceImpl implements McTicketsService{
 
     private final EntityManager entityManager;
+    private final McTicketsAvgValuesRepository mcTicketsAvgValuesRepository;
 
-    public McTicketsServiceImpl(EntityManager entityManager) {
+    public McTicketsServiceImpl(EntityManager entityManager, McTicketsAvgValuesRepository mcTicketsAvgValuesRepository) {
         this.entityManager = entityManager;
+        this.mcTicketsAvgValuesRepository = mcTicketsAvgValuesRepository;
     }
 
     @Override
@@ -29,6 +32,9 @@ public class McTicketsServiceImpl implements McTicketsService{
             entityManager.persist(mcTicketsAvgDaily);
         }
     }
-    
-    
+
+    @Override
+    public List<McTicketsAvgDaily> findAll() {
+        return mcTicketsAvgValuesRepository.findAll();
+    }
 }

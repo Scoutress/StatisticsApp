@@ -11,8 +11,10 @@ public interface McTicketsService {
 
     void calculateMcTicketsAvgDaily(Employee employee);
 
-    List<McTicketsAvgDaily> findAll();
+    List<McTicketsAvgDaily> findAllAvgDaily();
 
     List<McTicketsAvgDailyRatio> calculateMcTicketsAvgDailyRatio(List<McTickets> mcTicketsList);
+
+    List<McTicketsAvgDailyRatio> findAllAvgDailyRatio();
 
 }

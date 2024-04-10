@@ -51,11 +51,6 @@ public class McTicketsServiceImpl implements McTicketsService {
     }
 
     @Override
-    public List<McTicketsAvgDaily> findAll() {
-        return mcTicketsAvgValuesRepository.findAll();
-    }
-
-    @Override
     public List<McTicketsAvgDailyRatio> calculateMcTicketsAvgDailyRatio(List<McTickets> mcTicketsList) {
         Map<Employee, Integer> employeeMcTicketsCountMap = new HashMap<>();
 
@@ -98,5 +93,15 @@ public class McTicketsServiceImpl implements McTicketsService {
             }
         }
         return updatedMcTicketsAvgDailyRatioList;
+    }
+
+    @Override
+    public List<McTicketsAvgDaily> findAllAvgDaily() {
+        return mcTicketsAvgValuesRepository.findAll();
+    }
+
+    @Override
+    public List<McTicketsAvgDailyRatio> findAllAvgDailyRatio() {
+        return mcTicketsAvgDailyRatioRepository.findAll();
     }
 }

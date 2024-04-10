@@ -23,13 +23,13 @@
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th>Average Values of McTickets per day</th>
+                    <th>McTickets ratio</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="response : ${responses}">
-                    <td th:text="${response.username}"></td>
-                    <td th:text="${response.averageValues}"></td>
+                    <td th:text="${response.employee.username}"></td>
+                    <td th:text="${response.averageDailyRatio}"></td>
                 </tr>
             </tbody>
         </table>

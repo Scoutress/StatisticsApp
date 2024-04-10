@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatioResponse;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyResponse;
 import lt.scoutress.StatisticsApp.services.McTickets.McTicketsService;
 
@@ -25,7 +27,7 @@ public class StatisticsController {
 
     @GetMapping("/avgMcTickets")
     public String getAvgMcTickets(Model model) {
-        List<McTicketsAvgDaily> mcTicketsAvgDailyList = mcTicketsService.findAll();
+        List<McTicketsAvgDaily> mcTicketsAvgDailyList = mcTicketsService.findAllAvgDaily();
 
         List<McTicketsAvgDailyResponse> responseList = mcTicketsAvgDailyList.stream()
                 .map(mcTicketsAvgDaily -> new McTicketsAvgDailyResponse(mcTicketsAvgDaily
@@ -39,7 +41,20 @@ public class StatisticsController {
         return "stats/mc-tickets/mc-tickets-avg";
     }
 
-    //avgMcTicketsRatio
+    @GetMapping("/avgMcTicketsRatio")
+    public String getAvgMcTicketsRatio(Model model) {
+        List<McTicketsAvgDailyRatio> mcTicketsAvgDailyRatioList = mcTicketsService.findAllAvgDailyRatio();
+
+        List<McTicketsAvgDailyRatioResponse> responseList = mcTicketsAvgDailyRatioList.stream()
+                .map(mcTicketsAvgDaily -> new McTicketsAvgDailyRatioResponse(
+                        mcTicketsAvgDaily.getEmployee(),
+                        mcTicketsAvgDaily.getAverageDailyRatio()
+                ))
+                .collect(Collectors.toList());
+
+        model.addAttribute("responses", responseList);
+        return "stats/mc-tickets/mc-tickets-ratio";
+    }
 
     //avgMcTicketsPerPlaytime
 }

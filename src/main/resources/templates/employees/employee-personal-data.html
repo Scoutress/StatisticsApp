@@ -38,7 +38,7 @@
             </thead>
             <tbody>
                 <tr th:each="tempEmployee : ${employees}">
-                    <td th:text="${tempEmployee.employeeId}"></td>
+                    <td th:text="${tempEmployee.id}"></td>
                     <td th:text="${tempEmployee.username}"></td>
                     <td th:text="${tempEmployee.level}"></td>
                     <td th:text="${tempEmployee.firstName}"></td>
@@ -47,11 +47,11 @@
                     <td th:text="${tempEmployee.joinDate}"></td>
                     <td th:text="${tempEmployee.language}"></td>
                     <td>
-                        <a th:href="@{/employees/showFormForUpdate(employeeId=${tempEmployee.employeeId})}"
+                        <a th:href="@{/employees/showFormForUpdate(id=${tempEmployee.id})}"
                             class="btn btn-info btm-sm">
                             Edit
                         </a>
-                        <a th:href="@{/employees/delete(employeeId=${tempEmployee.employeeId})}"
+                        <a th:href="@{/employees/delete(id=${tempEmployee.id})}"
                             class="btn btn-danger btm-sm"
                             onclick="if (!(confirm('Are you sure want to delete this employee?'))) return false">
                             Delete

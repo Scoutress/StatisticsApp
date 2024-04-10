@@ -41,6 +41,12 @@ public class EmployeeController {
         return "redirect:/main";
     }
 
+    @GetMapping("/personal")
+    public String getAllEmployeesPersonalData(Model model) {
+        List<Employee> employees = employeeService.findAll();
+        model.addAttribute("employees", employees);
+        return "employees/employee-personal-data";
+    }
 
 
 
@@ -56,12 +62,8 @@ public class EmployeeController {
 
 
 
-    // @GetMapping("/personal")
-    // public String getAllEmployeesPersonalData(Model model) {
-    //     List<Employee> employees = employeeService.findAll();
-    //     model.addAttribute("employees", employees);
-    //     return "employees/employee-personal-data";
-    // }
+
+
 
     // @GetMapping("/showFormForAdd")
     // public String showFormForAdd(Model model) {

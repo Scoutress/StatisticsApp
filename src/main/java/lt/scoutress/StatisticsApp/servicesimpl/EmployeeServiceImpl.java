@@ -21,6 +21,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository = employeeRepository;
     }
 
+    @Override
     public List<Employee> findAll() {
         return employeeRepository.findAllByOrderByLevel();
     }
@@ -36,6 +37,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employee;
     }
 
+    @Override
     public void deleteById(int id) {
         employeeRepository.deleteById(id);
     }
@@ -50,5 +52,17 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> getAllEmployees() {
         Query query = entityManager.createQuery("SELECT e FROM Employee e");
         return query.getResultList();
+    }
+
+    @Override
+    public void updateEmployeeCodes(Long id, Employee employee) {
+        Employee existingEmployee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
+        existingEmployee.setEmployeeCodes(employee.getEmployeeCodes());
+        employeeRepository.save(existingEmployee);
+    }
+
+    @Override
+    public void saveEmployeeCodes(Employee employee) {
+        employeeRepository.save(employee);
     }
 }

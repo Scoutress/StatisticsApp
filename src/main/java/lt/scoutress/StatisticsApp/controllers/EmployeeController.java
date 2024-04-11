@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,17 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
-import lt.scoutress.StatisticsApp.Servicesimpl.EmployeeServiceImpl;
+import lt.scoutress.StatisticsApp.Services.EmployeeService;
 import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Controller
 @RequestMapping("/employees")
 public class EmployeeController {
     
-    private final EmployeeServiceImpl employeeService;
+    private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
-    
-    public EmployeeController(EmployeeServiceImpl employeeService, EmployeeRepository employeeRepository) {
+
+    public EmployeeController(EmployeeService employeeService, EmployeeRepository employeeRepository) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
     }
@@ -92,42 +93,23 @@ public class EmployeeController {
         return "redirect:/employees/personal";
     }
 
+    @GetMapping("/codes")
+    public String getEmployeeCodes(ModelMap model) {
+        List<Employee> employees = employeeRepository.findAll();
+        model.addAttribute("employees", employees);
+        return "employees/employee-db-codes";
+    }
 
+    @GetMapping("/codesUpdateForm")
+    public String getEmployeeCodesForEdit(@RequestParam("id") Integer id, Model model) {
+        Employee employee = employeeRepository.findById(id).orElseThrow();
+        model.addAttribute("employee", employee);
+        return "employees/employee-db-codes-edit";
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // @GetMapping("/showFormForUpdate")
-    // public String showFormForUpdate(@RequestParam("employeeId") int id, Model model){
-    //     Employee employee = employeeService.findById(id);
-    //     model.addAttribute("employee", employee);
-    //     return "employees/employee-form-edit";
-    // }
-
-    // @PostMapping("/save")
-    // public String saveEmployee(@ModelAttribute("employee") Employee employee){
-    //     employeeService.addEmployee(employee);
-    //     return "redirect:/employees/personal";
-    // }
-
-
-
-    // @GetMapping("/promotions")
-    // public String getAllEmployeesPromotionsData(Model model) {
-    //     List<Employee> employees = employeeService.findAll();
-    //     model.addAttribute("employees", employees);
-    //     return "employees/employee-promotions";
-    // }
+    @PostMapping("/employees/{id}/edit-codes")
+    public String saveEditedEmployeeCodes(@ModelAttribute("employee") Employee employee, @PathVariable("id") Integer id) {
+        employeeService.saveEmployeeCodes(employee);
+        return "redirect:/employees/" + id;
+    }
 }

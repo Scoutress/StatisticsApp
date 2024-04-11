@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="\favicon.ico" />
+    <title>Kaimux Employee Stats</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    >
+</head>
+<body>
+    <div class="container">
+        <h3>Edit employee codes</h3>
+        <hr>
+        <form th:action="@{/employees/{id}/edit-codes(id=${employee.id})}" th:object="${employee}" method="post">
+            <input type="hidden" th:field="*{id}" />
+                <div class="col-md-6">
+
+                    <div class="form-group">
+                        <label for="survivalCode">Survival code:</label>
+                        <input type="text" class="form-control" id="survivalCode" th:field="*{employeeCodes[0].code}">
+                    </div>
+                    <div class="form-group">
+                        <label for="skyblockCode">Skyblock code:</label>
+                        <input type="text" class="form-control" id="skyblockCode" th:field="*{employeeCodes[1].code}">
+                    </div>
+                    <div class="form-group">
+                        <label for="creativeCode">Creative code:</label>
+                        <input type="text" class="form-control" id="creativeCode" th:field="*{employeeCodes[2].code}">
+                    </div>
+                    <div class="form-group">
+                        <label for="boxpvpCode">Boxpvp code:</label>
+                        <input type="text" class="form-control" id="boxpvpCode" th:field="*{employeeCodes[3].code}">
+                    </div>
+                    <div class="form-group">
+                        <label for="prisonCode">Prison code:</label>
+                        <input type="text" class="form-control" id="prisonCode" th:field="*{employeeCodes[4].code}">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventsCode">Events code:</label>
+                        <input type="text" class="form-control" id="eventsCode" th:field="*{employeeCodes[5].code}">
+                    </div>
+
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a th:href="@{/employees/codes}" class="btn btn-danger">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

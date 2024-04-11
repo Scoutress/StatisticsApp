@@ -40,16 +40,16 @@ public class Employee {
     @Column(name = "join_date", nullable = false)
     private LocalDate joinDate;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<McTickets> mcTickets;
 
-    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private McTicketsAvgDaily mcTicketsAvgDaily;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<McTicketsAvgDailyRatio> mcTicketsAvgDailyRatios = new ArrayList<>();
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private McTicketsAvgDailyRatio mcTicketsAvgDailyRatio;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<EmployeeCodes> employeeCodes = new ArrayList<>();
 
     public Employee() {}
@@ -153,6 +153,23 @@ public class Employee {
         tempMcTickets.setEmployee(this);
     }
 
+    public void addEmployeeCodes(EmployeeCodes tempEmployeeCodes){
+        if(employeeCodes == null){
+            employeeCodes = new ArrayList<>();
+        }
+        employeeCodes.add(tempEmployeeCodes);
+        tempEmployeeCodes.setEmployee(this);
+    }
+
+    public EmployeeCodes getCodeByServerName(String serverName) {
+        for (EmployeeCodes code : employeeCodes) {
+            if (code.getServerName().equals(serverName)) {
+                return code;
+            }
+        }
+        return null;
+    }
+
     @PostPersist
     public void addDefaultEmployeeCodes() {
         List<String> serverNames = Arrays.asList("Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events");
@@ -160,5 +177,13 @@ public class Employee {
             EmployeeCodes employeeCodes = new EmployeeCodes(this.getId(), serverName, null);
             this.employeeCodes.add(employeeCodes);
         }
+    }
+
+    public List<EmployeeCodes> getEmployeeCodes() {
+        return employeeCodes;
+    }
+
+    public void setEmployeeCodes(List<EmployeeCodes> employeeCodes) {
+        this.employeeCodes = employeeCodes;
     }
 }

@@ -16,4 +16,9 @@ public interface EmployeeService {
 
     Employee save(Employee employee);
 
+    void updateEmployeeCodes(Long id, Employee employee);
+
+    void deleteById(int id);
+
+    void saveEmployeeCodes(Employee employee);
 }

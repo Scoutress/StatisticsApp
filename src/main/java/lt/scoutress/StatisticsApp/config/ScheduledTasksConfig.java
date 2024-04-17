@@ -11,7 +11,7 @@ import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgDailyRatioRepository;
 import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsRepository;
 import lt.scoutress.StatisticsApp.Services.ProductivityService;
-import lt.scoutress.StatisticsApp.Servicesimpl.McTickets.McTicketsServiceImpl;
+import lt.scoutress.StatisticsApp.Servicesimpl.McTicketsServiceImpl;
 import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
@@ -70,5 +70,13 @@ public class ScheduledTasksConfig {
         System.out.println("Scheduled task 3 is started");
         productivityService.createOrUpdateProductivityForAllEmployees();
         System.out.println("Scheduled task 3 is completed");
+    }
+
+    @Scheduled(cron = "0 3 * * * *")
+    @Transactional
+    public void runTask4() {
+        System.out.println("Scheduled task 4 is started");
+        productivityService.copyMcTicketsValuesToProductivity();
+        System.out.println("Scheduled task 4 is completed");
     }
 }

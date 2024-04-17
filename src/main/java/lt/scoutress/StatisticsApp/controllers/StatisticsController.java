@@ -8,8 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import lt.scoutress.StatisticsApp.Services.McTicketsService;
 import lt.scoutress.StatisticsApp.Services.ProductivityService;
-import lt.scoutress.StatisticsApp.Services.McTickets.McTicketsService;
 import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;

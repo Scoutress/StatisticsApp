@@ -8,9 +8,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.Repositories.ProductivityRepository;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgDailyRatioRepository;
+import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgValuesRepository;
 import lt.scoutress.StatisticsApp.Services.ProductivityService;
 import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.Employees.Employee;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
+import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
 
 @Service
 public class ProductivityServiceImpl implements ProductivityService {
@@ -20,11 +24,17 @@ public class ProductivityServiceImpl implements ProductivityService {
 
     private final EmployeeRepository employeeRepository;
     private final ProductivityRepository productivityRepository;
+    private final McTicketsAvgValuesRepository mcTicketsAvgValuesRepository;
+    private final McTicketsAvgDailyRatioRepository mcTicketsAvgDailyRatioRepository;
 
     public ProductivityServiceImpl(EmployeeRepository employeeRepository,
-            ProductivityRepository productivityRepository) {
+            ProductivityRepository productivityRepository,
+            McTicketsAvgDailyRatioRepository mcTicketsAvgDailyRatioRepository,
+            McTicketsAvgValuesRepository mcTicketsAvgValuesRepository) {
         this.employeeRepository = employeeRepository;
         this.productivityRepository = productivityRepository;
+        this.mcTicketsAvgValuesRepository = mcTicketsAvgValuesRepository;
+        this.mcTicketsAvgDailyRatioRepository = mcTicketsAvgDailyRatioRepository;
     }
 
     @Override
@@ -45,6 +55,27 @@ public class ProductivityServiceImpl implements ProductivityService {
                 productivity = new Productivity();
                 productivity.setEmployee(employee);
                 productivityRepository.save(productivity);
+            }
+        }
+    }
+
+    @Override
+    public void copyMcTicketsValuesToProductivity() {
+        Iterable<McTicketsAvgDaily> mcTicketsAvgDailies = mcTicketsAvgValuesRepository.findAll();
+        Iterable<McTicketsAvgDailyRatio> mcTicketsAvgDailyRatios = mcTicketsAvgDailyRatioRepository.findAll();
+
+        for (McTicketsAvgDaily mcTicketsAvgDaily : mcTicketsAvgDailies) {
+            for (McTicketsAvgDailyRatio mcTicketsAvgDailyRatio : mcTicketsAvgDailyRatios) {
+                if (mcTicketsAvgDaily.getEmployee().getId().equals(mcTicketsAvgDailyRatio.getEmployee().getId())) {
+                    Productivity productivity = productivityRepository
+                            .findByEmployeeId(mcTicketsAvgDaily.getEmployee().getId());
+
+                    if (productivity != null) {
+                        productivity.setMcTickets(mcTicketsAvgDaily.getAverageValues());
+                        productivity.setMcTicketsRatio(mcTicketsAvgDailyRatio.getAverageDailyRatio());
+                        productivityRepository.save(productivity);
+                    }
+                }
             }
         }
     }

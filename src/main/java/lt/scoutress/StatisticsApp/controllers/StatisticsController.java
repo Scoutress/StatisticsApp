@@ -8,12 +8,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import lt.scoutress.StatisticsApp.Services.ProductivityService;
 import lt.scoutress.StatisticsApp.Services.McTickets.McTicketsService;
+import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatioResponse;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyResponse;
+
 
 @Controller
 @RequestMapping("/stats")
@@ -21,9 +23,11 @@ public class StatisticsController {
 
     @Autowired
     private final McTicketsService mcTicketsService;
+    private final ProductivityService productivityService;
 
-    public StatisticsController(McTicketsService mcTicketsService) {
+    public StatisticsController(McTicketsService mcTicketsService, ProductivityService productivityService) {
         this.mcTicketsService = mcTicketsService;
+        this.productivityService = productivityService;
     }
 
     @GetMapping("/avgMcTickets")
@@ -58,4 +62,11 @@ public class StatisticsController {
     }
 
     //avgMcTicketsPerPlaytime
+
+    @GetMapping("/productivity")
+    public String getProductivity(Model model) {
+        List<Productivity> productivity = productivityService.findAll();
+        model.addAttribute("productivities", productivity);
+        return "stats/productivity";
+    }
 }

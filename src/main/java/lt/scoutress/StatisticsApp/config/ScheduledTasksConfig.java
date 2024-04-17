@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lt.scoutress.StatisticsApp.Repositories.EmployeeRepository;
 import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsAvgDailyRatioRepository;
 import lt.scoutress.StatisticsApp.Repositories.McTickets.McTicketsRepository;
+import lt.scoutress.StatisticsApp.Services.ProductivityService;
 import lt.scoutress.StatisticsApp.Servicesimpl.McTickets.McTicketsServiceImpl;
 import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
@@ -23,13 +24,16 @@ public class ScheduledTasksConfig {
     private final McTicketsRepository mcTicketsRepository;
     private final McTicketsAvgDailyRatioRepository mcTicketsAvgDailyRatioRepository;
     private final McTicketsServiceImpl mcTicketsServiceImpl;
+    private final ProductivityService productivityService;
 
     public ScheduledTasksConfig(EmployeeRepository employeeRepository, McTicketsServiceImpl mcTicketsServiceImpl,
-            McTicketsRepository mcTicketsRepository, McTicketsAvgDailyRatioRepository mcTicketsAvgDailyRatioRepository) {
+            McTicketsRepository mcTicketsRepository, McTicketsAvgDailyRatioRepository mcTicketsAvgDailyRatioRepository,
+            ProductivityService productivityService) {
         this.employeeRepository = employeeRepository;
         this.mcTicketsRepository = mcTicketsRepository;
         this.mcTicketsAvgDailyRatioRepository = mcTicketsAvgDailyRatioRepository;
         this.mcTicketsServiceImpl = mcTicketsServiceImpl;
+        this.productivityService = productivityService;
     }
 
     // For copy-paste (DEBUG)
@@ -58,5 +62,13 @@ public class ScheduledTasksConfig {
                 .calculateMcTicketsAvgDailyRatio(mcTicketsList);
         mcTicketsAvgDailyRatioRepository.saveAll(mcTicketsAvgDailyRatioList);
         System.out.println("Scheduled task 2 is completed");
+    }
+
+    @Scheduled(cron = "0 2 * * * *")
+    @Transactional
+    public void runTask3() {
+        System.out.println("Scheduled task 3 is started");
+        productivityService.createOrUpdateProductivityForAllEmployees();
+        System.out.println("Scheduled task 3 is completed");
     }
 }

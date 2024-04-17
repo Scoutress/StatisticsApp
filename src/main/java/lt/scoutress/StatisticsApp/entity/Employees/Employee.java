@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import jakarta.persistence.*;
+import lt.scoutress.StatisticsApp.entity.Productivity;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTickets;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDaily;
 import lt.scoutress.StatisticsApp.entity.McTickets.McTicketsAvgDailyRatio;
@@ -52,7 +53,11 @@ public class Employee {
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<EmployeeCodes> employeeCodes = new ArrayList<>();
 
-    public Employee() {}
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Productivity productivity;
+
+    public Employee() {
+    }
 
     public Employee(String username, String level, String language, String firstName, String lastName, String email,
             LocalDate joinDate) {
@@ -140,12 +145,13 @@ public class Employee {
     @Override
     public String toString() {
         return "Employee [id=" + id + ", username=" + username + ", level=" + level + ", language=" + language
-                + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", joinDate=" + joinDate + "]";
+                + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", joinDate=" + joinDate
+                + "]";
     }
 
-    public void add(McTickets tempMcTickets){
+    public void add(McTickets tempMcTickets) {
 
-        if(mcTickets == null){
+        if (mcTickets == null) {
             mcTickets = new ArrayList<>();
         }
         mcTickets.add(tempMcTickets);
@@ -153,8 +159,8 @@ public class Employee {
         tempMcTickets.setEmployee(this);
     }
 
-    public void addEmployeeCodes(EmployeeCodes tempEmployeeCodes){
-        if(employeeCodes == null){
+    public void addEmployeeCodes(EmployeeCodes tempEmployeeCodes) {
+        if (employeeCodes == null) {
             employeeCodes = new ArrayList<>();
         }
         employeeCodes.add(tempEmployeeCodes);
@@ -185,5 +191,10 @@ public class Employee {
 
     public void setEmployeeCodes(List<EmployeeCodes> employeeCodes) {
         this.employeeCodes = employeeCodes;
+    }
+
+    public void setProductivity(Productivity productivity) {
+        this.productivity = productivity;
+        productivity.setEmployee(this);
     }
 }

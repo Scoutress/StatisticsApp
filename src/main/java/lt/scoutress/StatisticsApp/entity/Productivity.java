@@ -1,21 +1,20 @@
 package lt.scoutress.StatisticsApp.entity;
 
 import jakarta.persistence.*;
+import lt.scoutress.StatisticsApp.entity.Employees.Employee;
 
 @Entity
 @Table(name = "productivity")
 public class Productivity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "level")
-    private String level;
-
-    @Column(name = "username", unique = true)
-    private String username;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
 
     @Column(name = "activity_per_half_year")
     private Double activityPerHalfYear;
@@ -29,20 +28,17 @@ public class Productivity {
     @Column(name = "mc_tickets")
     private Double mcTickets;
 
-    @Column(name = "mc_tickets_comp")
-    private Double mcTicketsComp;
+    @Column(name = "mc_tickets_ratio")
+    private Double mcTicketsRatio;
 
-    @Column(name = "dc_messages")
-    private Double dcMessages;
-
-    @Column(name = "dc_messages_comp")
-    private Double dcMessagesComp;
+    @Column(name = "mc_tickets_per_playtime_hour")
+    private Double mcTicketsPerPlaytimeHour;
 
     @Column(name = "dc_tickets")
     private Double dcTickets;
 
-    @Column(name = "dc_tickets_comp")
-    private Double dcTicketsComp;
+    @Column(name = "dc_tickets_ratio")
+    private Double dcTicketsRatio;
 
     @Column(name = "productivity")
     private Double productivity;
@@ -50,23 +46,21 @@ public class Productivity {
     @Column(name = "recommendation")
     private Double recommendation;
 
-    public Productivity(){}
+    public Productivity() {
+    }
 
-    public Productivity(Integer id, String level, String username, Double activityPerHalfYear, Double playtime,
-            Double playtimeAfk, Double mcTickets, Double mcTicketsComp, Double dcMessages, Double dcMessagesComp,
-            Double dcTickets, Double dcTicketsComp, Double productivity, Double recommendation) {
-        this.id = id;
-        this.level = level;
-        this.username = username;
+    public Productivity(Employee employee, Double activityPerHalfYear, Double playtime, Double playtimeAfk,
+            Double mcTickets, Double mcTicketsRatio, Double mcTicketsPerPlaytimeHour, Double dcTickets,
+            Double dcTicketsRatio, Double productivity, Double recommendation) {
+        this.employee = employee;
         this.activityPerHalfYear = activityPerHalfYear;
         this.playtime = playtime;
         this.playtimeAfk = playtimeAfk;
         this.mcTickets = mcTickets;
-        this.mcTicketsComp = mcTicketsComp;
-        this.dcMessages = dcMessages;
-        this.dcMessagesComp = dcMessagesComp;
+        this.mcTicketsRatio = mcTicketsRatio;
+        this.mcTicketsPerPlaytimeHour = mcTicketsPerPlaytimeHour;
         this.dcTickets = dcTickets;
-        this.dcTicketsComp = dcTicketsComp;
+        this.dcTicketsRatio = dcTicketsRatio;
         this.productivity = productivity;
         this.recommendation = recommendation;
     }
@@ -79,20 +73,12 @@ public class Productivity {
         this.id = id;
     }
 
-    public String getLevel() {
-        return level;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public Double getActivityPerHalfYear() {
@@ -127,28 +113,20 @@ public class Productivity {
         this.mcTickets = mcTickets;
     }
 
-    public Double getMcTicketsComp() {
-        return mcTicketsComp;
+    public Double getMcTicketsRatio() {
+        return mcTicketsRatio;
     }
 
-    public void setMcTicketsComp(Double mcTicketsComp) {
-        this.mcTicketsComp = mcTicketsComp;
+    public void setMcTicketsRatio(Double mcTicketsRatio) {
+        this.mcTicketsRatio = mcTicketsRatio;
     }
 
-    public Double getDcMessages() {
-        return dcMessages;
+    public Double getMcTicketsPerPlaytimeHour() {
+        return mcTicketsPerPlaytimeHour;
     }
 
-    public void setDcMessages(Double dcMessages) {
-        this.dcMessages = dcMessages;
-    }
-
-    public Double getDcMessagesComp() {
-        return dcMessagesComp;
-    }
-
-    public void setDcMessagesComp(Double dcMessagesComp) {
-        this.dcMessagesComp = dcMessagesComp;
+    public void setMcTicketsPerPlaytimeHour(Double mcTicketsPerPlaytimeHour) {
+        this.mcTicketsPerPlaytimeHour = mcTicketsPerPlaytimeHour;
     }
 
     public Double getDcTickets() {
@@ -159,12 +137,12 @@ public class Productivity {
         this.dcTickets = dcTickets;
     }
 
-    public Double getDcTicketsComp() {
-        return dcTicketsComp;
+    public Double getDcTicketsRatio() {
+        return dcTicketsRatio;
     }
 
-    public void setDcTicketsComp(Double dcTicketsComp) {
-        this.dcTicketsComp = dcTicketsComp;
+    public void setDcTicketsRatio(Double dcTicketsRatio) {
+        this.dcTicketsRatio = dcTicketsRatio;
     }
 
     public Double getProductivity() {
@@ -181,5 +159,14 @@ public class Productivity {
 
     public void setRecommendation(Double recommendation) {
         this.recommendation = recommendation;
+    }
+
+    @Override
+    public String toString() {
+        return "Productivity [id=" + id + ", employee=" + employee + ", activityPerHalfYear=" + activityPerHalfYear
+                + ", playtime=" + playtime + ", playtimeAfk=" + playtimeAfk + ", mcTickets=" + mcTickets
+                + ", mcTicketsRatio=" + mcTicketsRatio + ", mcTicketsPerPlaytimeHour=" + mcTicketsPerPlaytimeHour
+                + ", dcTickets=" + dcTickets + ", dcTicketsRatio=" + dcTicketsRatio + ", productivity=" + productivity
+                + ", recommendation=" + recommendation + "]";
     }
 }

@@ -20,8 +20,7 @@ public class McTickets {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, 
-                          CascadeType.DETACH, CascadeType.REFRESH})
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
     private Employee employee;
     

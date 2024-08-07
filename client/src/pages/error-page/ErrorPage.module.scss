@@ -1,12 +1,8 @@
-@import "../../styles/main.module.scss";
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px;
   text-align: center;
-  font-family: $primaryFontStyle;
-  font-size: $primaryH3FontSize;
 }
 
 .title {

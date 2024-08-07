@@ -1,11 +1,8 @@
+import { RouterProvider } from "react-router-dom";
+import Router from "./navigation/router/Router.js";
+
 function App() {
-  return (
-    <>
-      <div>
-        <h1>Vite + React</h1>
-      </div>
-    </>
-  );
+  return <RouterProvider router={Router} />;
 }
 
 export default App;

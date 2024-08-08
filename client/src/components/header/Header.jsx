@@ -15,6 +15,9 @@ const Header = () => {
         <Link to="/employee/all" className={styles.navLink}>
           Employees
         </Link>
+        <Link to="/dc-tickets/add" className={styles.navLink}>
+          Add dc tickets
+        </Link>
       </nav>
     </header>
   );

@@ -3,11 +3,6 @@ package com.scoutress.KaimuxAdminStats.Config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.scoutress.KaimuxAdminStats.utils.GetEmployeesDummyData;
-import com.scoutress.KaimuxAdminStats.utils.GetProductivityDummyData;
-
-import jakarta.transaction.Transactional;
-
 @Configuration
 @EnableScheduling
 public class ScheduledTasksConfig {
@@ -17,13 +12,13 @@ public class ScheduledTasksConfig {
     // private final McTicketsAvgDailyRatioRepository mcTicketsAvgDailyRatioRepository;
     // private final McTicketsServiceImpl mcTicketsServiceImpl;
     // private final ProductivityService productivityService;
-    private final GetEmployeesDummyData getEmployeesDummyData;
-    private final GetProductivityDummyData getProductivityDummyData;
+    // private final GetEmployeesDummyData getEmployeesDummyData;
+    // private final GetProductivityDummyData getProductivityDummyData;
 
-    public ScheduledTasksConfig(GetEmployeesDummyData getEmployeesDummyData , GetProductivityDummyData getProductivityDummyData) {
-        this.getEmployeesDummyData = getEmployeesDummyData;
-        this.getProductivityDummyData = getProductivityDummyData;
-    }
+    // public ScheduledTasksConfig(GetEmployeesDummyData getEmployeesDummyData , GetProductivityDummyData getProductivityDummyData) {
+    //     this.getEmployeesDummyData = getEmployeesDummyData;
+    //     this.getProductivityDummyData = getProductivityDummyData;
+    // }
 
     // For copy-paste (DEBUG)
     // @Scheduled(cron = "0 * * * * *")
@@ -32,15 +27,15 @@ public class ScheduledTasksConfig {
     // @Scheduled(cron = "45 * * * * *")
 
     // @Scheduled(cron = "* * * * * *")
-    @Transactional
-    public void runTask1() {
-        System.out.println("Employee dummy data filling is started");
-        getEmployeesDummyData.createDummyEmployees();
-        System.out.println("Employee dummy data filling is completed");
-        System.out.println("Productivity dummy data filling is started");
-        getProductivityDummyData.createDummyProductivity();
-        System.out.println("Productivity dummy data filling is completed");
-    }
+    // @Transactional
+    // public void runTask1() {
+    //     System.out.println("Employee dummy data filling is started");
+    //     getEmployeesDummyData.createDummyEmployees();
+    //     System.out.println("Employee dummy data filling is completed");
+    //     System.out.println("Productivity dummy data filling is started");
+    //     getProductivityDummyData.createDummyProductivity();
+    //     System.out.println("Productivity dummy data filling is completed");
+    // }
 
     // @Scheduled(cron = "0 0 * * * *")
     // @Transactional

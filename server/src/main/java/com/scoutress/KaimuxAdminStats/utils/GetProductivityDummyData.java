@@ -3,14 +3,12 @@ package com.scoutress.KaimuxAdminStats.utils;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.Productivity;
 
-@Component
 public class GetProductivityDummyData {
 
   @Autowired

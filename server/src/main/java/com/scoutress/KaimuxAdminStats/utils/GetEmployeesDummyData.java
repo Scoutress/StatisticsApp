@@ -5,14 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
 
 import jakarta.annotation.PostConstruct;
 
-@Component
 public class GetEmployeesDummyData {
 
     @Autowired

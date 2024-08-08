@@ -5,6 +5,7 @@ import Home from "../../pages/home-page/HomePage.jsx";
 import Routes from "../routes/Routes.jsx";
 import Root from "../root/Root.jsx";
 import EmployeesPage from "../../pages/employees-page/EmployeesPage.jsx";
+import DcTicketsAddFormPage from "../../pages/dc-tickets-add-form-page/DcTicketsAddFormPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.employeesPage.link,
         element: <EmployeesPage />,
+      },
+      {
+        path: Routes.dcTicketsAddPage.link,
+        element: <DcTicketsAddFormPage />,
       },
     ],
   },

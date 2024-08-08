@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "productivity")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Productivity {
 
     @Id
@@ -56,5 +58,19 @@ public class Productivity {
     private Double productivity;
 
     @Column(name = "recommendation")
-    private String recommendation;    
+    private String recommendation;
+
+    public Productivity(Employee employee, Double annualPlaytime, Double serverTickets, Double serverTicketsTaking, Double discordTickets, Double discordTicketsTaking, Double playtime, Double afkPlaytime, Double productivity, String recommendation) {
+        this.employee = employee;
+        this.employeeId = employee.getId();
+        this.annualPlaytime = annualPlaytime;
+        this.serverTickets = serverTickets;
+        this.serverTicketsTaking = serverTicketsTaking;
+        this.discordTickets = discordTickets;
+        this.discordTicketsTaking = discordTicketsTaking;
+        this.playtime = playtime;
+        this.afkPlaytime = afkPlaytime;
+        this.productivity = productivity;
+        this.recommendation = recommendation;
+    }
 }

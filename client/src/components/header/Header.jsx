@@ -12,6 +12,9 @@ const Header = () => {
         <Link to="/stats/productivity" className={styles.navLink}>
           Productivity
         </Link>
+        <Link to="/employee/all" className={styles.navLink}>
+          Employees
+        </Link>
       </nav>
     </header>
   );

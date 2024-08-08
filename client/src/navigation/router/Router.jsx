@@ -4,6 +4,7 @@ import ProductivityPage from "../../pages/productivity-page/ProductivityPage.jsx
 import Home from "../../pages/home-page/HomePage.jsx";
 import Routes from "../routes/Routes.jsx";
 import Root from "../root/Root.jsx";
+import EmployeesPage from "../../pages/employees-page/EmployeesPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.productivityPage.link,
         element: <ProductivityPage />,
+      },
+      {
+        path: Routes.employeesPage.link,
+        element: <EmployeesPage />,
       },
     ],
   },

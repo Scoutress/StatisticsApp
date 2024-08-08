@@ -4,7 +4,7 @@ const Routes = {
     name: "Home",
   },
   productivityPage: {
-    link: "/productivity",
+    link: "/stats/productivity",
     name: "Productivity",
   },
 };

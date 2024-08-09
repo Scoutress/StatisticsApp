@@ -10,4 +10,6 @@ public interface DcTicketService {
     void updateDiscordTicketsAverage();
 
     void calculateDcTicketsPercentage();
+
+    void updateAverageDcTicketsPercentages();
 }

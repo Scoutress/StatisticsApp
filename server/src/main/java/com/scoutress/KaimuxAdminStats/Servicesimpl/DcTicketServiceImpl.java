@@ -100,4 +100,28 @@ public class DcTicketServiceImpl implements DcTicketService {
             }
         }
     }
+
+    @Override
+    public void updateAverageDcTicketsPercentages() {
+        List<DcTicketPercentage> allPercentages = dcTicketPercentageRepository.findAll();
+
+        Map<Integer, List<DcTicketPercentage>> percentagesPerEmployee = allPercentages.stream()
+            .collect(Collectors.groupingBy(DcTicketPercentage::getEmployeeId));
+        
+        for(Map.Entry<Integer, List<DcTicketPercentage>> entry : percentagesPerEmployee.entrySet()){
+            Integer employeeId = entry.getKey();
+            List<DcTicketPercentage> employPercentages = entry.getValue();
+
+            double averagePercentage = employPercentages.stream()
+                .mapToDouble(DcTicketPercentage::getPercentage)
+                .average()
+                .orElse(0.0);
+
+            Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
+            if(productivity != null){
+                productivity.setDiscordTicketsTaking(averagePercentage);
+                productivityRepository.save(productivity);
+            }
+        }
+    }
 }

@@ -9,4 +9,10 @@ public interface McTicketService {
     List<McTicket> getAllMcTickets();
 
     void saveAll(List<McTicket> mcTickets);
+
+    void updateMinecraftTicketsAverage();
+
+    void calculateMcTicketsPercentage();
+
+    void updateAverageMcTicketsPercentages();
 }

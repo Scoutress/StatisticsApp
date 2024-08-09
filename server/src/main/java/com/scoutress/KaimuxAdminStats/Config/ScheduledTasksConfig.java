@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
+import com.scoutress.KaimuxAdminStats.Services.McTicketService;
 import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
 
 import jakarta.transaction.Transactional;
@@ -15,9 +16,12 @@ public class ScheduledTasksConfig {
 
     private final DcTicketService dcTicketService;
     private final ProductivityService productivityService;
-    public ScheduledTasksConfig(DcTicketService dcTicketService, ProductivityService productivityService) {
+    private final McTicketService mcTicketService;
+
+    public ScheduledTasksConfig(DcTicketService dcTicketService, ProductivityService productivityService, McTicketService mcTicketService) {
         this.dcTicketService = dcTicketService;
         this.productivityService = productivityService;
+        this.mcTicketService = mcTicketService;
     }
     
     // For copy-paste (DEBUG)
@@ -67,5 +71,13 @@ public class ScheduledTasksConfig {
         System.out.println("DC tickets avg. percentages update is started");
         dcTicketService.updateAverageDcTicketsPercentages();
         System.out.println("DC tickets avg. percentages update is completed");
+    }
+
+    @Scheduled(cron = "0 5 * * * *")
+    @Transactional
+    public void runTask5() {
+        System.out.println("MC tickets avg. update is started");
+        mcTicketService.updateMinecraftTicketsAverage();
+        System.out.println("MC tickets avg. update is completed");
     }
 }

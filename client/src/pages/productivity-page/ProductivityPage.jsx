@@ -37,26 +37,24 @@ const ProductivityPage = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Username</th>
             <th>Level</th>
+            <th>Username</th>
             <th>Annual Playtime</th>
-            <th>Server Tickets</th>
-            <th>Server Tickets Taking</th>
-            <th>Discord Tickets</th>
-            <th>Discord Tickets Taking</th>
-            <th>Playtime</th>
-            <th>Afk Playtime</th>
-            <th>Productivity</th>
+            <th>Server Tickets /day</th>
+            <th>Server Tickets Taking %/day</th>
+            <th>Discord Tickets /day</th>
+            <th>Discord Tickets Taking %/day</th>
+            <th>Playtime hours/day</th>
+            <th>Afk Playtime %/day</th>
+            <th>Productivity %</th>
             <th>Recommendation</th>
           </tr>
         </thead>
         <tbody>
           {productivityData.map((item) => (
             <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.employee ? item.employee.username : "N/A"}</td>
               <td>{item.employee ? item.employee.level : "N/A"}</td>
+              <td>{item.employee ? item.employee.username : "N/A"}</td>
               <td>{item.annualPlaytime}</td>
               <td>{item.serverTickets}</td>
               <td>{item.serverTicketsTaking}</td>

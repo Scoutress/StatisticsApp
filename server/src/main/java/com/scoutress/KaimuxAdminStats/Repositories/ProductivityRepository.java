@@ -15,6 +15,6 @@ public interface ProductivityRepository extends JpaRepository<Productivity, Inte
            "CASE e.level WHEN 'Owner' THEN 1 WHEN 'Coder' THEN 2 WHEN 'Operator' THEN 3 WHEN 'Manager' THEN 4 WHEN 'Organizer' THEN 5 WHEN 'Overseer' THEN 6 WHEN 'ChatMod' THEN 7 WHEN 'Support' THEN 8 WHEN 'Helper' THEN 9 ELSE 10 END")
     List<Productivity> findAllWithEmployeeDetails();
 
-    // Productivity findByEmployeeId(Integer id);
+    Productivity findByEmployeeId(Integer employeeId);
     
 }

@@ -6,4 +6,6 @@ import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
 
 public interface DcTicketService {
     void saveAll(List<DcTicket> dcTickets);
+
+    void updateDiscordTicketsAverage();
 }

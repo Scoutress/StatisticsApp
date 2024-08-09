@@ -9,21 +9,6 @@ const Header = () => {
         <Link to="/" className={styles.navLink}>
           Home
         </Link>
-        <Link to="/stats/productivity" className={styles.navLink}>
-          Productivity
-        </Link>
-        <Link to="/employee/all" className={styles.navLink}>
-          Employees
-        </Link>
-        <Link to="/dc-tickets/add" className={styles.navLink}>
-          Add dc tickets
-        </Link>
-        <Link to="/dc-tickets/all" className={styles.navLink}>
-          Dc tickets
-        </Link>
-        <Link to="/dc-tickets/compare" className={styles.navLink}>
-          Dc tickets compare
-        </Link>
       </nav>
     </header>
   );

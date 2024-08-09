@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTicketRepository;
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
-import com.scoutress.KaimuxAdminStats.entity.dcTickets.DcTicket;
 
 @Service
 public class DcTicketServiceImpl implements DcTicketService {

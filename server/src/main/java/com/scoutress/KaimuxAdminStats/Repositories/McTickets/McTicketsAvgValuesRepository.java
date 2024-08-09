@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.scoutress.KaimuxAdminStats.entity.McTickets.McTicketsAvgDaily;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicketsAvgDaily;
 
 @Repository
 public interface McTicketsAvgValuesRepository extends JpaRepository<McTicketsAvgDaily, Integer> {

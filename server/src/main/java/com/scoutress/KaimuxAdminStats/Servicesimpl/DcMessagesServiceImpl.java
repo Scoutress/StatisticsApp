@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.DcMessages.DcMessagesCalc;
+import com.scoutress.KaimuxAdminStats.Entity.DcMessages.DcMessagesTexted;
 import com.scoutress.KaimuxAdminStats.Repositories.DcMessagesCalcRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.DcMessagesRepository;
 import com.scoutress.KaimuxAdminStats.Services.DcMessagesService;
-import com.scoutress.KaimuxAdminStats.entity.DcMessages.DcMessagesCalc;
-import com.scoutress.KaimuxAdminStats.entity.DcMessages.DcMessagesTexted;
 
 @Service
 public class DcMessagesServiceImpl implements DcMessagesService{

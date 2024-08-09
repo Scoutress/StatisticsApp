@@ -1,6 +1,6 @@
-package com.scoutress.KaimuxAdminStats.entity.McTickets;
+package com.scoutress.KaimuxAdminStats.Entity.McTickets;
 
-import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Services.EmployeeService;
-import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

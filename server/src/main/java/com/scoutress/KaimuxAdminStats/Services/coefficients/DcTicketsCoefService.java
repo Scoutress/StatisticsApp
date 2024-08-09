@@ -1,8 +1,8 @@
-package com.scoutress.KaimuxAdminStats.Services.coefficients;
+package com.scoutress.KaimuxAdminStats.Services.Coefficients;
 
 import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.entity.Coefficients.DcTicketsCoef;
+import com.scoutress.KaimuxAdminStats.Entity.Coefficients.DcTicketsCoef;
 
 public interface DcTicketsCoefService {
 

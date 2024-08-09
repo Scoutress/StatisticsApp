@@ -15,6 +15,10 @@ const Routes = {
     link: "/dc-tickets/add",
     name: "Dc Tickets Add",
   },
+  dcTicketsPage: {
+    link: "/dc-tickets/all",
+    name: "Dc Tickets",
+  },
 };
 
 export default Routes;

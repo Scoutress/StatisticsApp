@@ -1,8 +1,8 @@
-package com.scoutress.KaimuxAdminStats.Services.playtime;
+package com.scoutress.KaimuxAdminStats.Services.Playtime;
 
 import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.entity.Playtime.Playtime;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.Playtime;
 
 public interface PlaytimeService {
 

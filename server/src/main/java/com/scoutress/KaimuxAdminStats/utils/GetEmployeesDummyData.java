@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.utils;
+package com.scoutress.KaimuxAdminStats.Utils;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
 
 import jakarta.annotation.PostConstruct;
 

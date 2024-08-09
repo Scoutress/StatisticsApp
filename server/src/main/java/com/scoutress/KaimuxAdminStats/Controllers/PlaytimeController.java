@@ -7,8 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.scoutress.KaimuxAdminStats.Services.playtime.PlaytimeService;
-import com.scoutress.KaimuxAdminStats.entity.Playtime.Playtime;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.Playtime;
+import com.scoutress.KaimuxAdminStats.Services.Playtime.PlaytimeService;
 
 @Controller
 @RequestMapping("/playtime")

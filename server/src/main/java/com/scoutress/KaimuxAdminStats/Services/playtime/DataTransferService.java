@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.Services.playtime;
+package com.scoutress.KaimuxAdminStats.Services.Playtime;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

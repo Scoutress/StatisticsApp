@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.McTickets;
+package com.scoutress.KaimuxAdminStats.Entity.McTickets;
 
 public class McTicketsAvgDailyResponse {
     private String username;

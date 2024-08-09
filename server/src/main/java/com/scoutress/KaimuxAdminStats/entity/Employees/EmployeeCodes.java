@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.Employees;
+package com.scoutress.KaimuxAdminStats.Entity.Employees;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

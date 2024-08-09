@@ -18,6 +18,9 @@ const Header = () => {
         <Link to="/dc-tickets/add" className={styles.navLink}>
           Add dc tickets
         </Link>
+        <Link to="/dc-tickets/all" className={styles.navLink}>
+          Dc tickets
+        </Link>
       </nav>
     </header>
   );

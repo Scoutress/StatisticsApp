@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.Playtime.servers;
+package com.scoutress.KaimuxAdminStats.Entity.Playtime.Servers;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

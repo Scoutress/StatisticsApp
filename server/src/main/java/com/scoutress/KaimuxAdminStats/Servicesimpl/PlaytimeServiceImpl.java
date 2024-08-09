@@ -14,11 +14,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.Playtime;
 import com.scoutress.KaimuxAdminStats.Repositories.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.Services.playtime.PlaytimeService;
-import com.scoutress.KaimuxAdminStats.entity.Playtime.DailyPlaytime;
-import com.scoutress.KaimuxAdminStats.entity.Playtime.Playtime;
+import com.scoutress.KaimuxAdminStats.Services.Playtime.PlaytimeService;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;

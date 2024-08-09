@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.scoutress.KaimuxAdminStats.entity.Productivity;
+import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 
 @Repository
 public interface ProductivityRepository extends JpaRepository<Productivity, Integer> {

@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
-import com.scoutress.KaimuxAdminStats.entity.Productivity;
 
 @Service
 public class ProductivityServiceImpl implements ProductivityService {

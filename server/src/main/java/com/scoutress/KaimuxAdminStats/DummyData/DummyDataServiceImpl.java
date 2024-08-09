@@ -6,10 +6,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTickets;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketsRepository;
-import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.entity.McTickets.McTickets;
 
 import jakarta.transaction.Transactional;
 

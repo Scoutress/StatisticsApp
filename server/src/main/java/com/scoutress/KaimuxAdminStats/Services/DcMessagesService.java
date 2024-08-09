@@ -2,8 +2,8 @@ package com.scoutress.KaimuxAdminStats.Services;
 
 import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.entity.DcMessages.DcMessagesCalc;
-import com.scoutress.KaimuxAdminStats.entity.DcMessages.DcMessagesTexted;
+import com.scoutress.KaimuxAdminStats.Entity.DcMessages.DcMessagesCalc;
+import com.scoutress.KaimuxAdminStats.Entity.DcMessages.DcMessagesTexted;
 
 public interface DcMessagesService {
 

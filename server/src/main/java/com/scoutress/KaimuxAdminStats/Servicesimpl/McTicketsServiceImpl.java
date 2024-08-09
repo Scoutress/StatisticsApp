@@ -8,14 +8,14 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTickets;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicketsAvgDaily;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicketsAvgDailyRatio;
 import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketsAvgDailyRatioRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketsAvgValuesRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketsRepository;
 import com.scoutress.KaimuxAdminStats.Services.McTicketsService;
-import com.scoutress.KaimuxAdminStats.entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.entity.McTickets.McTickets;
-import com.scoutress.KaimuxAdminStats.entity.McTickets.McTicketsAvgDaily;
-import com.scoutress.KaimuxAdminStats.entity.McTickets.McTicketsAvgDailyRatio;
 
 @Service
 public class McTicketsServiceImpl implements McTicketsService {

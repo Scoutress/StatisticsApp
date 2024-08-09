@@ -40,4 +40,12 @@ public class ScheduledTasksConfig {
         dcTicketService.updateDiscordTicketsAverage();
         System.out.println("DC tickets avg. update is completed");
     }
+
+    // @Scheduled(cron = "0 2 * * * *")
+    @Transactional
+    public void runTask2() {
+        System.out.println("DC tickets compare update is started");
+        dcTicketService.calculateDcTicketsPercentage();
+        System.out.println("DC tickets compare update is completed");
+    }
 }

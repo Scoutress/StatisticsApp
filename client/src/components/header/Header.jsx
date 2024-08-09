@@ -21,6 +21,9 @@ const Header = () => {
         <Link to="/dc-tickets/all" className={styles.navLink}>
           Dc tickets
         </Link>
+        <Link to="/dc-tickets/compare" className={styles.navLink}>
+          Dc tickets compare
+        </Link>
       </nav>
     </header>
   );

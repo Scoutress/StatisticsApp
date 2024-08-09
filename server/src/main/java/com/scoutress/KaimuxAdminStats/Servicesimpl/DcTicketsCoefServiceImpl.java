@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Entity.Coefficients.DcTicketsCoef;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTicketsCoefRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketsCoefRepository;
 import com.scoutress.KaimuxAdminStats.Services.Coefficients.DcTicketsCoefService;
 
 import jakarta.persistence.EntityManager;

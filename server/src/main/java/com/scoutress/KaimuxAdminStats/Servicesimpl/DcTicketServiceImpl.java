@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
+import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicketPercentage;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTicketRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketPercentageRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
 
@@ -19,10 +21,12 @@ public class DcTicketServiceImpl implements DcTicketService {
 
     private final DcTicketRepository dcTicketRepository;
     private final ProductivityRepository productivityRepository;
+    private final DcTicketPercentageRepository dcTicketPercentageRepository;
 
-    public DcTicketServiceImpl(DcTicketRepository dcTicketRepository, ProductivityRepository productivityRepository) {
+    public DcTicketServiceImpl(DcTicketRepository dcTicketRepository, ProductivityRepository productivityRepository, DcTicketPercentageRepository dcTicketPercentageRepository) {
         this.dcTicketRepository = dcTicketRepository;
         this.productivityRepository = productivityRepository;
+        this.dcTicketPercentageRepository = dcTicketPercentageRepository;
     }
 
     @Override
@@ -65,6 +69,34 @@ public class DcTicketServiceImpl implements DcTicketService {
                     productivity.setDiscordTickets(averageTicketsPerDay);
                     productivityRepository.save(productivity);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void calculateDcTicketsPercentage() {
+        List<DcTicket> dcTickets = dcTicketRepository.findAll();
+
+        Map<LocalDate, List<DcTicket>> ticketsByDate = dcTickets.stream()
+            .collect(Collectors.groupingBy(DcTicket::getDate));
+
+        for(Map.Entry<LocalDate, List<DcTicket>> entry : ticketsByDate.entrySet()){
+            LocalDate date = entry.getKey();
+            List<DcTicket> dailyTickets = entry.getValue();
+
+            int totalTicketsForDay = dailyTickets.stream()
+                .mapToInt(DcTicket::getTicketCount)
+                .sum();
+            
+            for(DcTicket ticket : dailyTickets){
+                double percentage = totalTicketsForDay > 0 
+                ? (double) ticket.getTicketCount() / totalTicketsForDay * 100
+                : 0.0;
+
+                DcTicketPercentage dcTicketPercentage = new DcTicketPercentage(
+                    ticket.getEmployeeId(), date, percentage
+                );
+                dcTicketPercentageRepository.save(dcTicketPercentage);
             }
         }
     }

@@ -7,6 +7,7 @@ import Root from "../root/Root.jsx";
 import EmployeesPage from "../../pages/employees-page/EmployeesPage.jsx";
 import DcTicketsAddFormPage from "../../pages/dc-tickets-add-form-page/DcTicketsAddFormPage.jsx";
 import DcTicketsPage from "../../pages/dc-tickets-page/DcTicketsPage.jsx";
+import DcTicketsComparePage from "../../pages/dc-tickets-compare-page/DcTicketsComparePage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.dcTicketsPage.link,
         element: <DcTicketsPage />,
+      },
+      {
+        path: Routes.dcTicketsComparePage.link,
+        element: <DcTicketsComparePage />,
       },
     ],
   },

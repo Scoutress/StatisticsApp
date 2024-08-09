@@ -8,4 +8,6 @@ public interface DcTicketService {
     void saveAll(List<DcTicket> dcTickets);
 
     void updateDiscordTicketsAverage();
+
+    void calculateDcTicketsPercentage();
 }

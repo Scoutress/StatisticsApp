@@ -31,11 +31,6 @@ public class McTicketServiceImpl implements McTicketService {
     }
 
     @Override
-    public List<McTicket> getAllMcTickets() {
-        return  mcTicketsRepository.findAll();
-    }
-
-    @Override
     public void saveAll(List<McTicket> mcTickets) {
         mcTicketsRepository.saveAll(mcTickets);
     }

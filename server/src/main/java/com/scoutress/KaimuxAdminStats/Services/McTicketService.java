@@ -6,8 +6,6 @@ import com.scoutress.KaimuxAdminStats.Entity.McTicket;
 
 public interface McTicketService {
 
-    List<McTicket> getAllMcTickets();
-
     void saveAll(List<McTicket> mcTickets);
 
     void updateMinecraftTicketsAverage();

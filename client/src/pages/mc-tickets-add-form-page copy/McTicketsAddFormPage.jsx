@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import styles from "./DcTicketsAddFormPage.module.scss";
+import styles from "./McTicketsAddFormPage.module.scss";
 
-const DcTicketsAddFormPage = () => {
-  const [employees, setEmployees] = useState([]);
+const McTicketsAddFormPage = () => {
   const [formData, setFormData] = useState({ date: "", tickets: [] });
+  const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const DcTicketsAddFormPage = () => {
       .then((response) => {
         const sortedEmployees = response.data.sort((a, b) => a.id - b.id);
         setEmployees(sortedEmployees);
-        const initialTickets = response.data.map((employee) => ({
+        const initialTickets = sortedEmployees.map((employee) => ({
           employeeId: employee.id,
           ticketCount: "",
         }));
@@ -46,10 +46,10 @@ const DcTicketsAddFormPage = () => {
       ticketCount: ticket.ticketCount,
     }));
     axios
-      .post("http://localhost:8080/dc-tickets/add", payload)
+      .post("http://localhost:8080/mc-tickets/add", payload)
       .then((response) => {
-        console.log("DcTickets added", response);
-        navigate("/dc-tickets/all");
+        console.log("McTickets added", response);
+        navigate("/mc-tickets/all");
       })
       .catch((error) => console.error(error));
   };
@@ -93,4 +93,4 @@ const DcTicketsAddFormPage = () => {
   );
 };
 
-export default DcTicketsAddFormPage;
+export default McTicketsAddFormPage;

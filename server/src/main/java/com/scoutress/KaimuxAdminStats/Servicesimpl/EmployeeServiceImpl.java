@@ -4,24 +4,21 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.EmployeeService;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final ProductivityRepository productivityRepository;
     
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ProductivityRepository productivityRepository) {
         this.employeeRepository = employeeRepository;
+        this.productivityRepository = productivityRepository;
     }
 
     @Override
@@ -30,42 +27,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void addEmployee(Employee employee) {
-        employeeRepository.save(employee);
-    }
-
-    @Override
-    public Employee findById(int employeeId) {
-        Employee employee = entityManager.find(Employee.class, employeeId);
-        return employee;
-    }
-
-    @Override
-    public void deleteById(int id) {
-        employeeRepository.deleteById(id);
-    }
-
-    @Override
     public Employee save(Employee employee) {
-        return employeeRepository.save(employee);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Employee> getAllEmployees() {
-        Query query = entityManager.createQuery("SELECT e FROM Employee e");
-        return query.getResultList();
-    }
-
-    // @Override
-    // public void updateEmployeeCodes(Long id, Employee employee) {
-    //     Employee existingEmployee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
-    //     existingEmployee.setEmployeeCodes(employee.getEmployeeCodes());
-    //     employeeRepository.save(existingEmployee);
-    // }
-
-    @Override
-    public void saveEmployeeCodes(Employee employee) {
-        employeeRepository.save(employee);
+        Employee savedEmployee = employeeRepository.save(employee);
+        Productivity newProductivity = new Productivity();
+        newProductivity.setEmployee(savedEmployee);
+        productivityRepository.save(newProductivity);
+        return savedEmployee;
     }
 }

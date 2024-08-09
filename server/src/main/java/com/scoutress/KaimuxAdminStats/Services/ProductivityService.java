@@ -8,7 +8,5 @@ public interface ProductivityService {
 
     List<Productivity> findAll();
 
-    // void createOrUpdateProductivityForAllEmployees();
-
-    // void copyMcTicketsValuesToProductivity();
+    void updateProductivityData();
 }

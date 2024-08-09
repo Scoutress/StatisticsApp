@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import styles from "./DcTicketsPage.module.scss";
+import styles from "./McTicketsPage.module.scss";
 
-const DcTicketsPage = () => {
-  const [dcTicketsData, setDcTicketsData] = useState([]);
+const McTicketsPage = () => {
+  const [mcTicketsData, setMcTicketsData] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,8 +14,8 @@ const DcTicketsPage = () => {
         const employeesResponse = await axios.get(
           "http://localhost:8080/employee/all"
         );
-        const dcTicketsResponse = await axios.get(
-          "http://localhost:8080/dc-tickets/all"
+        const mcTicketsResponse = await axios.get(
+          "http://localhost:8080/mc-tickets/all"
         );
 
         const sortedEmployees = employeesResponse.data.sort(
@@ -23,7 +23,7 @@ const DcTicketsPage = () => {
         );
 
         setEmployees(sortedEmployees);
-        setDcTicketsData(dcTicketsResponse.data);
+        setMcTicketsData(mcTicketsResponse.data);
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -45,7 +45,7 @@ const DcTicketsPage = () => {
     );
   }
 
-  const groupedData = dcTicketsData.reduce((acc, ticket) => {
+  const groupedData = mcTicketsData.reduce((acc, ticket) => {
     if (!acc[ticket.date]) {
       acc[ticket.date] = {};
     }
@@ -58,8 +58,8 @@ const DcTicketsPage = () => {
   );
 
   return (
-    <div className={styles.dcTicketsPage}>
-      <h1 className={styles.title}>Discord Tickets</h1>
+    <div className={styles.mcTicketsPage}>
+      <h1 className={styles.title}>Minecraft Tickets</h1>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -84,4 +84,4 @@ const DcTicketsPage = () => {
   );
 };
 
-export default DcTicketsPage;
+export default McTicketsPage;

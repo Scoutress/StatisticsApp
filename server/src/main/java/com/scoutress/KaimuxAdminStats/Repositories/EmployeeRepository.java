@@ -1,13 +1,12 @@
 package com.scoutress.KaimuxAdminStats.Repositories;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employee;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
@@ -28,8 +27,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "WHEN 'Helper' THEN 9 " +
             "ELSE 10 END")
     List<Employee> findAllByOrderByLevel();
-
-    Employee findByUsername(String username);
-
-    Optional<Employee> findById(Long id);
 }

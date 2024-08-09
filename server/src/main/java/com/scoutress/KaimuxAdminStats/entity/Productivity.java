@@ -1,7 +1,5 @@
 package com.scoutress.KaimuxAdminStats.Entity;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,11 +25,8 @@ public class Productivity {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id", insertable = false, updatable = false)
+    @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
-
-    @Column(name = "employee_id")
-    private Integer employeeId;
 
     @Column(name = "annual_playtime")
     private Double annualPlaytime;
@@ -60,9 +55,12 @@ public class Productivity {
     @Column(name = "recommendation")
     private String recommendation;
 
+    public Productivity(Employee employee) {
+        this.employee = employee;
+    }
+
     public Productivity(Employee employee, Double annualPlaytime, Double serverTickets, Double serverTicketsTaking, Double discordTickets, Double discordTicketsTaking, Double playtime, Double afkPlaytime, Double productivity, String recommendation) {
         this.employee = employee;
-        this.employeeId = employee.getId();
         this.annualPlaytime = annualPlaytime;
         this.serverTickets = serverTickets;
         this.serverTicketsTaking = serverTicketsTaking;

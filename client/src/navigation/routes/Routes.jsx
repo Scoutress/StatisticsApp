@@ -23,6 +23,14 @@ const Routes = {
     link: "/dc-tickets/compare",
     name: "Dc Tickets Compare",
   },
+  mcTicketsPage: {
+    link: "/mc-tickets/all",
+    name: "Mc Tickets",
+  },
+  mcTicketsAddPage: {
+    link: "/mc-tickets/add",
+    name: "Mc Tickets Add",
+  },
 };
 
 export default Routes;

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
 import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicketPercentage;
+import com.scoutress.KaimuxAdminStats.Entity.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketPercentageRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
 
@@ -22,11 +24,13 @@ public class DcTicketServiceImpl implements DcTicketService {
     private final DcTicketRepository dcTicketRepository;
     private final ProductivityRepository productivityRepository;
     private final DcTicketPercentageRepository dcTicketPercentageRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public DcTicketServiceImpl(DcTicketRepository dcTicketRepository, ProductivityRepository productivityRepository, DcTicketPercentageRepository dcTicketPercentageRepository) {
+    public DcTicketServiceImpl(DcTicketRepository dcTicketRepository, ProductivityRepository productivityRepository, DcTicketPercentageRepository dcTicketPercentageRepository, EmployeeRepository employeeRepository) {
         this.dcTicketRepository = dcTicketRepository;
         this.productivityRepository = productivityRepository;
         this.dcTicketPercentageRepository = dcTicketPercentageRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -41,7 +45,7 @@ public class DcTicketServiceImpl implements DcTicketService {
         Map<Integer, List<DcTicket>> ticketsByEmployee = dcTickets.stream()
             .collect(Collectors.groupingBy(DcTicket::getEmployeeId));
 
-        for (Map.Entry<Integer, List<DcTicket>> entry : ticketsByEmployee.entrySet()){
+        for (Map.Entry<Integer, List<DcTicket>> entry : ticketsByEmployee.entrySet()) {
             Integer employeeId = entry.getKey();
             List<DcTicket> employeeTickets = entry.getValue();
 
@@ -55,8 +59,8 @@ public class DcTicketServiceImpl implements DcTicketService {
                 .max(LocalDate::compareTo)
                 .orElse(null);
 
-            if(earliestDate != null && latestDate != null){
-                long daysBetween = ChronoUnit.DAYS.between(earliestDate, latestDate);
+            if (earliestDate != null && latestDate != null) {
+                long daysBetween = ChronoUnit.DAYS.between(earliestDate, latestDate) + 1;
 
                 int totalTickets = employeeTickets.stream()
                     .mapToInt(DcTicket::getTicketCount)
@@ -65,13 +69,21 @@ public class DcTicketServiceImpl implements DcTicketService {
                 double averageTicketsPerDay = (double) totalTickets / daysBetween;
 
                 Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
-                if(productivity != null){
-                    productivity.setDiscordTickets(averageTicketsPerDay);
-                    productivityRepository.save(productivity);
+                if (productivity == null) {
+                    Employee employee = employeeRepository.findById(employeeId).orElse(null);
+                    if (employee == null) {
+                        System.out.println("Employee with ID " + employeeId + " not found. Skipping.");
+                        continue;
+                    }
+                    productivity = new Productivity();
+                    productivity.setEmployee(employee);
                 }
+                productivity.setDiscordTickets(averageTicketsPerDay);
+                productivityRepository.save(productivity);
             }
         }
     }
+
 
     @Override
     public void calculateDcTicketsPercentage() {

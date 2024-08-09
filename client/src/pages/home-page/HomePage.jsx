@@ -22,7 +22,10 @@ const Homepage = () => {
 
       <div className={styles.category}>
         <h2>MC Tickets</h2>
-        <div className={styles.linkGroup}></div>
+        <div className={styles.linkGroup}>
+          <Link to="/mc-tickets/add">Add MC Tickets</Link>
+          <Link to="/mc-tickets/all">MC Tickets</Link>
+        </div>
       </div>
 
       <div className={styles.category}>

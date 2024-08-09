@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "discord_ticket_percentage")
+@Table(name = "dc_ticket_percentage")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data

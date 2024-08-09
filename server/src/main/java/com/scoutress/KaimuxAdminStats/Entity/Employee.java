@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.Entity.Employees;
+package com.scoutress.KaimuxAdminStats.Entity;
 
 import java.time.LocalDate;
 
@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "employee")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Employee {
 
     @Id

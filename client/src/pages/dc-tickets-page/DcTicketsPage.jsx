@@ -41,7 +41,6 @@ const DcTicketsPage = () => {
     );
   }
 
-  // Group and sort the data by date in descending order
   const groupedData = dcTicketsData.reduce((acc, ticket) => {
     if (!acc[ticket.date]) {
       acc[ticket.date] = {};

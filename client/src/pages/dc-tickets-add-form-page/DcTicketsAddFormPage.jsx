@@ -1,11 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import styles from "./DcTicketsAddFormPage.module.scss";
 
 const DcTicketsAddFormPage = () => {
   const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({ date: "", tickets: [] });
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -44,7 +46,10 @@ const DcTicketsAddFormPage = () => {
     }));
     axios
       .post("http://localhost:8080/dc-tickets/add", payload)
-      .then((response) => console.log("DcTickets added", response))
+      .then((response) => {
+        console.log("DcTickets added", response);
+        navigate("/dc-tickets/all");
+      })
       .catch((error) => console.error(error));
   };
 

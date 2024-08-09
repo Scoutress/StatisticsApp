@@ -41,6 +41,7 @@ const DcTicketsPage = () => {
     );
   }
 
+  // Group and sort the data by date in descending order
   const groupedData = dcTicketsData.reduce((acc, ticket) => {
     if (!acc[ticket.date]) {
       acc[ticket.date] = {};
@@ -48,6 +49,10 @@ const DcTicketsPage = () => {
     acc[ticket.date][ticket.employeeId] = ticket.ticketCount;
     return acc;
   }, {});
+
+  const sortedDates = Object.keys(groupedData).sort(
+    (a, b) => new Date(b) - new Date(a)
+  );
 
   return (
     <div className={styles.dcTicketsPage}>
@@ -62,7 +67,7 @@ const DcTicketsPage = () => {
           </tr>
         </thead>
         <tbody>
-          {Object.keys(groupedData).map((date) => (
+          {sortedDates.map((date) => (
             <tr key={date}>
               <td>{date}</td>
               {employees.map((employee) => (

@@ -76,4 +76,9 @@ public class Productivity {
         this.employee = employee;
         this.annualPlaytime = annualPlaytime;
     }
+
+    public Productivity(Integer employeeId) {
+        this.employee = new Employee();
+        this.employee.setId(employeeId);
+    }
 }

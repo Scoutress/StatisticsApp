@@ -104,4 +104,12 @@ public class ScheduledTasksConfig {
         productivityService.updateAnnualPlaytimeForAllEmployees();
         System.out.println("Annual playtime calc. is completed");
     }
+
+    @Scheduled(cron = "0 9 * * * *")
+    @Transactional
+    public void runTask9() {
+        System.out.println("Average playtime calc. is started");
+        productivityService.updateAveragePlaytimeForAllEmployees();
+        System.out.println("Average playtime calc. is completed");
+    }
 }

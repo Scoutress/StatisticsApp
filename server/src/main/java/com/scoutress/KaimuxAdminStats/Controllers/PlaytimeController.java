@@ -2,7 +2,6 @@ package com.scoutress.KaimuxAdminStats.Controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +18,11 @@ import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
 @CrossOrigin(origins = "http://localhost:5173")
 public class PlaytimeController {
 
-    @Autowired
-    private PlaytimeRepository playtimeRepository;
+    private final PlaytimeRepository playtimeRepository;
+
+    public PlaytimeController(PlaytimeRepository playtimeRepository){
+        this.playtimeRepository = playtimeRepository;
+    }
 
     @GetMapping("/all")
     public List<Playtime> getAllPlaytime() {

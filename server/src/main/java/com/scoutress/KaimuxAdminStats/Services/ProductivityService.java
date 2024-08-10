@@ -11,4 +11,6 @@ public interface ProductivityService {
     void updateProductivityData();
 
     void updateAnnualPlaytimeForAllEmployees();
+
+    void updateAveragePlaytimeForAllEmployees();
 }

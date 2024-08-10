@@ -1,6 +1,7 @@
 package com.scoutress.KaimuxAdminStats.Servicesimpl;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -72,6 +73,35 @@ public class ProductivityServiceImpl implements ProductivityService {
 
             productivity.setAnnualPlaytime(totalPlaytime != null ? totalPlaytime : 0.0);
             productivityRepository.save(productivity);
+        }
+    }
+
+    @Override
+    public void updateAveragePlaytimeForAllEmployees() {
+        List<Integer> employeeIds = playtimeRepository.findAllEmployeeIds();
+
+        for (Integer employeeId : employeeIds) {
+            LocalDate startDate = playtimeRepository.findEarliestPlaytimeDateByEmployeeId(employeeId);
+            LocalDate endDate = playtimeRepository.findLatestPlaytimeDateByEmployeeId(employeeId);
+
+            if (startDate != null && endDate != null) {
+                long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1; // Įskaitant abi dienas
+                Double totalPlaytime = playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate);
+
+                if (totalPlaytime != null && daysBetween > 0) {
+                    double averagePlaytime = totalPlaytime / daysBetween;
+
+                    Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
+
+                    if (productivity == null) {
+                        productivity = new Productivity(employeeRepository.findById(employeeId)
+                                .orElseThrow(() -> new RuntimeException("Employee not found")));
+                    }
+
+                    productivity.setPlaytime(averagePlaytime);
+                    productivityRepository.save(productivity);
+                }
+            }
         }
     }
 }

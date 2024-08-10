@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.scoutress.KaimuxAdminStats.Entity.Playtime;
 
@@ -19,4 +20,17 @@ public interface PlaytimeRepository extends JpaRepository<Playtime, Long> {
 
   @Query("SELECT DISTINCT p.employeeId FROM Playtime p")
   List<Long> findAllDistinctEmployeeIds();
+  
+  @Query("SELECT DISTINCT p.employeeId FROM Playtime p")
+  List<Integer> findAllEmployeeIds();
+
+  @Query("SELECT MIN(p.date) FROM Playtime p WHERE p.employeeId = :employeeId")
+  LocalDate findEarliestPlaytimeDateByEmployeeId(@Param("employeeId") Integer employeeId);
+
+  @Query("SELECT MAX(p.date) FROM Playtime p WHERE p.employeeId = :employeeId")
+  LocalDate findLatestPlaytimeDateByEmployeeId(@Param("employeeId") Integer employeeId);
+
+  @Query("SELECT SUM(p.hoursPlayed) FROM Playtime p WHERE p.employeeId = :employeeId AND p.date BETWEEN :startDate AND :endDate")
+  Double sumPlaytimeByEmployeeAndDateRange(@Param("employeeId") Integer employeeId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 }

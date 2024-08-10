@@ -491,4 +491,43 @@ public class ProductivityServiceImpl implements ProductivityService {
             productivityCalcRepository.save(productivityCalc);
         }
     }
+
+    @Override
+    public void calculateAndSaveProductivity() {
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                continue;
+            }
+
+            double discordTicketsCalc = productivityCalc.getDiscordTicketsCalc();
+            double afkPlaytimeCalc = productivityCalc.getAfkPlaytimeCalc();
+            double playtimeCalc = productivityCalc.getPlaytimeCalc();
+            double serverTicketsCalc = productivityCalc.getServerTicketsCalc();
+            double serverTicketsTakingCalc = productivityCalc.getServerTicketsTakingCalc();
+            double complainsCalc = productivityCalc.getComplainsCalc();
+
+            double result = ((discordTicketsCalc
+                    - afkPlaytimeCalc
+                    + playtimeCalc
+                    + serverTicketsCalc
+                    + serverTicketsTakingCalc) / 5)
+                    - complainsCalc;
+
+            Productivity productivity = productivityRepository.findByEmployeeId(employee.getId());
+
+            if (productivity == null) {
+                productivity = new Productivity();
+                productivity.setEmployee(employee);
+            }
+
+            productivity.setProductivity(result);
+
+            productivityRepository.save(productivity);
+        }
+    }
+
 }

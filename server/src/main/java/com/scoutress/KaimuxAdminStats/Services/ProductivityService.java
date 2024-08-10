@@ -27,4 +27,6 @@ public interface ProductivityService {
     void calculateAnsweredDiscordTicketsWithCoefs();
 
     void calculateAndSaveComplainsCalc();
+
+    void calculateAndSaveProductivity();
 }

@@ -169,4 +169,12 @@ public class ScheduledTasksConfig {
         productivityService.calculateAndSaveComplainsCalc();
         System.out.println("Complains with coef. calc. is completed");
     }
+
+    @Scheduled(cron = "0 17 * * * *")
+    @Transactional
+    public void runTask17() {
+        System.out.println("Productivity calculation is started");
+        productivityService.calculateAndSaveProductivity();
+        System.out.println("Productivity calculation is completed");
+    }
 }

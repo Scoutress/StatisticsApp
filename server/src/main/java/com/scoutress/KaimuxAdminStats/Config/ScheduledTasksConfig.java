@@ -96,4 +96,12 @@ public class ScheduledTasksConfig {
         mcTicketService.updateAverageMcTicketsPercentages();
         System.out.println("MC tickets avg. percentages update is completed");
     }
+
+    @Scheduled(cron = "0 8 * * * *")
+    @Transactional
+    public void runTask8() {
+        System.out.println("Annual playtime calc. is started");
+        productivityService.updateAnnualPlaytimeForAllEmployees();
+        System.out.println("Annual playtime calc. is completed");
+    }
 }

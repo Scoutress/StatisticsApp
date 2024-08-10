@@ -71,4 +71,9 @@ public class Productivity {
         this.productivity = productivity;
         this.recommendation = recommendation;
     }
+
+    public Productivity(Employee employee, Double annualPlaytime) {
+        this.employee = employee;
+        this.annualPlaytime = annualPlaytime;
+    }
 }

@@ -32,6 +32,6 @@ public class PlaytimeController {
     @PostMapping("/add")
     public ResponseEntity<String> addPlaytime(@RequestBody List<Playtime> playtimeList) {
         playtimeRepository.saveAll(playtimeList);
-        return ResponseEntity.ok("Playtime data added successfully");
+        return ResponseEntity.ok("Playtime and AFK Playtime data added successfully");
     }
 }

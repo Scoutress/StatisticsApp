@@ -31,4 +31,7 @@ public class Playtime {
 
     @Column(name = "hours_played", nullable = false)
     private Double hoursPlayed;
+
+    @Column(name = "afk_playtime", nullable = false)
+    private Double afkPlaytime;
 }

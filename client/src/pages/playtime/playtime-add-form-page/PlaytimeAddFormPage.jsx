@@ -28,6 +28,7 @@ const PlaytimeAddFormPage = () => {
         const initialPlaytimes = sortedEmployees.map((employee) => ({
           employeeId: employee.id,
           hoursPlayed: "",
+          afkPlaytime: "",
         }));
         setFormData((prevData) => ({
           ...prevData,
@@ -37,14 +38,15 @@ const PlaytimeAddFormPage = () => {
       .catch((error) => setError(error));
   }, []);
 
-  const handleChange = (e, employeeId) => {
-    const { name, value } = e.target;
-    if (name === "date") {
+  const handleChange = (e, employeeId, field) => {
+    const { value } = e.target;
+
+    if (field === "date") {
       setFormData({ ...formData, date: value });
     } else {
       const updatedPlaytimes = formData.playtimes.map((playtime) =>
         playtime.employeeId === employeeId
-          ? { ...playtime, hoursPlayed: value }
+          ? { ...playtime, [field]: value }
           : playtime
       );
       setFormData({ ...formData, playtimes: updatedPlaytimes });
@@ -57,11 +59,12 @@ const PlaytimeAddFormPage = () => {
       employeeId: playtime.employeeId,
       date: formData.date,
       hoursPlayed: playtime.hoursPlayed,
+      afkPlaytime: playtime.afkPlaytime,
     }));
     axios
       .post("http://localhost:8080/playtime/add", payload)
       .then((response) => {
-        console.log("Playtime data added", response);
+        console.log("Playtime and AFK Playtime data added", response);
         navigate("/playtime/all");
       })
       .catch((error) => console.error(error));
@@ -69,7 +72,7 @@ const PlaytimeAddFormPage = () => {
 
   return (
     <div className={styles.playtimeAddFormPage}>
-      <h1 className={styles.title}>Add Playtime Data</h1>
+      <h1 className={styles.title}>Add Playtime and AFK Playtime Data</h1>
       {error && <div className={styles.error}>Error: {error.message}</div>}
       <form onSubmit={handleSubmit} className={styles.form}>
         <label className={styles.label}>
@@ -78,7 +81,7 @@ const PlaytimeAddFormPage = () => {
             type="text"
             name="date"
             value={formData.date}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e, null, "date")}
             required
             pattern="\d{4}-\d{2}-\d{2}"
             placeholder="yyyy-mm-dd"
@@ -88,7 +91,7 @@ const PlaytimeAddFormPage = () => {
         {employees.map((employee) => (
           <div key={employee.id} className={styles.inputGroup}>
             <label className={styles.label}>
-              {employee.username}:
+              {employee.username} Playtime:
               <input
                 type="number"
                 name={`hoursPlayed-${employee.id}`}
@@ -97,7 +100,24 @@ const PlaytimeAddFormPage = () => {
                     (playtime) => playtime.employeeId === employee.id
                   )?.hoursPlayed || ""
                 }
-                onChange={(e) => handleChange(e, employee.id)}
+                onChange={(e) => handleChange(e, employee.id, "hoursPlayed")}
+                required
+                className={styles.input}
+                min="0"
+                step="0.1"
+              />
+            </label>
+            <label className={styles.label}>
+              {employee.username} AFK Playtime:
+              <input
+                type="number"
+                name={`afkPlaytime-${employee.id}`}
+                value={
+                  formData.playtimes.find(
+                    (playtime) => playtime.employeeId === employee.id
+                  )?.afkPlaytime || ""
+                }
+                onChange={(e) => handleChange(e, employee.id, "afkPlaytime")}
                 required
                 className={styles.input}
                 min="0"

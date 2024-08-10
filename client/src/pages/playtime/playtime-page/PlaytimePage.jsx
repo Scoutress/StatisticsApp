@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./PlaytimePage.module.scss";
 import { Link } from "react-router-dom";
@@ -46,7 +46,7 @@ const PlaytimePage = () => {
     if (!acc[playtime.date]) {
       acc[playtime.date] = {};
     }
-    acc[playtime.date][playtime.employeeId] = playtime.hoursPlayed;
+    acc[playtime.date][playtime.employeeId] = playtime;
     return acc;
   }, {});
 
@@ -56,14 +56,29 @@ const PlaytimePage = () => {
 
   return (
     <div className={styles.playtimePage}>
-      <h1 className={styles.title}>Employee Playtime</h1>
+      <h1 className={styles.title}>Employee Playtime and AFK Playtime</h1>
       <Link to="/playtime/add">Playtime Add</Link>
       <table className={styles.table}>
         <thead>
           <tr>
             <th>Date</th>
             {employees.map((employee) => (
-              <th key={employee.id}>{employee.username}</th>
+              <th
+                key={employee.id}
+                colSpan="2"
+                className={styles.employeeHeader}
+              >
+                {employee.username}
+              </th>
+            ))}
+          </tr>
+          <tr>
+            <th></th>
+            {employees.map((employee) => (
+              <React.Fragment key={employee.id}>
+                <th>Playtime</th>
+                <th>AFK Playtime</th>
+              </React.Fragment>
             ))}
           </tr>
         </thead>
@@ -72,7 +87,10 @@ const PlaytimePage = () => {
             <tr key={date}>
               <td>{date}</td>
               {employees.map((employee) => (
-                <td key={employee.id}>{groupedData[date][employee.id] || 0}</td>
+                <React.Fragment key={employee.id}>
+                  <td>{groupedData[date][employee.id]?.hoursPlayed || 0}</td>
+                  <td>{groupedData[date][employee.id]?.afkPlaytime || 0}</td>
+                </React.Fragment>
               ))}
             </tr>
           ))}

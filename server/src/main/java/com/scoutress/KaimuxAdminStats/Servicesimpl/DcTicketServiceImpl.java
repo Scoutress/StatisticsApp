@@ -122,9 +122,9 @@ public class DcTicketServiceImpl implements DcTicketService {
         
         for(Map.Entry<Integer, List<DcTicketPercentage>> entry : percentagesPerEmployee.entrySet()){
             Integer employeeId = entry.getKey();
-            List<DcTicketPercentage> employPercentages = entry.getValue();
+            List<DcTicketPercentage> employeePercentages = entry.getValue();
 
-            double averagePercentage = employPercentages.stream()
+            double averagePercentage = employeePercentages.stream()
                 .mapToDouble(DcTicketPercentage::getPercentage)
                 .average()
                 .orElse(0.0);

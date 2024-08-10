@@ -115,9 +115,25 @@ public class McTicketServiceImpl implements McTicketService {
 
     @Override
     public void updateAverageMcTicketsPercentages() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateAverageMcTicketsPercentages'");
-    }
+        List<McTicketPercentage> allPercentages = mcTicketPercentageRepository.findAll();
 
-    
+        Map<Integer, List<McTicketPercentage>> percentagesPerEmployee = allPercentages.stream()
+            .collect(Collectors.groupingBy(McTicketPercentage::getEmployeeId));
+
+        for(Map.Entry<Integer, List<McTicketPercentage>> entry : percentagesPerEmployee.entrySet()){
+            Integer employeeId = entry.getKey();
+            List<McTicketPercentage> employeePercentages = entry.getValue();
+
+            double averagePercentage = employeePercentages.stream()
+                .mapToDouble(McTicketPercentage::getPercentage)
+                .average()
+                .orElse(0.0);
+
+            Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
+            if(productivity != null){
+                productivity.setServerTicketsTaking(averagePercentage);
+                productivityRepository.save(productivity);
+            }
+        }
+    }    
 }

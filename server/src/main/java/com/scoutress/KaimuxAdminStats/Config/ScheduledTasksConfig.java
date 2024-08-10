@@ -88,4 +88,12 @@ public class ScheduledTasksConfig {
         mcTicketService.calculateMcTicketsPercentage();
         System.out.println("MC tickets compare update is completed");
     }
+
+    @Scheduled(cron = "0 7 * * * *")
+    @Transactional
+    public void runTask7() {
+        System.out.println("MC tickets avg. percentages update is started");
+        mcTicketService.updateAverageMcTicketsPercentages();
+        System.out.println("MC tickets avg. percentages update is completed");
+    }
 }

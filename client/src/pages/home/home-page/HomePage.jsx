@@ -42,6 +42,7 @@ const Homepage = () => {
         <h2>Playtime</h2>
         <div className={styles.linkGroup}>
           <Link to="/playtime/all">Playtime</Link>
+          <Link to="/playtime/add">Playtime Add</Link>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./PlaytimePage.module.scss";
+import { Link } from "react-router-dom";
 
 const PlaytimePage = () => {
   const [playtimeData, setPlaytimeData] = useState([]);
@@ -56,6 +57,7 @@ const PlaytimePage = () => {
   return (
     <div className={styles.playtimePage}>
       <h1 className={styles.title}>Employee Playtime</h1>
+      <Link to="/playtime/add">Playtime Add</Link>
       <table className={styles.table}>
         <thead>
           <tr>

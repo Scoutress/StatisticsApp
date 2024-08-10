@@ -1,17 +1,18 @@
 import { createBrowserRouter } from "react-router-dom";
-import ErrorPage from "../../pages/error-page/ErrorPage.jsx";
-import ProductivityPage from "../../pages/productivity-page/ProductivityPage.jsx";
-import Home from "../../pages/home-page/HomePage.jsx";
-import Routes from "../routes/Routes.jsx";
-import Root from "../root/Root.jsx";
-import EmployeesPage from "../../pages/employees-page/EmployeesPage.jsx";
-import DcTicketsAddFormPage from "../../pages/dc-tickets-add-form-page/DcTicketsAddFormPage.jsx";
-import DcTicketsPage from "../../pages/dc-tickets-page/DcTicketsPage.jsx";
-import DcTicketsComparePage from "../../pages/dc-tickets-compare-page/DcTicketsComparePage.jsx";
-import McTicketsAddFormPage from "../../pages/mc-tickets-add-form-page/McTicketsAddFormPage.jsx";
-import McTicketsPage from "../../pages/mc-tickets-page/McTicketsPage.jsx";
-import EmployeeAddFormPage from "../../pages/employee-add-form-page/EmployeeAddFormPage.jsx";
-import PlaytimePage from "../../pages/playtime-page/PlaytimePage.jsx";
+import Root from "../root/Root";
+import Routes from "../routes/Routes";
+import ErrorPage from "../../pages/other/error-page/ErrorPage";
+import Homepage from "../../pages/home/home-page/HomePage";
+import ProductivityPage from "../../pages/productivity/productivity-page/ProductivityPage";
+import EmployeesPage from "../../pages/employees/employees-page/EmployeesPage";
+import EmployeeAddFormPage from "../../pages/employees/employee-add-form-page/EmployeeAddFormPage";
+import DcTicketsAddFormPage from "../../pages/dc-tickets/dc-tickets-add-form-page/DcTicketsAddFormPage";
+import DcTicketsPage from "../../pages/dc-tickets/dc-tickets-page/DcTicketsPage";
+import DcTicketsComparePage from "../../pages/dc-tickets/dc-tickets-compare-page/DcTicketsComparePage";
+import McTicketsPage from "../../pages/mc-tickets/mc-tickets-page/McTicketsPage";
+import McTicketsAddFormPage from "../../pages/mc-tickets/mc-tickets-add-form-page/McTicketsAddFormPage";
+import PlaytimePage from "../../pages/playtime/playtime-page/PlaytimePage";
+import PlaytimeAddFormPage from "../../pages/playtime/playtime-add-form-page/PlaytimeAddFormPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ const Router = createBrowserRouter([
     children: [
       {
         path: Routes.homePage.link,
-        element: <Home />,
+        element: <Homepage />,
       },
       {
         path: Routes.productivityPage.link,
@@ -57,6 +58,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.playtimePage.link,
         element: <PlaytimePage />,
+      },
+      {
+        path: Routes.playtimeAddPage.link,
+        element: <PlaytimeAddFormPage />,
       },
     ],
   },

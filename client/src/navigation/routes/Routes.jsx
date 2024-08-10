@@ -39,6 +39,10 @@ const Routes = {
     link: "/playtime/all",
     name: "Playtime",
   },
+  playtimeAddPage: {
+    link: "/playtime/add",
+    name: "Playtime Add",
+  },
 };
 
 export default Routes;

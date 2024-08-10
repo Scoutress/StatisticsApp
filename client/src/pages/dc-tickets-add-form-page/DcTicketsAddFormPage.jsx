@@ -5,11 +5,17 @@ import { useNavigate } from "react-router-dom";
 import styles from "./DcTicketsAddFormPage.module.scss";
 
 const DcTicketsAddFormPage = () => {
-  const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({ date: "", tickets: [] });
+  const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    setFormData((prevData) => ({
+      ...prevData,
+      date: today,
+    }));
+
     axios
       .get("http://localhost:8080/employee/all")
       .then((response) => {
@@ -19,7 +25,10 @@ const DcTicketsAddFormPage = () => {
           employeeId: employee.id,
           ticketCount: "",
         }));
-        setFormData({ ...formData, tickets: initialTickets });
+        setFormData((prevData) => ({
+          ...prevData,
+          tickets: initialTickets,
+        }));
       })
       .catch((error) => console.error(error));
   }, []);
@@ -55,41 +64,46 @@ const DcTicketsAddFormPage = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <label className={styles.label}>
-        Date:
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={(e) => handleChange(e)}
-          required
-          className={styles.input}
-        />
-      </label>
-      {employees.map((employee) => (
-        <div key={employee.id} className={styles.inputGroup}>
-          <label className={styles.label}>
-            {employee.username}:
-            <input
-              type="number"
-              name={`ticketCount-${employee.id}`}
-              value={
-                formData.tickets.find(
-                  (ticket) => ticket.employeeId === employee.id
-                )?.ticketCount || ""
-              }
-              onChange={(e) => handleChange(e, employee.id)}
-              required
-              className={styles.input}
-            />
-          </label>
-        </div>
-      ))}
-      <button type="submit" className={styles.button}>
-        Submit
-      </button>
-    </form>
+    <div>
+      <h1>Add dc tickets</h1>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <label className={styles.label}>
+          Date:
+          <input
+            type="text"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            required
+            pattern="\d{4}-\d{2}-\d{2}"
+            placeholder="yyyy-mm-dd"
+            className={styles.input}
+          />
+        </label>
+        {employees.map((employee) => (
+          <div key={employee.id} className={styles.inputGroup}>
+            <label className={styles.label}>
+              {employee.username}:
+              <input
+                type="number"
+                name={`ticketCount-${employee.id}`}
+                value={
+                  formData.tickets.find(
+                    (ticket) => ticket.employeeId === employee.id
+                  )?.ticketCount || ""
+                }
+                onChange={(e) => handleChange(e, employee.id)}
+                required
+                className={styles.input}
+              />
+            </label>
+          </div>
+        ))}
+        <button type="submit" className={styles.button}>
+          Submit
+        </button>
+      </form>
+    </div>
   );
 };
 

@@ -117,11 +117,13 @@ const EmployeeAddFormPage = () => {
         <label className={styles.label}>
           Join Date:
           <input
-            type="date"
+            type="text"
             name="joinDate"
             value={formData.joinDate}
             onChange={handleChange}
             required
+            pattern="\d{4}-\d{2}-\d{2}"
+            placeholder="yyyy-mm-dd"
             className={styles.input}
           />
         </label>

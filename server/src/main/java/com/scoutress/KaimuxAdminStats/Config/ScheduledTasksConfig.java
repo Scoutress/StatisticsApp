@@ -18,12 +18,13 @@ public class ScheduledTasksConfig {
     private final ProductivityService productivityService;
     private final McTicketService mcTicketService;
 
-    public ScheduledTasksConfig(DcTicketService dcTicketService, ProductivityService productivityService, McTicketService mcTicketService) {
+    public ScheduledTasksConfig(DcTicketService dcTicketService, ProductivityService productivityService,
+            McTicketService mcTicketService) {
         this.dcTicketService = dcTicketService;
         this.productivityService = productivityService;
         this.mcTicketService = mcTicketService;
     }
-    
+
     // For copy-paste (DEBUG)
     // @Scheduled(cron = "0 * * * * *")
     // @Scheduled(cron = "15 * * * * *")
@@ -33,12 +34,12 @@ public class ScheduledTasksConfig {
     // @Scheduled(cron = "0 * * * * *")
     // @Transactional
     // public void runTask1() {
-    //     System.out.println("Employee dummy data filling is started");
-    //     getEmployeesDummyData.createDummyEmployees();
-    //     System.out.println("Employee dummy data filling is completed");
-    //     System.out.println("Productivity dummy data filling is started");
-    //     getProductivityDummyData.createDummyProductivity();
-    //     System.out.println("Productivity dummy data filling is completed");
+    // System.out.println("Employee dummy data filling is started");
+    // getEmployeesDummyData.createDummyEmployees();
+    // System.out.println("Employee dummy data filling is completed");
+    // System.out.println("Productivity dummy data filling is started");
+    // getProductivityDummyData.createDummyProductivity();
+    // System.out.println("Productivity dummy data filling is completed");
     // }
 
     @Scheduled(cron = "0 1 * * * *")
@@ -151,5 +152,13 @@ public class ScheduledTasksConfig {
         System.out.println("AFK Playtime with coef. calc. is started");
         productivityService.calculateAfkPlaytimeForAllEmployeesWithCoefs();
         System.out.println("AFK Playtime with coef. calc. is completed");
+    }
+
+    @Scheduled(cron = "0 15 * * * *")
+    @Transactional
+    public void runTask15() {
+        System.out.println("Answered DC tickets with coef. calc. is started");
+        productivityService.calculateAnsweredDiscordTicketsWithCoefs();
+        System.out.println("Answered DC tickets with coef. calc. is completed");
     }
 }

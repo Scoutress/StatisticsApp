@@ -10,6 +10,7 @@ import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
 import com.scoutress.KaimuxAdminStats.Entity.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
+import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityCalcRepository;
@@ -23,15 +24,18 @@ public class ProductivityServiceImpl implements ProductivityService {
     private final EmployeeRepository employeeRepository;
     private final PlaytimeRepository playtimeRepository;
     private final ProductivityCalcRepository productivityCalcRepository;
+    private final DcTicketRepository dcTicketRepository;
 
-    public ProductivityServiceImpl(ProductivityRepository productivityRepository, 
-                                    EmployeeRepository employeeRepository, 
-                                    PlaytimeRepository playtimeRepository,
-                                    ProductivityCalcRepository productivityCalcRepository) {
+    public ProductivityServiceImpl(ProductivityRepository productivityRepository,
+            EmployeeRepository employeeRepository,
+            PlaytimeRepository playtimeRepository,
+            ProductivityCalcRepository productivityCalcRepository,
+            DcTicketRepository dcTicketRepository) {
         this.productivityRepository = productivityRepository;
         this.employeeRepository = employeeRepository;
         this.playtimeRepository = playtimeRepository;
         this.productivityCalcRepository = productivityCalcRepository;
+        this.dcTicketRepository = dcTicketRepository;
     }
 
     @Override
@@ -46,20 +50,20 @@ public class ProductivityServiceImpl implements ProductivityService {
         for (Employee employee : employees) {
             Productivity existingProductivity = productivityRepository.findByEmployeeId(employee.getId());
 
-            if(existingProductivity == null){
+            if (existingProductivity == null) {
                 Productivity productivity = new Productivity();
-            productivity.setEmployee(employee);
-            productivity.setAnnualPlaytime(null);
-            productivity.setServerTickets(null);
-            productivity.setServerTicketsTaking(null);
-            productivity.setDiscordTickets(null);
-            productivity.setDiscordTicketsTaking(null);
-            productivity.setPlaytime(null);
-            productivity.setAfkPlaytime(null);
-            productivity.setProductivity(null);
-            productivity.setRecommendation(null);
-            productivityRepository.save(productivity);
-            }           
+                productivity.setEmployee(employee);
+                productivity.setAnnualPlaytime(null);
+                productivity.setServerTickets(null);
+                productivity.setServerTicketsTaking(null);
+                productivity.setDiscordTickets(null);
+                productivity.setDiscordTicketsTaking(null);
+                productivity.setPlaytime(null);
+                productivity.setAfkPlaytime(null);
+                productivity.setProductivity(null);
+                productivity.setRecommendation(null);
+                productivityRepository.save(productivity);
+            }
         }
     }
 
@@ -67,23 +71,23 @@ public class ProductivityServiceImpl implements ProductivityService {
     public void updateAnnualPlaytimeForAllEmployees() {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusDays(365);
-    
+
         List<Integer> employeeIds = playtimeRepository.findAllDistinctEmployeeIds();
-    
+
         for (Integer employeeId : employeeIds) {
             Double totalPlaytime = playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate);
-            
+
             Employee employee = employeeRepository.findById(employeeId)
                     .orElseThrow(() -> new RuntimeException("Employee not found"));
-    
+
             Productivity productivity;
             productivity = productivityRepository.findByEmployeeId(employeeId);
-    
+
             if (productivity == null) {
                 productivity = new Productivity();
                 productivity.setEmployee(employee);
             }
-            
+
             productivity.setAnnualPlaytime(totalPlaytime != null ? totalPlaytime : 0.0);
             productivityRepository.save(productivity);
         }
@@ -99,7 +103,8 @@ public class ProductivityServiceImpl implements ProductivityService {
 
             if (startDate != null && endDate != null) {
                 long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-                Double totalPlaytime = playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate);
+                Double totalPlaytime = playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate,
+                        endDate);
 
                 if (totalPlaytime != null && daysBetween > 0) {
                     double averagePlaytime = totalPlaytime / daysBetween;
@@ -121,25 +126,25 @@ public class ProductivityServiceImpl implements ProductivityService {
     @Override
     public void updateAfkPlaytimeForAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
-        
+
         for (Employee employee : employees) {
             Integer employeeId = employee.getId();
-            
+
             Double totalPlaytime = playtimeRepository.getTotalPlaytimeByEmployeeId(employeeId);
             Double totalAfkPlaytime = playtimeRepository.getTotalAfkPlaytimeByEmployeeId(employeeId);
-    
-            double afkPercentage = (totalPlaytime != null && totalPlaytime > 0) 
-                                   ? (totalAfkPlaytime / totalPlaytime) * 100 
-                                   : 0.0;
-    
+
+            double afkPercentage = (totalPlaytime != null && totalPlaytime > 0)
+                    ? (totalAfkPlaytime / totalPlaytime) * 100
+                    : 0.0;
+
             Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
-            
+
             if (productivity == null) {
                 productivity = new Productivity(employee);
             }
-    
+
             productivity.setAfkPlaytime(afkPercentage);
-    
+
             productivityRepository.save(productivity);
         }
     }
@@ -160,10 +165,6 @@ public class ProductivityServiceImpl implements ProductivityService {
             double calculatedValue;
 
             switch (employee.getLevel()) {
-                case "Helper" -> {
-                    calculatedValue = 0.0;
-                    break;
-                }
                 case "Support" -> {
                     if (serverTickets > 0.5) {
                         calculatedValue = 0.5 * CalculationConstants.SERVER_TICKETS_SUPPORT;
@@ -206,12 +207,12 @@ public class ProductivityServiceImpl implements ProductivityService {
                 }
                 default -> calculatedValue = 0.0;
             }
-            
+
             productivityCalc.setServerTicketsCalc(calculatedValue);
             productivityCalcRepository.save(productivityCalc);
         }
     }
-    
+
     @Override
     public void calculateServerTicketsTakenForAllEmployeesWithCoefs() {
         List<Employee> employees = employeeRepository.findAll();
@@ -228,10 +229,6 @@ public class ProductivityServiceImpl implements ProductivityService {
             double calculatedValue;
 
             switch (employee.getLevel()) {
-                case "Helper" -> {
-                    calculatedValue = 0.0;
-                    break;
-                }
                 case "Support" -> {
                     if (serverTicketsTaken > 20.0) {
                         calculatedValue = 20.0 * CalculationConstants.SERVER_TICKETS_PERC_SUPPORT;
@@ -274,12 +271,12 @@ public class ProductivityServiceImpl implements ProductivityService {
                 }
                 default -> calculatedValue = 0.0;
             }
-            
+
             productivityCalc.setServerTicketsTakingCalc(calculatedValue);
             productivityCalcRepository.save(productivityCalc);
         }
     }
-    
+
     @Override
     public void calculatePlaytimeForAllEmployeesWithCoefs() {
         List<Employee> employees = employeeRepository.findAll();
@@ -346,12 +343,12 @@ public class ProductivityServiceImpl implements ProductivityService {
                 }
                 default -> calculatedValue = 0.0;
             }
-            
+
             productivityCalc.setPlaytimeCalc(calculatedValue);
             productivityCalcRepository.save(productivityCalc);
         }
     }
-    
+
     @Override
     public void calculateAfkPlaytimeForAllEmployeesWithCoefs() {
         boolean isActive = false;
@@ -397,16 +394,94 @@ public class ProductivityServiceImpl implements ProductivityService {
                 default -> calculatedValue = 0.0;
             }
 
-            if (calculatedValue > 100.0){
+            if (calculatedValue > 100.0) {
                 calculatedValue = 100.0;
             }
 
-            if (!isActive){
+            if (!isActive) {
                 calculatedValue = 1.0;
             }
-            
+
             productivityCalc.setAfkPlaytimeCalc(calculatedValue);
             productivityCalcRepository.save(productivityCalc);
         }
     }
+
+    @Override
+    public void calculateAnsweredDiscordTicketsWithCoefs() {
+        System.out.println("Starting calculation of average answered Discord tickets with coefficients.");
+
+        List<Employee> employees = employeeRepository.findAll();
+        List<LocalDate> dates = dcTicketRepository.findAllDates();
+
+        for (Employee employee : employees) {
+            System.out.println(
+                    "----- Processing employee: " + employee.getUsername() + " (ID: " + employee.getId() + ") -----");
+
+            double totalResult = 0.0;
+            int daysWithTickets = 0;
+
+            for (LocalDate date : dates) {
+                System.out.println("Processing date: " + date);
+
+                double allDiscordTickets = dcTicketRepository.sumByDate(date);
+                System.out.println("Total Discord tickets for " + date + ": " + allDiscordTickets);
+
+                if (allDiscordTickets == 0) {
+                    System.out.println("No Discord tickets for this date. Skipping date: " + date);
+                    continue;
+                }
+
+                double discordTickets = dcTicketRepository
+                        .findAnsweredDiscordTicketsByEmployeeIdAndDate(employee.getId(), date);
+                System.out.println("Answered Discord tickets for employee on " + date + ": " + discordTickets);
+
+                double employeeLevelCoefficient;
+                switch (employee.getLevel()) {
+                    case "Support" -> employeeLevelCoefficient = CalculationConstants.DISCORD_TICKETS_SUPPORT;
+                    case "Chatmod" -> employeeLevelCoefficient = CalculationConstants.DISCORD_TICKETS_CHATMOD;
+                    case "Overseer" -> employeeLevelCoefficient = CalculationConstants.DISCORD_TICKETS_OVERSEER;
+                    case "Organizer" -> employeeLevelCoefficient = CalculationConstants.DISCORD_TICKETS_ORGANIZER;
+                    case "Manager" -> employeeLevelCoefficient = CalculationConstants.DISCORD_TICKETS_MANAGER;
+                    default -> {
+                        employeeLevelCoefficient = 0.0;
+                        System.out.println(
+                                "Unknown employee level for " + employee.getUsername() + ": " + employee.getLevel());
+                    }
+                }
+                System.out.println("Employee level coefficient: " + employeeLevelCoefficient);
+
+                double allDailyTicketsThisLevel = allDiscordTickets * employeeLevelCoefficient;
+                System.out.println("Total daily tickets for this level: " + allDailyTicketsThisLevel);
+
+                double result = 0.0;
+                if (allDailyTicketsThisLevel != 0 && allDiscordTickets != 0
+                        && !Double.isInfinite(allDailyTicketsThisLevel)
+                        && !Double.isNaN(allDailyTicketsThisLevel)) {
+                    result = (discordTickets / allDailyTicketsThisLevel) * 100;
+                    totalResult += result;
+                    daysWithTickets++;
+                }
+                System.out.println("Calculated result for " + date + " is: " + result + "%");
+            }
+
+            double averageResult = (daysWithTickets > 0) ? totalResult / daysWithTickets : 0.0;
+            System.out.println("Average result for employee " + employee.getUsername() + ": " + averageResult + "%");
+
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                System.out.println("No existing productivity calculation found for employee. Creating new entry.");
+                productivityCalc = new ProductivityCalc();
+                productivityCalc.setEmployee(employee);
+            }
+
+            productivityCalc.setDiscordTicketsCalc(averageResult);
+            productivityCalcRepository.save(productivityCalc);
+            System.out.println("Productivity calculation saved for employee " + employee.getUsername());
+        }
+
+        System.out.println("Finished calculation of average answered Discord tickets with coefficients.");
+    }
+
 }

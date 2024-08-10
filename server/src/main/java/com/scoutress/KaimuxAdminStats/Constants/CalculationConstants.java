@@ -14,12 +14,11 @@ public class CalculationConstants {
   public static final double SERVER_TICKETS_PERC_ORGANIZER = 1.17;
   public static final double SERVER_TICKETS_PERC_MANAGER = 1.0;
 
-  // Not tested yet
-  // public static final double DISCORD_TICKETS_SUPPORT = 2.0;
-  // public static final double DISCORD_TICKETS_CHATMOD = 1.0;
-  // public static final double DISCORD_TICKETS_OVERSEER = 0.5;
-  // public static final double DISCORD_TICKETS_ORGANIZER = 0.5;
-  // public static final double DISCORD_TICKETS_MANAGER = 0.25;
+  public static final double DISCORD_TICKETS_SUPPORT = 0.3275;
+  public static final double DISCORD_TICKETS_CHATMOD = 0.4803;
+  public static final double DISCORD_TICKETS_OVERSEER = 0.4803;
+  public static final double DISCORD_TICKETS_ORGANIZER = 0.4803;
+  public static final double DISCORD_TICKETS_MANAGER = 0.9520;
 
   // public static final double DISCORD_TICKETS_PERC_SUPPORT = 5.0;
   // public static final double DISCORD_TICKETS_PERC_CHATMOD = 2.5;

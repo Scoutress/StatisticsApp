@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.Entity;
+package com.scoutress.KaimuxAdminStats.Entity.McTickets;
 
 import java.time.LocalDate;
 

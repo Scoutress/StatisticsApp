@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Entity.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.McTicket;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicket;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicketPercentage;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.McTicketRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketPercentageRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.McTicketService;
 
@@ -23,11 +25,13 @@ public class McTicketServiceImpl implements McTicketService {
     private final McTicketRepository mcTicketsRepository;
     private final ProductivityRepository productivityRepository;
     private final EmployeeRepository employeeRepository;
+    private final McTicketPercentageRepository mcTicketPercentageRepository;
 
-    public McTicketServiceImpl(McTicketRepository mcTicketsRepository, EmployeeRepository employeeRepository, ProductivityRepository productivityRepository) {
+    public McTicketServiceImpl(McTicketRepository mcTicketsRepository, EmployeeRepository employeeRepository, ProductivityRepository productivityRepository, McTicketPercentageRepository mcTicketPercentageRepository) {
         this.mcTicketsRepository = mcTicketsRepository;
         this.productivityRepository = productivityRepository;
         this.employeeRepository = employeeRepository;
+        this.mcTicketPercentageRepository = mcTicketPercentageRepository;
     }
 
     @Override
@@ -83,8 +87,30 @@ public class McTicketServiceImpl implements McTicketService {
 
     @Override
     public void calculateMcTicketsPercentage() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calculateMcTicketsPercentage'");
+        List<McTicket> mcTickets = mcTicketsRepository.findAll();
+
+        Map<LocalDate, List<McTicket>> ticketsByDate = mcTickets.stream()
+            .collect(Collectors.groupingBy(McTicket::getDate));
+
+        for(Map.Entry<LocalDate, List<McTicket>> entry : ticketsByDate.entrySet()){
+            LocalDate date = entry.getKey();
+            List<McTicket> dailyTickets = entry.getValue();
+
+            int totalTicketsPerDay = dailyTickets.stream()
+                .mapToInt(McTicket::getTicketCount)
+                .sum();
+
+            for(McTicket ticket : dailyTickets){
+                double percentage = totalTicketsPerDay > 0
+                ? (double) ticket.getTicketCount() / totalTicketsPerDay * 100
+                : 0.0;
+
+                McTicketPercentage mcTicketPercentage = new McTicketPercentage(
+                    ticket.getEmployeeId(), date, percentage
+                );
+                mcTicketPercentageRepository.save(mcTicketPercentage);
+            }
+        }
     }
 
     @Override

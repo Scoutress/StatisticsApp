@@ -4,8 +4,6 @@ import styles from "./HomePage.module.scss";
 const Homepage = () => {
   return (
     <div className={styles.homePage}>
-      <h1>Home page</h1>
-
       <div className={styles.category}>
         <h2>Productivity</h2>
         <div className={styles.linkGroup}>

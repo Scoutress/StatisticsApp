@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.McTicket;
-import com.scoutress.KaimuxAdminStats.Repositories.McTicketRepository;
+import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicket;
+import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketRepository;
 import com.scoutress.KaimuxAdminStats.Services.McTicketService;
 
 @RestController

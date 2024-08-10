@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
 import com.scoutress.KaimuxAdminStats.Entity.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
+import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.ProductivityCalcRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
 
@@ -19,11 +22,16 @@ public class ProductivityServiceImpl implements ProductivityService {
     private final ProductivityRepository productivityRepository;
     private final EmployeeRepository employeeRepository;
     private final PlaytimeRepository playtimeRepository;
+    private final ProductivityCalcRepository productivityCalcRepository;
 
-    public ProductivityServiceImpl(ProductivityRepository productivityRepository, EmployeeRepository employeeRepository, PlaytimeRepository playtimeRepository) {
+    public ProductivityServiceImpl(ProductivityRepository productivityRepository, 
+                                    EmployeeRepository employeeRepository, 
+                                    PlaytimeRepository playtimeRepository,
+                                    ProductivityCalcRepository productivityCalcRepository) {
         this.productivityRepository = productivityRepository;
         this.employeeRepository = employeeRepository;
         this.playtimeRepository = playtimeRepository;
+        this.productivityCalcRepository = productivityCalcRepository;
     }
 
     @Override
@@ -135,4 +143,73 @@ public class ProductivityServiceImpl implements ProductivityService {
             productivityRepository.save(productivity);
         }
     }
+
+    @Override
+    public void calculateServerTicketsForAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                productivityCalc = new ProductivityCalc();
+                productivityCalc.setEmployee(employee);
+            }
+
+            double serverTickets = productivityRepository.findServerTicketsByEmployeeId(employee.getId());
+            double calculatedValue;
+
+            switch (employee.getLevel()) {
+                case "Helper" -> {
+                    calculatedValue = 0.0;
+                    break;
+                }
+                case "Support" -> {
+                    if (serverTickets > 0.5) {
+                        calculatedValue = 0.5 * CalculationConstants.SERVER_TICKETS_SUPPORT;
+                    } else {
+                        calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_SUPPORT;
+                    }
+                    break;
+                }
+                case "Chatmod" -> {
+                    if (serverTickets > 1.0) {
+                        calculatedValue = 1.0 * CalculationConstants.SERVER_TICKETS_CHATMOD;
+                    } else {
+                        calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_CHATMOD;
+                    }
+                    break;
+                }
+                case "Overseer" -> {
+                    if (serverTickets > 2.0) {
+                        calculatedValue = 2.0 * CalculationConstants.SERVER_TICKETS_OVERSEER;
+                    } else {
+                        calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_OVERSEER;
+                    }
+                    break;
+                }
+                case "Organizer" -> {
+                    if (serverTickets > 2.0) {
+                        calculatedValue = 2.0 * CalculationConstants.SERVER_TICKETS_ORGANIZER;
+                    } else {
+                        calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_ORGANIZER;
+                    }
+                    break;
+                }
+                case "Manager" -> {
+                    if (serverTickets > 4.0) {
+                        calculatedValue = 4.0 * CalculationConstants.SERVER_TICKETS_MANAGER;
+                    } else {
+                        calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_MANAGER;
+                    }
+                    break;
+                }
+                default -> calculatedValue = 0.0;
+            }
+            
+            productivityCalc.setServerTicketsCalc(calculatedValue);
+            productivityCalcRepository.save(productivityCalc);
+        }
+    }
+    
 }

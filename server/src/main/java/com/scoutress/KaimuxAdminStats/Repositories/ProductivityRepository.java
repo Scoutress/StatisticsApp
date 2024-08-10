@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
@@ -17,7 +18,6 @@ public interface ProductivityRepository extends JpaRepository<Productivity, Inte
 
     Productivity findByEmployeeId(Integer employeeId);
     
-    // Optional<Productivity> findByEmployeeId(Long employeeId);
-
-    // Optional<Productivity> findByEmployeeId(Integer employeeId);
+    @Query("SELECT p.serverTickets FROM Productivity p WHERE p.employee.id = :employeeId")
+    Double findServerTicketsByEmployeeId(@Param("employeeId") Integer employeeId);
 }

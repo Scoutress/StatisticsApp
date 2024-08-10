@@ -120,4 +120,12 @@ public class ScheduledTasksConfig {
         productivityService.updateAfkPlaytimeForAllEmployees();
         System.out.println("Average AFK playtime calc. is completed");
     }
+
+    @Scheduled(cron = "0 11 * * * *")
+    @Transactional
+    public void runTask11() {
+        System.out.println("Server tickets with coef. calc. is started");
+        productivityService.calculateServerTicketsForAllEmployees();
+        System.out.println("Server tickets with coef. calc. is completed");
+    }
 }

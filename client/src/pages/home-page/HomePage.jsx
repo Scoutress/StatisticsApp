@@ -15,6 +15,7 @@ const Homepage = () => {
         <h2>Employees</h2>
         <div className={styles.linkGroup}>
           <Link to="/employee/all">Employees</Link>
+          <Link to="/employee/add">Employee add</Link>
         </div>
       </div>
 
@@ -31,7 +32,9 @@ const Homepage = () => {
         <div className={styles.linkGroup}>
           <Link to="/dc-tickets/add">Add DC Tickets</Link>
           <Link to="/dc-tickets/all">DC Tickets</Link>
+
           <Link to="/dc-tickets/compare">DC Tickets Compare</Link>
+          {/* DC Tickets Compare Temp. */}
         </div>
       </div>
     </div>

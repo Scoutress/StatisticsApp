@@ -11,6 +11,10 @@ const Routes = {
     link: "/employee/all",
     name: "Employees",
   },
+  employeeAddPage: {
+    link: "/employee/add",
+    name: "Employee Add",
+  },
   dcTicketsAddPage: {
     link: "/dc-tickets/add",
     name: "Dc Tickets Add",

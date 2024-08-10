@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./McTicketsPage.module.scss";
+import { Link } from "react-router-dom";
 
 const McTicketsPage = () => {
   const [mcTicketsData, setMcTicketsData] = useState([]);
@@ -60,6 +61,7 @@ const McTicketsPage = () => {
   return (
     <div className={styles.mcTicketsPage}>
       <h1 className={styles.title}>Minecraft Tickets</h1>
+      <Link to="/mc-tickets/add">Add MC Tickets</Link>
       <table className={styles.table}>
         <thead>
           <tr>

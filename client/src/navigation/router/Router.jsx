@@ -8,8 +8,9 @@ import EmployeesPage from "../../pages/employees-page/EmployeesPage.jsx";
 import DcTicketsAddFormPage from "../../pages/dc-tickets-add-form-page/DcTicketsAddFormPage.jsx";
 import DcTicketsPage from "../../pages/dc-tickets-page/DcTicketsPage.jsx";
 import DcTicketsComparePage from "../../pages/dc-tickets-compare-page/DcTicketsComparePage.jsx";
-import McTicketsAddFormPage from "../../pages/mc-tickets-add-form-page copy/McTicketsAddFormPage.jsx";
+import McTicketsAddFormPage from "../../pages/mc-tickets-add-form-page/McTicketsAddFormPage.jsx";
 import McTicketsPage from "../../pages/mc-tickets-page/McTicketsPage.jsx";
+import EmployeeAddFormPage from "../../pages/employee-add-form-page/EmployeeAddFormPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.employeesPage.link,
         element: <EmployeesPage />,
+      },
+      {
+        path: Routes.employeeAddPage.link,
+        element: <EmployeeAddFormPage />,
       },
       {
         path: Routes.dcTicketsAddPage.link,

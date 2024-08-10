@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./EmployeesPage.module.scss";
+import { Link } from "react-router-dom";
 
 const EmployeesPage = () => {
   const [employeesData, setEmployeesData] = useState([]);
@@ -34,10 +35,10 @@ const EmployeesPage = () => {
   return (
     <div className={styles.employeesPage}>
       <h1 className={styles.title}>Employees list</h1>
+      <Link to="/employee/add">Employee add</Link>
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Username</th>
             <th>Level</th>
             <th>First name</th>
@@ -50,7 +51,6 @@ const EmployeesPage = () => {
         <tbody>
           {employeesData.map((employee) => (
             <tr key={employee.id}>
-              <td>{employee.id}</td>
               <td>{employee.username}</td>
               <td>{employee.level}</td>
               <td>{employee.firstName}</td>

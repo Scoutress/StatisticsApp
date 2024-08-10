@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./DcTicketsComparePage.module.scss";
+import { Link } from "react-router-dom";
 
 const DcTicketsComparePage = () => {
   const [dcComparedTicketsData, setDcComparedTicketsData] = useState([]);
@@ -52,6 +53,7 @@ const DcTicketsComparePage = () => {
   return (
     <div className={styles.employeeTicketPercentagePage}>
       <h1 className={styles.title}>Employee Ticket Percentages</h1>
+      <Link to="/dc-tickets/add">Add DC Tickets</Link>
       <table className={styles.table}>
         <thead>
           <tr>

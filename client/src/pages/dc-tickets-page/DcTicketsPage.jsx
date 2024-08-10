@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./DcTicketsPage.module.scss";
+import { Link } from "react-router-dom";
 
 const DcTicketsPage = () => {
   const [dcTicketsData, setDcTicketsData] = useState([]);
@@ -60,6 +61,7 @@ const DcTicketsPage = () => {
   return (
     <div className={styles.dcTicketsPage}>
       <h1 className={styles.title}>Discord Tickets</h1>
+      <Link to="/dc-tickets/add">Add DC Tickets</Link>
       <table className={styles.table}>
         <thead>
           <tr>

@@ -20,4 +20,7 @@ public interface ProductivityRepository extends JpaRepository<Productivity, Inte
     
     @Query("SELECT p.serverTickets FROM Productivity p WHERE p.employee.id = :employeeId")
     Double findServerTicketsByEmployeeId(@Param("employeeId") Integer employeeId);
+
+    @Query("SELECT p.serverTicketsTaking FROM Productivity p WHERE p.employee.id = :employeeId")
+    Double findServerTicketsTakenByEmployeeId(@Param("employeeId") Integer employeeId);
 }

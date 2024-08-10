@@ -18,5 +18,5 @@ public interface ProductivityService {
 
     void calculateServerTicketsForAllEmployees();
 
-    
+    void calculateServerTicketsTakenForAllEmployees();
 }

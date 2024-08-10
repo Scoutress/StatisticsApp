@@ -212,4 +212,72 @@ public class ProductivityServiceImpl implements ProductivityService {
         }
     }
     
+    @Override
+    public void calculateServerTicketsTakenForAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                productivityCalc = new ProductivityCalc();
+                productivityCalc.setEmployee(employee);
+            }
+
+            double serverTicketsTaken = productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId());
+            double calculatedValue;
+
+            switch (employee.getLevel()) {
+                case "Helper" -> {
+                    calculatedValue = 0.0;
+                    break;
+                }
+                case "Support" -> {
+                    if (serverTicketsTaken > 20.0) {
+                        calculatedValue = 20.0 * CalculationConstants.SERVER_TICKETS_PERC_SUPPORT;
+                    } else {
+                        calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_SUPPORT;
+                    }
+                    break;
+                }
+                case "Chatmod" -> {
+                    if (serverTicketsTaken > 40.0) {
+                        calculatedValue = 40.0 * CalculationConstants.SERVER_TICKETS_PERC_CHATMOD;
+                    } else {
+                        calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_CHATMOD;
+                    }
+                    break;
+                }
+                case "Overseer" -> {
+                    if (serverTicketsTaken > 85.0) {
+                        calculatedValue = 85.0 * CalculationConstants.SERVER_TICKETS_PERC_OVERSEER;
+                    } else {
+                        calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_OVERSEER;
+                    }
+                    break;
+                }
+                case "Organizer" -> {
+                    if (serverTicketsTaken > 85.0) {
+                        calculatedValue = 85.0 * CalculationConstants.SERVER_TICKETS_PERC_ORGANIZER;
+                    } else {
+                        calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_ORGANIZER;
+                    }
+                    break;
+                }
+                case "Manager" -> {
+                    if (serverTicketsTaken > 100.0) {
+                        calculatedValue = 100.0 * CalculationConstants.SERVER_TICKETS_PERC_MANAGER;
+                    } else {
+                        calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_MANAGER;
+                    }
+                    break;
+                }
+                default -> calculatedValue = 0.0;
+            }
+            
+            productivityCalc.setServerTicketsTakingCalc(calculatedValue);
+            productivityCalcRepository.save(productivityCalc);
+        }
+    }
+    
 }

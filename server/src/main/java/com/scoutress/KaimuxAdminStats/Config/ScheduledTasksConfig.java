@@ -128,4 +128,12 @@ public class ScheduledTasksConfig {
         productivityService.calculateServerTicketsForAllEmployees();
         System.out.println("Server tickets with coef. calc. is completed");
     }
+
+    @Scheduled(cron = "0 12 * * * *")
+    @Transactional
+    public void runTask12() {
+        System.out.println("Server tickets taken with coef. calc. is started");
+        productivityService.calculateServerTicketsTakenForAllEmployees();
+        System.out.println("Server tickets taken with coef. calc. is completed");
+    }
 }

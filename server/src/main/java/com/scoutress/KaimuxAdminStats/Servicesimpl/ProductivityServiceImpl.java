@@ -352,4 +352,61 @@ public class ProductivityServiceImpl implements ProductivityService {
         }
     }
     
+    @Override
+    public void calculateAfkPlaytimeForAllEmployeesWithCoefs() {
+        boolean isActive = false;
+
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                productivityCalc = new ProductivityCalc();
+                productivityCalc.setEmployee(employee);
+            }
+
+            double afkPlaytime = productivityRepository.findAfkPlaytimeByEmployeeId(employee.getId());
+            double calculatedValue;
+
+            switch (employee.getLevel()) {
+                case "Helper" -> {
+                    calculatedValue = afkPlaytime * CalculationConstants.AFK_PLAYTIME_SUPPORT;
+                    break;
+                }
+                case "Support" -> {
+                    calculatedValue = afkPlaytime * CalculationConstants.AFK_PLAYTIME_SUPPORT;
+                    break;
+                }
+                case "Chatmod" -> {
+                    calculatedValue = afkPlaytime * CalculationConstants.AFK_PLAYTIME_CHATMOD;
+                    break;
+                }
+                case "Overseer" -> {
+                    calculatedValue = afkPlaytime * CalculationConstants.AFK_PLAYTIME_OVERSEER;
+                    break;
+                }
+                case "Organizer" -> {
+                    calculatedValue = afkPlaytime * CalculationConstants.AFK_PLAYTIME_ORGANIZER;
+                    break;
+                }
+                case "Manager" -> {
+                    calculatedValue = afkPlaytime * CalculationConstants.AFK_PLAYTIME_MANAGER;
+                    break;
+                }
+                default -> calculatedValue = 0.0;
+            }
+
+            if (calculatedValue > 100.0){
+                calculatedValue = 100.0;
+            }
+
+            if (!isActive){
+                calculatedValue = 1.0;
+            }
+            
+            productivityCalc.setAfkPlaytimeCalc(calculatedValue);
+            productivityCalcRepository.save(productivityCalc);
+        }
+    }
 }

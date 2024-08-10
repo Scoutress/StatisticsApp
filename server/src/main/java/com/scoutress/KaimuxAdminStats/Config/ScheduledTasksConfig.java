@@ -144,4 +144,12 @@ public class ScheduledTasksConfig {
         productivityService.calculatePlaytimeForAllEmployeesWithCoefs();
         System.out.println("Playtime with coef. calc. is completed");
     }
+
+    @Scheduled(cron = "0 14 * * * *")
+    @Transactional
+    public void runTask14() {
+        System.out.println("AFK Playtime with coef. calc. is started");
+        productivityService.calculateAfkPlaytimeForAllEmployeesWithCoefs();
+        System.out.println("AFK Playtime with coef. calc. is completed");
+    }
 }

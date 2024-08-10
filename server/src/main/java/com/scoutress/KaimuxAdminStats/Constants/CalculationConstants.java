@@ -34,12 +34,12 @@ public class CalculationConstants {
   public static final double PLAYTIME_ORGANIZER = 0.25;
   public static final double PLAYTIME_MANAGER = 0.125;
 
-  // public static final double AFK_PLAYTIME_HELPER = 2.0;
-  // public static final double AFK_PLAYTIME_SUPPORT = 1.0;
-  // public static final double AFK_PLAYTIME_CHATMOD = 0.5;
-  // public static final double AFK_PLAYTIME_OVERSEER = 0.25;
-  // public static final double AFK_PLAYTIME_ORGANIZER = 0.25;
-  // public static final double AFK_PLAYTIME_MANAGER = 0.125;
+  public static final double AFK_PLAYTIME_HELPER = 2.5;
+  public static final double AFK_PLAYTIME_SUPPORT = 5.0;
+  public static final double AFK_PLAYTIME_CHATMOD = 10.0;
+  public static final double AFK_PLAYTIME_OVERSEER = 20.0;
+  public static final double AFK_PLAYTIME_ORGANIZER = 20.0;
+  public static final double AFK_PLAYTIME_MANAGER = 50.0;
 
   public static final double COMPLAINT = 0.01;
 

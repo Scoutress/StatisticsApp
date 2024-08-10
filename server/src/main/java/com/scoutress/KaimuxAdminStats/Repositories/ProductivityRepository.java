@@ -26,4 +26,7 @@ public interface ProductivityRepository extends JpaRepository<Productivity, Inte
 
     @Query("SELECT p.playtime FROM Productivity p WHERE p.employee.id = :employeeId")
     Double findPlaytimeByEmployeeId(@Param("employeeId") Integer employeeId);
+
+    @Query("SELECT p.afkPlaytime FROM Productivity p WHERE p.employee.id = :employeeId")
+    Double findAfkPlaytimeByEmployeeId(@Param("employeeId") Integer employeeId);
 }

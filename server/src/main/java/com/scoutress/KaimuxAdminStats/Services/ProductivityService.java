@@ -21,4 +21,6 @@ public interface ProductivityService {
     void calculateServerTicketsTakenForAllEmployeesWithCoefs();
 
     void calculatePlaytimeForAllEmployeesWithCoefs();
+
+    void calculateAfkPlaytimeForAllEmployeesWithCoefs();
 }

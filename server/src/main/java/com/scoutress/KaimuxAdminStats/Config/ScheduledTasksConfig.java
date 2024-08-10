@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
 import com.scoutress.KaimuxAdminStats.Services.McTicketService;
 import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
+import com.scoutress.KaimuxAdminStats.Services.RecommendationService;
 
 import jakarta.transaction.Transactional;
 
@@ -17,12 +18,14 @@ public class ScheduledTasksConfig {
     private final DcTicketService dcTicketService;
     private final ProductivityService productivityService;
     private final McTicketService mcTicketService;
+    private final RecommendationService recommendationService;
 
     public ScheduledTasksConfig(DcTicketService dcTicketService, ProductivityService productivityService,
-            McTicketService mcTicketService) {
+            McTicketService mcTicketService, RecommendationService recommendationService) {
         this.dcTicketService = dcTicketService;
         this.productivityService = productivityService;
         this.mcTicketService = mcTicketService;
+        this.recommendationService = recommendationService;
     }
 
     // For copy-paste (DEBUG)
@@ -176,5 +179,13 @@ public class ScheduledTasksConfig {
         System.out.println("Productivity calculation is started");
         productivityService.calculateAndSaveProductivity();
         System.out.println("Productivity calculation is completed");
+    }
+
+    @Scheduled(cron = "0 18 * * * *")
+    @Transactional
+    public void runTask18() {
+        System.out.println("Recommendation evaluation is started");
+        recommendationService.evaluateEmployees();
+        System.out.println("Recommendation evaluation is completed");
     }
 }

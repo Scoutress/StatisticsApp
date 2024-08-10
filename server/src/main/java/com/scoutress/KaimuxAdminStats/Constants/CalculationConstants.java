@@ -34,6 +34,16 @@ public class CalculationConstants {
   public static final double AFK_PLAYTIME_ORGANIZER = 20.0;
   public static final double AFK_PLAYTIME_MANAGER = 50.0;
 
+  public static final int WORK_TIME_HELPER = 1;
+  public static final int WORK_TIME_SUPPORT = 1;
+  public static final int WORK_TIME_CHATMOD = 1;
+  public static final int WORK_TIME_OVERSEER = 1;
+  public static final int WORK_TIME_MANAGER = 1;
+
+  public static final int MIN_ANNUAL_PLAYTIME = 4;
+  public static final int PROMOTION_VALUE = 90;
+  public static final int DEMOTION_VALUE = 10;
+
   private CalculationConstants() {
   }
 }

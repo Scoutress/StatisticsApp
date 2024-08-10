@@ -37,6 +37,13 @@ const Homepage = () => {
           {/* DC Tickets Compare Temp. */}
         </div>
       </div>
+
+      <div className={styles.category}>
+        <h2>Playtime</h2>
+        <div className={styles.linkGroup}>
+          <Link to="/playtime/all">Playtime</Link>
+        </div>
+      </div>
     </div>
   );
 };

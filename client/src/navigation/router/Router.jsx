@@ -11,6 +11,7 @@ import DcTicketsComparePage from "../../pages/dc-tickets-compare-page/DcTicketsC
 import McTicketsAddFormPage from "../../pages/mc-tickets-add-form-page/McTicketsAddFormPage.jsx";
 import McTicketsPage from "../../pages/mc-tickets-page/McTicketsPage.jsx";
 import EmployeeAddFormPage from "../../pages/employee-add-form-page/EmployeeAddFormPage.jsx";
+import PlaytimePage from "../../pages/playtime-page/PlaytimePage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.mcTicketsAddPage.link,
         element: <McTicketsAddFormPage />,
+      },
+      {
+        path: Routes.playtimePage.link,
+        element: <PlaytimePage />,
       },
     ],
   },

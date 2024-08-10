@@ -35,6 +35,10 @@ const Routes = {
     link: "/mc-tickets/add",
     name: "Mc Tickets Add",
   },
+  playtimePage: {
+    link: "/playtime/all",
+    name: "Playtime",
+  },
 };
 
 export default Routes;

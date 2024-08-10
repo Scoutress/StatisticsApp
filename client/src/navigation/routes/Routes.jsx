@@ -43,6 +43,10 @@ const Routes = {
     link: "/playtime/add",
     name: "Playtime Add",
   },
+  complainsPage: {
+    link: "/complains/all",
+    name: "Playtime",
+  },
 };
 
 export default Routes;

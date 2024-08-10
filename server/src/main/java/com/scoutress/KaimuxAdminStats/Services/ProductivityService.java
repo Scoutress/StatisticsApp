@@ -25,4 +25,6 @@ public interface ProductivityService {
     void calculateAfkPlaytimeForAllEmployeesWithCoefs();
 
     void calculateAnsweredDiscordTicketsWithCoefs();
+
+    void calculateAndSaveComplainsCalc();
 }

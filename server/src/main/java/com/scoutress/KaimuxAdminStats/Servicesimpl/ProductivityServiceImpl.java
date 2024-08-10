@@ -10,6 +10,7 @@ import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
 import com.scoutress.KaimuxAdminStats.Entity.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
+import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
@@ -25,17 +26,20 @@ public class ProductivityServiceImpl implements ProductivityService {
     private final PlaytimeRepository playtimeRepository;
     private final ProductivityCalcRepository productivityCalcRepository;
     private final DcTicketRepository dcTicketRepository;
+    private final ComplainsRepository complainsRepository;
 
     public ProductivityServiceImpl(ProductivityRepository productivityRepository,
             EmployeeRepository employeeRepository,
             PlaytimeRepository playtimeRepository,
             ProductivityCalcRepository productivityCalcRepository,
-            DcTicketRepository dcTicketRepository) {
+            DcTicketRepository dcTicketRepository,
+            ComplainsRepository complainsRepository) {
         this.productivityRepository = productivityRepository;
         this.employeeRepository = employeeRepository;
         this.playtimeRepository = playtimeRepository;
         this.productivityCalcRepository = productivityCalcRepository;
         this.dcTicketRepository = dcTicketRepository;
+        this.complainsRepository = complainsRepository;
     }
 
     @Override
@@ -409,32 +413,22 @@ public class ProductivityServiceImpl implements ProductivityService {
 
     @Override
     public void calculateAnsweredDiscordTicketsWithCoefs() {
-        System.out.println("Starting calculation of average answered Discord tickets with coefficients.");
-
         List<Employee> employees = employeeRepository.findAll();
         List<LocalDate> dates = dcTicketRepository.findAllDates();
 
         for (Employee employee : employees) {
-            System.out.println(
-                    "----- Processing employee: " + employee.getUsername() + " (ID: " + employee.getId() + ") -----");
-
             double totalResult = 0.0;
             int daysWithTickets = 0;
 
             for (LocalDate date : dates) {
-                System.out.println("Processing date: " + date);
-
                 double allDiscordTickets = dcTicketRepository.sumByDate(date);
-                System.out.println("Total Discord tickets for " + date + ": " + allDiscordTickets);
 
                 if (allDiscordTickets == 0) {
-                    System.out.println("No Discord tickets for this date. Skipping date: " + date);
                     continue;
                 }
 
                 double discordTickets = dcTicketRepository
                         .findAnsweredDiscordTicketsByEmployeeIdAndDate(employee.getId(), date);
-                System.out.println("Answered Discord tickets for employee on " + date + ": " + discordTickets);
 
                 double employeeLevelCoefficient;
                 switch (employee.getLevel()) {
@@ -445,16 +439,12 @@ public class ProductivityServiceImpl implements ProductivityService {
                     case "Manager" -> employeeLevelCoefficient = CalculationConstants.DISCORD_TICKETS_MANAGER;
                     default -> {
                         employeeLevelCoefficient = 0.0;
-                        System.out.println(
-                                "Unknown employee level for " + employee.getUsername() + ": " + employee.getLevel());
                     }
                 }
-                System.out.println("Employee level coefficient: " + employeeLevelCoefficient);
 
                 double allDailyTicketsThisLevel = allDiscordTickets * employeeLevelCoefficient;
-                System.out.println("Total daily tickets for this level: " + allDailyTicketsThisLevel);
 
-                double result = 0.0;
+                double result;
                 if (allDailyTicketsThisLevel != 0 && allDiscordTickets != 0
                         && !Double.isInfinite(allDailyTicketsThisLevel)
                         && !Double.isNaN(allDailyTicketsThisLevel)) {
@@ -462,26 +452,43 @@ public class ProductivityServiceImpl implements ProductivityService {
                     totalResult += result;
                     daysWithTickets++;
                 }
-                System.out.println("Calculated result for " + date + " is: " + result + "%");
             }
 
             double averageResult = (daysWithTickets > 0) ? totalResult / daysWithTickets : 0.0;
-            System.out.println("Average result for employee " + employee.getUsername() + ": " + averageResult + "%");
 
             ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
 
             if (productivityCalc == null) {
-                System.out.println("No existing productivity calculation found for employee. Creating new entry.");
                 productivityCalc = new ProductivityCalc();
                 productivityCalc.setEmployee(employee);
             }
 
             productivityCalc.setDiscordTicketsCalc(averageResult);
             productivityCalcRepository.save(productivityCalc);
-            System.out.println("Productivity calculation saved for employee " + employee.getUsername());
         }
-
-        System.out.println("Finished calculation of average answered Discord tickets with coefficients.");
     }
 
+    @Override
+    public void calculateAndSaveComplainsCalc() {
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            Double totalComplaints = complainsRepository.sumComplaintsByEmployeeId(employee.getId());
+
+            if (totalComplaints == null) {
+                totalComplaints = 0.0;
+            }
+
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                productivityCalc = new ProductivityCalc();
+                productivityCalc.setEmployee(employee);
+            }
+
+            productivityCalc.setComplainsCalc(totalComplaints);
+
+            productivityCalcRepository.save(productivityCalc);
+        }
+    }
 }

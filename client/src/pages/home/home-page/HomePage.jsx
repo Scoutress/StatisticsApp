@@ -45,6 +45,13 @@ const Homepage = () => {
           <Link to="/playtime/add">Playtime Add</Link>
         </div>
       </div>
+
+      <div className={styles.category}>
+        <h2>Complains</h2>
+        <div className={styles.linkGroup}>
+          <Link to="/complains/all">Complains</Link>
+        </div>
+      </div>
     </div>
   );
 };

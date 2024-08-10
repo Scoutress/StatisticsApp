@@ -1,7 +1,7 @@
 package com.scoutress.KaimuxAdminStats.Constants;
 
 public class CalculationConstants {
-    
+
   public static final double SERVER_TICKETS_SUPPORT = 2.0;
   public static final double SERVER_TICKETS_CHATMOD = 1.0;
   public static final double SERVER_TICKETS_OVERSEER = 0.5;
@@ -40,7 +40,6 @@ public class CalculationConstants {
   public static final double AFK_PLAYTIME_ORGANIZER = 20.0;
   public static final double AFK_PLAYTIME_MANAGER = 50.0;
 
-  public static final double COMPLAINT = 0.01;
-
-  private CalculationConstants() {}
+  private CalculationConstants() {
+  }
 }

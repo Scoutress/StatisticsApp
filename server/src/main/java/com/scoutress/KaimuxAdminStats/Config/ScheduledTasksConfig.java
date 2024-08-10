@@ -161,4 +161,12 @@ public class ScheduledTasksConfig {
         productivityService.calculateAnsweredDiscordTicketsWithCoefs();
         System.out.println("Answered DC tickets with coef. calc. is completed");
     }
+
+    @Scheduled(cron = "0 16 * * * *")
+    @Transactional
+    public void runTask16() {
+        System.out.println("Complains with coef. calc. is started");
+        productivityService.calculateAndSaveComplainsCalc();
+        System.out.println("Complains with coef. calc. is completed");
+    }
 }

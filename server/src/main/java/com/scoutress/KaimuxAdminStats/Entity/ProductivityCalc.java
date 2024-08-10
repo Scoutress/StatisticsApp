@@ -37,12 +37,12 @@ public class ProductivityCalc {
     @Column(name = "discord_tickets_calc", nullable = true)
     private Double discordTicketsCalc;
 
-    @Column(name = "discord_tickets_taking_calc", nullable = true)
-    private Double discordTicketsTakingCalc;
-
     @Column(name = "playtime_calc", nullable = true)
     private Double playtimeCalc;
 
     @Column(name = "afk_playtime_calc", nullable = true)
     private Double afkPlaytimeCalc;
+
+    @Column(name = "complains_calc", nullable = true)
+    private Double complainsCalc;
 }

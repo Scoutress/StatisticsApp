@@ -16,7 +16,9 @@ public interface ProductivityService {
 
     void updateAfkPlaytimeForAllEmployees();
 
-    void calculateServerTicketsForAllEmployees();
+    void calculateServerTicketsForAllEmployeesWithCoefs();
 
-    void calculateServerTicketsTakenForAllEmployees();
+    void calculateServerTicketsTakenForAllEmployeesWithCoefs();
+
+    void calculatePlaytimeForAllEmployeesWithCoefs();
 }

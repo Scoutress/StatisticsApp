@@ -145,7 +145,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     }
 
     @Override
-    public void calculateServerTicketsForAllEmployees() {
+    public void calculateServerTicketsForAllEmployeesWithCoefs() {
         List<Employee> employees = employeeRepository.findAll();
 
         for (Employee employee : employees) {
@@ -213,7 +213,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     }
     
     @Override
-    public void calculateServerTicketsTakenForAllEmployees() {
+    public void calculateServerTicketsTakenForAllEmployeesWithCoefs() {
         List<Employee> employees = employeeRepository.findAll();
 
         for (Employee employee : employees) {
@@ -276,6 +276,78 @@ public class ProductivityServiceImpl implements ProductivityService {
             }
             
             productivityCalc.setServerTicketsTakingCalc(calculatedValue);
+            productivityCalcRepository.save(productivityCalc);
+        }
+    }
+    
+    @Override
+    public void calculatePlaytimeForAllEmployeesWithCoefs() {
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+
+            if (productivityCalc == null) {
+                productivityCalc = new ProductivityCalc();
+                productivityCalc.setEmployee(employee);
+            }
+
+            double playtime = productivityRepository.findPlaytimeByEmployeeId(employee.getId());
+            double calculatedValue;
+
+            switch (employee.getLevel()) {
+                case "Helper" -> {
+                    if (playtime > 0.5) {
+                        calculatedValue = 0.5 * CalculationConstants.PLAYTIME_HELPER;
+                    } else {
+                        calculatedValue = playtime * CalculationConstants.PLAYTIME_SUPPORT;
+                    }
+                    break;
+                }
+                case "Support" -> {
+                    if (playtime > 1.0) {
+                        calculatedValue = 1.0 * CalculationConstants.PLAYTIME_SUPPORT;
+                    } else {
+                        calculatedValue = playtime * CalculationConstants.PLAYTIME_SUPPORT;
+                    }
+                    break;
+                }
+                case "Chatmod" -> {
+                    if (playtime > 2.0) {
+                        calculatedValue = 2.0 * CalculationConstants.PLAYTIME_CHATMOD;
+                    } else {
+                        calculatedValue = playtime * CalculationConstants.PLAYTIME_CHATMOD;
+                    }
+                    break;
+                }
+                case "Overseer" -> {
+                    if (playtime > 4.0) {
+                        calculatedValue = 4.0 * CalculationConstants.PLAYTIME_OVERSEER;
+                    } else {
+                        calculatedValue = playtime * CalculationConstants.PLAYTIME_OVERSEER;
+                    }
+                    break;
+                }
+                case "Organizer" -> {
+                    if (playtime > 4.0) {
+                        calculatedValue = 4.0 * CalculationConstants.PLAYTIME_ORGANIZER;
+                    } else {
+                        calculatedValue = playtime * CalculationConstants.PLAYTIME_ORGANIZER;
+                    }
+                    break;
+                }
+                case "Manager" -> {
+                    if (playtime > 8.0) {
+                        calculatedValue = 8.0 * CalculationConstants.PLAYTIME_MANAGER;
+                    } else {
+                        calculatedValue = playtime * CalculationConstants.PLAYTIME_MANAGER;
+                    }
+                    break;
+                }
+                default -> calculatedValue = 0.0;
+            }
+            
+            productivityCalc.setPlaytimeCalc(calculatedValue);
             productivityCalcRepository.save(productivityCalc);
         }
     }

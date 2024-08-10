@@ -125,7 +125,7 @@ public class ScheduledTasksConfig {
     @Transactional
     public void runTask11() {
         System.out.println("Server tickets with coef. calc. is started");
-        productivityService.calculateServerTicketsForAllEmployees();
+        productivityService.calculateServerTicketsForAllEmployeesWithCoefs();
         System.out.println("Server tickets with coef. calc. is completed");
     }
 
@@ -133,7 +133,15 @@ public class ScheduledTasksConfig {
     @Transactional
     public void runTask12() {
         System.out.println("Server tickets taken with coef. calc. is started");
-        productivityService.calculateServerTicketsTakenForAllEmployees();
+        productivityService.calculateServerTicketsTakenForAllEmployeesWithCoefs();
         System.out.println("Server tickets taken with coef. calc. is completed");
+    }
+
+    @Scheduled(cron = "0 13 * * * *")
+    @Transactional
+    public void runTask13() {
+        System.out.println("Playtime with coef. calc. is started");
+        productivityService.calculatePlaytimeForAllEmployeesWithCoefs();
+        System.out.println("Playtime with coef. calc. is completed");
     }
 }

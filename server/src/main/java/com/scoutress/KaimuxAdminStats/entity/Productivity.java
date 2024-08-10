@@ -81,4 +81,10 @@ public class Productivity {
         this.employee = new Employee();
         this.employee.setId(employeeId);
     }
+
+    public Productivity(Employee employee, Double playtime, Double afkPlaytime) {
+        this.employee = employee;
+        this.playtime = playtime;
+        this.afkPlaytime = afkPlaytime;
+    }
 }

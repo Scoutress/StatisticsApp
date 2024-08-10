@@ -59,18 +59,23 @@ public class ProductivityServiceImpl implements ProductivityService {
     public void updateAnnualPlaytimeForAllEmployees() {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusDays(365);
-
-        List<Long> employeeIds = playtimeRepository.findAllDistinctEmployeeIds();
-
-        for (Long employeeId : employeeIds) {
+    
+        List<Integer> employeeIds = playtimeRepository.findAllDistinctEmployeeIds();
+    
+        for (Integer employeeId : employeeIds) {
             Double totalPlaytime = playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate);
             
-            Employee employee = employeeRepository.findById(employeeId.intValue())
+            Employee employee = employeeRepository.findById(employeeId)
                     .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-            Productivity productivity = productivityRepository.findByEmployeeId(employeeId)
-                    .orElse(new Productivity(employee));
-
+    
+            Productivity productivity;
+            productivity = productivityRepository.findByEmployeeId(employeeId);
+    
+            if (productivity == null) {
+                productivity = new Productivity();
+                productivity.setEmployee(employee);
+            }
+            
             productivity.setAnnualPlaytime(totalPlaytime != null ? totalPlaytime : 0.0);
             productivityRepository.save(productivity);
         }
@@ -85,7 +90,7 @@ public class ProductivityServiceImpl implements ProductivityService {
             LocalDate endDate = playtimeRepository.findLatestPlaytimeDateByEmployeeId(employeeId);
 
             if (startDate != null && endDate != null) {
-                long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1; // Įskaitant abi dienas
+                long daysBetween = ChronoUnit.DAYS.between(startDate, endDate) + 1;
                 Double totalPlaytime = playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate);
 
                 if (totalPlaytime != null && daysBetween > 0) {
@@ -102,6 +107,32 @@ public class ProductivityServiceImpl implements ProductivityService {
                     productivityRepository.save(productivity);
                 }
             }
+        }
+    }
+
+    @Override
+    public void updateAfkPlaytimeForAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+        
+        for (Employee employee : employees) {
+            Integer employeeId = employee.getId();
+            
+            Double totalPlaytime = playtimeRepository.getTotalPlaytimeByEmployeeId(employeeId);
+            Double totalAfkPlaytime = playtimeRepository.getTotalAfkPlaytimeByEmployeeId(employeeId);
+    
+            double afkPercentage = (totalPlaytime != null && totalPlaytime > 0) 
+                                   ? (totalAfkPlaytime / totalPlaytime) * 100 
+                                   : 0.0;
+    
+            Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
+            
+            if (productivity == null) {
+                productivity = new Productivity(employee);
+            }
+    
+            productivity.setAfkPlaytime(afkPercentage);
+    
+            productivityRepository.save(productivity);
         }
     }
 }

@@ -19,7 +19,7 @@ public interface PlaytimeRepository extends JpaRepository<Playtime, Long> {
   Double sumPlaytimeByEmployeeAndDateRange(Long employeeId, LocalDate startDate, LocalDate endDate);
 
   @Query("SELECT DISTINCT p.employeeId FROM Playtime p")
-  List<Long> findAllDistinctEmployeeIds();
+  List<Integer> findAllDistinctEmployeeIds();
   
   @Query("SELECT DISTINCT p.employeeId FROM Playtime p")
   List<Integer> findAllEmployeeIds();
@@ -33,4 +33,9 @@ public interface PlaytimeRepository extends JpaRepository<Playtime, Long> {
   @Query("SELECT SUM(p.hoursPlayed) FROM Playtime p WHERE p.employeeId = :employeeId AND p.date BETWEEN :startDate AND :endDate")
   Double sumPlaytimeByEmployeeAndDateRange(@Param("employeeId") Integer employeeId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
+  @Query("SELECT SUM(p.hoursPlayed) FROM Playtime p WHERE p.employeeId = :employeeId")
+  Double getTotalPlaytimeByEmployeeId(Integer employeeId);
+
+  @Query("SELECT SUM(p.afkPlaytime) FROM Playtime p WHERE p.employeeId = :employeeId")
+  Double getTotalAfkPlaytimeByEmployeeId(Integer employeeId);
 }

@@ -77,7 +77,6 @@ const EmployeeAddFormPage = () => {
             name="firstName"
             value={formData.firstName}
             onChange={handleChange}
-            required
             className={styles.input}
           />
         </label>
@@ -88,18 +87,16 @@ const EmployeeAddFormPage = () => {
             name="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            required
             className={styles.input}
           />
         </label>
         <label className={styles.label}>
           Email:
           <input
-            type="email"
+            type="text"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            required
             className={styles.input}
           />
         </label>

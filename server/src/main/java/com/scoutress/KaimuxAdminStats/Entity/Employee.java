@@ -27,19 +27,19 @@ public class Employee {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "level")
+    @Column(name = "level", nullable = false)
     private String level;
 
     @Column(name = "language", nullable = false)
     private String language;
 
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name", nullable = true)
     private String firstName;
 
-    @Column(name = "last_name", nullable = false)
+    @Column(name = "last_name", nullable = true)
     private String lastName;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = true, unique = true)
     private String email;
 
     @Column(name = "join_date", nullable = false)

@@ -18,7 +18,7 @@ import com.scoutress.KaimuxAdminStats.Services.EmployeeService;
 @RequestMapping("/employee")
 @CrossOrigin(origins = "http://localhost:5173")
 public class EmployeeController {
-    
+
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
 
@@ -26,9 +26,9 @@ public class EmployeeController {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
     }
-    
+
     @GetMapping("/all")
-    public List<Employee> getAllEmployees(){
+    public List<Employee> getAllEmployees() {
         return employeeService.findAll();
     }
 

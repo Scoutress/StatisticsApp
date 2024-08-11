@@ -165,7 +165,15 @@ public class ProductivityServiceImpl implements ProductivityService {
                 productivityCalc.setEmployee(employee);
             }
 
-            double serverTickets = productivityRepository.findServerTicketsByEmployeeId(employee.getId());
+            double serverTickets = 0.0;
+
+            try {
+                serverTickets = productivityRepository.findServerTicketsByEmployeeId(employee.getId());
+            } catch (Exception e) {
+                System.err.println("Klaida gaunant serverTickets darbuotojui ID: " + employee.getId() + ". Klaida: "
+                        + e.getMessage());
+            }
+
             double calculatedValue;
 
             switch (employee.getLevel()) {
@@ -175,7 +183,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_SUPPORT;
                     }
-                    break;
                 }
                 case "Chatmod" -> {
                     if (serverTickets > 1.0) {
@@ -183,7 +190,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_CHATMOD;
                     }
-                    break;
                 }
                 case "Overseer" -> {
                     if (serverTickets > 2.0) {
@@ -191,7 +197,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_OVERSEER;
                     }
-                    break;
                 }
                 case "Organizer" -> {
                     if (serverTickets > 2.0) {
@@ -199,7 +204,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_ORGANIZER;
                     }
-                    break;
                 }
                 case "Manager" -> {
                     if (serverTickets > 4.0) {
@@ -207,7 +211,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTickets * CalculationConstants.SERVER_TICKETS_MANAGER;
                     }
-                    break;
                 }
                 default -> calculatedValue = 0.0;
             }
@@ -229,7 +232,15 @@ public class ProductivityServiceImpl implements ProductivityService {
                 productivityCalc.setEmployee(employee);
             }
 
-            double serverTicketsTaken = productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId());
+            double serverTicketsTaken = 0.0;
+
+            try {
+                serverTicketsTaken = productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId());
+            } catch (Exception e) {
+                System.err.println("Error fetching serverTicketsTaken for employee ID: " + employee.getId()
+                        + ". Error: " + e.getMessage());
+            }
+
             double calculatedValue;
 
             switch (employee.getLevel()) {
@@ -239,7 +250,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_SUPPORT;
                     }
-                    break;
                 }
                 case "Chatmod" -> {
                     if (serverTicketsTaken > 40.0) {
@@ -247,7 +257,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_CHATMOD;
                     }
-                    break;
                 }
                 case "Overseer" -> {
                     if (serverTicketsTaken > 85.0) {
@@ -255,7 +264,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_OVERSEER;
                     }
-                    break;
                 }
                 case "Organizer" -> {
                     if (serverTicketsTaken > 85.0) {
@@ -263,7 +271,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_ORGANIZER;
                     }
-                    break;
                 }
                 case "Manager" -> {
                     if (serverTicketsTaken > 100.0) {
@@ -271,7 +278,6 @@ public class ProductivityServiceImpl implements ProductivityService {
                     } else {
                         calculatedValue = serverTicketsTaken * CalculationConstants.SERVER_TICKETS_PERC_MANAGER;
                     }
-                    break;
                 }
                 default -> calculatedValue = 0.0;
             }
@@ -293,55 +299,56 @@ public class ProductivityServiceImpl implements ProductivityService {
                 productivityCalc.setEmployee(employee);
             }
 
-            double playtime = productivityRepository.findPlaytimeByEmployeeId(employee.getId());
+            Double playtime = productivityRepository.findPlaytimeByEmployeeId(employee.getId());
+            double playtimeValue = (playtime != null) ? playtime : 0.0;
             double calculatedValue;
 
             switch (employee.getLevel()) {
                 case "Helper" -> {
-                    if (playtime > 0.5) {
+                    if (playtimeValue > 0.5) {
                         calculatedValue = 0.5 * CalculationConstants.PLAYTIME_HELPER;
                     } else {
-                        calculatedValue = playtime * CalculationConstants.PLAYTIME_SUPPORT;
+                        calculatedValue = playtimeValue * CalculationConstants.PLAYTIME_SUPPORT;
                     }
                     break;
                 }
                 case "Support" -> {
-                    if (playtime > 1.0) {
+                    if (playtimeValue > 1.0) {
                         calculatedValue = 1.0 * CalculationConstants.PLAYTIME_SUPPORT;
                     } else {
-                        calculatedValue = playtime * CalculationConstants.PLAYTIME_SUPPORT;
+                        calculatedValue = playtimeValue * CalculationConstants.PLAYTIME_SUPPORT;
                     }
                     break;
                 }
                 case "Chatmod" -> {
-                    if (playtime > 2.0) {
+                    if (playtimeValue > 2.0) {
                         calculatedValue = 2.0 * CalculationConstants.PLAYTIME_CHATMOD;
                     } else {
-                        calculatedValue = playtime * CalculationConstants.PLAYTIME_CHATMOD;
+                        calculatedValue = playtimeValue * CalculationConstants.PLAYTIME_CHATMOD;
                     }
                     break;
                 }
                 case "Overseer" -> {
-                    if (playtime > 4.0) {
+                    if (playtimeValue > 4.0) {
                         calculatedValue = 4.0 * CalculationConstants.PLAYTIME_OVERSEER;
                     } else {
-                        calculatedValue = playtime * CalculationConstants.PLAYTIME_OVERSEER;
+                        calculatedValue = playtimeValue * CalculationConstants.PLAYTIME_OVERSEER;
                     }
                     break;
                 }
                 case "Organizer" -> {
-                    if (playtime > 4.0) {
+                    if (playtimeValue > 4.0) {
                         calculatedValue = 4.0 * CalculationConstants.PLAYTIME_ORGANIZER;
                     } else {
-                        calculatedValue = playtime * CalculationConstants.PLAYTIME_ORGANIZER;
+                        calculatedValue = playtimeValue * CalculationConstants.PLAYTIME_ORGANIZER;
                     }
                     break;
                 }
                 case "Manager" -> {
-                    if (playtime > 8.0) {
+                    if (playtimeValue > 8.0) {
                         calculatedValue = 8.0 * CalculationConstants.PLAYTIME_MANAGER;
                     } else {
-                        calculatedValue = playtime * CalculationConstants.PLAYTIME_MANAGER;
+                        calculatedValue = playtimeValue * CalculationConstants.PLAYTIME_MANAGER;
                     }
                     break;
                 }
@@ -497,37 +504,70 @@ public class ProductivityServiceImpl implements ProductivityService {
         List<Employee> employees = employeeRepository.findAll();
 
         for (Employee employee : employees) {
-            ProductivityCalc productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+            ProductivityCalc productivityCalc = null;
+            System.out.println(productivityCalc);// fix this later
+            try {
+                productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
+            } catch (Exception e) {
+                System.err.println("Error fetching ProductivityCalc for employee ID: " + employee.getId() + ". Error: "
+                        + e.getMessage());
+                continue; // Skip this employee and continue with the next one
+            }
 
             if (productivityCalc == null) {
                 continue;
             }
 
-            double discordTicketsCalc = productivityCalc.getDiscordTicketsCalc();
-            double afkPlaytimeCalc = productivityCalc.getAfkPlaytimeCalc();
-            double playtimeCalc = productivityCalc.getPlaytimeCalc();
-            double serverTicketsCalc = productivityCalc.getServerTicketsCalc();
-            double serverTicketsTakingCalc = productivityCalc.getServerTicketsTakingCalc();
-            double complainsCalc = productivityCalc.getComplainsCalc();
+            double discordTicketsCalc;
+            double afkPlaytimeCalc;
+            double playtimeCalc;
+            double serverTicketsCalc;
+            double serverTicketsTakingCalc;
+            double complainsCalc;
 
-            double result = ((discordTicketsCalc
-                    - afkPlaytimeCalc
-                    + playtimeCalc
-                    + serverTicketsCalc
-                    + serverTicketsTakingCalc) / 5)
-                    - complainsCalc;
-
-            Productivity productivity = productivityRepository.findByEmployeeId(employee.getId());
-
-            if (productivity == null) {
-                productivity = new Productivity();
-                productivity.setEmployee(employee);
+            try {
+                discordTicketsCalc = productivityCalc.getDiscordTicketsCalc();
+                afkPlaytimeCalc = productivityCalc.getAfkPlaytimeCalc();
+                playtimeCalc = productivityCalc.getPlaytimeCalc();
+                serverTicketsCalc = productivityCalc.getServerTicketsCalc();
+                serverTicketsTakingCalc = productivityCalc.getServerTicketsTakingCalc();
+                complainsCalc = productivityCalc.getComplainsCalc();
+            } catch (Exception e) {
+                System.err.println(
+                        "Error calculating values for employee ID: " + employee.getId() + ". Error: " + e.getMessage());
+                continue; // Skip this employee if any of the calculations fail
             }
 
-            productivity.setProductivity(result);
+            double result;
+            try {
+                result = ((discordTicketsCalc
+                        - afkPlaytimeCalc
+                        + playtimeCalc
+                        + serverTicketsCalc
+                        + serverTicketsTakingCalc) / 5)
+                        - complainsCalc;
+            } catch (Exception e) {
+                System.err.println("Error computing productivity result for employee ID: " + employee.getId()
+                        + ". Error: " + e.getMessage());
+                continue; // Skip this employee if the final calculation fails
+            }
 
-            productivityRepository.save(productivity);
+            Productivity productivity;
+            try {
+                productivity = productivityRepository.findByEmployeeId(employee.getId());
+                if (productivity == null) {
+                    productivity = new Productivity();
+                    productivity.setEmployee(employee);
+                }
+
+                productivity.setProductivity(result);
+                productivityRepository.save(productivity);
+            } catch (Exception e) {
+                System.err.println("Error saving productivity for employee ID: " + employee.getId() + ". Error: "
+                        + e.getMessage());
+                // Depending on your logic, decide whether to continue or handle the exception
+                // differently
+            }
         }
     }
-
 }

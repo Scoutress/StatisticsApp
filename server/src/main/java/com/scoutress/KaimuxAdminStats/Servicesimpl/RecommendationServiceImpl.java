@@ -86,8 +86,6 @@ public class RecommendationServiceImpl implements RecommendationService {
     if (daysSinceJoined >= CalculationConstants.WORK_TIME_HELPER) {
       if (productivityValue >= CalculationConstants.PROMOTION_VALUE) {
         return PROMOTE;
-      } else if (productivityValue < CalculationConstants.DEMOTION_VALUE) {
-        return DEMOTE;
       }
     }
 
@@ -150,18 +148,13 @@ public class RecommendationServiceImpl implements RecommendationService {
   }
 
   public String evaluateManager(Employee employee, double productivityValue, LocalDate currentDate) {
-    long daysSinceJoined = DAYS.between(employee.getJoinDate(), currentDate);
 
     if (!checkPlaytime(employee.getId(), currentDate.minusYears(1), currentDate)) {
       return DISMISS;
     }
 
-    if (daysSinceJoined >= CalculationConstants.WORK_TIME_MANAGER) {
-      if (productivityValue >= CalculationConstants.PROMOTION_VALUE) {
-        return PROMOTE;
-      } else if (productivityValue < CalculationConstants.DEMOTION_VALUE) {
-        return DEMOTE;
-      }
+    if (productivityValue < CalculationConstants.DEMOTION_VALUE) {
+      return DEMOTE;
     }
 
     return STAY;

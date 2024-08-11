@@ -510,14 +510,13 @@ public class ProductivityServiceImpl implements ProductivityService {
         List<Employee> employees = employeeRepository.findAll();
 
         for (Employee employee : employees) {
-            ProductivityCalc productivityCalc = null;
-            System.out.println(productivityCalc);// fix this later
+            ProductivityCalc productivityCalc;
             try {
                 productivityCalc = productivityCalcRepository.findByEmployeeId(employee.getId());
             } catch (Exception e) {
                 System.err.println("Error fetching ProductivityCalc for employee ID: " + employee.getId() + ". Error: "
                         + e.getMessage());
-                continue; // Skip this employee and continue with the next one
+                continue;
             }
 
             if (productivityCalc == null) {
@@ -541,7 +540,7 @@ public class ProductivityServiceImpl implements ProductivityService {
             } catch (Exception e) {
                 System.err.println(
                         "Error calculating values for employee ID: " + employee.getId() + ". Error: " + e.getMessage());
-                continue; // Skip this employee if any of the calculations fail
+                continue;
             }
 
             double result;
@@ -555,7 +554,7 @@ public class ProductivityServiceImpl implements ProductivityService {
             } catch (Exception e) {
                 System.err.println("Error computing productivity result for employee ID: " + employee.getId()
                         + ". Error: " + e.getMessage());
-                continue; // Skip this employee if the final calculation fails
+                continue;
             }
 
             Productivity productivity;
@@ -571,8 +570,6 @@ public class ProductivityServiceImpl implements ProductivityService {
             } catch (Exception e) {
                 System.err.println("Error saving productivity for employee ID: " + employee.getId() + ". Error: "
                         + e.getMessage());
-                // Depending on your logic, decide whether to continue or handle the exception
-                // differently
             }
         }
     }
@@ -580,39 +577,30 @@ public class ProductivityServiceImpl implements ProductivityService {
     @Override
     @Transactional
     public void calculateAveragePlaytime() {
-        // 1. Gaukite visus darbuotojus
         List<Employee> employees = employeeRepository.findAll();
 
         for (Employee employee : employees) {
-            // 2. Gaukite visus `DailyPlaytime` įrašus šiam darbuotojui
             List<DailyPlaytime> playtimes = dailyPlaytimeRepository.findByEmployeeId(employee.getId());
 
             if (playtimes.isEmpty()) {
-                // Jei nėra duomenų, praleidžiame šį darbuotoją
                 continue;
             }
 
-            // 3. Nustatykite seniausią datą su playtime duomenimis
             LocalDate earliestDate = playtimes.stream()
                     .map(DailyPlaytime::getDate)
                     .min(LocalDate::compareTo)
                     .orElse(LocalDate.now());
 
-            // 4. Nustatykite vakar dienos datą
             LocalDate yesterday = LocalDate.now().minusDays(1);
 
-            // 5. Apskaičiuokite dienų skaičių nuo seniausios iki vakar dienos
             long daysBetween = ChronoUnit.DAYS.between(earliestDate, yesterday) + 1;
 
-            // 6. Sudėkite visą playtime
             double totalPlaytime = playtimes.stream()
                     .mapToDouble(DailyPlaytime::getTotalPlaytime)
                     .sum();
 
-            // 7. Apskaičiuokite vidutinį playtime per dieną
             double averagePlaytimePerDay = totalPlaytime / daysBetween;
 
-            // 8. Išsaugoti arba atnaujinti `Productivity` įrašą
             Productivity productivity = productivityRepository.findByEmployee(employee)
                     .orElse(new Productivity(employee));
 

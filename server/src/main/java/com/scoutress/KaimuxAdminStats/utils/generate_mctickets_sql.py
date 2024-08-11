@@ -1,4 +1,3 @@
-# Darbuotojų ID susiejimas su jų vardais
 employee_mapping = {
     'ItsVaidas': 1,
     'Scoutress': 2,
@@ -19,7 +18,6 @@ employee_mapping = {
     '3MAHH': 22
 }
 
-# Duomenų eilutės
 data = [
     "2023-06-02,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0",
     "2023-06-03,0,0,2,0,2,0,1,0,0,0,0,0,0,0,0,0",
@@ -459,7 +457,6 @@ data = [
     "2024-08-10,0,0,0,0,2,0,0,0,1,0,0,0,0,0,0,1,0"
 ]
 
-# SQL užklausų generavimas
 sql_statements = []
 
 for row in data:
@@ -471,7 +468,6 @@ for row in data:
         sql = f"INSERT INTO mc_tickets (date, employee_id, ticket_count) VALUES ('{date_value}', {employee_id}, {ticket_count});"
         sql_statements.append(sql)
 
-# Įrašome SQL užklausas į failą
 with open('insert_statements.sql', 'w') as file:
     for statement in sql_statements:
         file.write(statement + '\n')

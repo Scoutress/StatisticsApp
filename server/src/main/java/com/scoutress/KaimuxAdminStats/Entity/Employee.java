@@ -44,4 +44,8 @@ public class Employee {
 
     @Column(name = "join_date", nullable = false)
     private LocalDate joinDate;
+
+    public Employee(Integer id) {
+        this.id = id;
+    }
 }

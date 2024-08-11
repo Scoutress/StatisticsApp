@@ -45,4 +45,8 @@ public class ProductivityCalc {
 
     @Column(name = "complains_calc", nullable = true)
     private Double complainsCalc;
+
+    public ProductivityCalc(Employee employee) {
+        this.employee = employee;
+    }
 }

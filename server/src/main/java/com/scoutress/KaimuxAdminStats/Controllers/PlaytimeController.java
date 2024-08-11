@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.Playtime.Playtime;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.AfkPlaytime;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
 
 @RestController
@@ -25,12 +25,12 @@ public class PlaytimeController {
     }
 
     @GetMapping("/all")
-    public List<Playtime> getAllPlaytime() {
+    public List<AfkPlaytime> getAllPlaytime() {
         return playtimeRepository.findAll();
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addPlaytime(@RequestBody List<Playtime> playtimeList) {
+    public ResponseEntity<String> addPlaytime(@RequestBody List<AfkPlaytime> playtimeList) {
         playtimeRepository.saveAll(playtimeList);
         return ResponseEntity.ok("Playtime and AFK Playtime data added successfully");
     }

@@ -238,4 +238,14 @@ public class ScheduledTasksConfig {
         playtimeCalculationService.calculateDailyPlaytime();
         System.out.println("Daily Playtime calculation is completed");
     }
+
+    @Scheduled(cron = "30 20 * * * *")
+    @Scheduled(cron = "30 40 * * * *")
+    @Scheduled(cron = "30 0 * * * *")
+    @Transactional
+    public void runTask20() {
+        System.out.println("Average daily Playtime calculation is started");
+        productivityService.calculateAveragePlaytime();
+        System.out.println("Average daily Playtime calculation is completed");
+    }
 }

@@ -29,4 +29,6 @@ public interface ProductivityService {
     void calculateAndSaveComplainsCalc();
 
     void calculateAndSaveProductivity();
+
+    void calculateAveragePlaytime();
 }

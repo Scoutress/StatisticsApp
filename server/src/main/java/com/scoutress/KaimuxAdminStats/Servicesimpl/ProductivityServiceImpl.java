@@ -8,15 +8,19 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
 import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
 import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityCalcRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProductivityServiceImpl implements ProductivityService {
@@ -27,19 +31,21 @@ public class ProductivityServiceImpl implements ProductivityService {
     private final ProductivityCalcRepository productivityCalcRepository;
     private final DcTicketRepository dcTicketRepository;
     private final ComplainsRepository complainsRepository;
+    private final DailyPlaytimeRepository dailyPlaytimeRepository;
 
     public ProductivityServiceImpl(ProductivityRepository productivityRepository,
             EmployeeRepository employeeRepository,
             PlaytimeRepository playtimeRepository,
             ProductivityCalcRepository productivityCalcRepository,
             DcTicketRepository dcTicketRepository,
-            ComplainsRepository complainsRepository) {
+            ComplainsRepository complainsRepository, DailyPlaytimeRepository dailyPlaytimeRepository) {
         this.productivityRepository = productivityRepository;
         this.employeeRepository = employeeRepository;
         this.playtimeRepository = playtimeRepository;
         this.productivityCalcRepository = productivityCalcRepository;
         this.dcTicketRepository = dcTicketRepository;
         this.complainsRepository = complainsRepository;
+        this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     }
 
     @Override
@@ -568,6 +574,51 @@ public class ProductivityServiceImpl implements ProductivityService {
                 // Depending on your logic, decide whether to continue or handle the exception
                 // differently
             }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void calculateAveragePlaytime() {
+        // 1. Gaukite visus darbuotojus
+        List<Employee> employees = employeeRepository.findAll();
+
+        for (Employee employee : employees) {
+            // 2. Gaukite visus `DailyPlaytime` įrašus šiam darbuotojui
+            List<DailyPlaytime> playtimes = dailyPlaytimeRepository.findByEmployeeId(employee.getId());
+
+            if (playtimes.isEmpty()) {
+                // Jei nėra duomenų, praleidžiame šį darbuotoją
+                continue;
+            }
+
+            // 3. Nustatykite seniausią datą su playtime duomenimis
+            LocalDate earliestDate = playtimes.stream()
+                    .map(DailyPlaytime::getDate)
+                    .min(LocalDate::compareTo)
+                    .orElse(LocalDate.now());
+
+            // 4. Nustatykite vakar dienos datą
+            LocalDate yesterday = LocalDate.now().minusDays(1);
+
+            // 5. Apskaičiuokite dienų skaičių nuo seniausios iki vakar dienos
+            long daysBetween = ChronoUnit.DAYS.between(earliestDate, yesterday) + 1;
+
+            // 6. Sudėkite visą playtime
+            double totalPlaytime = playtimes.stream()
+                    .mapToDouble(DailyPlaytime::getTotalPlaytime)
+                    .sum();
+
+            // 7. Apskaičiuokite vidutinį playtime per dieną
+            double averagePlaytimePerDay = totalPlaytime / daysBetween;
+
+            // 8. Išsaugoti arba atnaujinti `Productivity` įrašą
+            Productivity productivity = productivityRepository.findByEmployee(employee)
+                    .orElse(new Productivity(employee));
+
+            productivity.setPlaytime(averagePlaytimePerDay);
+
+            productivityRepository.save(productivity);
         }
     }
 }

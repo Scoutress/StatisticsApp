@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Playtime {
+public class AfkPlaytime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +28,6 @@ public class Playtime {
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
-
-    @Column(name = "hours_played", nullable = false)
-    private Double hoursPlayed;
 
     @Column(name = "afk_playtime", nullable = false)
     private Double afkPlaytime;

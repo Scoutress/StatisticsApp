@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.scoutress.KaimuxAdminStats.Entity.Playtime;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.Playtime;
 
 public interface PlaytimeRepository extends JpaRepository<Playtime, Long> {
 
@@ -20,7 +20,7 @@ public interface PlaytimeRepository extends JpaRepository<Playtime, Long> {
 
   @Query("SELECT DISTINCT p.employeeId FROM Playtime p")
   List<Integer> findAllDistinctEmployeeIds();
-  
+
   @Query("SELECT DISTINCT p.employeeId FROM Playtime p")
   List<Integer> findAllEmployeeIds();
 
@@ -31,7 +31,8 @@ public interface PlaytimeRepository extends JpaRepository<Playtime, Long> {
   LocalDate findLatestPlaytimeDateByEmployeeId(@Param("employeeId") Integer employeeId);
 
   @Query("SELECT SUM(p.hoursPlayed) FROM Playtime p WHERE p.employeeId = :employeeId AND p.date BETWEEN :startDate AND :endDate")
-  Double sumPlaytimeByEmployeeAndDateRange(@Param("employeeId") Integer employeeId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+  Double sumPlaytimeByEmployeeAndDateRange(@Param("employeeId") Integer employeeId,
+      @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
   @Query("SELECT SUM(p.hoursPlayed) FROM Playtime p WHERE p.employeeId = :employeeId")
   Double getTotalPlaytimeByEmployeeId(Integer employeeId);

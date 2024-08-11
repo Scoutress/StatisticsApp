@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
 import com.scoutress.KaimuxAdminStats.Services.McTicketService;
+import com.scoutress.KaimuxAdminStats.Services.PlaytimeCalculationService;
 import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
 import com.scoutress.KaimuxAdminStats.Services.RecommendationService;
 
@@ -19,13 +20,16 @@ public class ScheduledTasksConfig {
     private final ProductivityService productivityService;
     private final McTicketService mcTicketService;
     private final RecommendationService recommendationService;
+    private final PlaytimeCalculationService playtimeCalculationService;
 
     public ScheduledTasksConfig(DcTicketService dcTicketService, ProductivityService productivityService,
-            McTicketService mcTicketService, RecommendationService recommendationService) {
+            McTicketService mcTicketService, RecommendationService recommendationService,
+            PlaytimeCalculationService playtimeCalculationService) {
         this.dcTicketService = dcTicketService;
         this.productivityService = productivityService;
         this.mcTicketService = mcTicketService;
         this.recommendationService = recommendationService;
+        this.playtimeCalculationService = playtimeCalculationService;
     }
 
     // For copy-paste (DEBUG)
@@ -223,5 +227,15 @@ public class ScheduledTasksConfig {
         System.out.println("Recommendation evaluation is started");
         recommendationService.evaluateEmployees();
         System.out.println("Recommendation evaluation is completed");
+    }
+
+    @Scheduled(cron = "0 19 * * * *")
+    @Scheduled(cron = "0 39 * * * *")
+    @Scheduled(cron = "0 59 * * * *")
+    @Transactional
+    public void runTask19() {
+        System.out.println("Daily Playtime calculation is started");
+        playtimeCalculationService.calculateDailyPlaytime();
+        System.out.println("Daily Playtime calculation is completed");
     }
 }

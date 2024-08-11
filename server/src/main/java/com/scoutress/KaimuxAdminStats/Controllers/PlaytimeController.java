@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.Playtime;
+import com.scoutress.KaimuxAdminStats.Entity.Playtime.Playtime;
 import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
 
 @RestController
@@ -20,7 +20,7 @@ public class PlaytimeController {
 
     private final PlaytimeRepository playtimeRepository;
 
-    public PlaytimeController(PlaytimeRepository playtimeRepository){
+    public PlaytimeController(PlaytimeRepository playtimeRepository) {
         this.playtimeRepository = playtimeRepository;
     }
 

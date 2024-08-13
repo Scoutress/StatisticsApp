@@ -14,6 +14,7 @@ import McTicketsAddFormPage from "../../pages/mc-tickets/mc-tickets-add-form-pag
 import PlaytimePage from "../../pages/playtime/playtime-page/PlaytimePage";
 import PlaytimeAddFormPage from "../../pages/playtime/playtime-add-form-page/PlaytimeAddFormPage.jsx";
 import ComplainsPage from "../../pages/complains/ComplainsPage.jsx";
+import PromotionsPage from "../../pages/promotions/PromotionsPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.complainsPage.link,
         element: <ComplainsPage />,
+      },
+      {
+        path: Routes.promotionsPage.link,
+        element: <PromotionsPage />,
       },
     ],
   },

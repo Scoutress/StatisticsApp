@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
 import com.scoutress.KaimuxAdminStats.Services.McTicketService;
@@ -37,7 +36,7 @@ public class ScheduledTasksConfig {
                 this.playtimeCalculationService = playtimeCalculationService;
         }
 
-        @Scheduled(cron = "0 0 * * * *")
+        // @Scheduled(cron = "0 0 * * * *")
         // @Scheduled(cron = "0 20 * * * *")
         @Transactional
         public void run() {

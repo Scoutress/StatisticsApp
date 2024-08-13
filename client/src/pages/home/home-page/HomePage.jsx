@@ -16,6 +16,7 @@ const Homepage = () => {
         <div className={styles.linkGroup}>
           <Link to="/employee/all">Employees</Link>
           <Link to="/employee/add">Employee add</Link>
+          <Link to="/stats/promotions">Promotions</Link>
         </div>
       </div>
 

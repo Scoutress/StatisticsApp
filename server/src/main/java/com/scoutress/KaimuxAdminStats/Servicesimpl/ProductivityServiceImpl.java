@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
-import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;

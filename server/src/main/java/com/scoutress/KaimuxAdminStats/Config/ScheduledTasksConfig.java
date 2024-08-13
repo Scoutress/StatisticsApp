@@ -38,6 +38,7 @@ public class ScheduledTasksConfig {
         }
 
         @Scheduled(cron = "0 0 * * * *")
+        // @Scheduled(cron = "0 20 * * * *")
         @Transactional
         public void run() {
                 System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
@@ -95,6 +96,7 @@ public class ScheduledTasksConfig {
                 System.out.println(taskName + " >> " + duration.toMillis() + " ms");
                 try {
                         Thread.sleep(300000);
+                        // Thread.sleep(1);
                 } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         System.out.println("Task interrupted: " + taskName);

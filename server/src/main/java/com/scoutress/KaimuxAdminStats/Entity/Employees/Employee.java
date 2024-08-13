@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.Entity;
+package com.scoutress.KaimuxAdminStats.Entity.Employees;
 
 import java.time.LocalDate;
 
@@ -48,4 +48,10 @@ public class Employee {
     public Employee(Integer id) {
         this.id = id;
     }
+
+    public Employee(Integer id, LocalDate joinDate) {
+        this.id = id;
+        this.joinDate = joinDate;
+    }
+
 }

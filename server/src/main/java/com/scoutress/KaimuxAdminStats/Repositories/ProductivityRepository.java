@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 
 @Repository

@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
 import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicketPercentage;
-import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.EmployeePromotions;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketPercentageRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.EmployeePromotionsRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
@@ -25,13 +27,16 @@ public class DcTicketServiceImpl implements DcTicketService {
     private final ProductivityRepository productivityRepository;
     private final DcTicketPercentageRepository dcTicketPercentageRepository;
     private final EmployeeRepository employeeRepository;
+    private final EmployeePromotionsRepository employeePromotionsRepository;
 
     public DcTicketServiceImpl(DcTicketRepository dcTicketRepository, ProductivityRepository productivityRepository,
-            DcTicketPercentageRepository dcTicketPercentageRepository, EmployeeRepository employeeRepository) {
+            DcTicketPercentageRepository dcTicketPercentageRepository, EmployeeRepository employeeRepository,
+            EmployeePromotionsRepository employeePromotionsRepository) {
         this.dcTicketRepository = dcTicketRepository;
         this.productivityRepository = productivityRepository;
         this.dcTicketPercentageRepository = dcTicketPercentageRepository;
         this.employeeRepository = employeeRepository;
+        this.employeePromotionsRepository = employeePromotionsRepository;
     }
 
     @Override
@@ -50,12 +55,38 @@ public class DcTicketServiceImpl implements DcTicketService {
             Integer employeeId = entry.getKey();
             List<DcTicket> employeeTickets = entry.getValue();
 
-            LocalDate earliestDate = employeeTickets.stream()
+            Employee employee = employeeRepository.findById(employeeId).orElse(null);
+            if (employee == null) {
+                System.out.println("Employee with ID " + employeeId + " not found. Skipping.");
+                continue;
+            }
+
+            LocalDate joinDate = employee.getJoinDate();
+            EmployeePromotions promotions = employeePromotionsRepository.findByEmployeeId(employeeId);
+            LocalDate supportDate = promotions != null ? promotions.getToSupport() : null;
+
+            if (supportDate == null || joinDate == null) {
+                System.out.println(
+                        "Employee with ID " + employeeId + " has no support promotion date or join date. Skipping.");
+                continue;
+            }
+
+            List<DcTicket> filteredTickets = employeeTickets.stream()
+                    .filter(ticket -> !ticket.getDate().isBefore(joinDate) && !ticket.getDate().isBefore(supportDate))
+                    .collect(Collectors.toList());
+
+            if (filteredTickets.isEmpty()) {
+                System.out
+                        .println("Employee with ID " + employeeId + " has no valid tickets after filtering. Skipping.");
+                continue;
+            }
+
+            LocalDate earliestDate = filteredTickets.stream()
                     .map(DcTicket::getDate)
                     .min(LocalDate::compareTo)
                     .orElse(null);
 
-            LocalDate latestDate = employeeTickets.stream()
+            LocalDate latestDate = filteredTickets.stream()
                     .map(DcTicket::getDate)
                     .max(LocalDate::compareTo)
                     .orElse(null);
@@ -63,7 +94,7 @@ public class DcTicketServiceImpl implements DcTicketService {
             if (earliestDate != null && latestDate != null) {
                 long daysBetween = ChronoUnit.DAYS.between(earliestDate, latestDate) + 1;
 
-                int totalTickets = employeeTickets.stream()
+                int totalTickets = filteredTickets.stream()
                         .mapToInt(DcTicket::getTicketCount)
                         .sum();
 
@@ -71,11 +102,6 @@ public class DcTicketServiceImpl implements DcTicketService {
 
                 Productivity productivity = productivityRepository.findByEmployeeId(employeeId);
                 if (productivity == null) {
-                    Employee employee = employeeRepository.findById(employeeId).orElse(null);
-                    if (employee == null) {
-                        System.out.println("Employee with ID " + employeeId + " not found. Skipping.");
-                        continue;
-                    }
                     productivity = new Productivity();
                     productivity.setEmployee(employee);
                 }
@@ -96,11 +122,30 @@ public class DcTicketServiceImpl implements DcTicketService {
             LocalDate date = entry.getKey();
             List<DcTicket> dailyTickets = entry.getValue();
 
-            int totalTicketsForDay = dailyTickets.stream()
+            List<DcTicket> filteredTickets = dailyTickets.stream()
+                    .filter(ticket -> {
+                        Employee employee = employeeRepository.findById(ticket.getEmployeeId()).orElse(null);
+                        if (employee == null) {
+                            return false;
+                        }
+                        LocalDate joinDate = employee.getJoinDate();
+                        EmployeePromotions promotions = employeePromotionsRepository
+                                .findByEmployeeId(ticket.getEmployeeId());
+                        LocalDate supportDate = promotions != null ? promotions.getToSupport() : null;
+                        return supportDate != null && joinDate != null && !date.isBefore(joinDate)
+                                && !date.isBefore(supportDate);
+                    })
+                    .collect(Collectors.toList());
+
+            if (filteredTickets.isEmpty()) {
+                continue;
+            }
+
+            int totalTicketsForDay = filteredTickets.stream()
                     .mapToInt(DcTicket::getTicketCount)
                     .sum();
 
-            for (DcTicket ticket : dailyTickets) {
+            for (DcTicket ticket : filteredTickets) {
                 double percentage = totalTicketsForDay > 0
                         ? (double) ticket.getTicketCount() / totalTicketsForDay * 100
                         : 0.0;

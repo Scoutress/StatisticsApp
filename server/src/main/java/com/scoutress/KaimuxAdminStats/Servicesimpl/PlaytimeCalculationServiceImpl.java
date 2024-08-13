@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.Entity.Playtime.LoginLogoutTimes;
 import com.scoutress.KaimuxAdminStats.Repositories.DailyPlaytimeRepository;

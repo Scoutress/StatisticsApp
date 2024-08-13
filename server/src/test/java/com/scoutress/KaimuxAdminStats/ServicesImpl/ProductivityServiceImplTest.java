@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
-import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 import com.scoutress.KaimuxAdminStats.Entity.Productivity;
 import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
 import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;

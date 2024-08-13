@@ -2,7 +2,7 @@ package com.scoutress.KaimuxAdminStats.Services;
 
 import java.time.LocalDate;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
 
 public interface RecommendationService {
 

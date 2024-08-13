@@ -34,4 +34,13 @@ public class LoginLogoutTimes {
 
   @Column(name = "logout_time", nullable = false)
   private LocalDateTime logoutTime;
+
+  public LoginLogoutTimes(Long id, Integer employeeId, LocalDateTime loginTime, LocalDateTime logoutTime,
+      String serverName) {
+    this.id = id;
+    this.employeeId = employeeId;
+    this.loginTime = loginTime;
+    this.logoutTime = logoutTime;
+    this.serverName = serverName;
+  }
 }

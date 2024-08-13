@@ -30,23 +30,23 @@ public class DailyPlaytime {
   private LocalDate date;
 
   @Column(name = "total_survival_playtime", nullable = false)
-  private Double totalSurvivalPlaytime;
+  private Double totalSurvivalPlaytime = 0.0;
 
   @Column(name = "total_skyblock_playtime", nullable = false)
-  private Double totalSkyblockPlaytime;
+  private Double totalSkyblockPlaytime = 0.0;
 
   @Column(name = "total_creative_playtime", nullable = false)
-  private Double totalCreativePlaytime;
+  private Double totalCreativePlaytime = 0.0;
 
   @Column(name = "total_boxpvp_playtime", nullable = false)
-  private Double totalBoxpvpPlaytime;
+  private Double totalBoxpvpPlaytime = 0.0;
 
   @Column(name = "total_Prison_playtime", nullable = false)
-  private Double totalPrisonPlaytime;
+  private Double totalPrisonPlaytime = 0.0;
 
   @Column(name = "total_events_playtime", nullable = false)
-  private Double totalEventsPlaytime;
+  private Double totalEventsPlaytime = 0.0;
 
   @Column(name = "total_playtime", nullable = false)
-  private Double totalPlaytime;
+  private Double totalPlaytime = 0.0;
 }

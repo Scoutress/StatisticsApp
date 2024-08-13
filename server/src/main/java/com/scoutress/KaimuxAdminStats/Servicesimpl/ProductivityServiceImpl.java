@@ -408,12 +408,18 @@ public class ProductivityServiceImpl implements ProductivityService {
 
             if (productivityCalc == null) {
                 System.err.println("ProductivityCalc not found for employee ID: " + employee.getId());
-                return;
+                continue;
+            }
+
+            if ("Owner".equals(employee.getLevel()) || "Operator".equals(employee.getLevel())) {
+                System.out.println("Skipping productivity calculation for level: " + employee.getLevel());
+                continue;
             }
 
             try {
                 double result = calculateProductivity(productivityCalc);
                 saveProductivity(employee, result);
+
             } catch (Exception e) {
                 System.err.println("Error processing productivity for employee ID: " + employee.getId() + ". Error: "
                         + e.getMessage());

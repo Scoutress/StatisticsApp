@@ -42,7 +42,8 @@ public class ScheduledTasksConfig {
         public void run() {
                 System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
 
-                measureExecutionTime(() -> productivityService.updateProductivityData(), "updateProductivityData");
+                measureExecutionTime(() -> productivityService.updateProductivityData(),
+                                "updateProductivityData");
                 measureExecutionTime(() -> dcTicketService.updateDiscordTicketsAverage(),
                                 "updateDiscordTicketsAverage");
                 measureExecutionTime(() -> dcTicketService.calculateDcTicketsPercentage(),
@@ -81,16 +82,23 @@ public class ScheduledTasksConfig {
                 measureExecutionTime(() -> productivityService.calculateAveragePlaytime(), "calculateAveragePlaytime");
 
                 System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
         private void measureExecutionTime(Runnable task, String taskName) {
                 Instant start = Instant.now();
-                System.out.println("Starting " + taskName + " at: " + getCurrentTimestamp());
+                System.out.println("");
+                System.out.println("Starting " + taskName);
                 task.run();
                 Instant end = Instant.now();
                 Duration duration = Duration.between(start, end);
-                System.out.println("Completed " + taskName + " at: " + getCurrentTimestamp() + ". Duration: "
-                                + duration.toMillis() + " ms");
+                System.out.println(taskName + " >> " + duration.toMillis() + " ms");
+                try {
+                        Thread.sleep(300000);
+                } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.out.println("Task interrupted: " + taskName);
+                }
         }
 
         private String getCurrentTimestamp() {

@@ -1,5 +1,5 @@
 .productivityPage {
-  padding: 2rem;
+  padding: 1rem;
   font-family: Arial, sans-serif;
 
   .title {
@@ -13,11 +13,13 @@
     border-collapse: collapse;
     margin: 0 auto;
     text-align: left;
+    font-size: 15px;
 
     th,
     td {
       border: 1px solid #ddd;
       padding: 8px;
+      text-align: center;
     }
 
     th {

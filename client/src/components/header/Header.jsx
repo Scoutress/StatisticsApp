@@ -4,7 +4,7 @@ import styles from "./Header.module.scss";
 const Header = () => {
   return (
     <header className={styles.header}>
-      <h1 className={styles.title}>Kaimux admin stats</h1>
+      <h1 className={styles.title}>Kaimux administration statistics</h1>
       <nav className={styles.nav}>
         <Link to="/" className={styles.navLink}>
           Home

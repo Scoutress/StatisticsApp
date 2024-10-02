@@ -200,14 +200,14 @@ const ProductivityPage = () => {
           <tr>
             <th>Level</th>
             <th>Username</th>
-            <th>Annual Playtime</th>
-            <th>Server Tickets /day</th>
-            <th>Server Tickets Taking %/day</th>
-            <th>Discord Tickets /day</th>
-            <th>Discord Tickets Taking %/day</th>
-            <th>Playtime hours/day</th>
-            <th>Afk Playtime %/day</th>
-            <th>Productivity %</th>
+            <th>Annual playtime, hours/year</th>
+            <th>Server tickets, tickets/day</th>
+            <th>Server tickets taken, %/day</th>
+            <th>Discord tickets, tickets/day</th>
+            <th>Discord tickets taken, %/day</th>
+            <th>Playtime, hours/day</th>
+            <th>Afk playtime, %/day</th>
+            <th>Productivity, %</th>
             <th>Recommendation</th>
           </tr>
         </thead>
@@ -216,14 +216,14 @@ const ProductivityPage = () => {
             <tr key={item.id}>
               <td>{item.employee ? item.employee.level : "N/A"}</td>
               <td>{item.employee ? item.employee.username : "N/A"}</td>
-              <td>{item.annualPlaytime}</td>
-              <td>{item.serverTickets}</td>
-              <td>{item.serverTicketsTaking}</td>
-              <td>{item.discordTickets}</td>
-              <td>{item.discordTicketsTaking}</td>
-              <td>{item.playtime}</td>
-              <td>{item.afkPlaytime}</td>
-              <td>{item.productivity}</td>
+              <td>{item.annualPlaytime.toFixed(2)}</td>
+              <td>{item.serverTickets.toFixed(2)}</td>
+              <td>{item.serverTicketsTaking.toFixed(2)}</td>
+              <td>{item.discordTickets.toFixed(2)}</td>
+              <td>{item.discordTicketsTaking.toFixed(2)}</td>
+              <td>{item.playtime.toFixed(2)}</td>
+              <td>{item.afkPlaytime.toFixed(2)}</td>
+              <td>{item.productivity.toFixed(2)}</td>
               <td>{item.recommendation}</td>
             </tr>
           ))}

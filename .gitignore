@@ -5,6 +5,7 @@
 *.jar
 *.war
 *.ear
+.env
 
 # IDE konfigūracijos failai
 /.idea/

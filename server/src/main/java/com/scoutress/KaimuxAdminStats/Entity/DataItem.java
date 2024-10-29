@@ -1,15 +1,14 @@
 package com.scoutress.KaimuxAdminStats.Entity;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class DataItem {
   private final int id;
   private final short aid;
-  private final LocalDateTime time;
+  private final long time;
   private final boolean action;
 
-  public DataItem(int id, short aid, LocalDateTime time, boolean action) {
+  public DataItem(int id, short aid, long time, boolean action) {
     this.id = id;
     this.aid = aid;
     this.time = time;
@@ -24,7 +23,7 @@ public class DataItem {
     return aid;
   }
 
-  public LocalDateTime getTime() {
+  public long getTime() {
     return time;
   }
 
@@ -41,8 +40,8 @@ public class DataItem {
     DataItem dataItem = (DataItem) o;
     return id == dataItem.id &&
         aid == dataItem.aid &&
-        action == dataItem.action &&
-        Objects.equals(time, dataItem.time);
+        time == dataItem.time &&
+        action == dataItem.action;
   }
 
   @Override

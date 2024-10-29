@@ -48,4 +48,24 @@ public class NEW_DataFilterTest {
 
     assertEquals(expectedLogins, actualLogins);
   }
+
+  @Test
+  public void testSessionDuration() {
+    List<DataItem> dataList = Arrays.asList(
+        new DataItem(1, (short) 10, 1698578400, true),
+        new DataItem(2, (short) 10, 1698578460, false),
+        new DataItem(3, (short) 10, 1698578500, true),
+        new DataItem(4, (short) 10, 1698578560, false));
+
+    List<DataItem> logins = DataFilter.filterLogins(DataFilter.sessionsFilterByAid(dataList, (short) 10));
+    List<DataItem> logouts = DataFilter.filterLogouts(DataFilter.sessionsFilterByAid(dataList, (short) 10));
+
+    Long firstLoginTime = DataFilter.getFirstLoginTime(logins);
+    Long firstLogoutTime = DataFilter.getFirstLogoutTime(logouts);
+
+    long sessionDuration = DataFilter.calculateSessionDuration(firstLoginTime, firstLogoutTime);
+
+    assertEquals(60, sessionDuration);
+    assert firstLoginTime < firstLogoutTime;
+  }
 }

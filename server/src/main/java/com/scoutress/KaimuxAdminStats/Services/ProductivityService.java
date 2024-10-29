@@ -8,27 +8,5 @@ public interface ProductivityService {
 
     List<Productivity> findAll();
 
-    void updateProductivityData();
-
-    void updateAnnualPlaytimeForAllEmployees();
-
-    void updateAveragePlaytimeForAllEmployees();
-
-    void updateAfkPlaytimeForAllEmployees();
-
-    void calculateServerTicketsForAllEmployeesWithCoefs();
-
-    void calculateServerTicketsTakenForAllEmployeesWithCoefs();
-
-    void calculatePlaytimeForAllEmployeesWithCoefs();
-
-    void calculateAfkPlaytimeForAllEmployeesWithCoefs();
-
-    void calculateAnsweredDiscordTicketsWithCoefs();
-
-    void calculateAndSaveComplainsCalc();
-
-    void calculateAndSaveProductivity();
-
-    void calculateAveragePlaytime();
+    void updateProductivity();
 }

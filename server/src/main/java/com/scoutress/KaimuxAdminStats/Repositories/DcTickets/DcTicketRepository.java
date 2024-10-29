@@ -20,5 +20,9 @@ public interface DcTicketRepository extends JpaRepository<DcTicket, Long> {
   double sumByDate(@Param("date") LocalDate date);
 
   @Query("SELECT COALESCE(SUM(p.ticketCount), 0) FROM DcTicket p WHERE p.employeeId = :employeeId AND p.date = :date")
-  double findAnsweredDiscordTicketsByEmployeeIdAndDate(@Param("employeeId") Integer employeeId, @Param("date") LocalDate date);
+  double findAnsweredDiscordTicketsByEmployeeIdAndDate(@Param("employeeId") Integer employeeId,
+      @Param("date") LocalDate date);
+
+  @Query("SELECT t FROM DcTicket t WHERE t.employeeId = :employeeId")
+  List<DcTicket> findTicketsByEmployeeId(@Param("employeeId") Integer employeeId);
 }

@@ -27,4 +27,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "WHEN 'Helper' THEN 9 " +
             "ELSE 10 END")
     List<Employee> findAllByOrderByLevel();
+
+    @Query("SELECT e.id FROM Employee e")
+    List<Integer> findAllEmployeeIds();
 }

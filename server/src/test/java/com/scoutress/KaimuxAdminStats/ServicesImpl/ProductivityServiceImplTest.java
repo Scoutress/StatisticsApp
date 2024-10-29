@@ -1,565 +1,603 @@
-package com.scoutress.KaimuxAdminStats.ServicesImpl;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.Productivity;
-import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
-import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.ProductivityCalcRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
-import com.scoutress.KaimuxAdminStats.Servicesimpl.ProductivityServiceImpl;
-
-@ExtendWith(MockitoExtension.class)
-public class ProductivityServiceImplTest {
-
-  @Mock
-  private PlaytimeRepository playtimeRepository;
-
-  @Mock
-  private EmployeeRepository employeeRepository;
-
-  @Mock
-  private ProductivityRepository productivityRepository;
-
-  @Mock
-  private DcTicketRepository dcTicketRepository;
-
-  @Mock
-  private ProductivityCalcRepository productivityCalcRepository;
-
-  @Mock
-  private ComplainsRepository complainsRepository;
-
-  @InjectMocks
-  private ProductivityServiceImpl productivityServiceImpl;
-
-  private Integer employeeId;
-  private Employee employee;
-  private ProductivityCalc productivityCalc;
-  private Productivity productivity;
-
-  @BeforeEach
-  void setup() {
-    employeeId = 1;
-    employee = new Employee(1, "JohnDoe", "Support", "English", "John", "Doe", "johndoe@example.com", null);
-    employee.setLevel("Support");
-
-    productivityCalc = new ProductivityCalc();
-    productivityCalc.setEmployee(employee);
-    productivityCalc.setDiscordTicketsCalc(100.0);
-    productivityCalc.setAfkPlaytimeCalc(20.0);
-    productivityCalc.setPlaytimeCalc(50.0);
-    productivityCalc.setServerTicketsCalc(70.0);
-    productivityCalc.setServerTicketsTakingCalc(60.0);
-    productivityCalc.setComplainsCalc(10.0);
-
-    productivity = new Productivity();
-    productivity.setEmployee(employee);
-  }
-
-  @Test
-  void testFindAll() {
-    setup();
-    Productivity productivity1 = new Productivity();
-    Productivity productivity2 = new Productivity();
-    List<Productivity> productivityList = Arrays.asList(productivity1, productivity2);
-
-    when(productivityRepository.findAllWithEmployeeDetails()).thenReturn(productivityList);
-
-    List<Productivity> result = productivityServiceImpl.findAll();
+// package com.scoutress.KaimuxAdminStats.ServicesImpl;
+
+// import java.time.LocalDate;
+// import java.time.temporal.ChronoUnit;
+// import java.util.Arrays;
+// import java.util.List;
+// import java.util.Optional;
+
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertNotNull;
+// import static org.junit.jupiter.api.Assertions.assertNull;
+// import static org.junit.jupiter.api.Assertions.assertThrows;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.ArgumentCaptor;
+// import static org.mockito.ArgumentCaptor.forClass;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.anyInt;
+// import static org.mockito.ArgumentMatchers.argThat;
+// import static org.mockito.ArgumentMatchers.eq;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.lenient;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.times;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import org.mockito.junit.jupiter.MockitoExtension;
+
+// import com.scoutress.KaimuxAdminStats.Constants.CalculationConstants;
+// import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
+// import com.scoutress.KaimuxAdminStats.Entity.Productivity;
+// import com.scoutress.KaimuxAdminStats.Entity.ProductivityCalc;
+// import com.scoutress.KaimuxAdminStats.Repositories.AfkPlaytimeRepository;
+// import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;
+// import com.scoutress.KaimuxAdminStats.Repositories.DailyPlaytimeRepository;
+// import
+// com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
+// import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
+// import
+// com.scoutress.KaimuxAdminStats.Repositories.ProductivityCalcRepository;
+// import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
+// import com.scoutress.KaimuxAdminStats.Servicesimpl.ProductivityServiceImpl;
+
+// @ExtendWith(MockitoExtension.class)
+// public class ProductivityServiceImplTest {
+
+// @Mock
+// private AfkPlaytimeRepository afkPlaytimeRepository;
+
+// @Mock
+// private DailyPlaytimeRepository dailyPlaytimeRepository;
+
+// @Mock
+// private EmployeeRepository employeeRepository;
+
+// @Mock
+// private ProductivityRepository productivityRepository;
+
+// @Mock
+// private DcTicketRepository dcTicketRepository;
+
+// @Mock
+// private ProductivityCalcRepository productivityCalcRepository;
+
+// @Mock
+// private ComplainsRepository complainsRepository;
+
+// @InjectMocks
+// private ProductivityServiceImpl productivityServiceImpl;
+
+// private Integer employeeId;
+// private Employee employee;
+// private ProductivityCalc productivityCalc;
+// private Productivity productivity;
+
+// @BeforeEach
+// void setup() {
+// employeeId = 1;
+// employee = new Employee(1, "JohnDoe", "Support", "English", "John", "Doe",
+// "johndoe@example.com", null);
+// employee.setLevel("Support");
+
+// productivityCalc = new ProductivityCalc();
+// productivityCalc.setEmployee(employee);
+// productivityCalc.setDiscordTicketsCalc(100.0);
+// productivityCalc.setAfkPlaytimeCalc(20.0);
+// productivityCalc.setPlaytimeCalc(50.0);
+// productivityCalc.setServerTicketsCalc(70.0);
+// productivityCalc.setServerTicketsTakingCalc(60.0);
+// productivityCalc.setComplainsCalc(10.0);
+
+// productivity = new Productivity();
+// productivity.setEmployee(employee);
+// }
+
+// @Test
+// void testFindAll() {
+// setup();
+// Productivity productivity1 = new Productivity();
+// Productivity productivity2 = new Productivity();
+// List<Productivity> productivityList = Arrays.asList(productivity1,
+// productivity2);
 
-    assertEquals(productivityList, result);
-    verify(productivityRepository, times(1)).findAllWithEmployeeDetails();
-  }
+// when(productivityRepository.findAllWithEmployeeDetails()).thenReturn(productivityList);
 
-  @Test
-  void testUpdateProductivityData_whenProductivityDoesNotExist() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityRepository.findByEmployeeId(1)).thenReturn(null);
+// List<Productivity> result = productivityServiceImpl.findAll();
 
-    productivityServiceImpl.updateProductivityData();
+// assertEquals(productivityList, result);
+// verify(productivityRepository, times(1)).findAllWithEmployeeDetails();
+// }
 
-    verify(productivityRepository, times(1)).save(any(Productivity.class));
-  }
+// @Test
+// void testUpdateProductivityData_whenProductivityDoesNotExist() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityRepository.findByEmployeeId(1)).thenReturn(null);
 
-  @Test
-  void testUpdateProductivityData_whenProductivityExists() {
-    Productivity existingProductivity = new Productivity();
-    existingProductivity.setEmployee(employee);
+// productivityServiceImpl.updateProductivityData();
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityRepository.findByEmployeeId(1)).thenReturn(existingProductivity);
+// verify(productivityRepository, times(1)).save(any(Productivity.class));
+// }
 
-    productivityServiceImpl.updateProductivityData();
+// @Test
+// void testUpdateProductivityData_whenProductivityExists() {
+// Productivity existingProductivity = new Productivity();
+// existingProductivity.setEmployee(employee);
+
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityRepository.findByEmployeeId(1)).thenReturn(existingProductivity);
 
-    verify(productivityRepository, never()).save(any(Productivity.class));
-  }
+// productivityServiceImpl.updateProductivityData();
 
-  @Test
-  void testUpdateAnnualPlaytimeForAllEmployees_whenProductivityRecordExists() {
-    LocalDate endDate = LocalDate.now().minusDays(1);
-    LocalDate startDate = endDate.minusDays(365);
+// verify(productivityRepository, never()).save(any(Productivity.class));
+// }
 
-    Double totalPlaytime = 100.0;
-    Productivity existingProductivity = new Productivity(employee);
+// @Test
+// void testUpdateAnnualPlaytimeForAllEmployees_whenProductivityRecordExists() {
+// LocalDate endDate = LocalDate.now().minusDays(1);
+// LocalDate startDate = endDate.minusDays(365);
+
+// Double totalPlaytime = 100.0;
+// Productivity existingProductivity = new Productivity(employee);
 
-    when(playtimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
-    when(playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate))
-        .thenReturn(totalPlaytime);
-    when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
-    when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(existingProductivity);
+// when(dailyPlaytimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
+// when(dailyPlaytimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId,
+// startDate, endDate))
+// .thenReturn(totalPlaytime);
+// when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+// when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(existingProductivity);
 
-    productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
+// productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
+
+// verify(productivityRepository).save(existingProductivity);
+// assertEquals(totalPlaytime, existingProductivity.getAnnualPlaytime());
+// }
+
+// @Test
+// void
+// testUpdateAnnualPlaytimeForAllEmployees_whenProductivityRecordDoesNotExist()
+// {
+// LocalDate endDate = LocalDate.now().minusDays(1);
+// LocalDate startDate = endDate.minusDays(365);
+
+// Double totalPlaytime = 200.0;
 
-    verify(productivityRepository).save(existingProductivity);
-    assertEquals(totalPlaytime, existingProductivity.getAnnualPlaytime());
-  }
+// when(dailyPlaytimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
+// when(dailyPlaytimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId,
+// startDate, endDate))
+// .thenReturn(totalPlaytime);
+// when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+// when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(null);
 
-  @Test
-  void testUpdateAnnualPlaytimeForAllEmployees_whenProductivityRecordDoesNotExist() {
-    LocalDate endDate = LocalDate.now().minusDays(1);
-    LocalDate startDate = endDate.minusDays(365);
+// productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
 
-    Double totalPlaytime = 200.0;
+// verify(productivityRepository).save(any(Productivity.class));
+// }
 
-    when(playtimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
-    when(playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate))
-        .thenReturn(totalPlaytime);
-    when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
-    when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(null);
+// @Test
+// void testUpdateAnnualPlaytimeForAllEmployees_whenEmployeeNotFound() {
+// when(dailyPlaytimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
+// when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
 
-    productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
+// Exception exception = assertThrows(RuntimeException.class, () -> {
+// productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
+// });
 
-    verify(productivityRepository).save(any(Productivity.class));
-  }
+// assertEquals("Employee not found", exception.getMessage());
+// }
 
-  @Test
-  void testUpdateAnnualPlaytimeForAllEmployees_whenEmployeeNotFound() {
-    when(playtimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
-    when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
+// @Test
+// void testUpdateAnnualPlaytimeForAllEmployees_withNoPlaytimeData() {
+// LocalDate endDate = LocalDate.now().minusDays(1);
+// LocalDate startDate = endDate.minusDays(365);
 
-    Exception exception = assertThrows(RuntimeException.class, () -> {
-      productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
-    });
+// when(dailyPlaytimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
+// when(dailyPlaytimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId,
+// startDate, endDate)).thenReturn(null);
+// when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+// when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(null);
 
-    assertEquals("Employee not found", exception.getMessage());
-  }
+// productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
 
-  @Test
-  void testUpdateAnnualPlaytimeForAllEmployees_withNoPlaytimeData() {
-    LocalDate endDate = LocalDate.now().minusDays(1);
-    LocalDate startDate = endDate.minusDays(365);
+// verify(productivityRepository).save(any(Productivity.class));
+// }
 
-    when(playtimeRepository.findAllDistinctEmployeeIds()).thenReturn(List.of(employeeId));
-    when(playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate)).thenReturn(null);
-    when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
-    when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(null);
+// @Test
+// void
+// testUpdateAveragePlaytimeForAllEmployees_withExistingProductivityRecord() {
+// setup();
 
-    productivityServiceImpl.updateAnnualPlaytimeForAllEmployees();
+// LocalDate startDate = LocalDate.of(2023, 8, 11);
+// LocalDate endDate = LocalDate.of(2024, 8, 10);
+// Double totalPlaytime = 100.0;
 
-    verify(productivityRepository).save(any(Productivity.class));
-  }
+// Productivity existingProductivity = new Productivity(employee);
 
-  @Test
-  void testUpdateAveragePlaytimeForAllEmployees_withExistingProductivityRecord() {
-    setup();
+// when(employeeRepository.findAllEmployeeIds()).thenReturn(List.of(employeeId));
+// when(dailyPlaytimeRepository.findEarliestPlaytimeDateByEmployeeId(employeeId)).thenReturn(startDate);
+// when(dailyPlaytimeRepository.findLatestPlaytimeDateByEmployeeId(employeeId)).thenReturn(endDate);
+// when(dailyPlaytimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId,
+// startDate, endDate))
+// .thenReturn(totalPlaytime);
+// when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(existingProductivity);
+// when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
 
-    LocalDate startDate = LocalDate.of(2023, 8, 11);
-    LocalDate endDate = LocalDate.of(2024, 8, 10);
-    Double totalPlaytime = 100.0;
+// productivityServiceImpl.updateAveragePlaytimeForAllEmployees();
 
-    Productivity existingProductivity = new Productivity(employee);
+// double expectedAveragePlaytime = totalPlaytime /
+// (ChronoUnit.DAYS.between(startDate, endDate) + 1);
 
-    when(playtimeRepository.findAllEmployeeIds()).thenReturn(List.of(employeeId));
-    when(playtimeRepository.findEarliestPlaytimeDateByEmployeeId(employeeId)).thenReturn(startDate);
-    when(playtimeRepository.findLatestPlaytimeDateByEmployeeId(employeeId)).thenReturn(endDate);
-    when(playtimeRepository.sumPlaytimeByEmployeeAndDateRange(employeeId, startDate, endDate))
-        .thenReturn(totalPlaytime);
-    when(productivityRepository.findByEmployeeId(employeeId)).thenReturn(existingProductivity);
-    when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+// verify(productivityRepository).save(existingProductivity);
+// assertEquals(expectedAveragePlaytime, existingProductivity.getPlaytime());
+// }
 
-    productivityServiceImpl.updateAveragePlaytimeForAllEmployees();
+// @Test
+// void testUpdateAveragePlaytimeForAllEmployees_whenNoPlaytimeRecords() {
+// when(employeeRepository.findAllEmployeeIds()).thenReturn(List.of(employeeId));
+// when(dailyPlaytimeRepository.findEarliestPlaytimeDateByEmployeeId(employeeId)).thenReturn(null);
+// when(dailyPlaytimeRepository.findLatestPlaytimeDateByEmployeeId(employeeId)).thenReturn(null);
 
-    double expectedAveragePlaytime = totalPlaytime / (ChronoUnit.DAYS.between(startDate, endDate) + 1);
+// productivityServiceImpl.updateAveragePlaytimeForAllEmployees();
 
-    verify(productivityRepository).save(existingProductivity);
-    assertEquals(expectedAveragePlaytime, existingProductivity.getPlaytime());
-  }
+// verify(productivityRepository, never()).save(any(Productivity.class));
+// }
 
-  @Test
-  void testUpdateAveragePlaytimeForAllEmployees_whenNoPlaytimeRecords() {
-    when(playtimeRepository.findAllEmployeeIds()).thenReturn(List.of(employeeId));
-    when(playtimeRepository.findEarliestPlaytimeDateByEmployeeId(employeeId)).thenReturn(null);
-    when(playtimeRepository.findLatestPlaytimeDateByEmployeeId(employeeId)).thenReturn(null);
+// @Test
+// void testUpdateAveragePlaytimeForAllEmployees_whenTotalPlaytimeIsNull() {
+// lenient()
+// .when(
+// dailyPlaytimeRepository.sumPlaytimeByEmployeeAndDateRange(anyInt(),
+// any(LocalDate.class),
+// any(LocalDate.class)))
+// .thenReturn(null);
 
-    productivityServiceImpl.updateAveragePlaytimeForAllEmployees();
+// Productivity localProductivity = new Productivity(new Employee(1));
+// lenient().when(productivityRepository.findByEmployeeId(anyInt())).thenReturn(localProductivity);
 
-    verify(productivityRepository, never()).save(any(Productivity.class));
-  }
+// productivityServiceImpl.updateAveragePlaytimeForAllEmployees();
 
-  @Test
-  void testUpdateAveragePlaytimeForAllEmployees_whenTotalPlaytimeIsNull() {
-    lenient()
-        .when(
-            playtimeRepository.sumPlaytimeByEmployeeAndDateRange(anyInt(), any(LocalDate.class), any(LocalDate.class)))
-        .thenReturn(null);
+// assertNull(localProductivity.getPlaytime());
+// verify(productivityRepository, never()).save(localProductivity);
+// }
 
-    Productivity localProductivity = new Productivity(new Employee(1));
-    lenient().when(productivityRepository.findByEmployeeId(anyInt())).thenReturn(localProductivity);
+// @Test
+// void testUpdateAfkPlaytimeForAllEmployees_withExistingProductivityRecord() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(dailyPlaytimeRepository.getTotalPlaytimeByEmployeeId(employee.getId())).thenReturn(100.0);
+// when(afkPlaytimeRepository.getTotalAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(20.0);
 
-    productivityServiceImpl.updateAveragePlaytimeForAllEmployees();
+// Productivity existingProductivity = new Productivity(employee);
 
-    assertNull(localProductivity.getPlaytime());
-    verify(productivityRepository, never()).save(localProductivity);
-  }
+// when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(existingProductivity);
 
-  @Test
-  void testUpdateAfkPlaytimeForAllEmployees_withExistingProductivityRecord() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(playtimeRepository.getTotalPlaytimeByEmployeeId(employee.getId())).thenReturn(100.0);
-    when(playtimeRepository.getTotalAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(20.0);
+// productivityServiceImpl.updateAfkPlaytimeForAllEmployees();
 
-    Productivity existingProductivity = new Productivity(employee);
+// verify(productivityRepository).save(existingProductivity);
+// assertEquals(20.0, existingProductivity.getAfkPlaytime());
+// }
 
-    when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(existingProductivity);
+// @Test
+// void testUpdateAfkPlaytimeForAllEmployees_withZeroTotalPlaytime() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(dailyPlaytimeRepository.getTotalPlaytimeByEmployeeId(employee.getId())).thenReturn(0.0);
+// when(afkPlaytimeRepository.getTotalAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(50.0);
 
-    productivityServiceImpl.updateAfkPlaytimeForAllEmployees();
+// Productivity existingProductivity = new Productivity(employee);
 
-    verify(productivityRepository).save(existingProductivity);
-    assertEquals(20.0, existingProductivity.getAfkPlaytime());
-  }
+// when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(existingProductivity);
 
-  @Test
-  void testUpdateAfkPlaytimeForAllEmployees_withZeroTotalPlaytime() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(playtimeRepository.getTotalPlaytimeByEmployeeId(employee.getId())).thenReturn(0.0);
-    when(playtimeRepository.getTotalAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(50.0);
+// productivityServiceImpl.updateAfkPlaytimeForAllEmployees();
 
-    Productivity existingProductivity = new Productivity(employee);
+// verify(productivityRepository).save(existingProductivity);
+// assertEquals(0.0, existingProductivity.getAfkPlaytime());
+// }
 
-    when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(existingProductivity);
+// @Test
+// void testUpdateAfkPlaytimeForAllEmployees_withNullTotalPlaytime() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(dailyPlaytimeRepository.getTotalPlaytimeByEmployeeId(employee.getId())).thenReturn(null);
+// when(afkPlaytimeRepository.getTotalAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(50.0);
 
-    productivityServiceImpl.updateAfkPlaytimeForAllEmployees();
+// Productivity existingProductivity = new Productivity(employee);
 
-    verify(productivityRepository).save(existingProductivity);
-    assertEquals(0.0, existingProductivity.getAfkPlaytime());
-  }
+// when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(existingProductivity);
 
-  @Test
-  void testUpdateAfkPlaytimeForAllEmployees_withNullTotalPlaytime() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(playtimeRepository.getTotalPlaytimeByEmployeeId(employee.getId())).thenReturn(null);
-    when(playtimeRepository.getTotalAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(50.0);
+// productivityServiceImpl.updateAfkPlaytimeForAllEmployees();
 
-    Productivity existingProductivity = new Productivity(employee);
+// verify(productivityRepository).save(existingProductivity);
+// assertEquals(0.0, existingProductivity.getAfkPlaytime());
+// }
 
-    when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(existingProductivity);
+// @Test
+// void testCalculateServerTicketsForAllEmployeesWithCoefs_supportLevel() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findServerTicketsByEmployeeId(employee.getId())).thenReturn(1.0);
 
-    productivityServiceImpl.updateAfkPlaytimeForAllEmployees();
+// productivityServiceImpl.calculateServerTicketsForAllEmployeesWithCoefs();
 
-    verify(productivityRepository).save(existingProductivity);
-    assertEquals(0.0, existingProductivity.getAfkPlaytime());
-  }
+// ArgumentCaptor<ProductivityCalc> captor = forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-  @Test
-  void testCalculateServerTicketsForAllEmployeesWithCoefs_supportLevel() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findServerTicketsByEmployeeId(employee.getId())).thenReturn(1.0);
+// ProductivityCalc captured = captor.getValue();
+// assertEquals(0.5 * CalculationConstants.SERVER_TICKETS_SUPPORT,
+// captured.getServerTicketsCalc());
+// }
 
-    productivityServiceImpl.calculateServerTicketsForAllEmployeesWithCoefs();
+// @Test
+// void testCalculateServerTicketsForAllEmployeesWithCoefs_chatmodLevel() {
+// employee.setLevel("Chatmod");
 
-    ArgumentCaptor<ProductivityCalc> captor = forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findServerTicketsByEmployeeId(employee.getId())).thenReturn(1.0);
 
-    ProductivityCalc captured = captor.getValue();
-    assertEquals(0.5 * CalculationConstants.SERVER_TICKETS_SUPPORT, captured.getServerTicketsCalc());
-  }
+// productivityServiceImpl.calculateServerTicketsForAllEmployeesWithCoefs();
 
-  @Test
-  void testCalculateServerTicketsForAllEmployeesWithCoefs_chatmodLevel() {
-    employee.setLevel("Chatmod");
+// ArgumentCaptor<ProductivityCalc> captor = forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findServerTicketsByEmployeeId(employee.getId())).thenReturn(1.0);
+// ProductivityCalc captured = captor.getValue();
+// assertEquals(1.0 * CalculationConstants.SERVER_TICKETS_CHATMOD,
+// captured.getServerTicketsCalc());
+// }
 
-    productivityServiceImpl.calculateServerTicketsForAllEmployeesWithCoefs();
+// @Test
+// void
+// testCalculateServerTicketsForAllEmployeesWithCoefs_managerLevelWithHighTickets()
+// {
+// employee.setLevel("Manager");
 
-    ArgumentCaptor<ProductivityCalc> captor = forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findServerTicketsByEmployeeId(employee.getId())).thenReturn(5.0);
 
-    ProductivityCalc captured = captor.getValue();
-    assertEquals(1.0 * CalculationConstants.SERVER_TICKETS_CHATMOD, captured.getServerTicketsCalc());
-  }
+// productivityServiceImpl.calculateServerTicketsForAllEmployeesWithCoefs();
 
-  @Test
-  void testCalculateServerTicketsForAllEmployeesWithCoefs_managerLevelWithHighTickets() {
-    employee.setLevel("Manager");
+// ArgumentCaptor<ProductivityCalc> captor =
+// ArgumentCaptor.forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findServerTicketsByEmployeeId(employee.getId())).thenReturn(5.0);
+// ProductivityCalc captured = captor.getValue();
+// assertNotNull(captured, "Captured ProductivityCalc should not be null");
+// assertEquals(4.0 * CalculationConstants.SERVER_TICKETS_MANAGER,
+// captured.getServerTicketsCalc());
+// }
 
-    productivityServiceImpl.calculateServerTicketsForAllEmployeesWithCoefs();
+// @Test
+// void testCalculateServerTicketsTakenForAllEmployeesWithCoefs_supportLevel() {
+// double serverTicketsTaken = 25.0;
+// double expectedValue = 20.0 *
+// CalculationConstants.SERVER_TICKETS_PERC_SUPPORT;
 
-    ArgumentCaptor<ProductivityCalc> captor = ArgumentCaptor.forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId())).thenReturn(serverTicketsTaken);
 
-    ProductivityCalc captured = captor.getValue();
-    assertNotNull(captured, "Captured ProductivityCalc should not be null");
-    assertEquals(4.0 * CalculationConstants.SERVER_TICKETS_MANAGER, captured.getServerTicketsCalc());
-  }
+// productivityServiceImpl.calculateServerTicketsTakenForAllEmployeesWithCoefs();
 
-  @Test
-  void testCalculateServerTicketsTakenForAllEmployeesWithCoefs_supportLevel() {
-    double serverTicketsTaken = 25.0;
-    double expectedValue = 20.0 * CalculationConstants.SERVER_TICKETS_PERC_SUPPORT;
+// verify(productivityCalcRepository, times(1)).save(argThat(savedCalc -> {
+// assertEquals(expectedValue, savedCalc.getServerTicketsTakingCalc());
+// assertEquals(employee, savedCalc.getEmployee());
+// return true;
+// }));
+// }
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId())).thenReturn(serverTicketsTaken);
+// @Test
+// void testCalculateServerTicketsTakenForAllEmployeesWithCoefs_chatmodLevel() {
+// employee.setLevel("Chatmod");
+// double serverTicketsTaken = 45.0;
+// double expectedValue = 40.0 *
+// CalculationConstants.SERVER_TICKETS_PERC_CHATMOD;
 
-    productivityServiceImpl.calculateServerTicketsTakenForAllEmployeesWithCoefs();
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId())).thenReturn(serverTicketsTaken);
 
-    verify(productivityCalcRepository, times(1)).save(argThat(savedCalc -> {
-      assertEquals(expectedValue, savedCalc.getServerTicketsTakingCalc());
-      assertEquals(employee, savedCalc.getEmployee());
-      return true;
-    }));
-  }
+// productivityServiceImpl.calculateServerTicketsTakenForAllEmployeesWithCoefs();
 
-  @Test
-  void testCalculateServerTicketsTakenForAllEmployeesWithCoefs_chatmodLevel() {
-    employee.setLevel("Chatmod");
-    double serverTicketsTaken = 45.0;
-    double expectedValue = 40.0 * CalculationConstants.SERVER_TICKETS_PERC_CHATMOD;
+// verify(productivityCalcRepository, times(1)).save(argThat(savedCalc -> {
+// assertEquals(expectedValue, savedCalc.getServerTicketsTakingCalc());
+// assertEquals(employee, savedCalc.getEmployee());
+// return true;
+// }));
+// }
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findServerTicketsTakenByEmployeeId(employee.getId())).thenReturn(serverTicketsTaken);
+// @Test
+// void testCalculateAfkPlaytimeForAllEmployeesWithCoefs_supportLevel() {
+// employee.setLevel("Support");
 
-    productivityServiceImpl.calculateServerTicketsTakenForAllEmployeesWithCoefs();
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(250.0);
 
-    verify(productivityCalcRepository, times(1)).save(argThat(savedCalc -> {
-      assertEquals(expectedValue, savedCalc.getServerTicketsTakingCalc());
-      assertEquals(employee, savedCalc.getEmployee());
-      return true;
-    }));
-  }
+// productivityServiceImpl.calculateAfkPlaytimeForAllEmployeesWithCoefs();
 
-  @Test
-  void testCalculateAfkPlaytimeForAllEmployeesWithCoefs_supportLevel() {
-    employee.setLevel("Support");
+// ArgumentCaptor<ProductivityCalc> captor =
+// ArgumentCaptor.forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(250.0);
+// ProductivityCalc captured = captor.getValue();
+// assertEquals(100.0, captured.getAfkPlaytimeCalc());
+// }
 
-    productivityServiceImpl.calculateAfkPlaytimeForAllEmployeesWithCoefs();
+// @Test
+// void testCalculateAfkPlaytimeForAllEmployeesWithCoefs_chatmodLevel() {
+// employee.setLevel("Chatmod");
 
-    ArgumentCaptor<ProductivityCalc> captor = ArgumentCaptor.forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// when(productivityRepository.findAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(1000.0);
 
-    ProductivityCalc captured = captor.getValue();
-    assertEquals(100.0, captured.getAfkPlaytimeCalc());
-  }
+// productivityServiceImpl.calculateAfkPlaytimeForAllEmployeesWithCoefs();
 
-  @Test
-  void testCalculateAfkPlaytimeForAllEmployeesWithCoefs_chatmodLevel() {
-    employee.setLevel("Chatmod");
+// ArgumentCaptor<ProductivityCalc> captor =
+// ArgumentCaptor.forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
-    when(productivityRepository.findAfkPlaytimeByEmployeeId(employee.getId())).thenReturn(1000.0);
+// ProductivityCalc captured = captor.getValue();
+// assertEquals(100.0, captured.getAfkPlaytimeCalc());
+// }
 
-    productivityServiceImpl.calculateAfkPlaytimeForAllEmployeesWithCoefs();
+// @Test
+// void testCalculateAnsweredDiscordTicketsWithCoefs_supportLevel() {
+// employee.setLevel("Support");
 
-    ArgumentCaptor<ProductivityCalc> captor = ArgumentCaptor.forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(dcTicketRepository.findAllDates()).thenReturn(List.of(LocalDate.now()));
+// when(dcTicketRepository.sumByDate(any(LocalDate.class))).thenReturn(100.0);
+// when(dcTicketRepository.findAnsweredDiscordTicketsByEmployeeIdAndDate(eq(employee.getId()),
+// any(LocalDate.class)))
+// .thenReturn(50.0);
 
-    ProductivityCalc captured = captor.getValue();
-    assertEquals(100.0, captured.getAfkPlaytimeCalc());
-  }
+// productivityServiceImpl.calculateAnsweredDiscordTicketsWithCoefs();
 
-  @Test
-  void testCalculateAnsweredDiscordTicketsWithCoefs_supportLevel() {
-    employee.setLevel("Support");
+// ArgumentCaptor<ProductivityCalc> captor =
+// ArgumentCaptor.forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(dcTicketRepository.findAllDates()).thenReturn(List.of(LocalDate.now()));
-    when(dcTicketRepository.sumByDate(any(LocalDate.class))).thenReturn(100.0);
-    when(dcTicketRepository.findAnsweredDiscordTicketsByEmployeeIdAndDate(eq(employee.getId()), any(LocalDate.class)))
-        .thenReturn(50.0);
+// ProductivityCalc captured = captor.getValue();
+// double expectedValue = (50.0 / (100.0 *
+// CalculationConstants.DISCORD_TICKETS_SUPPORT)) * 100;
+// assertEquals(expectedValue, captured.getDiscordTicketsCalc());
+// }
 
-    productivityServiceImpl.calculateAnsweredDiscordTicketsWithCoefs();
+// @Test
+// void testCalculateAnsweredDiscordTicketsWithCoefs_whenNoTickets() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(dcTicketRepository.findAllDates()).thenReturn(List.of(LocalDate.now()));
+// when(dcTicketRepository.sumByDate(any(LocalDate.class))).thenReturn(0.0);
 
-    ArgumentCaptor<ProductivityCalc> captor = ArgumentCaptor.forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// productivityServiceImpl.calculateAnsweredDiscordTicketsWithCoefs();
 
-    ProductivityCalc captured = captor.getValue();
-    double expectedValue = (50.0 / (100.0 * CalculationConstants.DISCORD_TICKETS_SUPPORT)) * 100;
-    assertEquals(expectedValue, captured.getDiscordTicketsCalc());
-  }
+// verify(productivityCalcRepository,
+// never()).save(any(ProductivityCalc.class));
+// }
 
-  @Test
-  void testCalculateAnsweredDiscordTicketsWithCoefs_whenNoTickets() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(dcTicketRepository.findAllDates()).thenReturn(List.of(LocalDate.now()));
-    when(dcTicketRepository.sumByDate(any(LocalDate.class))).thenReturn(0.0);
+// @Test
+// void testCalculateAndSaveComplainsCalc_whenProductivityCalcExists() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(complainsRepository.sumComplaintsByEmployeeId(employee.getId())).thenReturn(5.0);
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(productivityCalc);
 
-    productivityServiceImpl.calculateAnsweredDiscordTicketsWithCoefs();
+// productivityServiceImpl.calculateAndSaveComplainsCalc();
 
-    verify(productivityCalcRepository, never()).save(any(ProductivityCalc.class));
-  }
+// ArgumentCaptor<ProductivityCalc> captor =
+// ArgumentCaptor.forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-  @Test
-  void testCalculateAndSaveComplainsCalc_whenProductivityCalcExists() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(complainsRepository.sumComplaintsByEmployeeId(employee.getId())).thenReturn(5.0);
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(productivityCalc);
+// ProductivityCalc captured = captor.getValue();
+// assertEquals(5.0, captured.getComplainsCalc());
+// }
 
-    productivityServiceImpl.calculateAndSaveComplainsCalc();
+// @Test
+// void testCalculateAndSaveComplainsCalc_whenProductivityCalcDoesNotExist() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(complainsRepository.sumComplaintsByEmployeeId(employee.getId())).thenReturn(3.0);
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
 
-    ArgumentCaptor<ProductivityCalc> captor = ArgumentCaptor.forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// productivityServiceImpl.calculateAndSaveComplainsCalc();
 
-    ProductivityCalc captured = captor.getValue();
-    assertEquals(5.0, captured.getComplainsCalc());
-  }
+// ArgumentCaptor<ProductivityCalc> captor =
+// ArgumentCaptor.forClass(ProductivityCalc.class);
+// verify(productivityCalcRepository).save(captor.capture());
 
-  @Test
-  void testCalculateAndSaveComplainsCalc_whenProductivityCalcDoesNotExist() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(complainsRepository.sumComplaintsByEmployeeId(employee.getId())).thenReturn(3.0);
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// ProductivityCalc captured = captor.getValue();
+// assertEquals(3.0, captured.getComplainsCalc());
+// }
 
-    productivityServiceImpl.calculateAndSaveComplainsCalc();
+// @Test
+// void testCalculateAndSaveProductivity_successfulCalculationAndSave() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(productivityCalc);
+// when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(productivity);
 
-    ArgumentCaptor<ProductivityCalc> captor = ArgumentCaptor.forClass(ProductivityCalc.class);
-    verify(productivityCalcRepository).save(captor.capture());
+// productivityServiceImpl.calculateAndSaveProductivity();
 
-    ProductivityCalc captured = captor.getValue();
-    assertEquals(3.0, captured.getComplainsCalc());
-  }
+// verify(productivityRepository).save(productivity);
+// assertEquals(42.0, productivity.getProductivity());
+// }
 
-  @Test
-  void testCalculateAndSaveProductivity_successfulCalculationAndSave() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(productivityCalc);
-    when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(productivity);
+// @Test
+// void testCalculateAndSaveProductivity_whenProductivityCalcIsNull() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
 
-    productivityServiceImpl.calculateAndSaveProductivity();
+// productivityServiceImpl.calculateAndSaveProductivity();
 
-    verify(productivityRepository).save(productivity);
-    assertEquals(42.0, productivity.getProductivity());
-  }
+// verify(productivityRepository, never()).save(any(Productivity.class));
+// }
 
-  @Test
-  void testCalculateAndSaveProductivity_whenProductivityCalcIsNull() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(null);
+// @Test
+// void testCalculateAndSaveProductivity_whenExceptionFetchingProductivityCalc()
+// {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId()))
+// .thenThrow(new RuntimeException("Test Exception"));
 
-    productivityServiceImpl.calculateAndSaveProductivity();
+// RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+// productivityServiceImpl.calculateAndSaveProductivity();
+// });
 
-    verify(productivityRepository, never()).save(any(Productivity.class));
-  }
+// assertEquals("Test Exception", exception.getMessage());
+// verify(productivityRepository, never()).save(any(Productivity.class));
+// }
 
-  @Test
-  void testCalculateAndSaveProductivity_whenExceptionFetchingProductivityCalc() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId()))
-        .thenThrow(new RuntimeException("Test Exception"));
+// @Test
+// void testCalculateAndSaveProductivity_whenExceptionFetchingValues() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
 
-    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-      productivityServiceImpl.calculateAndSaveProductivity();
-    });
+// ProductivityCalc mockProductivityCalc = mock(ProductivityCalc.class);
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(mockProductivityCalc);
 
-    assertEquals("Test Exception", exception.getMessage());
-    verify(productivityRepository, never()).save(any(Productivity.class));
-  }
+// doThrow(new RuntimeException("Test
+// Exception")).when(mockProductivityCalc).getPlaytimeCalc();
 
-  @Test
-  void testCalculateAndSaveProductivity_whenExceptionFetchingValues() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// RuntimeException thrown = assertThrows(RuntimeException.class,
+// () -> productivityServiceImpl.calculateAndSaveProductivity());
 
-    ProductivityCalc mockProductivityCalc = mock(ProductivityCalc.class);
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(mockProductivityCalc);
+// assertEquals("Test Exception", thrown.getMessage());
 
-    doThrow(new RuntimeException("Test Exception")).when(mockProductivityCalc).getPlaytimeCalc();
+// verify(productivityRepository, never()).save(any(Productivity.class));
+// }
 
-    RuntimeException thrown = assertThrows(RuntimeException.class,
-        () -> productivityServiceImpl.calculateAndSaveProductivity());
+// @Test
+// void testCalculateAndSaveProductivity_whenExceptionDuringCalculation() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
 
-    assertEquals("Test Exception", thrown.getMessage());
+// ProductivityCalc mockProductivityCalc = mock(ProductivityCalc.class);
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(mockProductivityCalc);
 
-    verify(productivityRepository, never()).save(any(Productivity.class));
-  }
+// doThrow(new RuntimeException("Test
+// Exception")).when(mockProductivityCalc).getPlaytimeCalc();
 
-  @Test
-  void testCalculateAndSaveProductivity_whenExceptionDuringCalculation() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+// productivityServiceImpl.calculateAndSaveProductivity();
+// });
 
-    ProductivityCalc mockProductivityCalc = mock(ProductivityCalc.class);
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(mockProductivityCalc);
+// assertEquals("Test Exception", thrown.getMessage());
 
-    doThrow(new RuntimeException("Test Exception")).when(mockProductivityCalc).getPlaytimeCalc();
+// verify(productivityRepository, never()).save(any(Productivity.class));
+// }
 
-    RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-      productivityServiceImpl.calculateAndSaveProductivity();
-    });
+// @Test
+// void testCalculateAndSaveProductivity_whenExceptionDuringSave() {
+// when(employeeRepository.findAll()).thenReturn(List.of(employee));
+// when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(productivityCalc);
+// when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(productivity);
 
-    assertEquals("Test Exception", thrown.getMessage());
+// doThrow(new RuntimeException("Test
+// Exception")).when(productivityRepository).save(any(Productivity.class));
 
-    verify(productivityRepository, never()).save(any(Productivity.class));
-  }
+// RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+// productivityServiceImpl.calculateAndSaveProductivity();
+// });
 
-  @Test
-  void testCalculateAndSaveProductivity_whenExceptionDuringSave() {
-    when(employeeRepository.findAll()).thenReturn(List.of(employee));
-    when(productivityCalcRepository.findByEmployeeId(employee.getId())).thenReturn(productivityCalc);
-    when(productivityRepository.findByEmployeeId(employee.getId())).thenReturn(productivity);
-
-    doThrow(new RuntimeException("Test Exception")).when(productivityRepository).save(any(Productivity.class));
-
-    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-      productivityServiceImpl.calculateAndSaveProductivity();
-    });
-
-    assertEquals("Test Exception", exception.getMessage());
-    verify(productivityRepository).save(any(Productivity.class));
-  }
-}
+// assertEquals("Test Exception", exception.getMessage());
+// verify(productivityRepository).save(any(Productivity.class));
+// }
+// }

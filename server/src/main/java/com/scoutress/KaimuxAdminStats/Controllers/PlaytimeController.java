@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.scoutress.KaimuxAdminStats.Entity.Playtime.AfkPlaytime;
-import com.scoutress.KaimuxAdminStats.Repositories.PlaytimeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.AfkPlaytimeRepository;
 
 @RestController
 @RequestMapping("/playtime")
 @CrossOrigin(origins = "http://localhost:5173")
 public class PlaytimeController {
 
-    private final PlaytimeRepository playtimeRepository;
+    private final AfkPlaytimeRepository playtimeRepository;
 
-    public PlaytimeController(PlaytimeRepository playtimeRepository) {
+    public PlaytimeController(AfkPlaytimeRepository playtimeRepository) {
         this.playtimeRepository = playtimeRepository;
     }
 

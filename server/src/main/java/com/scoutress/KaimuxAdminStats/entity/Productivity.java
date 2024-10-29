@@ -91,4 +91,9 @@ public class Productivity {
         this.playtime = playtime;
         this.afkPlaytime = afkPlaytime;
     }
+
+    public Productivity(Employee employee, int annualPlaytime) {
+        this.employee = employee;
+        this.annualPlaytime = (double) annualPlaytime;
+    }
 }

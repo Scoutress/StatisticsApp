@@ -35,117 +35,78 @@ public class PlaytimeCalculationServiceImpl implements PlaytimeCalculationServic
   public void calculateDailyPlaytime() {
     List<Employee> employees = employeeRepository.findAll();
     for (Employee employee : employees) {
-      List<LoginLogoutTimes> loginLogoutTimes = loginLogoutTimesRepository.findByEmployeeId(employee.getId());
-      Map<String, Map<LocalDate, Double>> playtimePerServer = new HashMap<>();
+      List<LoginLogoutTimes> loginLogoutTimes = getEmployeeLoginLogoutTimes(employee);
+      Map<String, Map<LocalDate, Double>> playtimePerServer = calculatePlaytimeForEmployee(loginLogoutTimes);
+      updatePlaytimeForEmployee(employee, playtimePerServer);
+    }
+  }
 
-      for (LoginLogoutTimes times : loginLogoutTimes) {
-        String serverName = times.getServerName();
-        LocalDateTime loginTime = times.getLoginTime();
-        LocalDateTime logoutTime = times.getLogoutTime();
-        long minutesPlayed = Duration.between(loginTime, logoutTime).toMinutes();
-        double hoursPlayed = minutesPlayed / 60.0;
+  private List<LoginLogoutTimes> getEmployeeLoginLogoutTimes(Employee employee) {
+    return loginLogoutTimesRepository.findByEmployeeId(employee.getId());
+  }
 
-        System.out.println("Processing server: " + serverName + ", playtime: " + hoursPlayed + " hours");
+  private Map<String, Map<LocalDate, Double>> calculatePlaytimeForEmployee(List<LoginLogoutTimes> loginLogoutTimes) {
+    Map<String, Map<LocalDate, Double>> playtimePerServer = new HashMap<>();
 
-        playtimePerServer.computeIfAbsent(serverName, k -> new HashMap<>())
-            .merge(loginTime.toLocalDate(), hoursPlayed, Double::sum);
-      }
+    for (LoginLogoutTimes times : loginLogoutTimes) {
+      String serverName = times.getServerName();
+      LocalDateTime loginTime = times.getLoginTime();
+      LocalDateTime logoutTime = times.getLogoutTime();
+      long minutesPlayed = Duration.between(loginTime, logoutTime).toMinutes();
+      double hoursPlayed = minutesPlayed / 60.0;
 
-      for (Map.Entry<String, Map<LocalDate, Double>> entry : playtimePerServer.entrySet()) {
-        String serverName = entry.getKey();
-        Map<LocalDate, Double> dailyPlaytimes = entry.getValue();
+      playtimePerServer.computeIfAbsent(serverName, k -> new HashMap<>())
+          .merge(loginTime.toLocalDate(), hoursPlayed, Double::sum);
+    }
+    return playtimePerServer;
+  }
 
-        for (Map.Entry<LocalDate, Double> dayEntry : dailyPlaytimes.entrySet()) {
-          LocalDate date = dayEntry.getKey();
-          Double playtime = dayEntry.getValue();
+  private void updatePlaytimeForEmployee(Employee employee, Map<String, Map<LocalDate, Double>> playtimePerServer) {
+    for (Map.Entry<String, Map<LocalDate, Double>> entry : playtimePerServer.entrySet()) {
+      String serverName = entry.getKey();
+      Map<LocalDate, Double> dailyPlaytimes = entry.getValue();
 
-          DailyPlaytime dailyPlaytime = dailyPlaytimeRepository.findByEmployeeIdAndDate(employee.getId(), date);
-          if (dailyPlaytime == null) {
-            dailyPlaytime = new DailyPlaytime();
-            dailyPlaytime.setEmployeeId(employee.getId());
-            dailyPlaytime.setDate(date);
-          }
+      for (Map.Entry<LocalDate, Double> dayEntry : dailyPlaytimes.entrySet()) {
+        LocalDate date = dayEntry.getKey();
+        Double playtime = dayEntry.getValue();
 
-          System.out.println("Before update: Survival playtime: " + dailyPlaytime.getTotalSurvivalPlaytime());
-          System.out
-              .println("Updating playtime for server: " + serverName + ", date: " + date + ", playtime: " + playtime);
-          updatePlaytimeForServer(dailyPlaytime, serverName, playtime);
-
-          System.out.println("After update: Survival playtime: " + dailyPlaytime.getTotalSurvivalPlaytime());
-          dailyPlaytimeRepository.save(dailyPlaytime);
-          System.out
-              .println("Saved playtime for server: " + serverName + ", date: " + date + ", playtime: " + playtime);
+        DailyPlaytime dailyPlaytime = dailyPlaytimeRepository.findByEmployeeIdAndDate(employee.getId(), date);
+        if (dailyPlaytime == null) {
+          dailyPlaytime = new DailyPlaytime();
+          dailyPlaytime.setEmployeeId(employee.getId());
+          dailyPlaytime.setDate(date);
         }
+
+        resetPlaytimeForServer(dailyPlaytime, serverName);
+        updatePlaytimeForServer(dailyPlaytime, serverName, playtime);
+        dailyPlaytimeRepository.save(dailyPlaytime);
       }
     }
   }
 
-  @Override
-  public void updatePlaytimeForServer(DailyPlaytime dailyPlaytime, String serverName, Double playtime) {
+  private void resetPlaytimeForServer(DailyPlaytime dailyPlaytime, String serverName) {
+    switch (serverName.toLowerCase()) {
+      case "survival" -> dailyPlaytime.setTotalSurvivalPlaytime(0.0);
+      case "skyblock" -> dailyPlaytime.setTotalSkyblockPlaytime(0.0);
+      case "creative" -> dailyPlaytime.setTotalCreativePlaytime(0.0);
+      case "boxpvp" -> dailyPlaytime.setTotalBoxpvpPlaytime(0.0);
+      case "prison" -> dailyPlaytime.setTotalPrisonPlaytime(0.0);
+      case "events" -> dailyPlaytime.setTotalEventsPlaytime(0.0);
+    }
+  }
+
+  private void updatePlaytimeForServer(DailyPlaytime dailyPlaytime, String serverName, Double playtime) {
     if (dailyPlaytime == null || playtime == null) {
       return;
     }
 
-    if (dailyPlaytime.getTotalSurvivalPlaytime() == null) {
-      dailyPlaytime.setTotalSurvivalPlaytime(0.0);
-    }
-    if (dailyPlaytime.getTotalSkyblockPlaytime() == null) {
-      dailyPlaytime.setTotalSkyblockPlaytime(0.0);
-    }
-    if (dailyPlaytime.getTotalCreativePlaytime() == null) {
-      dailyPlaytime.setTotalCreativePlaytime(0.0);
-    }
-    if (dailyPlaytime.getTotalBoxpvpPlaytime() == null) {
-      dailyPlaytime.setTotalBoxpvpPlaytime(0.0);
-    }
-    if (dailyPlaytime.getTotalPrisonPlaytime() == null) {
-      dailyPlaytime.setTotalPrisonPlaytime(0.0);
-    }
-    if (dailyPlaytime.getTotalEventsPlaytime() == null) {
-      dailyPlaytime.setTotalEventsPlaytime(0.0);
-    }
-
     switch (serverName.toLowerCase()) {
-      case "survival" -> {
-        System.out.println("Updating Survival playtime...");
-        double currentSurvivalPlaytime = dailyPlaytime.getTotalSurvivalPlaytime();
-        dailyPlaytime.setTotalSurvivalPlaytime(playtime + currentSurvivalPlaytime);
-        System.out.println("New Survival playtime: " + dailyPlaytime.getTotalSurvivalPlaytime());
-      }
-      case "skyblock" -> {
-        System.out.println("Updating Skyblock playtime...");
-        double currentSkyblockPlaytime = dailyPlaytime.getTotalSkyblockPlaytime();
-        dailyPlaytime.setTotalSkyblockPlaytime(playtime + currentSkyblockPlaytime);
-        System.out.println("New Skyblock playtime: " + dailyPlaytime.getTotalSkyblockPlaytime());
-      }
-      case "creative" -> {
-        System.out.println("Updating Creative playtime...");
-        double currentCreativePlaytime = dailyPlaytime.getTotalCreativePlaytime();
-        dailyPlaytime.setTotalCreativePlaytime(playtime + currentCreativePlaytime);
-        System.out.println("New Creative playtime: " + dailyPlaytime.getTotalCreativePlaytime());
-      }
-      case "boxpvp" -> {
-        System.out.println("Updating BoxPVP playtime...");
-        double currentBoxpvpPlaytime = dailyPlaytime.getTotalBoxpvpPlaytime();
-        dailyPlaytime.setTotalBoxpvpPlaytime(playtime + currentBoxpvpPlaytime);
-        System.out.println("New BoxPVP playtime: " + dailyPlaytime.getTotalBoxpvpPlaytime());
-      }
-      case "prison" -> {
-        System.out.println("Updating Prison playtime...");
-        double currentPrisonPlaytime = dailyPlaytime.getTotalPrisonPlaytime();
-        dailyPlaytime.setTotalPrisonPlaytime(playtime + currentPrisonPlaytime);
-        System.out.println("New Prison playtime: " + dailyPlaytime.getTotalPrisonPlaytime());
-      }
-      case "events" -> {
-        System.out.println("Updating Events playtime...");
-        double currentEventsPlaytime = dailyPlaytime.getTotalEventsPlaytime();
-        dailyPlaytime.setTotalEventsPlaytime(playtime + currentEventsPlaytime);
-        System.out.println("New Events playtime: " + dailyPlaytime.getTotalEventsPlaytime());
-      }
-      default -> {
-        System.out.println("Server name not recognized: " + serverName);
-        return;
-      }
+      case "survival" -> dailyPlaytime.setTotalSurvivalPlaytime(playtime);
+      case "skyblock" -> dailyPlaytime.setTotalSkyblockPlaytime(playtime);
+      case "creative" -> dailyPlaytime.setTotalCreativePlaytime(playtime);
+      case "boxpvp" -> dailyPlaytime.setTotalBoxpvpPlaytime(playtime);
+      case "prison" -> dailyPlaytime.setTotalPrisonPlaytime(playtime);
+      case "events" -> dailyPlaytime.setTotalEventsPlaytime(playtime);
     }
 
     double totalPlaytime = dailyPlaytime.getTotalSurvivalPlaytime() +
@@ -156,7 +117,5 @@ public class PlaytimeCalculationServiceImpl implements PlaytimeCalculationServic
         dailyPlaytime.getTotalEventsPlaytime();
 
     dailyPlaytime.setTotalPlaytime(totalPlaytime);
-    System.out.println("Total playtime updated: " + dailyPlaytime.getTotalPlaytime());
   }
-
 }

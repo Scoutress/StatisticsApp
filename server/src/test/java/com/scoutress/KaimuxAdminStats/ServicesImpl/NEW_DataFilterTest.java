@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import com.scoutress.KaimuxAdminStats.Entity.DataItem;
 import com.scoutress.KaimuxAdminStats.Services.DataFilter;
+import com.scoutress.KaimuxAdminStats.Services.DataProcessing;
 
 public class NEW_DataFilterTest {
 
@@ -60,10 +61,10 @@ public class NEW_DataFilterTest {
     List<DataItem> logins = DataFilter.filterLogins(DataFilter.sessionsFilterByAid(dataList, (short) 10));
     List<DataItem> logouts = DataFilter.filterLogouts(DataFilter.sessionsFilterByAid(dataList, (short) 10));
 
-    Long firstLoginTime = DataFilter.getFirstLoginTime(logins);
-    Long firstLogoutTime = DataFilter.getFirstLogoutTime(logouts);
+    Long firstLoginTime = DataProcessing.getFirstLoginTime(logins);
+    Long firstLogoutTime = DataProcessing.getFirstLogoutTime(logouts);
 
-    long sessionDuration = DataFilter.calculateSessionDuration(firstLoginTime, firstLogoutTime);
+    long sessionDuration = DataProcessing.calculateSessionDuration(firstLoginTime, firstLogoutTime);
 
     assertEquals(60, sessionDuration);
     assert firstLoginTime < firstLogoutTime;

@@ -17,13 +17,13 @@ public class NEW_DataFilterTest {
     LocalDateTime fixedTime = LocalDateTime.of(2024, 10, 29, 12, 00);
 
     List<DataItem> dataList = Arrays.asList(
-        new DataItem(1, (short) 10, fixedTime),
-        new DataItem(2, (short) 20, fixedTime),
-        new DataItem(3, (short) 10, fixedTime));
+        new DataItem(1, (short) 10, fixedTime, true),
+        new DataItem(2, (short) 20, fixedTime, false),
+        new DataItem(3, (short) 10, fixedTime, true));
 
     List<DataItem> expected = Arrays.asList(
-        new DataItem(1, (short) 10, fixedTime),
-        new DataItem(3, (short) 10, fixedTime));
+        new DataItem(1, (short) 10, fixedTime, true),
+        new DataItem(3, (short) 10, fixedTime, true));
 
     List<DataItem> result = DataFilter.sessionsFilterByAid(dataList, (short) 10);
 

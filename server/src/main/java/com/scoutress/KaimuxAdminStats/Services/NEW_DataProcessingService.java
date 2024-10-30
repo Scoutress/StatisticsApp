@@ -2,8 +2,11 @@ package com.scoutress.KaimuxAdminStats.Services;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.scoutress.KaimuxAdminStats.Entity.DataItem;
 
+@Service
 public class NEW_DataProcessingService {
   public static Long getFirstLoginTime(List<DataItem> logins) {
     return logins.isEmpty() ? null : logins.get(0).getTime();

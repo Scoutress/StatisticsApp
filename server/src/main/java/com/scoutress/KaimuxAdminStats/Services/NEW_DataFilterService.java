@@ -3,8 +3,11 @@ package com.scoutress.KaimuxAdminStats.Services;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
 import com.scoutress.KaimuxAdminStats.Entity.DataItem;
 
+@Service
 public class NEW_DataFilterService {
   public static List<DataItem> sessionsFilterByAid(List<DataItem> data, short aid) {
     return data

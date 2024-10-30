@@ -51,4 +51,17 @@ public class ScheduledTasksConfig {
         private String getCurrentTimestamp() {
                 return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
+
+        // @Scheduled(cron = "0 * * * * *")
+        // @Scheduled(cron = "15 * * * * *")
+        // @Scheduled(cron = "30 * * * * *")
+        // @Scheduled(cron = "45 * * * * *")
+        // @Transactional
+        // public void runTesting() {
+        // List<LoginLogoutTimes> list = dataExtractingService.getLoginLogoutTimes();
+        // for (LoginLogoutTimes list1 : list) {
+        // System.out.println(list1);
+        // }
+        // System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        // }
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.scoutress.KaimuxAdminStats.Entity.DataItem;
 
-public class DataProcessing {
+public class NEW_DataProcessingService {
   public static Long getFirstLoginTime(List<DataItem> logins) {
     return logins.isEmpty() ? null : logins.get(0).getTime();
   }

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import com.scoutress.KaimuxAdminStats.Entity.DataItem;
 
-public class DataFilter {
+public class NEW_DataFilterService {
   public static List<DataItem> sessionsFilterByAid(List<DataItem> data, short aid) {
     return data
         .stream()

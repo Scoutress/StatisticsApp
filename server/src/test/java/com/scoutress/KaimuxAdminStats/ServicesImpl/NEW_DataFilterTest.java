@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.scoutress.KaimuxAdminStats.Entity.DataItem;
-import com.scoutress.KaimuxAdminStats.Services.DataFilter;
+import com.scoutress.KaimuxAdminStats.Services.NEW_DataFilterService;
 
 public class NEW_DataFilterTest {
 
@@ -31,7 +31,7 @@ public class NEW_DataFilterTest {
         new DataItem(1, (short) 10, time, true),
         new DataItem(3, (short) 10, time, false));
 
-    List<DataItem> result = DataFilter.sessionsFilterByAid(dataList, (short) 10);
+    List<DataItem> result = NEW_DataFilterService.sessionsFilterByAid(dataList, (short) 10);
 
     assertEquals(expected, result);
   }
@@ -52,14 +52,14 @@ public class NEW_DataFilterTest {
         new DataItem(9, (short) 10, time, true),
         new DataItem(10, (short) 20, time, false));
 
-    List<DataItem> adminSessions = DataFilter.sessionsFilterByAid(dataList, (short) 10);
+    List<DataItem> adminSessions = NEW_DataFilterService.sessionsFilterByAid(dataList, (short) 10);
 
     List<DataItem> expectedLogins = Arrays.asList(
         new DataItem(1, (short) 10, time, true),
         new DataItem(3, (short) 10, time, true),
         new DataItem(5, (short) 10, time, true),
         new DataItem(9, (short) 10, time, true));
-    List<DataItem> actualLogins = DataFilter.filterByAction(adminSessions, true);
+    List<DataItem> actualLogins = NEW_DataFilterService.filterByAction(adminSessions, true);
 
     assertEquals(expectedLogins, actualLogins);
   }

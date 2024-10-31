@@ -15,6 +15,8 @@ public class NEW_DataFilterTest {
   public void testSessionsFilterByAid() {
     long time = 1698578400;
 
+    NEW_DataFilterService dataFilterService = new NEW_DataFilterService();
+
     List<NEW_SessionDataItem> dataList = Arrays.asList(
         new NEW_SessionDataItem((long) 1, (short) 10, time, true, "survival"),
         new NEW_SessionDataItem((long) 2, (short) 20, time, true, "survival"),
@@ -31,7 +33,7 @@ public class NEW_DataFilterTest {
         new NEW_SessionDataItem((long) 1, (short) 10, time, true, "survival"),
         new NEW_SessionDataItem((long) 3, (short) 10, time, false, "survival"));
 
-    List<NEW_SessionDataItem> result = NEW_DataFilterService.sessionsFilterByAid(dataList, (short) 10);
+    List<NEW_SessionDataItem> result = dataFilterService.sessionsFilterByAid(dataList, (short) 10);
 
     assertEquals(expected, result);
   }
@@ -39,6 +41,8 @@ public class NEW_DataFilterTest {
   @Test
   public void testSessionsFilterByAction() {
     long time = 1698578400;
+
+    NEW_DataFilterService dataFilterService = new NEW_DataFilterService();
 
     List<NEW_SessionDataItem> dataList = Arrays.asList(
         new NEW_SessionDataItem((long) 1, (short) 10, time, true, "survival"),
@@ -52,14 +56,14 @@ public class NEW_DataFilterTest {
         new NEW_SessionDataItem((long) 9, (short) 10, time, true, "skyblock"),
         new NEW_SessionDataItem((long) 10, (short) 20, time, false, "survival"));
 
-    List<NEW_SessionDataItem> adminSessions = NEW_DataFilterService.sessionsFilterByAid(dataList, (short) 10);
+    List<NEW_SessionDataItem> adminSessions = dataFilterService.sessionsFilterByAid(dataList, (short) 10);
 
     List<NEW_SessionDataItem> expectedLogins = Arrays.asList(
         new NEW_SessionDataItem((long) 1, (short) 10, time, true, "survival"),
         new NEW_SessionDataItem((long) 3, (short) 10, time, true, "survival"),
         new NEW_SessionDataItem((long) 5, (short) 10, time, true, "survival"),
         new NEW_SessionDataItem((long) 9, (short) 10, time, true, "skyblock"));
-    List<NEW_SessionDataItem> actualLogins = NEW_DataFilterService.filterByAction(adminSessions, true);
+    List<NEW_SessionDataItem> actualLogins = dataFilterService.filterByAction(adminSessions, true);
 
     assertEquals(expectedLogins, actualLogins);
   }

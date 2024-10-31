@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.Entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,11 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "session_data")
+@Table(name = "session_duration")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NEW_SessionDataItem {
+public class NEW_SessionDuration {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,12 +26,19 @@ public class NEW_SessionDataItem {
   @Column(name = "aid", nullable = false)
   private short aid;
 
-  @Column(name = "time", nullable = false)
-  private long time;
+  @Column(name = "single_session_duration", nullable = false)
+  private long singleSessionDuration;
 
-  @Column(name = "action", nullable = false)
-  private boolean action;
+  @Column(name = "date", nullable = false)
+  private LocalDate date;
 
   @Column(name = "server", nullable = false)
   private String server;
+
+  public NEW_SessionDuration(short aid, long singleSessionDuration, LocalDate date, String server) {
+    this.aid = aid;
+    this.singleSessionDuration = singleSessionDuration;
+    this.date = date;
+    this.server = server;
+  }
 }

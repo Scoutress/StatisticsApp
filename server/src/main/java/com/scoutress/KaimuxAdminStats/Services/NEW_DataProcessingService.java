@@ -141,16 +141,11 @@ public class NEW_DataProcessingService {
 
       long sessionDuration = maxLogoutEpochTime + loginEpochTime;
 
-      NEW_SessionDuration session = new NEW_SessionDuration(
-          aid,
-          sessionDuration,
-          LocalDateTime
-              .ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC)
-              .toLocalDate(),
-          server);
+      LocalDate date = LocalDateTime
+          .ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC)
+          .toLocalDate();
 
-      processedPlaytimeSessionsRepository.save(session);
-
+      saveSessionDuration(aid, sessionDuration, date, server);
     }
   }
 

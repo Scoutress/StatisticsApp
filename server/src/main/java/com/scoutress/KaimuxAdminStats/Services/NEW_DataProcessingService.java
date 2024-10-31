@@ -45,63 +45,81 @@ public class NEW_DataProcessingService {
   }
 
   public void calculateSingleSessionTime() {
-
     List<NEW_SessionDataItem> allSessions = dataExtractingService
         .getLoginLogoutTimes();
 
     for (Short aid : aids) {
-
       List<NEW_SessionDataItem> allSessionsById = dataFilterService
-          .sessionsFilterByAid(allSessions, (short) 1);
+          .sessionsFilterByAid(allSessions, aid);
 
       for (String server : serverNames) {
-
-        List<NEW_SessionDataItem> allSessionsByIdByServer = dataFilterService
+        List<NEW_SessionDataItem> allSessionsByServer = dataFilterService
             .sessionsFilterByServer(allSessionsById, server);
-
         List<NEW_SessionDataItem> loginSessions = dataFilterService
-            .filterByAction(allSessionsByIdByServer, true);
-
+            .filterByAction(allSessionsByServer, true);
         List<NEW_SessionDataItem> logoutSessions = dataFilterService
-            .filterByAction(allSessionsByIdByServer, false);
+            .filterByAction(allSessionsByServer, false);
 
-        for (int i = 0; i < Math.min(loginSessions.size(), logoutSessions.size()); i++) {
-          NEW_SessionDataItem login = loginSessions.get(i);
-          NEW_SessionDataItem logout = logoutSessions.get(i);
-
-          long loginEpochTime = login.getTime();
-          long logoutEpochTime = logout.getTime();
-
-          LocalDate loginDate = LocalDateTime.ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC).toLocalDate();
-          LocalDate logoutDate = LocalDateTime.ofEpochSecond(logoutEpochTime, 0, ZoneOffset.UTC).toLocalDate();
-
-          long midnightEpochTime = logoutDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
-
-          if (loginDate.isEqual(logoutDate)) {
-            long sessionDuration = logoutEpochTime - loginEpochTime;
-
-            NEW_SessionDuration session = new NEW_SessionDuration(
-                aid, sessionDuration, loginDate, server);
-
-            processedPlaytimeSessionsRepository.save(session);
-          } else {
-            long sessionDurationTillMidnight = midnightEpochTime - loginEpochTime;
-            long sessionDurationAfterMidnight = logoutEpochTime - midnightEpochTime;
-
-            NEW_SessionDuration sessionTillMidnight = new NEW_SessionDuration(
-                aid, sessionDurationTillMidnight, loginDate, server);
-            NEW_SessionDuration sessionAfterMidnight = new NEW_SessionDuration(
-                aid, sessionDurationAfterMidnight, loginDate, server);
-
-            processedPlaytimeSessionsRepository.save(sessionTillMidnight);
-            processedPlaytimeSessionsRepository.save(sessionAfterMidnight);
-          }
-
-          // TODO:
-          // I need also to add check for errors in DB with double logins or logouts.
-          // Also check for only login time.
-        }
+        processSessions(aid, server, loginSessions, logoutSessions, allSessionsByServer);
       }
     }
+  }
+
+  private void processSessions(
+      short aid,
+      String server,
+      List<NEW_SessionDataItem> loginSessions,
+      List<NEW_SessionDataItem> logoutSessions,
+      List<NEW_SessionDataItem> allSessionsByServer) {
+
+    for (int i = 0; i < Math.min(loginSessions.size(), logoutSessions.size()); i++) {
+      NEW_SessionDataItem login = loginSessions.get(i);
+      long loginEpochTime = login.getTime();
+      long nextLoginEpochTime = (i + 1 < loginSessions.size())
+          ? loginSessions.get(i + 1).getTime()
+          : Long.MAX_VALUE;
+
+      List<NEW_SessionDataItem> logoutsInRange = dataFilterService.filterForMultipleLoginsOrLogouts(
+          allSessionsByServer,
+          false,
+          LocalDateTime.ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC),
+          LocalDateTime.ofEpochSecond(nextLoginEpochTime, 0, ZoneOffset.UTC));
+
+      if (logoutsInRange.size() == 1) {
+        handleSingleLogout(aid, server, loginEpochTime, logoutSessions.get(i).getTime());
+      } else if (!logoutsInRange.isEmpty()) {
+        handleMultipleLogouts(aid, server, loginEpochTime, logoutsInRange);
+      }
+    }
+  }
+
+  private void handleSingleLogout(short aid, String server, long loginEpochTime, long logoutEpochTime) {
+    LocalDate loginDate = LocalDateTime.ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC).toLocalDate();
+    LocalDate logoutDate = LocalDateTime.ofEpochSecond(logoutEpochTime, 0, ZoneOffset.UTC).toLocalDate();
+
+    if (loginDate.isEqual(logoutDate)) {
+      long sessionDuration = logoutEpochTime - loginEpochTime;
+      saveSessionDuration(aid, sessionDuration, loginDate, server);
+    } else {
+      long midnightEpochTime = logoutDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
+      long sessionDurationTillMidnight = midnightEpochTime - loginEpochTime;
+      long sessionDurationAfterMidnight = logoutEpochTime - midnightEpochTime;
+
+      saveSessionDuration(aid, sessionDurationTillMidnight, loginDate, server);
+      saveSessionDuration(aid, sessionDurationAfterMidnight, logoutDate, server);
+    }
+  }
+
+  private void handleMultipleLogouts(short aid, String server, long loginEpochTime,
+      List<NEW_SessionDataItem> logoutsInRange) {
+    for (NEW_SessionDataItem logout : logoutsInRange) {
+      // Logic to handle multiple logouts
+      // You might need to determine how to process this scenario
+    }
+  }
+
+  private void saveSessionDuration(short aid, long sessionDuration, LocalDate date, String server) {
+    NEW_SessionDuration session = new NEW_SessionDuration(aid, sessionDuration, date, server);
+    processedPlaytimeSessionsRepository.save(session);
   }
 }

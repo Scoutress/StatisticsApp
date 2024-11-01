@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.NEW_SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDataItem;
 import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDuration;
 import com.scoutress.KaimuxAdminStats.Repositories.NEW_ProcessedPlaytimeSessionsRepository;
@@ -19,6 +19,7 @@ public class NEW_DataProcessingService {
 
   private final NEW_DataExtractingService dataExtractingService;
   private final NEW_DataFilterService dataFilterService;
+  private final NEW_DataSanitizationService dataSanitizationService;
   private final NEW_ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository;
 
   // temp. admin id's
@@ -38,12 +39,26 @@ public class NEW_DataProcessingService {
   private final List<String> serverNames = Arrays
       .asList("survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby");
 
-  public NEW_DataProcessingService(NEW_DataExtractingService dataExtractingService,
+  public NEW_DataProcessingService(
+      NEW_DataExtractingService dataExtractingService,
       NEW_DataFilterService dataFilterService,
+      NEW_DataSanitizationService dataSanitizationService,
       NEW_ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository) {
     this.dataExtractingService = dataExtractingService;
     this.dataFilterService = dataFilterService;
+    this.dataSanitizationService = dataSanitizationService;
     this.processedPlaytimeSessionsRepository = processedPlaytimeSessionsRepository;
+  }
+
+  private List<NEW_SanitizedSessionData> convertToSanitizedSessionData(List<NEW_SessionDataItem> items) {
+    return items.stream().map(item -> {
+      NEW_SanitizedSessionData sanitizedData = new NEW_SanitizedSessionData();
+      sanitizedData.setAid(item.getAid());
+      sanitizedData.setTime(item.getTime());
+      sanitizedData.setAction(item.isAction());
+      sanitizedData.setServer(item.getServer());
+      return sanitizedData;
+    }).collect(Collectors.toList());
   }
 
   public void calculateSingleSessionTime() {
@@ -51,23 +66,30 @@ public class NEW_DataProcessingService {
     List<NEW_SessionDataItem> allSessions = dataExtractingService
         .getLoginLogoutTimes();
 
+    List<NEW_SanitizedSessionData> sanitizedSessionData = convertToSanitizedSessionData(allSessions);
+
+    dataSanitizationService.filterAndSaveSessions(sanitizedSessionData);
+
+    List<NEW_SanitizedSessionData> sanitizedData = dataExtractingService
+        .getSanitizedLoginLogoutTimes();
+
     for (Short aid : aids) {
 
-      List<NEW_SessionDataItem> allSessionsById = dataFilterService
-          .sessionsFilterByAid(allSessions, aid);
+      List<NEW_SanitizedSessionData> allSessionsById = dataFilterService
+          .sessionsFilterByAid(sanitizedData, aid);
 
       for (String server : serverNames) {
 
-        List<NEW_SessionDataItem> allSessionsByServer = dataFilterService
+        List<NEW_SanitizedSessionData> allSessionsByServer = dataFilterService
             .sessionsFilterByServer(allSessionsById, server);
 
-        List<NEW_SessionDataItem> loginSessions = dataFilterService
+        List<NEW_SanitizedSessionData> loginSessions = dataFilterService
             .filterByAction(allSessionsByServer, true);
 
-        List<NEW_SessionDataItem> logoutSessions = dataFilterService
+        List<NEW_SanitizedSessionData> logoutSessions = dataFilterService
             .filterByAction(allSessionsByServer, false);
 
-        processSessions(aid, server, loginSessions, logoutSessions, allSessionsByServer);
+        processSessions(aid, server, loginSessions, logoutSessions);
 
       }
     }
@@ -76,33 +98,18 @@ public class NEW_DataProcessingService {
   private void processSessions(
       short aid,
       String server,
-      List<NEW_SessionDataItem> loginSessions,
-      List<NEW_SessionDataItem> logoutSessions,
-      List<NEW_SessionDataItem> allSessionsByServer) {
+      List<NEW_SanitizedSessionData> loginSessions,
+      List<NEW_SanitizedSessionData> logoutSessions) {
 
     for (int i = 0; i < Math.min(loginSessions.size(), logoutSessions.size()); i++) {
 
-      NEW_SessionDataItem login = loginSessions.get(i);
+      NEW_SanitizedSessionData login = loginSessions.get(i);
+      NEW_SanitizedSessionData logout = logoutSessions.get(i);
+
       long loginEpochTime = login.getTime();
-      long nextLoginEpochTime = (i + 1 < loginSessions.size())
-          ? loginSessions.get(i + 1).getTime()
-          : Long.MAX_VALUE;
+      long logoutEpochTime = logout.getTime();
 
-      List<NEW_SessionDataItem> logoutsInRange = dataFilterService.filterForMultipleLoginsOrLogouts(
-          allSessionsByServer,
-          false,
-          LocalDateTime.ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC),
-          LocalDateTime.ofEpochSecond(nextLoginEpochTime, 0, ZoneOffset.UTC));
-
-      if (logoutsInRange.size() == 1) {
-
-        handleSingleLogout(aid, server, loginEpochTime, logoutSessions.get(i).getTime());
-
-      } else if (!logoutsInRange.isEmpty()) {
-
-        handleMultipleLogouts(aid, server, loginEpochTime, logoutsInRange);
-
-      }
+      handleSingleLogout(aid, server, loginEpochTime, logoutEpochTime);
     }
   }
 
@@ -124,28 +131,6 @@ public class NEW_DataProcessingService {
       saveSessionDuration(aid, sessionDurationTillMidnight, loginDate, server);
       saveSessionDuration(aid, sessionDurationAfterMidnight, logoutDate, server);
 
-    }
-  }
-
-  private void handleMultipleLogouts(short aid, String server, long loginEpochTime,
-      List<NEW_SessionDataItem> logoutsInRange) {
-
-    Optional<NEW_SessionDataItem> maxLogoutOptional = logoutsInRange
-        .stream()
-        .max(Comparator.comparingLong(NEW_SessionDataItem::getTime));
-
-    if (maxLogoutOptional.isPresent()) {
-
-      NEW_SessionDataItem maxLogout = maxLogoutOptional.get();
-      long maxLogoutEpochTime = maxLogout.getTime();
-
-      long sessionDuration = maxLogoutEpochTime + loginEpochTime;
-
-      LocalDate date = LocalDateTime
-          .ofEpochSecond(loginEpochTime, 0, ZoneOffset.UTC)
-          .toLocalDate();
-
-      saveSessionDuration(aid, sessionDuration, date, server);
     }
   }
 

@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
-import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicketPercentage;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketPercentageRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
-import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
+import com.scoutress.KaimuxAdminStats.Entity.old.DcTickets.DcTicket;
+import com.scoutress.KaimuxAdminStats.Entity.old.DcTickets.DcTicketPercentage;
+import com.scoutress.KaimuxAdminStats.Repositories.old.DcTickets.DcTicketPercentageRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.DcTickets.DcTicketRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.DcTicketService;
 
 @RestController
 @RequestMapping("/dc-tickets")
@@ -24,7 +24,8 @@ public class DcTicketController {
     private final DcTicketRepository dcTicketRepository;
     private final DcTicketPercentageRepository dcTicketPercentageRepository;
 
-    public DcTicketController(DcTicketService dcTicketService, DcTicketRepository dcTicketRepository, DcTicketPercentageRepository dcTicketPercentageRepository) {
+    public DcTicketController(DcTicketService dcTicketService, DcTicketRepository dcTicketRepository,
+            DcTicketPercentageRepository dcTicketPercentageRepository) {
         this.dcTicketService = dcTicketService;
         this.dcTicketRepository = dcTicketRepository;
         this.dcTicketPercentageRepository = dcTicketPercentageRepository;

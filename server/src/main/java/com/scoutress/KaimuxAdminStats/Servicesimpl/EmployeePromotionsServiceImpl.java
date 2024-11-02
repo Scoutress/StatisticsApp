@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.EmployeePromotionsPlus;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeePromotionsRepository;
-import com.scoutress.KaimuxAdminStats.Services.EmployeePromotionsService;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.EmployeePromotionsPlus;
+import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeePromotionsRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.EmployeePromotionsService;
 
 @Service
 public class EmployeePromotionsServiceImpl implements EmployeePromotionsService {

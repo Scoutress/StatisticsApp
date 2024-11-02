@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.Productivity;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
-import com.scoutress.KaimuxAdminStats.Services.EmployeeService;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
+import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.ProductivityRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.EmployeeService;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {

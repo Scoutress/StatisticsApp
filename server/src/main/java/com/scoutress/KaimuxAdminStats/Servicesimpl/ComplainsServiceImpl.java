@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Complains;
-import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;
-import com.scoutress.KaimuxAdminStats.Services.ComplainsService;
+import com.scoutress.KaimuxAdminStats.Entity.old.Complains;
+import com.scoutress.KaimuxAdminStats.Repositories.old.ComplainsRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.ComplainsService;
 
 @Service
 public class ComplainsServiceImpl implements ComplainsService {

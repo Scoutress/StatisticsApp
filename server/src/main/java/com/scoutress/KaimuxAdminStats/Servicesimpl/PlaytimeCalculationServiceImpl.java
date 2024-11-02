@@ -9,13 +9,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.Playtime.DailyPlaytime;
-import com.scoutress.KaimuxAdminStats.Entity.Playtime.LoginLogoutTimes;
-import com.scoutress.KaimuxAdminStats.Repositories.DailyPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.LoginLogoutTimesRepository;
-import com.scoutress.KaimuxAdminStats.Services.PlaytimeCalculationService;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.old.Playtime.DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.Entity.old.Playtime.LoginLogoutTimes;
+import com.scoutress.KaimuxAdminStats.Repositories.old.DailyPlaytimeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.LoginLogoutTimesRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.PlaytimeCalculationService;
 
 @Service
 public class PlaytimeCalculationServiceImpl implements PlaytimeCalculationService {

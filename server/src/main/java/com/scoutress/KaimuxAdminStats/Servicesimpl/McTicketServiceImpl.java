@@ -8,15 +8,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicket;
-import com.scoutress.KaimuxAdminStats.Entity.McTickets.McTicketPercentage;
-import com.scoutress.KaimuxAdminStats.Entity.Productivity;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketPercentageRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.McTickets.McTicketRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
-import com.scoutress.KaimuxAdminStats.Services.McTicketService;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.old.McTickets.McTicket;
+import com.scoutress.KaimuxAdminStats.Entity.old.McTickets.McTicketPercentage;
+import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
+import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.McTickets.McTicketPercentageRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.McTickets.McTicketRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.ProductivityRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.McTicketService;
 
 @Service
 public class McTicketServiceImpl implements McTicketService {

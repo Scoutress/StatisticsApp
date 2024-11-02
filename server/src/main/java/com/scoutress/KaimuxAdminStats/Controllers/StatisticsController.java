@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.Employees.EmployeePromotionsPlus;
-import com.scoutress.KaimuxAdminStats.Entity.Productivity;
-import com.scoutress.KaimuxAdminStats.Services.EmployeePromotionsService;
-import com.scoutress.KaimuxAdminStats.Services.ProductivityService;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.EmployeePromotionsPlus;
+import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
+import com.scoutress.KaimuxAdminStats.Services.old.EmployeePromotionsService;
+import com.scoutress.KaimuxAdminStats.Services.old.ProductivityService;
 
 @RestController
 @RequestMapping("/stats")

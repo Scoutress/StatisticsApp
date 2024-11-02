@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.Playtime.AfkPlaytime;
-import com.scoutress.KaimuxAdminStats.Repositories.AfkPlaytimeRepository;
+import com.scoutress.KaimuxAdminStats.Entity.old.Playtime.AfkPlaytime;
+import com.scoutress.KaimuxAdminStats.Repositories.old.AfkPlaytimeRepository;
 
 @RestController
 @RequestMapping("/playtime")

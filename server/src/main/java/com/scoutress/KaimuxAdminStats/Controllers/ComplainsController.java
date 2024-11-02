@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scoutress.KaimuxAdminStats.Entity.Complains;
-import com.scoutress.KaimuxAdminStats.Repositories.ComplainsRepository;
+import com.scoutress.KaimuxAdminStats.Entity.old.Complains;
+import com.scoutress.KaimuxAdminStats.Repositories.old.ComplainsRepository;
 
 @RestController
 @RequestMapping("/complains")

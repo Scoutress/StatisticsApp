@@ -8,17 +8,17 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicket;
-import com.scoutress.KaimuxAdminStats.Entity.DcTickets.DcTicketPercentage;
-import com.scoutress.KaimuxAdminStats.Entity.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.Employees.EmployeePromotions;
-import com.scoutress.KaimuxAdminStats.Entity.Productivity;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketPercentageRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.DcTickets.DcTicketRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeePromotionsRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.ProductivityRepository;
-import com.scoutress.KaimuxAdminStats.Services.DcTicketService;
+import com.scoutress.KaimuxAdminStats.Entity.old.DcTickets.DcTicket;
+import com.scoutress.KaimuxAdminStats.Entity.old.DcTickets.DcTicketPercentage;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+import com.scoutress.KaimuxAdminStats.Entity.old.Employees.EmployeePromotions;
+import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
+import com.scoutress.KaimuxAdminStats.Repositories.old.DcTickets.DcTicketPercentageRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.DcTickets.DcTicketRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeePromotionsRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.old.ProductivityRepository;
+import com.scoutress.KaimuxAdminStats.Services.old.DcTicketService;
 
 @Service
 public class DcTicketServiceImpl implements DcTicketService {

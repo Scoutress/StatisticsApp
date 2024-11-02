@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,7 @@ public class NEW_DataProcessingService {
   private final NEW_DataSanitizationService dataSanitizationService;
   private final NEW_ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository;
 
-  // temp. admin id's
+  // TODO: temp. admin id's
   private final List<Short> aids = Arrays
       .asList(
           (short) 1,
@@ -50,25 +49,12 @@ public class NEW_DataProcessingService {
     this.processedPlaytimeSessionsRepository = processedPlaytimeSessionsRepository;
   }
 
-  private List<NEW_SanitizedSessionData> convertToSanitizedSessionData(List<NEW_SessionDataItem> items) {
-    return items.stream().map(item -> {
-      NEW_SanitizedSessionData sanitizedData = new NEW_SanitizedSessionData();
-      sanitizedData.setAid(item.getAid());
-      sanitizedData.setTime(item.getTime());
-      sanitizedData.setAction(item.isAction());
-      sanitizedData.setServer(item.getServer());
-      return sanitizedData;
-    }).collect(Collectors.toList());
-  }
-
   public void calculateSingleSessionTime() {
 
     List<NEW_SessionDataItem> allSessions = dataExtractingService
         .getLoginLogoutTimes();
 
-    List<NEW_SanitizedSessionData> sanitizedSessionData = convertToSanitizedSessionData(allSessions);
-
-    dataSanitizationService.filterAndSaveSessions(sanitizedSessionData);
+    dataSanitizationService.sanitizeData(allSessions);
 
     List<NEW_SanitizedSessionData> sanitizedData = dataExtractingService
         .getSanitizedLoginLogoutTimes();
@@ -76,18 +62,18 @@ public class NEW_DataProcessingService {
     for (Short aid : aids) {
 
       List<NEW_SanitizedSessionData> allSessionsById = dataFilterService
-          .sessionsFilterByAid(sanitizedData, aid);
+          .sessionsSanitizedFilterByAid(sanitizedData, aid);
 
       for (String server : serverNames) {
 
         List<NEW_SanitizedSessionData> allSessionsByServer = dataFilterService
-            .sessionsFilterByServer(allSessionsById, server);
+            .sessionsSanitizedFilterByServer(allSessionsById, server);
 
         List<NEW_SanitizedSessionData> loginSessions = dataFilterService
-            .filterByAction(allSessionsByServer, true);
+            .sessionsSanitizedFilterByAction(allSessionsByServer, true);
 
         List<NEW_SanitizedSessionData> logoutSessions = dataFilterService
-            .filterByAction(allSessionsByServer, false);
+            .sessionsSanitizedFilterByAction(allSessionsByServer, false);
 
         processSessions(aid, server, loginSessions, logoutSessions);
 

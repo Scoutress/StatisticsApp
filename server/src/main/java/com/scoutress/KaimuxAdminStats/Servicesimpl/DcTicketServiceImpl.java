@@ -71,8 +71,10 @@ public class DcTicketServiceImpl implements DcTicketService {
                 continue;
             }
 
-            List<DcTicket> filteredTickets = employeeTickets.stream()
-                    .filter(ticket -> !ticket.getDate().isBefore(joinDate) && !ticket.getDate().isBefore(supportDate))
+            List<DcTicket> filteredTickets = employeeTickets
+                    .stream()
+                    .filter(ticket -> !ticket.getDate().isBefore(joinDate))
+                    .filter(ticket -> !ticket.getDate().isBefore(supportDate))
                     .collect(Collectors.toList());
 
             if (filteredTickets.isEmpty()) {
@@ -122,7 +124,8 @@ public class DcTicketServiceImpl implements DcTicketService {
             LocalDate date = entry.getKey();
             List<DcTicket> dailyTickets = entry.getValue();
 
-            List<DcTicket> filteredTickets = dailyTickets.stream()
+            List<DcTicket> filteredTickets = dailyTickets
+                    .stream()
                     .filter(ticket -> {
                         Employee employee = employeeRepository.findById(ticket.getEmployeeId()).orElse(null);
                         if (employee == null) {

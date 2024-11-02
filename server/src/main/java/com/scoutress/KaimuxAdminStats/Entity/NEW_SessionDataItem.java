@@ -32,4 +32,8 @@ public class NEW_SessionDataItem {
 
   @Column(name = "server", nullable = false)
   private String server;
+
+  public boolean getActionAsBoolean() {
+    return action;
+  }
 }

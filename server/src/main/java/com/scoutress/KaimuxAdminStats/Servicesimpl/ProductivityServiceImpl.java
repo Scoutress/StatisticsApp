@@ -602,8 +602,6 @@ public class ProductivityServiceImpl implements ProductivityService {
         };
     }
 
-    // Complains
-
     @Transactional
     public void calculateAndSaveComplaintsForAllEmployees() {
         employees.forEach(employee -> {
@@ -632,9 +630,6 @@ public class ProductivityServiceImpl implements ProductivityService {
         productivityCalcRepository.save(productivityCalc);
     }
 
-    // Other Methods
-
-    // permest i apacia visus 4
     @Transactional
     public void calculateAndSaveProductivity() {
         for (Employee employee : employees) {

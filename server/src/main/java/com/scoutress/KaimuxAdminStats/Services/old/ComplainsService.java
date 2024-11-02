@@ -1,10 +1,13 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-import java.util.List;
+// import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.Complains;
+// import org.springframework.stereotype.Service;
 
-public interface ComplainsService {
+// import com.scoutress.KaimuxAdminStats.Entity.old.Complains;
 
-  List<Complains> getAllComplains();
-}
+// @Service
+// public interface ComplainsService {
+
+// List<Complains> getAllComplains();
+// }

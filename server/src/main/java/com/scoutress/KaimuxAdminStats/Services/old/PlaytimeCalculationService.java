@@ -1,6 +1,9 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-public interface PlaytimeCalculationService {
+// import org.springframework.stereotype.Service;
 
-  void calculateDailyPlaytime();
-}
+// @Service
+// public interface PlaytimeCalculationService {
+
+// void calculateDailyPlaytime();
+// }

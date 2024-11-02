@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.scoutress.KaimuxAdminStats.Services.NEW_AnnualyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DataProcessingService;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DummyDataUploadingService;
@@ -23,15 +24,19 @@ public class ScheduledTasksConfig {
 	private final NEW_DataProcessingService dataProcessingService;
 	@SuppressWarnings("unused")
 	private final NEW_DummyDataUploadingService dummyDataUploadingService;
+	@SuppressWarnings("unused")
 	private final NEW_DailyPlaytimeService dailyPlaytimeService;
+	private final NEW_AnnualyPlaytimeService annualyPlaytimeService;
 
 	public ScheduledTasksConfig(
 			NEW_DataProcessingService dataProcessingService,
 			NEW_DummyDataUploadingService dummyDataUploadingService,
-			NEW_DailyPlaytimeService dailyPlaytimeService) {
+			NEW_DailyPlaytimeService dailyPlaytimeService,
+			NEW_AnnualyPlaytimeService annualyPlaytimeService) {
 		this.dataProcessingService = dataProcessingService;
 		this.dummyDataUploadingService = dummyDataUploadingService;
 		this.dailyPlaytimeService = dailyPlaytimeService;
+		this.annualyPlaytimeService = annualyPlaytimeService;
 	}
 
 	@Scheduled(cron = "0 * * * * *")
@@ -42,7 +47,7 @@ public class ScheduledTasksConfig {
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
 
-		measureExecutionTime(() -> dailyPlaytimeService.handleDailyPlaytime(), "Daily playtime");
+		measureExecutionTime(() -> annualyPlaytimeService.handleAnnualPlaytime(), "<><><>");
 
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");

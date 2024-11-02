@@ -1,37 +1,39 @@
-package com.scoutress.KaimuxAdminStats.Servicesimpl;
+// package com.scoutress.KaimuxAdminStats.Servicesimpl;
 
-import java.util.List;
+// import java.util.List;
 
-import org.springframework.stereotype.Service;
+// import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
-import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
-import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.old.ProductivityRepository;
-import com.scoutress.KaimuxAdminStats.Services.old.EmployeeService;
+// import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+// import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
+// import com.scoutress.KaimuxAdminStats.Repositories.old.EmployeeRepository;
+// import
+// com.scoutress.KaimuxAdminStats.Repositories.old.ProductivityRepository;
+// import com.scoutress.KaimuxAdminStats.Services.old.EmployeeService;
 
-@Service
-public class EmployeeServiceImpl implements EmployeeService {
+// @Service
+// public class EmployeeServiceImpl implements EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
-    private final ProductivityRepository productivityRepository;
+// private final EmployeeRepository employeeRepository;
+// private final ProductivityRepository productivityRepository;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ProductivityRepository productivityRepository) {
-        this.employeeRepository = employeeRepository;
-        this.productivityRepository = productivityRepository;
-    }
+// public EmployeeServiceImpl(EmployeeRepository employeeRepository,
+// ProductivityRepository productivityRepository) {
+// this.employeeRepository = employeeRepository;
+// this.productivityRepository = productivityRepository;
+// }
 
-    @Override
-    public List<Employee> findAll() {
-        return employeeRepository.findAllByOrderByLevel();
-    }
+// @Override
+// public List<Employee> findAll() {
+// return employeeRepository.findAllByOrderByLevel();
+// }
 
-    @Override
-    public Employee save(Employee employee) {
-        Employee savedEmployee = employeeRepository.save(employee);
-        Productivity newProductivity = new Productivity();
-        newProductivity.setEmployee(savedEmployee);
-        productivityRepository.save(newProductivity);
-        return savedEmployee;
-    }
-}
+// @Override
+// public Employee save(Employee employee) {
+// Employee savedEmployee = employeeRepository.save(employee);
+// Productivity newProductivity = new Productivity();
+// newProductivity.setEmployee(savedEmployee);
+// productivityRepository.save(newProductivity);
+// return savedEmployee;
+// }
+// }

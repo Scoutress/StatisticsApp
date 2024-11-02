@@ -1,15 +1,18 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-import java.util.List;
+// import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.DcTickets.DcTicket;
+// import org.springframework.stereotype.Service;
 
-public interface DcTicketService {
-    void saveAll(List<DcTicket> dcTickets);
+// import com.scoutress.KaimuxAdminStats.Entity.old.DcTickets.DcTicket;
 
-    void updateDiscordTicketsAverage();
+// @Service
+// public interface DcTicketService {
+// void saveAll(List<DcTicket> dcTickets);
 
-    void calculateDcTicketsPercentage();
+// void updateDiscordTicketsAverage();
 
-    void updateAverageDcTicketsPercentages();
-}
+// void calculateDcTicketsPercentage();
+
+// void updateAverageDcTicketsPercentages();
+// }

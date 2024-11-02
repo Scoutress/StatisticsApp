@@ -1,24 +1,24 @@
-package com.scoutress.KaimuxAdminStats.Servicesimpl;
+// package com.scoutress.KaimuxAdminStats.Servicesimpl;
 
-import java.util.List;
+// import java.util.List;
 
-import org.springframework.stereotype.Service;
+// import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.Complains;
-import com.scoutress.KaimuxAdminStats.Repositories.old.ComplainsRepository;
-import com.scoutress.KaimuxAdminStats.Services.old.ComplainsService;
+// import com.scoutress.KaimuxAdminStats.Entity.old.Complains;
+// import com.scoutress.KaimuxAdminStats.Repositories.old.ComplainsRepository;
+// import com.scoutress.KaimuxAdminStats.Services.old.ComplainsService;
 
-@Service
-public class ComplainsServiceImpl implements ComplainsService {
+// @Service
+// public class ComplainsServiceImpl implements ComplainsService {
 
-  private final ComplainsRepository complainsRepository;
+// private final ComplainsRepository complainsRepository;
 
-  public ComplainsServiceImpl(ComplainsRepository complainsRepository) {
-    this.complainsRepository = complainsRepository;
-  }
+// public ComplainsServiceImpl(ComplainsRepository complainsRepository) {
+// this.complainsRepository = complainsRepository;
+// }
 
-  @Override
-  public List<Complains> getAllComplains() {
-    return complainsRepository.findAll();
-  }
-}
+// @Override
+// public List<Complains> getAllComplains() {
+// return complainsRepository.findAll();
+// }
+// }

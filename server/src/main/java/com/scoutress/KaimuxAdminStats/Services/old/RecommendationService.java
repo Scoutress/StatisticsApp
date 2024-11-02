@@ -1,16 +1,22 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-import java.time.LocalDate;
+// import java.time.LocalDate;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+// import org.springframework.stereotype.Service;
 
-public interface RecommendationService {
+// import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
 
-  void evaluateEmployees();
+// @Service
+// public interface RecommendationService {
 
-  boolean checkPlaytime(int employeeId, LocalDate startDate, LocalDate endDate);
+// void evaluateEmployees();
 
-  String evaluateHelper(Employee employee, double productivityValue, LocalDate currentDate);
+// boolean checkPlaytime(int employeeId, LocalDate startDate, LocalDate
+// endDate);
 
-  String evaluateSupport(Employee employee, double productivityValue, LocalDate currentDate);
-}
+// String evaluateHelper(Employee employee, double productivityValue, LocalDate
+// currentDate);
+
+// String evaluateSupport(Employee employee, double productivityValue, LocalDate
+// currentDate);
+// }

@@ -1,12 +1,15 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-import java.util.List;
+// import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
+// import org.springframework.stereotype.Service;
 
-public interface EmployeeService {
+// import com.scoutress.KaimuxAdminStats.Entity.old.Employees.Employee;
 
-    List<Employee> findAll();
+// @Service
+// public interface EmployeeService {
 
-    Employee save(Employee employee);
-}
+// List<Employee> findAll();
+
+// Employee save(Employee employee);
+// }

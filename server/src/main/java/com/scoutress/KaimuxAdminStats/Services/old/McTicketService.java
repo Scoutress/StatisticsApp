@@ -1,16 +1,19 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-import java.util.List;
+// import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.McTickets.McTicket;
+// import org.springframework.stereotype.Service;
 
-public interface McTicketService {
+// import com.scoutress.KaimuxAdminStats.Entity.old.McTickets.McTicket;
 
-    void saveAll(List<McTicket> mcTickets);
+// @Service
+// public interface McTicketService {
 
-    void updateMinecraftTicketsAverage();
+// void saveAll(List<McTicket> mcTickets);
 
-    void calculateMcTicketsPercentage();
+// void updateMinecraftTicketsAverage();
 
-    void updateAverageMcTicketsPercentages();
-}
+// void calculateMcTicketsPercentage();
+
+// void updateAverageMcTicketsPercentages();
+// }

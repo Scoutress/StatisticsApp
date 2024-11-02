@@ -1,12 +1,15 @@
-package com.scoutress.KaimuxAdminStats.Services.old;
+// package com.scoutress.KaimuxAdminStats.Services.old;
 
-import java.util.List;
+// import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
+// import org.springframework.stereotype.Service;
 
-public interface ProductivityService {
+// import com.scoutress.KaimuxAdminStats.Entity.old.Productivity;
 
-    List<Productivity> findAll();
+// @Service
+// public interface ProductivityService {
 
-    void updateProductivity();
-}
+// List<Productivity> findAll();
+
+// void updateProductivity();
+// }

@@ -11,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "average_playtime")
+@Table(name = "average_playtime_overall")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NEW_AveragePlaytime {
+public class NEW_AveragePlaytimeOverall {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +25,5 @@ public class NEW_AveragePlaytime {
   private short aid;
 
   @Column(name = "playtime", nullable = false)
-  private int playtime;
+  private double playtime;
 }

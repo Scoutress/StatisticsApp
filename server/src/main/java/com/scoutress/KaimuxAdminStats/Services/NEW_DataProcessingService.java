@@ -105,14 +105,14 @@ public class NEW_DataProcessingService {
 
     if (loginDate.isEqual(logoutDate)) {
 
-      long sessionDuration = logoutEpochTime - loginEpochTime;
+      int sessionDuration = (int) (logoutEpochTime - loginEpochTime);
       saveSessionDuration(aid, sessionDuration, loginDate, server);
 
     } else {
 
       long midnightEpochTime = logoutDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
-      long sessionDurationTillMidnight = midnightEpochTime - loginEpochTime;
-      long sessionDurationAfterMidnight = logoutEpochTime - midnightEpochTime;
+      int sessionDurationTillMidnight = (int) (midnightEpochTime - loginEpochTime);
+      int sessionDurationAfterMidnight = (int) (logoutEpochTime - midnightEpochTime);
 
       saveSessionDuration(aid, sessionDurationTillMidnight, loginDate, server);
       saveSessionDuration(aid, sessionDurationAfterMidnight, logoutDate, server);
@@ -120,7 +120,7 @@ public class NEW_DataProcessingService {
     }
   }
 
-  private void saveSessionDuration(short aid, long sessionDuration, LocalDate date, String server) {
+  private void saveSessionDuration(short aid, int sessionDuration, LocalDate date, String server) {
     NEW_SessionDuration session = new NEW_SessionDuration(aid, sessionDuration, date, server);
     processedPlaytimeSessionsRepository.save(session);
   }

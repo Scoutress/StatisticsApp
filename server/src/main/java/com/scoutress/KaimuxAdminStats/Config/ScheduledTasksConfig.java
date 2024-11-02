@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.scoutress.KaimuxAdminStats.Services.NEW_DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DataProcessingService;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DummyDataUploadingService;
 
@@ -18,17 +19,21 @@ import jakarta.transaction.Transactional;
 @EnableScheduling
 public class ScheduledTasksConfig {
 
+	@SuppressWarnings("unused")
 	private final NEW_DataProcessingService dataProcessingService;
+	@SuppressWarnings("unused")
 	private final NEW_DummyDataUploadingService dummyDataUploadingService;
+	private final NEW_DailyPlaytimeService dailyPlaytimeService;
 
 	public ScheduledTasksConfig(
 			NEW_DataProcessingService dataProcessingService,
-			NEW_DummyDataUploadingService dummyDataUploadingService) {
+			NEW_DummyDataUploadingService dummyDataUploadingService,
+			NEW_DailyPlaytimeService dailyPlaytimeService) {
 		this.dataProcessingService = dataProcessingService;
 		this.dummyDataUploadingService = dummyDataUploadingService;
+		this.dailyPlaytimeService = dailyPlaytimeService;
 	}
 
-	// @Scheduled(cron = "0 0 * * * *")
 	@Scheduled(cron = "0 * * * * *")
 	@Scheduled(cron = "15 * * * * *")
 	@Scheduled(cron = "30 * * * * *")
@@ -37,10 +42,7 @@ public class ScheduledTasksConfig {
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
 
-		measureExecutionTime(() -> dataProcessingService.calculateSingleSessionTime(), "data processing");
-
-		// measureExecutionTime(() -> dummyDataUploadingService.uploadDummyData(),
-		// "");
+		measureExecutionTime(() -> dailyPlaytimeService.handleDailyPlaytime(), "Daily playtime");
 
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");

@@ -13,11 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "session_duration")
+@Table(name = "daily_playtime")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NEW_SessionDuration {
+public class NEW_DailyPlaytime {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,19 +26,12 @@ public class NEW_SessionDuration {
   @Column(name = "aid", nullable = false)
   private short aid;
 
-  @Column(name = "single_session_duration", nullable = false)
-  private int singleSessionDuration;
+  @Column(name = "time", nullable = false)
+  private int time;
 
   @Column(name = "date", nullable = false)
   private LocalDate date;
 
   @Column(name = "server", nullable = false)
   private String server;
-
-  public NEW_SessionDuration(short aid, int singleSessionDuration, LocalDate date, String server) {
-    this.aid = aid;
-    this.singleSessionDuration = singleSessionDuration;
-    this.date = date;
-    this.server = server;
-  }
 }

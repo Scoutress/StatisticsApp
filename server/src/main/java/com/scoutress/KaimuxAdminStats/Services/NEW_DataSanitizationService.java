@@ -32,7 +32,7 @@ public class NEW_DataSanitizationService {
 
     for (Short aid : uniqueAids) {
 
-      List<NEW_SessionDataItem> sessionsForAid = dataFilterService.sessionsFilterByAid(sessionDataItems, aid);
+      List<NEW_SessionDataItem> sessionsForAid = dataFilterService.filterSessionsByAid(sessionDataItems, aid);
 
       Set<String> uniqueServers = sessionsForAid
           .stream()
@@ -41,11 +41,11 @@ public class NEW_DataSanitizationService {
 
       for (String server : uniqueServers) {
 
-        List<NEW_SessionDataItem> sessionsForServer = dataFilterService.sessionsFilterByServer(sessionsForAid, server);
+        List<NEW_SessionDataItem> sessionsForServer = dataFilterService.filterSessionsByServer(sessionsForAid, server);
 
-        List<NEW_SessionDataItem> loginSessions = dataFilterService.sessionsFilterByAction(sessionsForServer, true);
+        List<NEW_SessionDataItem> loginSessions = dataFilterService.filterSessionsByAction(sessionsForServer, true);
 
-        List<NEW_SessionDataItem> logoutSessions = dataFilterService.sessionsFilterByAction(sessionsForServer, false);
+        List<NEW_SessionDataItem> logoutSessions = dataFilterService.filterSessionsByAction(sessionsForServer, false);
 
         List<NEW_SanitizedSessionData> sanitizedData = sanitizeSessions(loginSessions, logoutSessions);
 

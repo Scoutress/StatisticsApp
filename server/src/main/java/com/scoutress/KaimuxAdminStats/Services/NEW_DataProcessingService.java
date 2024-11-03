@@ -1,13 +1,20 @@
 package com.scoutress.KaimuxAdminStats.Services;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.Entity.NEW_EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.Entity.NEW_SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDataItem;
 import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDuration;
@@ -21,23 +28,6 @@ public class NEW_DataProcessingService {
   private final NEW_DataSanitizationService dataSanitizationService;
   private final NEW_ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository;
 
-  // TODO: temp. admin id's
-  private final List<Short> aids = Arrays
-      .asList(
-          (short) 1,
-          (short) 2,
-          (short) 3,
-          (short) 4,
-          (short) 5,
-          (short) 6,
-          (short) 7,
-          (short) 8,
-          (short) 9,
-          (short) 10);
-
-  private final List<String> serverNames = Arrays
-      .asList("survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby");
-
   public NEW_DataProcessingService(
       NEW_DataExtractingService dataExtractingService,
       NEW_DataFilterService dataFilterService,
@@ -50,35 +40,68 @@ public class NEW_DataProcessingService {
   }
 
   public void calculateSingleSessionTime() {
+    Map<String, Method> serverIdMethods = initializeServerIdMethods();
 
-    List<NEW_SessionDataItem> allSessions = dataExtractingService
-        .getLoginLogoutTimes();
+    List<NEW_SessionDataItem> allSessions = dataExtractingService.getLoginLogoutTimes();
+
+    Set<String> serverNames = allSessions
+        .stream()
+        .map(NEW_SessionDataItem::getServer)
+        .collect(Collectors.toSet());
 
     dataSanitizationService.sanitizeData(allSessions);
 
-    List<NEW_SanitizedSessionData> sanitizedData = dataExtractingService
-        .getSanitizedLoginLogoutTimes();
+    List<NEW_SanitizedSessionData> sanitizedData = dataExtractingService.getSanitizedLoginLogoutTimes();
 
-    for (Short aid : aids) {
+    for (String server : serverNames) {
+      List<NEW_SanitizedSessionData> allSessionsByServer = dataFilterService
+          .filterSanitizedSessionsByServer(sanitizedData, server);
 
-      List<NEW_SanitizedSessionData> allSessionsById = dataFilterService
-          .sessionsSanitizedFilterByAid(sanitizedData, aid);
+      Method serverIdMethod = serverIdMethods.get(server);
+      if (serverIdMethod == null) {
+        System.err.println("Server ID method not found for server: " + server);
+        continue;
+      }
 
-      for (String server : serverNames) {
+      Set<Short> allAidsByServer = allSessionsByServer
+          .stream()
+          .map(employee -> {
+            try {
+              return (Short) serverIdMethod.invoke(employee);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+              return null;
+            }
+          })
+          .filter(Objects::nonNull)
+          .collect(Collectors.toSet());
 
-        List<NEW_SanitizedSessionData> allSessionsByServer = dataFilterService
-            .sessionsSanitizedFilterByServer(allSessionsById, server);
-
+      for (Short aid : allAidsByServer) {
+        List<NEW_SanitizedSessionData> allSessionsById = dataFilterService.filterSanitizedSessionsByAid(sanitizedData,
+            aid);
         List<NEW_SanitizedSessionData> loginSessions = dataFilterService
-            .sessionsSanitizedFilterByAction(allSessionsByServer, true);
-
+            .filterSanitizedSessionsByAction(allSessionsById, true);
         List<NEW_SanitizedSessionData> logoutSessions = dataFilterService
-            .sessionsSanitizedFilterByAction(allSessionsByServer, false);
+            .filterSanitizedSessionsByAction(allSessionsByServer, false);
 
         processSessions(aid, server, loginSessions, logoutSessions);
-
       }
     }
+  }
+
+  private Map<String, Method> initializeServerIdMethods() {
+    Map<String, Method> serverIdMethods = new HashMap<>();
+    try {
+      serverIdMethods.put("survival", NEW_EmployeeCodes.class.getMethod("getSurvivalId"));
+      serverIdMethods.put("skyblock", NEW_EmployeeCodes.class.getMethod("getSkyblockId"));
+      serverIdMethods.put("creative", NEW_EmployeeCodes.class.getMethod("getCreativeId"));
+      serverIdMethods.put("boxpvp", NEW_EmployeeCodes.class.getMethod("getBoxpvpId"));
+      serverIdMethods.put("prison", NEW_EmployeeCodes.class.getMethod("getPrisonId"));
+      serverIdMethods.put("events", NEW_EmployeeCodes.class.getMethod("getEventsId"));
+      serverIdMethods.put("lobby", NEW_EmployeeCodes.class.getMethod("getLobbyId"));
+    } catch (NoSuchMethodException e) {
+      System.err.println("One or more server ID methods could not be found: " + e.getMessage());
+    }
+    return serverIdMethods;
   }
 
   private void processSessions(
@@ -88,7 +111,6 @@ public class NEW_DataProcessingService {
       List<NEW_SanitizedSessionData> logoutSessions) {
 
     for (int i = 0; i < Math.min(loginSessions.size(), logoutSessions.size()); i++) {
-
       NEW_SanitizedSessionData login = loginSessions.get(i);
       NEW_SanitizedSessionData logout = logoutSessions.get(i);
 
@@ -104,19 +126,15 @@ public class NEW_DataProcessingService {
     LocalDate logoutDate = LocalDateTime.ofEpochSecond(logoutEpochTime, 0, ZoneOffset.UTC).toLocalDate();
 
     if (loginDate.isEqual(logoutDate)) {
-
       int sessionDuration = (int) (logoutEpochTime - loginEpochTime);
       saveSessionDuration(aid, sessionDuration, loginDate, server);
-
     } else {
-
       long midnightEpochTime = logoutDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
       int sessionDurationTillMidnight = (int) (midnightEpochTime - loginEpochTime);
       int sessionDurationAfterMidnight = (int) (logoutEpochTime - midnightEpochTime);
 
       saveSessionDuration(aid, sessionDurationTillMidnight, loginDate, server);
       saveSessionDuration(aid, sessionDurationAfterMidnight, logoutDate, server);
-
     }
   }
 

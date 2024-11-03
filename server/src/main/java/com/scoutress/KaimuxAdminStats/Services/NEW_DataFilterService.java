@@ -11,7 +11,7 @@ import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDataItem;
 @Service
 public class NEW_DataFilterService {
 
-  public List<NEW_SessionDataItem> sessionsFilterByAid(
+  public List<NEW_SessionDataItem> filterSessionsByAid(
       List<NEW_SessionDataItem> data, short aid) {
     return data
         .stream()
@@ -19,7 +19,7 @@ public class NEW_DataFilterService {
         .collect(Collectors.toList());
   }
 
-  public List<NEW_SessionDataItem> sessionsFilterByServer(
+  public List<NEW_SessionDataItem> filterSessionsByServer(
       List<NEW_SessionDataItem> data, String server) {
     return data
         .stream()
@@ -27,7 +27,7 @@ public class NEW_DataFilterService {
         .collect(Collectors.toList());
   }
 
-  public List<NEW_SessionDataItem> sessionsFilterByAction(
+  public List<NEW_SessionDataItem> filterSessionsByAction(
       List<NEW_SessionDataItem> data, boolean action) {
     return data
         .stream()
@@ -35,7 +35,7 @@ public class NEW_DataFilterService {
         .collect(Collectors.toList());
   }
 
-  public List<NEW_SanitizedSessionData> sessionsSanitizedFilterByAid(
+  public List<NEW_SanitizedSessionData> filterSanitizedSessionsByAid(
       List<NEW_SanitizedSessionData> data, short aid) {
     return data
         .stream()
@@ -43,7 +43,7 @@ public class NEW_DataFilterService {
         .collect(Collectors.toList());
   }
 
-  public List<NEW_SanitizedSessionData> sessionsSanitizedFilterByServer(
+  public List<NEW_SanitizedSessionData> filterSanitizedSessionsByServer(
       List<NEW_SanitizedSessionData> data, String server) {
     return data
         .stream()
@@ -51,7 +51,7 @@ public class NEW_DataFilterService {
         .collect(Collectors.toList());
   }
 
-  public List<NEW_SanitizedSessionData> sessionsSanitizedFilterByAction(
+  public List<NEW_SanitizedSessionData> filterSanitizedSessionsByAction(
       List<NEW_SanitizedSessionData> data, boolean action) {
     return data
         .stream()

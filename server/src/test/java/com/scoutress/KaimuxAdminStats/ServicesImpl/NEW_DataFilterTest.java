@@ -33,7 +33,7 @@ public class NEW_DataFilterTest {
         new NEW_SanitizedSessionData((long) 1, (short) 10, time, true, "survival"),
         new NEW_SanitizedSessionData((long) 3, (short) 10, time, false, "survival"));
 
-    List<NEW_SanitizedSessionData> result = dataFilterService.sessionsSanitizedFilterByAid(dataList, (short) 10);
+    List<NEW_SanitizedSessionData> result = dataFilterService.filterSanitizedSessionsByAid(dataList, (short) 10);
 
     assertEquals(expected, result);
   }
@@ -56,14 +56,14 @@ public class NEW_DataFilterTest {
         new NEW_SanitizedSessionData((long) 9, (short) 10, time, true, "skyblock"),
         new NEW_SanitizedSessionData((long) 10, (short) 20, time, false, "survival"));
 
-    List<NEW_SanitizedSessionData> adminSessions = dataFilterService.sessionsSanitizedFilterByAid(dataList, (short) 10);
+    List<NEW_SanitizedSessionData> adminSessions = dataFilterService.filterSanitizedSessionsByAid(dataList, (short) 10);
 
     List<NEW_SanitizedSessionData> expectedLogins = Arrays.asList(
         new NEW_SanitizedSessionData((long) 1, (short) 10, time, true, "survival"),
         new NEW_SanitizedSessionData((long) 3, (short) 10, time, true, "survival"),
         new NEW_SanitizedSessionData((long) 5, (short) 10, time, true, "survival"),
         new NEW_SanitizedSessionData((long) 9, (short) 10, time, true, "skyblock"));
-    List<NEW_SanitizedSessionData> actualLogins = dataFilterService.sessionsSanitizedFilterByAction(adminSessions,
+    List<NEW_SanitizedSessionData> actualLogins = dataFilterService.filterSanitizedSessionsByAction(adminSessions,
         true);
 
     assertEquals(expectedLogins, actualLogins);

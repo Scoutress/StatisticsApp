@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "kaimux-website-api-for-server-visitors",
+      "type": "java.lang.String",
+      "description": "A description for 'kaimux-website-api-for-server-visitors'"
+    },
+    {
+      "name": "kaimux-website-api-for-minecraft-tickets",
+      "type": "java.lang.String",
+      "description": "A description for 'kaimux-website-api-for-minecraft-tickets'"
+    },
+    {
+      "name": "kaimux-website-api-for-discord-tickets",
+      "type": "java.lang.String",
+      "description": "A description for 'kaimux-website-api-for-discord-tickets'"
+    },
+    {
+      "name": "kaimux-api-token",
+      "type": "java.lang.String",
+      "description": "A description for 'kaimux-api-token'"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.Exceptions;
+package com.scoutress.KaimuxAdminStats.exceptions;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

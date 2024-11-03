@@ -1,18 +1,16 @@
-package com.scoutress.KaimuxAdminStats.Config;
+package com.scoutress.KaimuxAdminStats.config;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.scoutress.KaimuxAdminStats.Services.NEW_DummyDataUploadingService;
-import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_AnnualyPlaytimeService;
-import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_DailyPlaytimeService;
-import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_DataProcessingService;
+import com.scoutress.KaimuxAdminStats.servicesimpl.discord.DiscordTicketsReactionsServiceImpl;
 
 import jakarta.transaction.Transactional;
 
@@ -20,35 +18,28 @@ import jakarta.transaction.Transactional;
 @EnableScheduling
 public class ScheduledTasksConfig {
 
-	@SuppressWarnings("unused")
-	private final NEW_DataProcessingService dataProcessingService;
-	@SuppressWarnings("unused")
-	private final NEW_DummyDataUploadingService dummyDataUploadingService;
-	@SuppressWarnings("unused")
-	private final NEW_DailyPlaytimeService dailyPlaytimeService;
-	private final NEW_AnnualyPlaytimeService annualyPlaytimeService;
+	private final DiscordTicketsReactionsServiceImpl service;
 
-	public ScheduledTasksConfig(
-			NEW_DataProcessingService dataProcessingService,
-			NEW_DummyDataUploadingService dummyDataUploadingService,
-			NEW_DailyPlaytimeService dailyPlaytimeService,
-			NEW_AnnualyPlaytimeService annualyPlaytimeService) {
-		this.dataProcessingService = dataProcessingService;
-		this.dummyDataUploadingService = dummyDataUploadingService;
-		this.dailyPlaytimeService = dailyPlaytimeService;
-		this.annualyPlaytimeService = annualyPlaytimeService;
+	public ScheduledTasksConfig(DiscordTicketsReactionsServiceImpl service) {
+		this.service = service;
 	}
 
 	@Scheduled(cron = "0 * * * * *")
-	@Scheduled(cron = "15 * * * * *")
-	@Scheduled(cron = "30 * * * * *")
-	@Scheduled(cron = "45 * * * * *")
 	@Transactional
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
+		System.out.println("");
 
-		measureExecutionTime(() -> annualyPlaytimeService.handleAnnualPlaytime(), "<><><>");
+		measureExecutionTime(() -> {
+			String result;
+			try {
+				result = service.fetchDataFromApi();
+				System.out.println("Discord API response: " + result);
+			} catch (JSONException e) {
+			}
+		}, "Discord API Call");
 
+		System.out.println("");
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}

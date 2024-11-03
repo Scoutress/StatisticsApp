@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.Constants;
+package com.scoutress.KaimuxAdminStats.constants;
 
 public class CalculationConstants {
 

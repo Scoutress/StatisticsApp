@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsReactionsService;
 import com.scoutress.KaimuxAdminStats.servicesimpl.discord.DiscordTicketsReactionsServiceImpl;
 
 import jakarta.transaction.Transactional;
@@ -18,10 +19,10 @@ import jakarta.transaction.Transactional;
 @EnableScheduling
 public class ScheduledTasksConfig {
 
-	private final DiscordTicketsReactionsServiceImpl service;
+	private final DiscordTicketsReactionsService discordTicketsReactionsService;
 
-	public ScheduledTasksConfig(DiscordTicketsReactionsServiceImpl service) {
-		this.service = service;
+	public ScheduledTasksConfig(DiscordTicketsReactionsServiceImpl discordTicketsReactionsService) {
+		this.discordTicketsReactionsService = discordTicketsReactionsService;
 	}
 
 	@Scheduled(cron = "0 * * * * *")
@@ -31,10 +32,8 @@ public class ScheduledTasksConfig {
 		System.out.println("");
 
 		measureExecutionTime(() -> {
-			String result;
 			try {
-				result = service.fetchDataFromApi();
-				System.out.println("Discord API response: " + result);
+				discordTicketsReactionsService.fetchAndSaveData();
 			} catch (JSONException e) {
 			}
 		}, "Discord API Call");

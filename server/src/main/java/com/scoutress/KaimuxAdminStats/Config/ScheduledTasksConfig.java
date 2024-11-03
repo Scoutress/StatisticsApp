@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.scoutress.KaimuxAdminStats.Services.NEW_AnnualyPlaytimeService;
-import com.scoutress.KaimuxAdminStats.Services.NEW_DailyPlaytimeService;
-import com.scoutress.KaimuxAdminStats.Services.NEW_DataProcessingService;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DummyDataUploadingService;
+import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_AnnualyPlaytimeService;
+import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_DailyPlaytimeService;
+import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_DataProcessingService;
 
 import jakarta.transaction.Transactional;
 

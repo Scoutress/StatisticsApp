@@ -15,11 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.scoutress.KaimuxAdminStats.Entity.NEW_DailyPlaytime;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDuration;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_DailyPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.Services.NEW_DailyPlaytimeService;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SessionDuration;
+import com.scoutress.KaimuxAdminStats.Repositories.playtime.NEW_DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DataExtractingService;
+import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_DailyPlaytimeService;
 
 class NEW_DailyPlaytimeServiceTest {
 

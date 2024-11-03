@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SanitizedSessionData;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDataItem;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SanitizedSessionData;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SessionDataItem;
 
 @Service
 public class NEW_DataFilterService {

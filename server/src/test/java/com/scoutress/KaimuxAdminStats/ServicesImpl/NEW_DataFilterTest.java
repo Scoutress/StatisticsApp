@@ -6,7 +6,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SanitizedSessionData;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DataFilterService;
 
 public class NEW_DataFilterTest {

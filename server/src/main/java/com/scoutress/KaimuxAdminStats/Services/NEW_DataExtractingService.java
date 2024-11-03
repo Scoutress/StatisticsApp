@@ -4,18 +4,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.Entity.NEW_DailyPlaytime;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_Employee;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_EmployeeCodes;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SanitizedSessionData;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDataItem;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_SessionDuration;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_DailyPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_EmployeeCodesRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_EmployeeRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_PlaytimeSessionsRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_ProcessedPlaytimeSessionsRepository;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_SanitazedDataRepository;
+import com.scoutress.KaimuxAdminStats.Entity.employees.NEW_Employee;
+import com.scoutress.KaimuxAdminStats.Entity.employees.NEW_EmployeeCodes;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SanitizedSessionData;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SessionDataItem;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_SessionDuration;
+import com.scoutress.KaimuxAdminStats.Repositories.employees.NEW_EmployeeCodesRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.employees.NEW_EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.playtime.NEW_DailyPlaytimeRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.playtime.NEW_PlaytimeSessionsRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.playtime.NEW_ProcessedPlaytimeSessionsRepository;
+import com.scoutress.KaimuxAdminStats.Repositories.playtime.NEW_SanitazedDataRepository;
 
 @Service
 public class NEW_DataExtractingService {

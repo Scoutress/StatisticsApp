@@ -15,13 +15,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.scoutress.KaimuxAdminStats.Entity.NEW_AveragePlaytimeLastYear;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_DailyPlaytime;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_Employee;
-import com.scoutress.KaimuxAdminStats.Entity.NEW_EmployeeCodes;
-import com.scoutress.KaimuxAdminStats.Repositories.NEW_AveragePlaytimeLastYearRepository;
-import com.scoutress.KaimuxAdminStats.Services.NEW_AveragePlaytimeLastYearService;
+import com.scoutress.KaimuxAdminStats.Entity.employees.NEW_Employee;
+import com.scoutress.KaimuxAdminStats.Entity.employees.NEW_EmployeeCodes;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_AveragePlaytimeLastYear;
+import com.scoutress.KaimuxAdminStats.Entity.playtime.NEW_DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.Repositories.playtime.NEW_AveragePlaytimeLastYearRepository;
 import com.scoutress.KaimuxAdminStats.Services.NEW_DataExtractingService;
+import com.scoutress.KaimuxAdminStats.Services.playtime.NEW_AveragePlaytimeLastYearService;
 
 class NEW_AveragePlaytimeLastYearServiceTest {
 

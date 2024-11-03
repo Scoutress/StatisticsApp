@@ -2,6 +2,9 @@ package com.scoutress.KaimuxAdminStats.servicesimpl.discord;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -26,6 +29,7 @@ public class DiscordTicketsReactionsServiceImpl implements DiscordTicketsReactio
   private final RestTemplate restTemplate;
   private final KaimuxWebsiteConfig kaimuxWebsiteConfig;
   private final DiscordTicketsReactionsRepository discordTicketsReactionsRepository;
+  private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
   public DiscordTicketsReactionsServiceImpl(
       RestTemplate restTemplate,
@@ -37,20 +41,38 @@ public class DiscordTicketsReactionsServiceImpl implements DiscordTicketsReactio
     this.discordTicketsReactionsRepository = discordTicketsReactionsRepository;
   }
 
+  // TODO: Atm DB table are filled with data
+  // Still need to add functionality, that requests only newer data
+  // (not old dublicates)
+
   @Override
-  public void fetchAndSaveData() throws JSONException {
-    String jsonData = fetchDataFromApi();
-    saveDataToDatabase(jsonData);
+  public void fetchAndSaveData() {
+    fetchDataWithDelay(1);
+  }
+
+  private void fetchDataWithDelay(int level) {
+    executorService.schedule(() -> {
+      try {
+        String jsonData = fetchDataFromApi(level);
+        if (!isDataEmpty(jsonData)) {
+          saveDataToDatabase(jsonData);
+          fetchDataWithDelay(level + 1);
+        }
+      } catch (JSONException e) {
+        System.err.println("JSON Parsing Error: " + e.getMessage());
+      } catch (HttpClientErrorException e) {
+        System.err.println("HTTP Error: " + e.getMessage());
+      }
+    }, 2, TimeUnit.SECONDS);
   }
 
   @Override
-  public String fetchDataFromApi() throws JSONException {
+  public String fetchDataFromApi(int level) throws JSONException {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
     String api = kaimuxWebsiteConfig.getApiToken();
     String url = kaimuxWebsiteConfig.getApiForDiscordTickets();
-    int level = 1;
 
     JSONObject requestBody = new JSONObject();
     requestBody.put("api_token", api);
@@ -67,6 +89,12 @@ public class DiscordTicketsReactionsServiceImpl implements DiscordTicketsReactio
     } catch (HttpClientErrorException e) {
       throw e;
     }
+  }
+
+  private boolean isDataEmpty(String jsonData) throws JSONException {
+    JSONObject jsonObject = new JSONObject(jsonData);
+    JSONArray dataArray = jsonObject.getJSONArray("data");
+    return dataArray.length() == 0;
   }
 
   private void saveDataToDatabase(String jsonData) throws JSONException {

@@ -5,10 +5,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsReactionsService;
 import com.scoutress.KaimuxAdminStats.servicesimpl.discord.DiscordTicketsReactionsServiceImpl;
@@ -25,20 +23,20 @@ public class ScheduledTasksConfig {
 		this.discordTicketsReactionsService = discordTicketsReactionsService;
 	}
 
-	@Scheduled(cron = "0 * * * * *")
+	// @Scheduled(cron = "0 0 * * * *")
+	// @Scheduled(cron = "0 38 * * * *")
 	@Transactional
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
 		System.out.println("");
 
-		measureExecutionTime(() -> {
-			try {
-				discordTicketsReactionsService.fetchAndSaveData();
-			} catch (JSONException e) {
-			}
-		}, "Discord API Call");
+		// measureExecutionTime(() -> {
+		// try {
+		// discordTicketsReactionsService.fetchAndSaveData();
+		// } catch (JSONException e) {
+		// }
+		// }, "Discord API Call");
 
-		System.out.println("");
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}

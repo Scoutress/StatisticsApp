@@ -4,7 +4,7 @@ import org.springframework.boot.configurationprocessor.json.JSONException;
 
 public interface DiscordTicketsReactionsService {
 
-  String fetchDataFromApi() throws JSONException;
-
   void fetchAndSaveData() throws JSONException;
+
+  String fetchDataFromApi(int level) throws JSONException;
 }

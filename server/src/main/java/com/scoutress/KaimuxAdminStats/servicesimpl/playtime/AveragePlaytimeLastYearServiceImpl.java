@@ -35,7 +35,7 @@ public class AveragePlaytimeLastYearServiceImpl implements AveragePlaytimeLastYe
   @Override
   public void handleAveragePlaytime() {
     List<DailyPlaytime> allPlaytime = dataExtractingService.getDailyPlaytimeData();
-    List<EmployeeCodes> allEmployeeAids = dataExtractingService.getAidsFromEmployeeCodes();
+    List<EmployeeCodes> allEmployeeAids = dataExtractingService.getAllEmployeeCodes();
     List<Employee> allEmployees = dataExtractingService.getAllEmployees();
 
     List<AveragePlaytimeLastYear> averagePlaytime = calculateAveragePlaytime(

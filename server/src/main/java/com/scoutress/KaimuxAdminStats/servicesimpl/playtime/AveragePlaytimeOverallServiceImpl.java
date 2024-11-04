@@ -36,7 +36,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
   @Override
   public void handleAveragePlaytime() {
     List<DailyPlaytime> allPlaytime = dataExtractingService.getDailyPlaytimeData();
-    List<EmployeeCodes> allEmployeeAids = dataExtractingService.getAidsFromEmployeeCodes();
+    List<EmployeeCodes> allEmployeeAids = dataExtractingService.getAllEmployeeCodes();
     List<Employee> allEmployees = dataExtractingService.getAllEmployees();
 
     List<AveragePlaytimeOverall> averagePlaytime = calculateAveragePlaytime(

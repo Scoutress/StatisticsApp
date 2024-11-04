@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.entity.discord.DiscordTicketsReactions;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDataItem;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
+import com.scoutress.KaimuxAdminStats.repositories.discord.DiscordTicketsReactionsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
@@ -27,6 +29,7 @@ public class DataExtractingServiceImpl implements DataExtractingService {
   public final DailyPlaytimeRepository dailyPlaytimeRepository;
   public final EmployeeCodesRepository employeeCodesRepository;
   public final EmployeeRepository employeeRepository;
+  public final DiscordTicketsReactionsRepository discordTicketsReactionsRepository;
 
   public DataExtractingServiceImpl(
       PlaytimeSessionsRepository playtimeSessionsRepository,
@@ -34,7 +37,8 @@ public class DataExtractingServiceImpl implements DataExtractingService {
       ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository,
       DailyPlaytimeRepository dailyPlaytimeRepository,
       EmployeeCodesRepository employeeCodesRepository,
-      EmployeeRepository employeeRepository) {
+      EmployeeRepository employeeRepository,
+      DiscordTicketsReactionsRepository discordTicketsReactionsRepository) {
 
     this.playtimeSessionsRepository = playtimeSessionsRepository;
     this.sanitazedDataRepository = sanitazedDataRepository;
@@ -42,6 +46,7 @@ public class DataExtractingServiceImpl implements DataExtractingService {
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.employeeCodesRepository = employeeCodesRepository;
     this.employeeRepository = employeeRepository;
+    this.discordTicketsReactionsRepository = discordTicketsReactionsRepository;
   }
 
   @Override
@@ -65,12 +70,17 @@ public class DataExtractingServiceImpl implements DataExtractingService {
   }
 
   @Override
-  public List<EmployeeCodes> getAidsFromEmployeeCodes() {
+  public List<EmployeeCodes> getAllEmployeeCodes() {
     return employeeCodesRepository.findAll();
   }
 
   @Override
   public List<Employee> getAllEmployees() {
     return employeeRepository.findAll();
+  }
+
+  @Override
+  public List<DiscordTicketsReactions> getAllDcTicketReactions() {
+    return discordTicketsReactionsRepository.findAll();
   }
 }

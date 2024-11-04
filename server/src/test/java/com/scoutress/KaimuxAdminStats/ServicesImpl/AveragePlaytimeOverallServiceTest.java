@@ -55,7 +55,7 @@ public class AveragePlaytimeOverallServiceTest {
         new Employee((short) 1, "firstName", "lastName", "email", "phone", "role", LocalDate.now().minusDays(11)));
 
     when(dataExtractingService.getDailyPlaytimeData()).thenReturn(playtimes);
-    when(dataExtractingService.getAidsFromEmployeeCodes()).thenReturn(employeeAids);
+    when(dataExtractingService.getAllEmployeeCodes()).thenReturn(employeeAids);
     when(dataExtractingService.getAllEmployees()).thenReturn(employees);
 
     List<AveragePlaytimeOverall> result = averagePlaytimeService.calculateAveragePlaytime(playtimes, employeeAids,

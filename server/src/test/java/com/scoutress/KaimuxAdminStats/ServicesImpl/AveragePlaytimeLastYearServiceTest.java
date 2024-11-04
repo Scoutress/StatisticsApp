@@ -59,7 +59,7 @@ class AveragePlaytimeLastYearServiceTest {
         new Employee((short) 1, "John Doe", "Department", "Position", "Email", "Phone", LocalDate.now()));
 
     when(dataExtractingService.getDailyPlaytimeData()).thenReturn(dailyPlaytimes);
-    when(dataExtractingService.getAidsFromEmployeeCodes()).thenReturn(employeeCodes);
+    when(dataExtractingService.getAllEmployeeCodes()).thenReturn(employeeCodes);
     when(dataExtractingService.getAllEmployees()).thenReturn(employees);
 
     // Act

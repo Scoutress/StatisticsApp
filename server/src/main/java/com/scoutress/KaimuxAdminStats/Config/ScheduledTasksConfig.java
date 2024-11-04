@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsReactionsService;
+import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.servicesimpl.discord.DiscordTicketsReactionsServiceImpl;
 
 import jakarta.transaction.Transactional;
@@ -18,13 +19,17 @@ import jakarta.transaction.Transactional;
 public class ScheduledTasksConfig {
 
 	private final DiscordTicketsReactionsService discordTicketsReactionsService;
+	private final DiscordTicketsService discordTicketsService;
 
-	public ScheduledTasksConfig(DiscordTicketsReactionsServiceImpl discordTicketsReactionsService) {
+	public ScheduledTasksConfig(
+			DiscordTicketsReactionsServiceImpl discordTicketsReactionsService,
+			DiscordTicketsService discordTicketsService) {
 		this.discordTicketsReactionsService = discordTicketsReactionsService;
+		this.discordTicketsService = discordTicketsService;
 	}
 
 	// @Scheduled(cron = "0 0 * * * *")
-	// @Scheduled(cron = "0 38 * * * *")
+	// @Scheduled(cron = "0 19 * * * *")
 	@Transactional
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
@@ -36,6 +41,8 @@ public class ScheduledTasksConfig {
 		// } catch (JSONException e) {
 		// }
 		// }, "Discord API Call");
+
+		discordTicketsService.convertDiscordTicketsResponses();
 
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");

@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.services.discord;
+package com.scoutress.KaimuxAdminStats.services.discordTickets;
 
 public interface DiscordTicketsService {
 

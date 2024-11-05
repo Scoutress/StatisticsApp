@@ -2,7 +2,7 @@ package com.scoutress.KaimuxAdminStats.services;
 
 import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.entity.discord.DiscordTicketsReactions;
+import com.scoutress.KaimuxAdminStats.entity.discordTickets.DiscordTicketsReactions;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;

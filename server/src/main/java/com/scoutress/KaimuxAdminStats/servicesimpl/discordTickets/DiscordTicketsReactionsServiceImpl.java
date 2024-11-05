@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.discord;
+package com.scoutress.KaimuxAdminStats.servicesimpl.discordTickets;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,9 +19,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.scoutress.KaimuxAdminStats.config.KaimuxWebsiteConfig;
-import com.scoutress.KaimuxAdminStats.entity.discord.DiscordTicketsReactions;
-import com.scoutress.KaimuxAdminStats.repositories.discord.DiscordTicketsReactionsRepository;
-import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsReactionsService;
+import com.scoutress.KaimuxAdminStats.entity.discordTickets.DiscordTicketsReactions;
+import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DiscordTicketsReactionsRepository;
+import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsReactionsService;
 
 @Service
 public class DiscordTicketsReactionsServiceImpl implements DiscordTicketsReactionsService {

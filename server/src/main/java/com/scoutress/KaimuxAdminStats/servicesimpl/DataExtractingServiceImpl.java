@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.entity.discord.DiscordTicketsReactions;
+import com.scoutress.KaimuxAdminStats.entity.discordTickets.DiscordTicketsReactions;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDataItem;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
-import com.scoutress.KaimuxAdminStats.repositories.discord.DiscordTicketsReactionsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DiscordTicketsReactionsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;

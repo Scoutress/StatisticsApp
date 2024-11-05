@@ -8,9 +8,9 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsReactionsService;
-import com.scoutress.KaimuxAdminStats.services.discord.DiscordTicketsService;
-import com.scoutress.KaimuxAdminStats.servicesimpl.discord.DiscordTicketsReactionsServiceImpl;
+import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsReactionsService;
+import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
+import com.scoutress.KaimuxAdminStats.servicesimpl.discordTickets.DiscordTicketsReactionsServiceImpl;
 
 import jakarta.transaction.Transactional;
 

@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsReactionsService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsAnswersService;
+import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 import com.scoutress.KaimuxAdminStats.servicesimpl.discordTickets.DiscordTicketsReactionsServiceImpl;
 
 import jakarta.transaction.Transactional;
@@ -23,20 +23,26 @@ public class ScheduledTasksConfig {
 
 	@SuppressWarnings("unused")
 	private final DiscordTicketsReactionsService discordTicketsReactionsService;
+	@SuppressWarnings("unused")
 	private final DiscordTicketsService discordTicketsService;
+	@SuppressWarnings("unused")
 	private final MinecraftTicketsAnswersService minecraftTicketsAnswersService;
+	@SuppressWarnings("unused")
+	private final MinecraftTicketsService minecraftTicketsService;
 
 	public ScheduledTasksConfig(
 			DiscordTicketsReactionsServiceImpl discordTicketsReactionsService,
 			DiscordTicketsService discordTicketsService,
-			MinecraftTicketsAnswersService minecraftTicketsAnswersService) {
+			MinecraftTicketsAnswersService minecraftTicketsAnswersService,
+			MinecraftTicketsService minecraftTicketsService) {
 		this.discordTicketsReactionsService = discordTicketsReactionsService;
 		this.discordTicketsService = discordTicketsService;
 		this.minecraftTicketsAnswersService = minecraftTicketsAnswersService;
+		this.minecraftTicketsService = minecraftTicketsService;
 	}
 
 	// @Scheduled(cron = "0 0 * * * *")
-	@Scheduled(cron = "0 6 * * * *")
+	@Scheduled(cron = "0 47 * * * *")
 	@Transactional
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
@@ -49,19 +55,20 @@ public class ScheduledTasksConfig {
 		// }
 		// }, "Discord API Call");
 
-		measureExecutionTime(() -> {
-			try {
-				minecraftTicketsAnswersService.fetchAndSaveData();
-			} catch (JSONException e) {
-			}
-		}, "Discord API Call");
+		// measureExecutionTime(() -> {
+		// try {
+		// minecraftTicketsAnswersService.fetchAndSaveData();
+		// } catch (JSONException e) {
+		// }
+		// }, "Discord API Call");
 
-		discordTicketsService.convertDiscordTicketsResponses();
+		// minecraftTicketsService.convertMinecraftTicketsAnswers();
 
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 
+	@SuppressWarnings("unused")
 	private void measureExecutionTime(Runnable task, String taskName) {
 		Instant start = Instant.now();
 		System.out.println("");

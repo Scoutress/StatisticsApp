@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.scoutress.KaimuxAdminStats.services.ProjectVisitorsRawDataService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsReactionsService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsAnswersService;
@@ -29,20 +30,23 @@ public class ScheduledTasksConfig {
 	private final MinecraftTicketsAnswersService minecraftTicketsAnswersService;
 	@SuppressWarnings("unused")
 	private final MinecraftTicketsService minecraftTicketsService;
+	private final ProjectVisitorsRawDataService projectVisitorsRawDataService;
 
 	public ScheduledTasksConfig(
 			DiscordTicketsReactionsServiceImpl discordTicketsReactionsService,
 			DiscordTicketsService discordTicketsService,
 			MinecraftTicketsAnswersService minecraftTicketsAnswersService,
-			MinecraftTicketsService minecraftTicketsService) {
+			MinecraftTicketsService minecraftTicketsService,
+			ProjectVisitorsRawDataService projectVisitorsRawDataService) {
 		this.discordTicketsReactionsService = discordTicketsReactionsService;
 		this.discordTicketsService = discordTicketsService;
 		this.minecraftTicketsAnswersService = minecraftTicketsAnswersService;
 		this.minecraftTicketsService = minecraftTicketsService;
+		this.projectVisitorsRawDataService = projectVisitorsRawDataService;
 	}
 
 	// @Scheduled(cron = "0 0 * * * *")
-	@Scheduled(cron = "0 47 * * * *")
+	@Scheduled(cron = "0 45 * * * *")
 	@Transactional
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
@@ -61,6 +65,8 @@ public class ScheduledTasksConfig {
 		// } catch (JSONException e) {
 		// }
 		// }, "Discord API Call");
+
+			projectVisitorsRawDataService.fetchAndSaveData();
 
 		// minecraftTicketsService.convertMinecraftTicketsAnswers();
 

@@ -96,21 +96,31 @@ public class ProjectVisitorsRawDataServiceImpl implements ProjectVisitorsRawData
     JSONObject jsonObject = new JSONObject(jsonData);
     JSONArray dataArray = jsonObject.getJSONArray("data");
 
+    LocalDateTime latestDateTime = findLatestDateTime();
+
     for (int i = 0; i < dataArray.length(); i++) {
       JSONObject item = dataArray.getJSONObject(i);
 
-      ProjectVisitorsRawData entity = new ProjectVisitorsRawData();
-      entity.setIp(item.optString("ip", "unknown"));
-      entity.setType(item.optInt("type", 0));
-
-      int premiumInt = item.optInt("is_premium", 0);
-      entity.setPremium(premiumInt == 1);
-
       String createdAt = item.optString("created_at", "1970-01-01T00:00:00");
       LocalDateTime dateTime = LocalDateTime.parse(createdAt, DateTimeFormatter.ISO_DATE_TIME);
-      entity.setDateTime(dateTime);
 
-      projectVisitorsRawDataRepository.save(entity);
+      if (dateTime.isAfter(latestDateTime)) {
+        ProjectVisitorsRawData entity = new ProjectVisitorsRawData();
+        entity.setIp(item.optString("ip", "unknown"));
+        entity.setType(item.optInt("type", 0));
+        entity.setPremium(item.optInt("is_premium", 0) == 1);
+        entity.setDateTime(dateTime);
+
+        projectVisitorsRawDataRepository.save(entity);
+      }
     }
+  }
+
+  public LocalDateTime findLatestDateTime() {
+    return projectVisitorsRawDataRepository.findAll()
+        .stream()
+        .map(ProjectVisitorsRawData::getDateTime)
+        .max(LocalDateTime::compareTo)
+        .orElse(LocalDateTime.MIN);
   }
 }

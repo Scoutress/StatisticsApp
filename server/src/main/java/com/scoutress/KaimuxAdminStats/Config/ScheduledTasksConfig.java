@@ -46,7 +46,7 @@ public class ScheduledTasksConfig {
 	}
 
 	// @Scheduled(cron = "0 0 * * * *")
-	@Scheduled(cron = "0 8 * * * *")
+	@Scheduled(cron = "0 28 20 * * *")
 	@Transactional
 	public void run() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
@@ -67,6 +67,8 @@ public class ScheduledTasksConfig {
 		// }, "Discord API Call");
 
 		projectVisitorsRawDataService.fetchAndSaveData();
+
+		// projectVisitorsRawDataService.fetchAndSaveDataFromLastSavedPage();
 
 		// minecraftTicketsService.convertMinecraftTicketsAnswers();
 

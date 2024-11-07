@@ -47,26 +47,15 @@ public class ProjectVisitorsRawDataServiceImpl implements ProjectVisitorsRawData
   }
 
   private void fetchDataWithDelay(int level) {
-    System.out.println("DEBUG: Scheduling data fetch for level " + level);
-
     executorService.schedule(() -> {
       try {
         String jsonData = fetchDataFromApi(level);
-        System.out.println("DEBUG: Fetched data from API at level " + level);
-
         if (!isDataEmpty(jsonData)) {
-          System.out.println("DEBUG: Data is not empty at level " + level + ", saving to database...");
           saveDataToDatabase(jsonData);
-          System.out.println("DEBUG: Data saved for level " + level);
 
-          fetchDataWithDelay(level + 1); // Recursively fetch next level
-        } else {
-          System.out.println("DEBUG: No more data available at level " + level);
+          fetchDataWithDelay(level + 1);
         }
-      } catch (JSONException e) {
-        System.err.println("JSON Parsing Error at level " + level + ": " + e.getMessage());
-      } catch (HttpClientErrorException e) {
-        System.err.println("HTTP Error at level " + level + ": " + e.getMessage());
+      } catch (HttpClientErrorException | JSONException e) {
       }
     }, 2, TimeUnit.SECONDS);
   }
@@ -84,14 +73,12 @@ public class ProjectVisitorsRawDataServiceImpl implements ProjectVisitorsRawData
     HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
     try {
-      System.out.println("DEBUG: Sending request to API for level " + level);
       ResponseEntity<String> response = restTemplate.exchange(
           url + level,
           HttpMethod.POST,
           entity,
           String.class);
 
-      System.out.println("DEBUG: Received response from API for level " + level);
       return response.getBody();
     } catch (HttpClientErrorException e) {
       System.err.println("HTTP Error while fetching level " + level + ": " + e.getMessage());
@@ -109,8 +96,6 @@ public class ProjectVisitorsRawDataServiceImpl implements ProjectVisitorsRawData
     JSONObject jsonObject = new JSONObject(jsonData);
     JSONArray dataArray = jsonObject.getJSONArray("data");
 
-    System.out.println("DEBUG: Saving data to database. Number of records to save: " + dataArray.length());
-
     for (int i = 0; i < dataArray.length(); i++) {
       JSONObject item = dataArray.getJSONObject(i);
 
@@ -126,7 +111,6 @@ public class ProjectVisitorsRawDataServiceImpl implements ProjectVisitorsRawData
       entity.setDateTime(dateTime);
 
       projectVisitorsRawDataRepository.save(entity);
-      System.out.println("DEBUG: Record saved for IP: " + entity.getIp() + ", DateTime: " + entity.getDateTime());
     }
   }
 
@@ -140,13 +124,10 @@ public class ProjectVisitorsRawDataServiceImpl implements ProjectVisitorsRawData
 
   @Override
   public void fetchAndSaveDataFromLastSavedPage() {
-    int totalRecords = (int) projectVisitorsRawDataRepository.count(); // Get current record count
+    int totalRecords = (int) projectVisitorsRawDataRepository.count();
     int recordsPerPage = 30;
-    int startLevel = (totalRecords / recordsPerPage) + 1; // Calculate the starting page level
+    int startLevel = (totalRecords / recordsPerPage) + 1;
 
-    System.out.println("DEBUG: Total records in database: " + totalRecords);
-    System.out.println("DEBUG: Starting data fetch from level: " + startLevel);
-
-    fetchDataWithDelay(startLevel); // Start fetching from the calculated level
+    fetchDataWithDelay(startLevel);
   }
 }

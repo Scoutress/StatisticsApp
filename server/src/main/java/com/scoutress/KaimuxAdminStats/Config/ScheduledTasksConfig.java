@@ -45,38 +45,20 @@ public class ScheduledTasksConfig {
 		this.projectVisitorsRawDataService = projectVisitorsRawDataService;
 	}
 
-	// @Scheduled(cron = "0 0 * * * *")
-	@Scheduled(cron = "0 28 20 * * *")
+	@Scheduled(initialDelay = 0, fixedRate = 86400000)
 	@Transactional
-	public void run() {
+	public void runDataExtractionFromAPI() {
 		System.out.println("Scheduled tasks started at: " + getCurrentTimestamp());
 		System.out.println("");
 
-		// measureExecutionTime(() -> {
-		// try {
-		// discordTicketsReactionsService.fetchAndSaveData();
-		// } catch (JSONException e) {
-		// }
-		// }, "Discord API Call");
-
-		// measureExecutionTime(() -> {
-		// try {
-		// minecraftTicketsAnswersService.fetchAndSaveData();
-		// } catch (JSONException e) {
-		// }
-		// }, "Discord API Call");
-
-		projectVisitorsRawDataService.fetchAndSaveData();
-
-		// projectVisitorsRawDataService.fetchAndSaveDataFromLastSavedPage();
-
-		// minecraftTicketsService.convertMinecraftTicketsAnswers();
+		measureExecutionTime(() -> discordTicketsReactionsService.fetchAndSaveData(), "Discord API Call");
+		measureExecutionTime(() -> minecraftTicketsAnswersService.fetchAndSaveData(), "Minecraft API Call");
+		measureExecutionTime(() -> projectVisitorsRawDataService.fetchAndSaveData(), "Visitors API Call");
 
 		System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 
-	@SuppressWarnings("unused")
 	private void measureExecutionTime(Runnable task, String taskName) {
 		Instant start = Instant.now();
 		System.out.println("");

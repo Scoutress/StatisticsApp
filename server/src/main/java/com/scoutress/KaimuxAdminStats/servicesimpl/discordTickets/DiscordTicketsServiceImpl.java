@@ -144,6 +144,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
     convertedData.forEach(discordTicketsRepository::save);
   }
 
+  @Override
   @Transactional
   public void removeDuplicateReactions() {
     List<DiscordTicketsReactions> allReactions = discordTicketsReactionsRepository.findAll();

@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
-import com.scoutress.KaimuxAdminStats.servicesimpl.discordTickets.DiscordTicketsServiceImpl;
+import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 
 import jakarta.transaction.Transactional;
 
@@ -17,13 +17,13 @@ import jakarta.transaction.Transactional;
 public class ScheduledTasksConfig {
 
   private final DataFetchingService dataFetchingService;
-  private final DiscordTicketsServiceImpl discordTicketsServiceImpl;
+  private final DiscordTicketsService discordTicketsService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
-      DiscordTicketsServiceImpl discordTicketsServiceImpl) {
+      DiscordTicketsService discordTicketsService) {
     this.dataFetchingService = dataFetchingService;
-    this.discordTicketsServiceImpl = discordTicketsServiceImpl;
+    this.discordTicketsService = discordTicketsService;
   }
 
   @Scheduled(initialDelay = 1000, fixedRate = 86400000)
@@ -65,7 +65,7 @@ public class ScheduledTasksConfig {
 
   private void runDuplicateRemover() {
     System.out.println("Running: runDuplicateRemover");
-    discordTicketsServiceImpl.removeDuplicateReactions();
+    discordTicketsService.removeDuplicateReactions();
     System.out.println("Completed: runDuplicateRemover");
     System.out.println("");
   }

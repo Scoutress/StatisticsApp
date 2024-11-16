@@ -35,7 +35,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   @Override
-  public void calculateProductivity() {
+  public void calculateDailyProductivity() {
     List<ObjectiveProductivity> objProd = objectiveProductivityRepository.findAll();
     List<SubjectiveProductivity> subjProd = subjectiveProductivityRepository.findAll();
 
@@ -71,5 +71,92 @@ public class ProductivityServiceImpl implements ProductivityService {
     }
 
     productivityRepository.saveAll(productivityResults);
+  }
+
+  @Override
+  public void calculateDailyObjectiveProductivity() {
+    // List<DailyPlaytime> dailyPlaytime = dailyPlaytimeRepository.findAll();
+    // List<DailyAfkPlaytime> dailyAfkPlaytime =
+    // dailyAfkPlaytimeRepository.findAll();
+    // List<DailyDiscordTickets> dailyDiscordTickets =
+    // dailyDiscordTicketsRepository.findAll();
+    // List<DailyDiscordTicketsComp> dailyDiscordTicketsComp =
+    // dailyDiscordTicketsCompRepository.findAll();
+    // List<DailyDiscordMessages> dailyDiscordMessages =
+    // dailyDiscordMessagesRepository.findAll();
+    // List<DailyMinecraftTickets> dailyMinecraftTickets =
+    // dailyMinecraftTicketsRepository.findAll();
+    // List<DailyMinecraftTicketsComp> dailyMinecraftTicketsComp =
+    // dailyMinecraftTicketsCompRepository.findAll();
+
+    // Map<Short, List<Double>> groupedValues = new HashMap<>();
+
+    // mergeValues(groupedValues, dailyPlaytime
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyPlaytime::getAid,
+    // Collectors.mapping(
+    // DailyPlaytime::getValue,
+    // Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyAfkPlaytime
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyAfkPlaytime::getAid,
+    // Collectors.mapping(
+    // DailyAfkPlaytime::getValue,
+    // Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyDiscordTickets
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyDiscordTickets::getAid,
+    // Collectors.mapping(
+    // DailyDiscordTickets::getValue,
+    // Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyDiscordTicketsComp
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyDiscordTicketsComp::getAid,
+    // Collectors.mapping(
+    // DailyDiscordTicketsComp::getValue,
+    // Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyDiscordMessages
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyDiscordMessages::getAid,
+    // Collectors.mapping(
+    // DailyDiscordMessages::getValue,
+    // Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyMinecraftTickets
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyMinecraftTickets::getAid,
+    // Collectors.mapping(
+    // DailyMinecraftTickets::getValue,
+    // Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyMinecraftTicketsComp
+    // .stream()
+    // .collect(Collectors.groupingBy(DailyMinecraftTicketsComp::getAid,
+    // Collectors.mapping(
+    // DailyMinecraftTicketsComp::getValue,
+    // Collectors.toList()))));
+
+    // List<ObjectiveProductivity> dailyObjectiveProductivityResults =
+    // groupedValues.entrySet().stream()
+    // .map(entry -> {
+    // Short aid = entry.getKey();
+    // double averageValue =
+    // entry.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+    // return new ObjectiveProductivity(null, aid, averageValue);
+    // })
+    // .collect(Collectors.toList());
+
+    // objectiveProductivityRepository.saveAll(dailyObjectiveProductivityResults);
+  }
+
+  private void mergeValues(Map<Short, List<Double>> mainMap, Map<Short, List<Double>> newMap) {
+    newMap.forEach((key, valueList) -> mainMap.merge(key, valueList, (existing, newValues) -> {
+      existing.addAll(newValues);
+      return existing;
+    }));
   }
 }

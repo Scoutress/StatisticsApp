@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
+import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
 import jakarta.transaction.Transactional;
 
@@ -18,12 +19,15 @@ public class ScheduledTasksConfig {
 
   private final DataFetchingService dataFetchingService;
   private final DiscordTicketsService discordTicketsService;
+  private final ProductivityService productivityService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
-      DiscordTicketsService discordTicketsService) {
+      DiscordTicketsService discordTicketsService,
+      ProductivityService productivityService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
+    this.productivityService = productivityService;
   }
 
   @Scheduled(initialDelay = 1000, fixedRate = 86400000)
@@ -42,6 +46,8 @@ public class ScheduledTasksConfig {
     // runDiscordTicketsDataConvertor();
 
     // runDiscordTicketsConvertedDataDuplicateRemover();
+
+    // runProductivityCalculations();
 
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
@@ -86,6 +92,13 @@ public class ScheduledTasksConfig {
     System.out.println("Running: runDiscordTicketsConvertedDataDuplicateRemover");
     discordTicketsService.removeDuplicateTicketsData();
     System.out.println("Completed: runDiscordTicketsConvertedDataDuplicateRemover");
+    System.out.println("");
+  }
+
+  private void runProductivityCalculations() {
+    System.out.println("Running: runProductivityCalculations");
+    productivityService.calculateProductivity();
+    System.out.println("Completed: runProductivityCalculations");
     System.out.println("");
   }
 

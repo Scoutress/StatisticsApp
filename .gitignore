@@ -47,3 +47,5 @@ yarn-error.log*
 # Kiti nereikalingi failai
 *.bak
 *.backup
+
+ToDoList.txt

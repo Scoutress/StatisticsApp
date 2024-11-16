@@ -11,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "subjective_productivity")
+@Table(name = "daily_objective_productivity")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubjectiveProductivity {
+public class DailyObjectiveProductivity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

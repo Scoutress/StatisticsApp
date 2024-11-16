@@ -47,7 +47,8 @@ public class ScheduledTasksConfig {
 
     // runDiscordTicketsConvertedDataDuplicateRemover();
 
-    // runProductivityCalculations();
+    // runDailyObjectiveProductivityCalculations();
+    // runDailyProductivityCalculations();
 
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
@@ -95,9 +96,16 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
-  private void runProductivityCalculations() {
+  private void runDailyObjectiveProductivityCalculations() {
+    System.out.println("Running: runDailyObjectiveProductivityCalculations");
+    productivityService.calculateDailyObjectiveProductivity();
+    System.out.println("Completed: runDailyObjectiveProductivityCalculations");
+    System.out.println("");
+  }
+
+  private void runDailyProductivityCalculations() {
     System.out.println("Running: runProductivityCalculations");
-    productivityService.calculateProductivity();
+    productivityService.calculateDailyProductivity();
     System.out.println("Completed: runProductivityCalculations");
     System.out.println("");
   }

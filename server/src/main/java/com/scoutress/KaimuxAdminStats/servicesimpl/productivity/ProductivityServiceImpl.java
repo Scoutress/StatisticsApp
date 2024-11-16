@@ -10,25 +10,25 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.entity.productivity.ObjectiveProductivity;
-import com.scoutress.KaimuxAdminStats.entity.productivity.Productivity;
-import com.scoutress.KaimuxAdminStats.entity.productivity.SubjectiveProductivity;
-import com.scoutress.KaimuxAdminStats.repositories.productivity.ObjectiveProductivityRepository;
-import com.scoutress.KaimuxAdminStats.repositories.productivity.ProductivityRepository;
-import com.scoutress.KaimuxAdminStats.repositories.productivity.SubjectiveProductivityRepository;
+import com.scoutress.KaimuxAdminStats.entity.productivity.DailyObjectiveProductivity;
+import com.scoutress.KaimuxAdminStats.entity.productivity.DailyProductivity;
+import com.scoutress.KaimuxAdminStats.entity.productivity.DailySubjectiveProductivity;
+import com.scoutress.KaimuxAdminStats.repositories.productivity.DailyObjectiveProductivityRepository;
+import com.scoutress.KaimuxAdminStats.repositories.productivity.DailyProductivityRepository;
+import com.scoutress.KaimuxAdminStats.repositories.productivity.DailySubjectiveProductivityRepository;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
 @Service
 public class ProductivityServiceImpl implements ProductivityService {
 
-  private final ObjectiveProductivityRepository objectiveProductivityRepository;
-  private final SubjectiveProductivityRepository subjectiveProductivityRepository;
-  private final ProductivityRepository productivityRepository;
+  private final DailyObjectiveProductivityRepository objectiveProductivityRepository;
+  private final DailySubjectiveProductivityRepository subjectiveProductivityRepository;
+  private final DailyProductivityRepository productivityRepository;
 
   public ProductivityServiceImpl(
-      ObjectiveProductivityRepository objectiveProductivityRepository,
-      SubjectiveProductivityRepository subjectiveProductivityRepository,
-      ProductivityRepository productivityRepository) {
+      DailyObjectiveProductivityRepository objectiveProductivityRepository,
+      DailySubjectiveProductivityRepository subjectiveProductivityRepository,
+      DailyProductivityRepository productivityRepository) {
     this.objectiveProductivityRepository = objectiveProductivityRepository;
     this.subjectiveProductivityRepository = subjectiveProductivityRepository;
     this.productivityRepository = productivityRepository;
@@ -36,24 +36,24 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   @Override
   public void calculateDailyProductivity() {
-    List<ObjectiveProductivity> objProd = objectiveProductivityRepository.findAll();
-    List<SubjectiveProductivity> subjProd = subjectiveProductivityRepository.findAll();
+    List<DailyObjectiveProductivity> objProd = objectiveProductivityRepository.findAll();
+    List<DailySubjectiveProductivity> subjProd = subjectiveProductivityRepository.findAll();
 
     Map<Short, List<Double>> objectiveValues = objProd.stream()
         .collect(Collectors.groupingBy(
-            ObjectiveProductivity::getAid,
-            Collectors.mapping(ObjectiveProductivity::getValue, Collectors.toList())));
+            DailyObjectiveProductivity::getAid,
+            Collectors.mapping(DailyObjectiveProductivity::getValue, Collectors.toList())));
 
     Map<Short, List<Double>> subjectiveValues = subjProd.stream()
         .collect(Collectors.groupingBy(
-            SubjectiveProductivity::getAid,
-            Collectors.mapping(SubjectiveProductivity::getValue, Collectors.toList())));
+            DailySubjectiveProductivity::getAid,
+            Collectors.mapping(DailySubjectiveProductivity::getValue, Collectors.toList())));
 
     Set<Short> allAids = new HashSet<>();
     allAids.addAll(objectiveValues.keySet());
     allAids.addAll(subjectiveValues.keySet());
 
-    List<Productivity> productivityResults = new ArrayList<>();
+    List<DailyProductivity> productivityResults = new ArrayList<>();
 
     for (Short aid : allAids) {
       List<Double> objValues = objectiveValues.getOrDefault(aid, Collections.emptyList());
@@ -64,7 +64,7 @@ public class ProductivityServiceImpl implements ProductivityService {
 
       double finalValue = (objAvg + subjAvg) / 2;
 
-      Productivity productivity = new Productivity();
+      DailyProductivity productivity = new DailyProductivity();
       productivity.setAid(aid);
       productivity.setValue(finalValue);
       productivityResults.add(productivity);

@@ -5,4 +5,6 @@ public interface DiscordTicketsService {
   void convertDiscordTicketsResponses();
 
   void removeDuplicateReactions();
+
+  void removeDuplicateTicketsData();
 }

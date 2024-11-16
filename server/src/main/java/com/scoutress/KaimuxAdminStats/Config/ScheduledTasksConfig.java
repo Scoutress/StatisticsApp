@@ -36,7 +36,12 @@ public class ScheduledTasksConfig {
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();
     // runVisitorsDataExtractionFromAPI();
-    // runDuplicateRemover();
+
+    // runDiscordTicketsRawDataDuplicateRemover();
+
+    // runDiscordTicketsDataConvertor();
+
+    // runDiscordTicketsConvertedDataDuplicateRemover();
 
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
@@ -63,9 +68,23 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
-  private void runDuplicateRemover() {
+  private void runDiscordTicketsRawDataDuplicateRemover() {
     System.out.println("Running: runDuplicateRemover");
     discordTicketsService.removeDuplicateReactions();
+    System.out.println("Completed: runDuplicateRemover");
+    System.out.println("");
+  }
+
+  private void runDiscordTicketsDataConvertor() {
+    System.out.println("Running: runDuplicateRemover");
+    discordTicketsService.convertDiscordTicketsResponses();
+    System.out.println("Completed: runDuplicateRemover");
+    System.out.println("");
+  }
+
+  private void runDiscordTicketsConvertedDataDuplicateRemover() {
+    System.out.println("Running: runDuplicateRemover");
+    discordTicketsService.removeDuplicateTicketsData();
     System.out.println("Completed: runDuplicateRemover");
     System.out.println("");
   }

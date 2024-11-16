@@ -165,4 +165,26 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
 
     discordTicketsReactionsRepository.deleteAllById(duplicateIds);
   }
+
+  @Override
+  @Transactional
+  public void removeDuplicateTicketsData() {
+    List<DiscordTickets> allReactions = discordTicketsRepository.findAll();
+
+    Map<List<Object>, List<Long>> groupedReactions = allReactions.stream()
+        .collect(Collectors.groupingBy(
+            reaction -> List.of(
+                reaction.getEmployeeId(),
+                reaction.getDate()),
+            Collectors.mapping(
+                DiscordTickets::getId,
+                Collectors.toList())));
+
+    List<Long> duplicateIds = groupedReactions.values()
+        .stream()
+        .flatMap(ids -> ids.stream().skip(1))
+        .collect(Collectors.toList());
+
+    discordTicketsRepository.deleteAllById(duplicateIds);
+  }
 }

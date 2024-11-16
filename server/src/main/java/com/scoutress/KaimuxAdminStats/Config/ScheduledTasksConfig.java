@@ -69,23 +69,23 @@ public class ScheduledTasksConfig {
   }
 
   private void runDiscordTicketsRawDataDuplicateRemover() {
-    System.out.println("Running: runDuplicateRemover");
+    System.out.println("Running: runDiscordTicketsRawDataDuplicateRemover");
     discordTicketsService.removeDuplicateReactions();
-    System.out.println("Completed: runDuplicateRemover");
+    System.out.println("Completed: runDiscordTicketsRawDataDuplicateRemover");
     System.out.println("");
   }
 
   private void runDiscordTicketsDataConvertor() {
-    System.out.println("Running: runDuplicateRemover");
+    System.out.println("Running: runDiscordTicketsDataConvertor");
     discordTicketsService.convertDiscordTicketsResponses();
-    System.out.println("Completed: runDuplicateRemover");
+    System.out.println("Completed: runDiscordTicketsDataConvertor");
     System.out.println("");
   }
 
   private void runDiscordTicketsConvertedDataDuplicateRemover() {
-    System.out.println("Running: runDuplicateRemover");
+    System.out.println("Running: runDiscordTicketsConvertedDataDuplicateRemover");
     discordTicketsService.removeDuplicateTicketsData();
-    System.out.println("Completed: runDuplicateRemover");
+    System.out.println("Completed: runDiscordTicketsConvertedDataDuplicateRemover");
     System.out.println("");
   }
 

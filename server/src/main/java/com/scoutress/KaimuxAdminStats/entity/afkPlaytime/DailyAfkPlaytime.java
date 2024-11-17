@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_afk_daily_playtime")
+@Table(name = "daily_afk_playtime")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

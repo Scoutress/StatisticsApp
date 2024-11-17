@@ -54,6 +54,7 @@ public class ScheduledTasksConfig {
     System.out.println("-----------------------------------------------");
   }
 
+  @SuppressWarnings("unused")
   private void runDiscordDataExtractionFromAPI() {
     System.out.println("Running: runDiscordDataExtractionFromAPI");
     dataFetchingService.fetchAndSaveData(1, "discord");
@@ -61,6 +62,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runMinecraftDataExtractionFromAPI() {
     System.out.println("Running: runMinecraftDataExtractionFromAPI");
     dataFetchingService.fetchAndSaveData(1, "minecraft");
@@ -68,6 +70,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runVisitorsDataExtractionFromAPI() {
     System.out.println("Running: runVisitorsDataExtractionFromAPI");
     dataFetchingService.fetchAndSaveData(1, "visitors");
@@ -75,6 +78,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runDiscordTicketsRawDataDuplicateRemover() {
     System.out.println("Running: runDiscordTicketsRawDataDuplicateRemover");
     discordTicketsService.removeDuplicateReactions();
@@ -82,6 +86,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runDiscordTicketsDataConvertor() {
     System.out.println("Running: runDiscordTicketsDataConvertor");
     discordTicketsService.convertDiscordTicketsResponses();
@@ -89,6 +94,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runDiscordTicketsConvertedDataDuplicateRemover() {
     System.out.println("Running: runDiscordTicketsConvertedDataDuplicateRemover");
     discordTicketsService.removeDuplicateTicketsData();
@@ -96,6 +102,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runDailyObjectiveProductivityCalculations() {
     System.out.println("Running: runDailyObjectiveProductivityCalculations");
     productivityService.calculateDailyObjectiveProductivity();
@@ -103,6 +110,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
   }
 
+  @SuppressWarnings("unused")
   private void runDailyProductivityCalculations() {
     System.out.println("Running: runProductivityCalculations");
     productivityService.calculateDailyProductivity();

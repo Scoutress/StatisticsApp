@@ -2,5 +2,19 @@ package com.scoutress.KaimuxAdminStats.services;
 
 public interface DummyDataUploadingService {
 
-  public void uploadPlaytimeSessionsDummyData();
+  void uploadDailyPlaytimeDummyData();
+
+  void uploadDailyAfkPlaytimeDummyData();
+
+  void uploadDailyDiscordTicketsDummyData();
+
+  void uploadDailyDiscordTicketsComparedDummyData();
+
+  void uploadDailyDiscordMessagesDummyData();
+
+  void uploadDailyDiscordMessagesComparedDummyData();
+
+  void uploadDailyMinecraftTicketsDummyData();
+
+  void uploadDailyMinecraftTicketsComparedDummyData();
 }

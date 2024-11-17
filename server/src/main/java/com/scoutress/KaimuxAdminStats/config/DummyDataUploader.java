@@ -29,16 +29,22 @@ public class DummyDataUploader {
     System.out.println("Started DDU at: " + getCurrentTimestamp());
     System.out.println("");
 
-    // uploadPlaytimeAndAfkPlaytimeDummyData();
+    // uploadDummyData();
 
     System.out.println("Scheduled DDU at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
   }
 
   @SuppressWarnings("unused")
-  private void uploadPlaytimeAndAfkPlaytimeDummyData() {
-    System.out.println("Running: runProductivityCalculations");
-    dummyDataUploadingService.uploadPlaytimeSessionsDummyData();
+  private void uploadDummyData() {
+    dummyDataUploadingService.uploadDailyPlaytimeDummyData();
+    dummyDataUploadingService.uploadDailyAfkPlaytimeDummyData();
+    dummyDataUploadingService.uploadDailyDiscordTicketsDummyData();
+    dummyDataUploadingService.uploadDailyDiscordTicketsComparedDummyData();
+    dummyDataUploadingService.uploadDailyDiscordMessagesDummyData();
+    dummyDataUploadingService.uploadDailyDiscordMessagesComparedDummyData();
+    dummyDataUploadingService.uploadDailyMinecraftTicketsDummyData();
+    dummyDataUploadingService.uploadDailyMinecraftTicketsComparedDummyData();
     System.out.println("");
   }
 

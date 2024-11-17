@@ -2,6 +2,7 @@ package com.scoutress.KaimuxAdminStats.services;
 
 import java.util.List;
 
+import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.AfkPlaytimeRawData;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDataItem;
 
@@ -24,4 +25,13 @@ public interface DataFilterService {
 
   public List<SanitizedSessionData> filterSanitizedSessionsByAction(
       List<SanitizedSessionData> data, boolean action);
+
+  public List<AfkPlaytimeRawData> filterAfkSessionsByAid(
+      List<AfkPlaytimeRawData> dataItems, Short aid);
+
+  public List<AfkPlaytimeRawData> filterAfkSessionsByServer(
+      List<AfkPlaytimeRawData> sessionsForAid, String server);
+
+  public List<AfkPlaytimeRawData> filterAfkSessionsByAction(
+      List<AfkPlaytimeRawData> sessionsForServer, boolean action);
 }

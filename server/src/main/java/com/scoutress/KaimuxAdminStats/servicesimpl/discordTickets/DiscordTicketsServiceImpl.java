@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.entity.discordTickets.DiscordTickets;
+import com.scoutress.KaimuxAdminStats.entity.discordTickets.DailyDiscordTickets;
 import com.scoutress.KaimuxAdminStats.entity.discordTickets.DiscordTicketsReactions;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DiscordTicketsReactionsRepository;
@@ -40,7 +40,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
     List<DiscordTicketsReactions> ticketsReactions = extractDataFromResponsesTable();
     List<DiscordTicketsReactions> reactionsWithEmployeeIds = mapDiscordToEmployeeIds(ticketsReactions,
         employeeCodes);
-    List<DiscordTickets> convertedData = convertData(reactionsWithEmployeeIds);
+    List<DailyDiscordTickets> convertedData = convertData(reactionsWithEmployeeIds);
 
     saveDataToNewTable(convertedData);
   }
@@ -55,7 +55,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
     return data;
   }
 
-  public List<DiscordTickets> convertData(List<DiscordTicketsReactions> rawData) {
+  public List<DailyDiscordTickets> convertData(List<DiscordTicketsReactions> rawData) {
     Map<Long, Map<LocalDate, Long>> groupedData = rawData
         .stream()
         .collect(Collectors
@@ -96,7 +96,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
                 .entrySet()
                 .stream()
                 .map(
-                    dateEntry -> new DiscordTickets(
+                    dateEntry -> new DailyDiscordTickets(
                         null,
                         adminEntry
                             .getKey(),
@@ -139,7 +139,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
         .collect(Collectors.toList());
   }
 
-  private void saveDataToNewTable(List<DiscordTickets> convertedData) {
+  private void saveDataToNewTable(List<DailyDiscordTickets> convertedData) {
     convertedData.sort((a, b) -> a.getDate().compareTo(b.getDate()));
     convertedData.forEach(discordTicketsRepository::save);
   }
@@ -169,7 +169,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
   @Override
   @Transactional
   public void removeDuplicateTicketsData() {
-    List<DiscordTickets> allReactions = discordTicketsRepository.findAll();
+    List<DailyDiscordTickets> allReactions = discordTicketsRepository.findAll();
 
     Map<List<Object>, List<Long>> groupedReactions = allReactions.stream()
         .collect(Collectors.groupingBy(
@@ -177,7 +177,7 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
                 reaction.getEmployeeId(),
                 reaction.getDate()),
             Collectors.mapping(
-                DiscordTickets::getId,
+                DailyDiscordTickets::getId,
                 Collectors.toList())));
 
     List<Long> duplicateIds = groupedReactions.values()

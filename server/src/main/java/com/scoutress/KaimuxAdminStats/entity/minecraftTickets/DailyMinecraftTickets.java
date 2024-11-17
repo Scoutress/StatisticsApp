@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.discordTickets;
+package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
 import java.time.LocalDate;
 
@@ -13,11 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "discord_tickets")
+@Table(name = "daily_minecraft_tickets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiscordTickets {
+public class DailyMinecraftTickets {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

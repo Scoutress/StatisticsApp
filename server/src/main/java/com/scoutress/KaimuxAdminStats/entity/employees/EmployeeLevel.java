@@ -26,30 +26,9 @@ public class EmployeeLevel {
   @Column(name = "aid", nullable = false, unique = true)
   private Short aid;
 
-  @Column(name = "became_helper", nullable = true)
-  private LocalDate becameHelper;
+  @Column(name = "level", nullable = true)
+  private Short level;
 
-  @Column(name = "promoted_to_support", nullable = true)
-  private LocalDate promotedToSupport;
-
-  @Column(name = "promoted_to_chatmod", nullable = true)
-  private LocalDate promotedToChatMod;
-
-  @Column(name = "promoted_to_overseer", nullable = true)
-  private LocalDate promotedToOverseer;
-
-  @Column(name = "promoted_to_manager", nullable = true)
-  private LocalDate promotedToManager;
-
-  @Column(name = "demoted_to_overseer", nullable = true)
-  private LocalDate demotedToOverseer;
-
-  @Column(name = "demoted_to_chatmod", nullable = true)
-  private LocalDate demotedToChatMod;
-
-  @Column(name = "demoted_to_support", nullable = true)
-  private LocalDate demotedToSupport;
-
-  @Column(name = "demoted_to_helper", nullable = true)
-  private LocalDate demotedToHelper;
+  @Column(name = "date", nullable = true)
+  private LocalDate date;
 }

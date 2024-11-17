@@ -141,16 +141,23 @@ public class ProductivityServiceImpl implements ProductivityService {
     LocalDate oldestDate = findOldestDate(
         dailyPlaytime, dailyAfkPlaytime, dailyDiscordTickets, dailyDiscordTicketsComp,
         dailyDiscordMessages, dailyDiscordMessagesComp, dailyMinecraftTickets, dailyMinecraftTicketsComp);
-    LocalDate yesterday = LocalDate.now().minusDays(1);
+
+    LocalDate today = LocalDate.now();
 
     List<DailyObjectiveProductivity> results = new ArrayList<>();
+
     for (Employee employee : employees) {
-      EmployeeLevel levelInfo = getEmployeeLevelInfo(employee.getId());
-      for (LocalDate date = oldestDate; date.isBefore(yesterday); date = date.plusDays(1)) {
-        double productivity = calculateObjectiveProductivityForDay(
-            employee, levelInfo, date,
+      List<EmployeeLevel> levelHistory = employeeLevelRepository.findByAid(employee.getId());
+
+      for (LocalDate date = oldestDate; date.isBefore(today); date = date.plusDays(1)) {
+        String level = getEmployeeLevelForDate(levelHistory, date);
+        Map<String, Double> constants = getConstantsForLevel(level);
+
+        double productivity = calculateObjectiveProductivityForThatDay(
+            employee, date, constants,
             dailyPlaytime, dailyAfkPlaytime, dailyDiscordTickets, dailyDiscordTicketsComp,
             dailyDiscordMessages, dailyDiscordMessagesComp, dailyMinecraftTickets, dailyMinecraftTicketsComp);
+
         results.add(new DailyObjectiveProductivity(null, employee.getId(), productivity, date));
       }
     }
@@ -159,101 +166,117 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   private LocalDate findOldestDate(List<?>... dataLists) {
     return Arrays.stream(dataLists)
-        .flatMap(list -> list.stream().map(this::extractDate))
+        .flatMap(list -> list.stream().map(this::getDate))
         .min(LocalDate::compareTo)
         .orElseThrow(() -> new RuntimeException("No dates found"));
   }
 
-  private LocalDate extractDate(Object entity) {
-    if (entity instanceof DailyPlaytime playtime)
-      return playtime.getDate();
-    if (entity instanceof DailyAfkPlaytime afk)
-      return afk.getDate();
-    if (entity instanceof DailyDiscordTickets ticket)
-      return ticket.getDate();
-    if (entity instanceof DailyDiscordTicketsCompared ticketComp)
-      return ticketComp.getDate();
-    if (entity instanceof DailyDiscordMessages msg)
-      return msg.getDate();
-    if (entity instanceof DailyDiscordMessagesCompared msgComp)
-      return msgComp.getDate();
-    if (entity instanceof DailyMinecraftTickets mcTicket)
-      return mcTicket.getDate();
-    if (entity instanceof DailyMinecraftTicketsCompared mcTicketComp)
-      return mcTicketComp.getDate();
-    throw new IllegalArgumentException("Unsupported entity type");
+  private String getEmployeeLevelForDate(List<EmployeeLevel> levelHistory, LocalDate date) {
+    EmployeeLevel levelForDate = levelHistory
+        .stream()
+        .filter(level -> level.getDate().equals(date))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No level found for date: " + date));
+
+    return switch (levelForDate.getLevel()) {
+      case 0 -> "organizer";
+      case 1 -> "helper";
+      case 2 -> "support";
+      case 3 -> "chatmod";
+      case 4 -> "overseer";
+      case 6 -> "manager";
+      default -> throw new IllegalStateException("Unknown level: " + levelForDate.getLevel());
+    };
   }
 
-  private EmployeeLevel getEmployeeLevelInfo(Short employeeId) {
-    return employeeLevelRepository.findByAid(employeeId);
+  private Map<String, Double> getConstantsForLevel(String level) {
+    return switch (level) {
+      case "helper" -> Map.ofEntries(
+          Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
+          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
+          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
+          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
+          Map.entry("discordTickets", null),
+          Map.entry("discordTicketsComp", null),
+          Map.entry("minecraftTickets", null),
+          Map.entry("minecraftTicketsComp", null));
+      case "support" -> Map.ofEntries(
+          Map.entry("playtime", CalculationConstants.PLAYTIME_SUPPORT),
+          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_SUPPORT),
+          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_SUPPORT),
+          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_SUPPORT),
+          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_SUPPORT),
+          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_SUPPORT),
+          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_SUPPORT),
+          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_SUPPORT));
+      case "chatmod" -> Map.ofEntries(
+          Map.entry("playtime", CalculationConstants.PLAYTIME_CHATMOD),
+          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_CHATMOD),
+          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_CHATMOD),
+          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_CHATMOD),
+          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_CHATMOD),
+          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_CHATMOD),
+          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_CHATMOD),
+          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_CHATMOD));
+      case "overseer", "organizer" -> Map.ofEntries(
+          Map.entry("playtime", CalculationConstants.PLAYTIME_OVERSEER),
+          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_OVERSEER),
+          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_OVERSEER),
+          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_OVERSEER),
+          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_OVERSEER),
+          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_OVERSEER),
+          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_OVERSEER),
+          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_OVERSEER));
+      case "manager" -> Map.ofEntries(
+          Map.entry("playtime", CalculationConstants.PLAYTIME_MANAGER),
+          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_MANAGER),
+          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_MANAGER),
+          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_MANAGER),
+          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_MANAGER),
+          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_MANAGER),
+          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_MANAGER),
+          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_MANAGER));
+      default -> throw new IllegalArgumentException("Unknown level: " + level);
+    };
   }
 
-  private String getEmployeeLevelForDate(EmployeeLevel levelInfo, LocalDate date) {
-    if (levelInfo.getBecameHelper() != null && !date.isBefore(levelInfo.getBecameHelper())) {
-      if (levelInfo.getPromotedToSupport() != null && !date.isBefore(levelInfo.getPromotedToSupport())) {
-        if (levelInfo.getPromotedToChatMod() != null && !date.isBefore(levelInfo.getPromotedToChatMod())) {
-          if (levelInfo.getPromotedToOverseer() != null && !date.isBefore(levelInfo.getPromotedToOverseer())) {
-            if (levelInfo.getPromotedToManager() != null && !date.isBefore(levelInfo.getPromotedToManager())) {
-              return "manager";
-            }
-            return "overseer";
-          }
-          return "chatmod";
-        }
-        return "support";
-      }
-      return "helper";
-    }
-
-    if (levelInfo.getDemotedToOverseer() != null && !date.isBefore(levelInfo.getDemotedToOverseer())) {
-      if (levelInfo.getDemotedToChatMod() != null && !date.isBefore(levelInfo.getDemotedToChatMod())) {
-        if (levelInfo.getDemotedToSupport() != null && !date.isBefore(levelInfo.getDemotedToSupport())) {
-          if (levelInfo.getDemotedToHelper() != null && !date.isBefore(levelInfo.getDemotedToHelper())) {
-            return "helper";
-          }
-          return "support";
-        }
-        return "chatmod";
-      }
-      return "overseer";
-    }
-    throw new IllegalStateException("Unable to determine level for date: " + date);
-  }
-
-  private double calculateObjectiveProductivityForDay(
-      Employee employee, EmployeeLevel levelInfo, LocalDate date,
-      List<DailyPlaytime> dailyPlaytime, List<DailyAfkPlaytime> dailyAfkPlaytime,
-      List<DailyDiscordTickets> dailyDiscordTickets, List<DailyDiscordTicketsCompared> dailyDiscordTicketsComp,
-      List<DailyDiscordMessages> dailyDiscordMessages, List<DailyDiscordMessagesCompared> dailyDiscordMessagesComp,
+  private double calculateObjectiveProductivityForThatDay(
+      Employee employee,
+      LocalDate date,
+      Map<String, Double> constants,
+      List<DailyPlaytime> dailyPlaytime,
+      List<DailyAfkPlaytime> dailyAfkPlaytime,
+      List<DailyDiscordTickets> dailyDiscordTickets,
+      List<DailyDiscordTicketsCompared> dailyDiscordTicketsComp,
+      List<DailyDiscordMessages> dailyDiscordMessages,
+      List<DailyDiscordMessagesCompared> dailyDiscordMessagesComp,
       List<DailyMinecraftTickets> dailyMinecraftTickets,
       List<DailyMinecraftTicketsCompared> dailyMinecraftTicketsComp) {
-    String level = getEmployeeLevelForDate(levelInfo, date);
-    Map<String, Double> constants = getConstantsForLevel(level);
-    double productivity = 0.0;
 
-    productivity += calculateProductivityFromList(
+    double totalProductivity = 0.0;
+    int categoriesCount = 8;
+
+    totalProductivity += calculateProductivityFromList(
         dailyPlaytime, employee, date, constants.get("playtime"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyAfkPlaytime, employee, date, constants.get("afkPlaytime"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyDiscordTickets, employee, date, constants.get("discordTickets"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyDiscordTicketsComp, employee, date, constants.get("discordTicketsComp"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyDiscordMessages, employee, date, constants.get("discordMessages"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyDiscordMessagesComp, employee, date, constants.get("discordMessagesComp"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyMinecraftTickets, employee, date, constants.get("minecraftTickets"));
-    productivity += calculateProductivityFromList(
+    totalProductivity += calculateProductivityFromList(
         dailyMinecraftTicketsComp, employee, date, constants.get("minecraftTicketsComp"));
 
-    return productivity;
+    return totalProductivity / categoriesCount;
   }
 
   private double calculateProductivityFromList(List<?> dataList, Employee employee, LocalDate date, Double constant) {
-    if (constant == null)
-      return 0.0;
     return dataList.stream()
         .filter(data -> matchesEmployeeAndDate(data, employee, date))
         .mapToDouble(this::extractValue)
@@ -261,118 +284,79 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private boolean matchesEmployeeAndDate(Object entity, Employee employee, LocalDate date) {
-    if (entity instanceof DailyPlaytime playtime)
-      return playtime.getAid().equals(employee.getId())
-          && playtime.getDate().equals(date);
-    if (entity instanceof DailyAfkPlaytime afkPlaytime)
-      return afkPlaytime.getAid().equals(employee.getId())
-          && afkPlaytime.getDate().equals(date);
-    if (entity instanceof DailyDiscordTickets discordTickets)
-      return discordTickets.getAid().equals(employee.getId())
-          && discordTickets.getDate().equals(date);
-    if (entity instanceof DailyDiscordTicketsCompared discordTicketsCompared)
-      return discordTicketsCompared.getAid().equals(employee.getId())
-          && discordTicketsCompared.getDate().equals(date);
-    if (entity instanceof DailyDiscordMessages discordMessages)
-      return discordMessages.getAid().equals(employee.getId())
-          && discordMessages.getDate().equals(date);
-    if (entity instanceof DailyDiscordMessagesCompared discordMessagesCompared)
-      return discordMessagesCompared.getAid().equals(employee.getId())
-          && discordMessagesCompared.getDate().equals(date);
-    if (entity instanceof DailyMinecraftTickets minecraftTickets)
-      return minecraftTickets.getAid().equals(employee.getId())
-          && minecraftTickets.getDate().equals(date);
-    if (entity instanceof DailyMinecraftTicketsCompared minecraftTicketsCompared)
-      return minecraftTicketsCompared.getAid().equals(employee.getId())
-          && minecraftTicketsCompared.getDate().equals(date);
-
+    if (entity instanceof DailyPlaytime
+        || entity instanceof DailyAfkPlaytime
+        || entity instanceof DailyDiscordMessages
+        || entity instanceof DailyDiscordTickets
+        || entity instanceof DailyDiscordTicketsCompared
+        || entity instanceof DailyDiscordMessagesCompared
+        || entity instanceof DailyMinecraftTickets
+        || entity instanceof DailyMinecraftTicketsCompared) {
+      return getAid(entity).equals(employee.getId()) && getDate(entity).equals(date);
+    }
     throw new IllegalArgumentException("Unsupported entity type: " + entity);
   }
 
   private double extractValue(Object entity) {
-    if (entity instanceof DailyPlaytime playtime)
-      return playtime.getTime();
-    if (entity instanceof DailyAfkPlaytime afkPlaytime)
-      return afkPlaytime.getTime();
-    if (entity instanceof DailyDiscordMessages discordMessages)
-      return discordMessages.getMsgCount();
-    if (entity instanceof DailyDiscordTickets discordTickets)
-      return discordTickets.getTicketCount();
-    if (entity instanceof DailyDiscordTicketsCompared discordTicketsCompared)
-      return discordTicketsCompared.getValue();
-    if (entity instanceof DailyDiscordMessagesCompared discordMessagesCompared)
-      return discordMessagesCompared.getValue();
-    if (entity instanceof DailyMinecraftTickets minecraftTickets)
-      return minecraftTickets.getTicketCount();
-    if (entity instanceof DailyMinecraftTicketsCompared minecraftTicketsCompared)
-      return minecraftTicketsCompared.getValue();
+    if (entity instanceof DailyPlaytime dailyPlaytime)
+      return dailyPlaytime.getTime();
+    if (entity instanceof DailyAfkPlaytime dailyAfkPlaytime)
+      return dailyAfkPlaytime.getTime();
+    if (entity instanceof DailyDiscordMessages dailyDiscordMessages)
+      return dailyDiscordMessages.getMsgCount();
+    if (entity instanceof DailyDiscordTickets dailyDiscordTickets)
+      return dailyDiscordTickets.getTicketCount();
+    if (entity instanceof DailyDiscordTicketsCompared dailyDiscordTicketsCompared)
+      return dailyDiscordTicketsCompared.getValue();
+    if (entity instanceof DailyDiscordMessagesCompared dailyDiscordMessagesCompared)
+      return dailyDiscordMessagesCompared.getValue();
+    if (entity instanceof DailyMinecraftTickets dailyMinecraftTickets)
+      return dailyMinecraftTickets.getTicketCount();
+    if (entity instanceof DailyMinecraftTicketsCompared dailyMinecraftTicketsCompared)
+      return dailyMinecraftTicketsCompared.getValue();
 
     throw new IllegalArgumentException("Unsupported entity type: " + entity);
   }
 
-  private Map<String, Double> getConstantsForLevel(String level) {
-    return switch (level) {
-      case "helper" -> Map.ofEntries(
-          Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
-          Map.entry("playtimeMax", CalculationConstants.PLAYTIME_MAX_HELPER),
-          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
-          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
-          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
-          Map.entry("discordTickets", null),
-          Map.entry("discordTicketsComp", null),
-          Map.entry("minecraftTickets", null),
-          Map.entry("minecraftTicketsMax", null),
-          Map.entry("minecraftTicketsComp", null),
-          Map.entry("minecraftTicketsCompMax", null));
-      case "support" -> Map.ofEntries(
-          Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
-          Map.entry("playtimeMax", CalculationConstants.PLAYTIME_MAX_HELPER),
-          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
-          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
-          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
-          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_SUPPORT),
-          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_SUPPORT),
-          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_SUPPORT),
-          Map.entry("minecraftTicketsMax", CalculationConstants.MINECRAFT_TICKETS_MAX_SUPPORT),
-          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_SUPPORT),
-          Map.entry("minecraftTicketsCompMax", CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_SUPPORT));
-      case "chatmod" -> Map.ofEntries(
-          Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
-          Map.entry("playtimeMax", CalculationConstants.PLAYTIME_MAX_HELPER),
-          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
-          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
-          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
-          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_CHATMOD),
-          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_CHATMOD),
-          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_CHATMOD),
-          Map.entry("minecraftTicketsMax", CalculationConstants.MINECRAFT_TICKETS_MAX_CHATMOD),
-          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_CHATMOD),
-          Map.entry("minecraftTicketsCompMax", CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_CHATMOD));
-      case "overseer" -> Map.ofEntries(
-          Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
-          Map.entry("playtimeMax", CalculationConstants.PLAYTIME_MAX_HELPER),
-          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
-          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
-          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
-          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_OVERSEER),
-          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_OVERSEER),
-          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_OVERSEER),
-          Map.entry("minecraftTicketsMax", CalculationConstants.MINECRAFT_TICKETS_MAX_OVERSEER),
-          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_OVERSEER),
-          Map.entry("minecraftTicketsCompMax", CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_OVERSEER));
-      case "manager" -> Map.ofEntries(
-          Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
-          Map.entry("playtimeMax", CalculationConstants.PLAYTIME_MAX_HELPER),
-          Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
-          Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
-          Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
-          Map.entry("discordTickets", CalculationConstants.DISCORD_TICKETS_MANAGER),
-          Map.entry("discordTicketsComp", CalculationConstants.DISCORD_TICKETS_COMPARED_MANAGER),
-          Map.entry("minecraftTickets", CalculationConstants.MINECRAFT_TICKETS_MANAGER),
-          Map.entry("minecraftTicketsMax", CalculationConstants.MINECRAFT_TICKETS_MAX_MANAGER),
-          Map.entry("minecraftTicketsComp", CalculationConstants.MINECRAFT_TICKETS_COMPARED_MANAGER),
-          Map.entry("minecraftTicketsCompMax", CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_MANAGER));
-      default -> throw new IllegalArgumentException("Unknown level: " + level);
-    };
+  private Object getAid(Object entity) {
+    if (entity instanceof DailyPlaytime dailyPlaytime)
+      return dailyPlaytime.getAid();
+    if (entity instanceof DailyAfkPlaytime dailyAfkPlaytime)
+      return dailyAfkPlaytime.getAid();
+    if (entity instanceof DailyDiscordMessages dailyDiscordMessages)
+      return dailyDiscordMessages.getAid();
+    if (entity instanceof DailyDiscordTickets dailyDiscordTickets)
+      return dailyDiscordTickets.getAid();
+    if (entity instanceof DailyDiscordTicketsCompared dailyDiscordTicketsCompared)
+      return dailyDiscordTicketsCompared.getAid();
+    if (entity instanceof DailyDiscordMessagesCompared dailyDiscordMessagesCompared)
+      return dailyDiscordMessagesCompared.getAid();
+    if (entity instanceof DailyMinecraftTickets dailyMinecraftTickets)
+      return dailyMinecraftTickets.getAid();
+    if (entity instanceof DailyMinecraftTicketsCompared dailyMinecraftTicketsCompared)
+      return dailyMinecraftTicketsCompared.getAid();
+
+    throw new IllegalArgumentException("Unsupported entity type: " + entity);
+  }
+
+  private LocalDate getDate(Object entity) {
+    if (entity instanceof DailyPlaytime dailyPlaytime)
+      return dailyPlaytime.getDate();
+    if (entity instanceof DailyAfkPlaytime dailyAfkPlaytime)
+      return dailyAfkPlaytime.getDate();
+    if (entity instanceof DailyDiscordMessages dailyDiscordMessages)
+      return dailyDiscordMessages.getDate();
+    if (entity instanceof DailyDiscordTickets dailyDiscordTickets)
+      return dailyDiscordTickets.getDate();
+    if (entity instanceof DailyDiscordTicketsCompared dailyDiscordTicketsCompared)
+      return dailyDiscordTicketsCompared.getDate();
+    if (entity instanceof DailyDiscordMessagesCompared dailyDiscordMessagesCompared)
+      return dailyDiscordMessagesCompared.getDate();
+    if (entity instanceof DailyMinecraftTickets dailyMinecraftTickets)
+      return dailyMinecraftTickets.getDate();
+    if (entity instanceof DailyMinecraftTicketsCompared dailyMinecraftTicketsCompared)
+      return dailyMinecraftTicketsCompared.getDate();
+
+    throw new IllegalArgumentException("Unsupported entity type: " + entity);
   }
 }

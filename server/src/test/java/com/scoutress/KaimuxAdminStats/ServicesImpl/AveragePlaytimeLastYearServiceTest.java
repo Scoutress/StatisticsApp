@@ -56,7 +56,7 @@ class AveragePlaytimeLastYearServiceTest {
             (short) 0, (short) 0, (short) 0));
 
     List<Employee> employees = Arrays.asList(
-        new Employee((short) 1, "John Doe", "Department", "Position", "Email", "Phone", LocalDate.now()));
+        new Employee((short) 1, "John Doe", "Department", "Position", "Email", "Phone", LocalDate.now(), "helper"));
 
     when(dataExtractingService.getDailyPlaytimeData()).thenReturn(dailyPlaytimes);
     when(dataExtractingService.getAllEmployeeCodes()).thenReturn(employeeCodes);
@@ -83,7 +83,7 @@ class AveragePlaytimeLastYearServiceTest {
             (short) 0, (short) 0, (short) 0));
 
     List<Employee> employees = Arrays.asList(
-        new Employee((short) 1, "John Doe", "Department", "Position", "Email", "Phone", LocalDate.now()));
+        new Employee((short) 1, "John Doe", "Department", "Position", "Email", "Phone", LocalDate.now(), "helper"));
 
     // Act
     List<AveragePlaytimeLastYear> averagePlaytimes = service.calculateAveragePlaytime(dailyPlaytimes, employeeCodes,

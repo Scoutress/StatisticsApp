@@ -24,7 +24,7 @@ public class EmployeeLevel {
   private Short id;
 
   @Column(name = "aid", nullable = false, unique = true)
-  private String aid;
+  private Short aid;
 
   @Column(name = "became_helper", nullable = true)
   private LocalDate becameHelper;

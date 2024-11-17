@@ -52,7 +52,8 @@ public class AveragePlaytimeOverallServiceTest {
         new EmployeeCodes(1L, (short) 1, (short) 1, (short) 1, (short) 1, (short) 1, (short) 1, (short) 1,
             (short) 1, (short) 1, (short) 1));
     List<Employee> employees = Arrays.asList(
-        new Employee((short) 1, "firstName", "lastName", "email", "phone", "role", LocalDate.now().minusDays(11)));
+        new Employee((short) 1, "firstName", "lastName", "email", "phone", "role", LocalDate.now().minusDays(11),
+            "helper"));
 
     when(dataExtractingService.getDailyPlaytimeData()).thenReturn(playtimes);
     when(dataExtractingService.getAllEmployeeCodes()).thenReturn(employeeAids);

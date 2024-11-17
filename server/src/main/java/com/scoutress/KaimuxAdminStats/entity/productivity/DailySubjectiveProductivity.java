@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.entity.productivity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,11 +21,14 @@ public class DailySubjectiveProductivity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Short id;
+  private Long id;
 
   @Column(name = "aid", nullable = false, unique = true)
   private Short aid;
 
   @Column(name = "value", nullable = false, unique = true)
   private Double value;
+
+  @Column(name = "date", nullable = false)
+  private LocalDate date;
 }

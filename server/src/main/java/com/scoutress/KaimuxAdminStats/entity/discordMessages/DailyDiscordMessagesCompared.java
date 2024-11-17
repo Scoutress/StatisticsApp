@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity;
+package com.scoutress.KaimuxAdminStats.entity.discordMessages;
 
 import java.time.LocalDate;
 
@@ -13,11 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_discord_messages")
+@Table(name = "daily_discord_messages_comp")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyDiscordMessages {
+public class DailyDiscordMessagesCompared {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +26,8 @@ public class DailyDiscordMessages {
   @Column(name = "aid", nullable = false)
   private Short aid;
 
-  @Column(name = "msg_count", nullable = false)
-  private int msgCount;
+  @Column(name = "value", nullable = false)
+  private Double value;
 
   @Column(name = "date", nullable = false)
   private LocalDate date;

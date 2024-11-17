@@ -11,12 +11,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.DailyAfkPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.discordTickets.DailyDiscordTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.productivity.DailyObjectiveProductivity;
 import com.scoutress.KaimuxAdminStats.entity.productivity.DailyProductivity;
 import com.scoutress.KaimuxAdminStats.entity.productivity.DailySubjectiveProductivity;
+import com.scoutress.KaimuxAdminStats.repositories.afkPlaytime.DailyAfkPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DailyDiscordTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
@@ -34,6 +36,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   private final DailyDiscordTicketsRepository dailyDiscordTicketsRepository;
   private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
+  private final DailyAfkPlaytimeRepository dailyAfkPlaytimeRepository;
 
   public ProductivityServiceImpl(
       DailyObjectiveProductivityRepository objectiveProductivityRepository,
@@ -41,13 +44,15 @@ public class ProductivityServiceImpl implements ProductivityService {
       DailyProductivityRepository productivityRepository,
       DailyDiscordTicketsRepository dailyDiscordTicketsRepository,
       DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository,
-      DailyPlaytimeRepository dailyPlaytimeRepository) {
+      DailyPlaytimeRepository dailyPlaytimeRepository,
+      DailyAfkPlaytimeRepository dailyAfkPlaytimeRepository) {
     this.dailyObjectiveProductivityRepository = objectiveProductivityRepository;
     this.dailySubjectiveProductivityRepository = subjectiveProductivityRepository;
     this.dailyProductivityRepository = productivityRepository;
     this.dailyDiscordTicketsRepository = dailyDiscordTicketsRepository;
     this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
+    this.dailyAfkPlaytimeRepository = dailyAfkPlaytimeRepository;
   }
 
   @Override
@@ -91,9 +96,11 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   @Override
   public void calculateDailyObjectiveProductivity() {
+    // TODO: still need to multiply each of them with coefs. by type and by employee
+    // level
+
     List<DailyPlaytime> dailyPlaytime = dailyPlaytimeRepository.findAll();
-    // List<DailyAfkPlaytime> dailyAfkPlaytime =
-    // dailyAfkPlaytimeRepository.findAll();
+    List<DailyAfkPlaytime> dailyAfkPlaytime = dailyAfkPlaytimeRepository.findAll();
     List<DailyDiscordTickets> dailyDiscordTickets = dailyDiscordTicketsRepository.findAll();
     // List<DailyDiscordTicketsComp> dailyDiscordTicketsComp =
     // dailyDiscordTicketsCompRepository.findAll();
@@ -113,12 +120,12 @@ public class ProductivityServiceImpl implements ProductivityService {
                 playtime -> playtime.getTime(),
                 Collectors.toList()))));
 
-    // mergeValues(groupedValues, dailyAfkPlaytime
-    // .stream()
-    // .collect(Collectors.groupingBy(DailyAfkPlaytime::getAid,
-    // Collectors.mapping(
-    // DailyAfkPlaytime::getValue,
-    // Collectors.toList()))));
+    mergeValues(groupedValues, dailyAfkPlaytime
+        .stream()
+        .collect(Collectors.groupingBy(DailyAfkPlaytime::getAid,
+            Collectors.mapping(
+                DailyAfkPlaytime::getTime,
+                Collectors.toList()))));
 
     mergeValues(groupedValues, dailyDiscordTickets
         .stream()

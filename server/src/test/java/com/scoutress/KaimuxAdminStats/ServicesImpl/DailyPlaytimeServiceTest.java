@@ -18,8 +18,8 @@ import org.mockito.MockitoAnnotations;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.servicesimpl.DataExtractingServiceImpl;
-import com.scoutress.KaimuxAdminStats.servicesimpl.playtime.DailyPlaytimeServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.DataExtractingServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.playtime.DailyPlaytimeServiceImpl;
 
 class DailyPlaytimeServiceTest {
 

@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.productivity;
+package com.scoutress.KaimuxAdminStats.servicesImpl.productivity;
 
 import java.util.ArrayList;
 import java.util.Collections;

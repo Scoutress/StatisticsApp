@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl;
+package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.playtime;
+package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

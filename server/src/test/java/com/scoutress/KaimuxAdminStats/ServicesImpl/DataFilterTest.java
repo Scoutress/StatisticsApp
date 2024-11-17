@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.scoutress.KaimuxAdminStats.entity.playtime.SanitizedSessionData;
-import com.scoutress.KaimuxAdminStats.servicesimpl.DataFilterServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.DataFilterServiceImpl;
 
 public class DataFilterTest {
 

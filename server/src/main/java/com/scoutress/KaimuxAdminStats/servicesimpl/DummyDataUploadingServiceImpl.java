@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl;
+package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

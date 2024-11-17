@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.playtime;
+package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
 import java.util.ArrayList;
 import java.util.Comparator;

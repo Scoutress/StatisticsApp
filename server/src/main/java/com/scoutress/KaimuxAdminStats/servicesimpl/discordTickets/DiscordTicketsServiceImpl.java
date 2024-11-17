@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.discordTickets;
+package com.scoutress.KaimuxAdminStats.servicesImpl.discordTickets;
 
 import java.time.LocalDate;
 import java.util.List;

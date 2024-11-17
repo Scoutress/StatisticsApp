@@ -19,8 +19,8 @@ import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeOverall;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AveragePlaytimeOverallRepository;
-import com.scoutress.KaimuxAdminStats.servicesimpl.DataExtractingServiceImpl;
-import com.scoutress.KaimuxAdminStats.servicesimpl.playtime.AveragePlaytimeOverallServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.DataExtractingServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.playtime.AveragePlaytimeOverallServiceImpl;
 
 public class AveragePlaytimeOverallServiceTest {
 

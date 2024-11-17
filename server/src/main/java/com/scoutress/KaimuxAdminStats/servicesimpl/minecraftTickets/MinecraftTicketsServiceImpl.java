@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.minecraftTickets;
+package com.scoutress.KaimuxAdminStats.servicesImpl.minecraftTickets;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl.playtime;
+package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

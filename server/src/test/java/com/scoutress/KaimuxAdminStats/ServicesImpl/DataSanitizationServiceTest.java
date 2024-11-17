@@ -18,7 +18,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDataItem;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.SanitazedDataRepository;
-import com.scoutress.KaimuxAdminStats.servicesimpl.playtime.DataSanitizationServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.playtime.DataSanitizationServiceImpl;
 
 class DataSanitizationServiceTest {
 

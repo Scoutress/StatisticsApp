@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesimpl;
+package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

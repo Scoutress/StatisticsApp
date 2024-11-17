@@ -20,8 +20,8 @@ import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeLastYear;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AveragePlaytimeLastYearRepository;
-import com.scoutress.KaimuxAdminStats.servicesimpl.DataExtractingServiceImpl;
-import com.scoutress.KaimuxAdminStats.servicesimpl.playtime.AveragePlaytimeLastYearServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.DataExtractingServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.playtime.AveragePlaytimeLastYearServiceImpl;
 
 class AveragePlaytimeLastYearServiceTest {
 

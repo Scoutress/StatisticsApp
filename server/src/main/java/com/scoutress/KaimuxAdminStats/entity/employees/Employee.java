@@ -40,4 +40,7 @@ public class Employee {
 
   @Column(name = "join_date", nullable = false)
   private LocalDate joinDate;
+
+  @Column(name = "level", nullable = false)
+  private String level;
 }

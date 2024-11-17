@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.entity.DailyDiscordMessages;
 import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.DailyAfkPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.discordTickets.DailyDiscordTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
@@ -18,6 +19,7 @@ import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.productivity.DailyObjectiveProductivity;
 import com.scoutress.KaimuxAdminStats.entity.productivity.DailyProductivity;
 import com.scoutress.KaimuxAdminStats.entity.productivity.DailySubjectiveProductivity;
+import com.scoutress.KaimuxAdminStats.repositories.DailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.afkPlaytime.DailyAfkPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DailyDiscordTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
@@ -37,6 +39,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
   private final DailyAfkPlaytimeRepository dailyAfkPlaytimeRepository;
+  private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
 
   public ProductivityServiceImpl(
       DailyObjectiveProductivityRepository objectiveProductivityRepository,
@@ -45,7 +48,8 @@ public class ProductivityServiceImpl implements ProductivityService {
       DailyDiscordTicketsRepository dailyDiscordTicketsRepository,
       DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository,
       DailyPlaytimeRepository dailyPlaytimeRepository,
-      DailyAfkPlaytimeRepository dailyAfkPlaytimeRepository) {
+      DailyAfkPlaytimeRepository dailyAfkPlaytimeRepository,
+      DailyDiscordMessagesRepository dailyDiscordMessagesRepository) {
     this.dailyObjectiveProductivityRepository = objectiveProductivityRepository;
     this.dailySubjectiveProductivityRepository = subjectiveProductivityRepository;
     this.dailyProductivityRepository = productivityRepository;
@@ -53,6 +57,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.dailyAfkPlaytimeRepository = dailyAfkPlaytimeRepository;
+    this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
   }
 
   @Override
@@ -96,16 +101,18 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   @Override
   public void calculateDailyObjectiveProductivity() {
-    // TODO: still need to multiply each of them with coefs. by type and by employee
-    // level
+    // TODO:
+    // still need to multiply each of them with coefs.
+    // by type and by employee level
 
     List<DailyPlaytime> dailyPlaytime = dailyPlaytimeRepository.findAll();
     List<DailyAfkPlaytime> dailyAfkPlaytime = dailyAfkPlaytimeRepository.findAll();
     List<DailyDiscordTickets> dailyDiscordTickets = dailyDiscordTicketsRepository.findAll();
     // List<DailyDiscordTicketsComp> dailyDiscordTicketsComp =
     // dailyDiscordTicketsCompRepository.findAll();
-    // List<DailyDiscordMessages> dailyDiscordMessages =
-    // dailyDiscordMessagesRepository.findAll();
+    List<DailyDiscordMessages> dailyDiscordMessages = dailyDiscordMessagesRepository.findAll();
+    // List<DailyDiscordMessagesComp> dailyDiscordMessagesComp =
+    // dailyDiscordMessagesCompRepository.findAll();
     List<DailyMinecraftTickets> dailyMinecraftTickets = dailyMinecraftTicketsRepository.findAll();
     // List<DailyMinecraftTicketsComp> dailyMinecraftTicketsComp =
     // dailyMinecraftTicketsCompRepository.findAll();
@@ -142,11 +149,18 @@ public class ProductivityServiceImpl implements ProductivityService {
     // DailyDiscordTicketsComp::getValue,
     // Collectors.toList()))));
 
-    // mergeValues(groupedValues, dailyDiscordMessages
+    mergeValues(groupedValues, dailyDiscordMessages
+        .stream()
+        .collect(Collectors.groupingBy(DailyDiscordMessages::getAid,
+            Collectors.mapping(
+                dm -> (double) dm.getMsgCount(),
+                Collectors.toList()))));
+
+    // mergeValues(groupedValues, dailyDiscordMessagesComp
     // .stream()
-    // .collect(Collectors.groupingBy(DailyDiscordMessages::getAid,
+    // .collect(Collectors.groupingBy(DailyDiscordMessagesComp::getAid,
     // Collectors.mapping(
-    // DailyDiscordMessages::getValue,
+    // DailyDiscordMessagesComp::getValue,
     // Collectors.toList()))));
 
     mergeValues(groupedValues, dailyMinecraftTickets

@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,36 +54,33 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
     List<AveragePlaytimeOverall> handledAveragePlaytimeData = new ArrayList<>();
     LocalDate today = LocalDate.now();
 
-    Set<Short> uniqueAids = allPlaytimes
-        .stream()
-        .map(DailyPlaytime::getAid)
+    Map<Short, Employee> employeeMap = allEmployees.stream()
+        .collect(Collectors.toMap(Employee::getId, emp -> emp));
+
+    Set<Short> allAids = allEmployeeAids.stream()
+        .map(EmployeeCodes::getEmployeeId)
         .collect(Collectors.toSet());
 
-    Set<Short> allAids = allEmployeeAids
-        .stream()
-        .map(EmployeeCodes::getEmployeeId)
+    Set<Short> uniqueAids = allPlaytimes.stream()
+        .map(DailyPlaytime::getAid)
         .collect(Collectors.toSet());
 
     for (Short aid : uniqueAids) {
       if (allAids.contains(aid)) {
-        Employee employee = allEmployees
-            .stream()
-            .filter(emp -> Objects.equals(emp.getId(), aid))
-            .findFirst()
-            .orElse(null);
+        Employee employee = employeeMap.get(aid);
 
         if (employee != null) {
-          LocalDate joinDate = employee.getJoinDate().minusDays(1);
+          LocalDate joinDate = employee.getJoinDate();
 
-          int playtimesSum = allPlaytimes
-              .stream()
-              .filter(pt -> pt.getDate().isAfter(joinDate))
-              .filter(pt -> pt.getAid() == aid)
-              .mapToInt(DailyPlaytime::getTime)
+          double playtimesSum = allPlaytimes.stream()
+              .filter(pt -> pt.getAid().equals(aid))
+              .filter(pt -> !pt.getDate().isBefore(joinDate))
+              .mapToDouble(DailyPlaytime::getTime)
               .sum();
 
-          int daysAfterJoin = (int) ChronoUnit.DAYS.between(joinDate, today);
-          double averagePlaytimeValue = daysAfterJoin > 0 ? (double) playtimesSum / daysAfterJoin : 0;
+          long daysAfterJoin = ChronoUnit.DAYS.between(joinDate, today);
+
+          double averagePlaytimeValue = daysAfterJoin > 0 ? playtimesSum / daysAfterJoin : 0;
 
           AveragePlaytimeOverall averagePlaytimeData = new AveragePlaytimeOverall();
           averagePlaytimeData.setAid(aid);
@@ -94,6 +91,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
     }
 
     handledAveragePlaytimeData.sort(Comparator.comparing(AveragePlaytimeOverall::getAid));
+
     return handledAveragePlaytimeData;
   }
 

@@ -97,7 +97,7 @@ class DailyPlaytimeServiceTest {
     dailyPlaytime.setAid((short) 1);
     dailyPlaytime.setServer("Server1");
     dailyPlaytime.setDate(LocalDate.of(2024, 11, 1));
-    dailyPlaytime.setTime(300);
+    dailyPlaytime.setTime(300.0);
 
     dailyPlaytimeService.saveCalculatedPlaytime(Arrays.asList(dailyPlaytime));
 

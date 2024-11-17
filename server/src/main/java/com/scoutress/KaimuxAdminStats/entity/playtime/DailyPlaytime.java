@@ -24,10 +24,10 @@ public class DailyPlaytime {
   private Long id;
 
   @Column(name = "aid", nullable = false)
-  private short aid;
+  private Short aid;
 
   @Column(name = "time", nullable = false)
-  private int time;
+  private Double time;
 
   @Column(name = "date", nullable = false)
   private LocalDate date;

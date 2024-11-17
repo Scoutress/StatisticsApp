@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,41 +50,44 @@ public class AveragePlaytimeLastYearServiceImpl implements AveragePlaytimeLastYe
       List<EmployeeCodes> allEmployeeAids,
       List<Employee> allEmployees) {
 
-    List<AveragePlaytimeLastYear> handledAveragePlaytimeData = new ArrayList<>();
+    Map<Short, Employee> employeeMap = allEmployees.stream()
+        .collect(Collectors.toMap(Employee::getId, employee -> employee));
 
-    Set<Short> uniqueAids = allPlaytimes
-        .stream()
+    Set<Short> uniqueAids = allPlaytimes.stream()
         .map(DailyPlaytime::getAid)
         .collect(Collectors.toSet());
 
-    Set<Short> allAids = allEmployeeAids
-        .stream()
+    Set<Short> validAids = allEmployeeAids.stream()
         .map(EmployeeCodes::getEmployeeId)
         .collect(Collectors.toSet());
 
+    List<AveragePlaytimeLastYear> handledAveragePlaytimeData = new ArrayList<>();
+
+    LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
+
     for (Short aid : uniqueAids) {
-      if (allAids.contains(aid)) {
-        Employee employee = allEmployees
-            .stream()
-            .filter(emp -> Objects.equals(emp.getId(), aid))
-            .findFirst()
-            .orElse(null);
+      if (validAids.contains(aid)) {
+        Employee employee = employeeMap.get(aid);
 
         if (employee != null) {
-          LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
-
-          int playtimesSum = allPlaytimes
-              .stream()
+          double totalPlaytime = allPlaytimes.stream()
+              .filter(pt -> pt.getAid().equals(aid))
               .filter(pt -> pt.getDate().isAfter(dateOneYearAgo))
-              .filter(pt -> pt.getAid() == aid)
-              .mapToInt(DailyPlaytime::getTime)
+              .mapToDouble(DailyPlaytime::getTime)
               .sum();
 
-          double averagePlaytimeValue = (double) playtimesSum / 365;
+          long daysPlayed = allPlaytimes.stream()
+              .filter(pt -> pt.getAid().equals(aid))
+              .filter(pt -> pt.getDate().isAfter(dateOneYearAgo))
+              .map(DailyPlaytime::getDate)
+              .distinct()
+              .count();
+
+          double averagePlaytime = daysPlayed > 0 ? totalPlaytime / daysPlayed : 0;
 
           AveragePlaytimeLastYear averagePlaytimeData = new AveragePlaytimeLastYear();
           averagePlaytimeData.setAid(aid);
-          averagePlaytimeData.setPlaytime(averagePlaytimeValue);
+          averagePlaytimeData.setPlaytime(averagePlaytime);
           handledAveragePlaytimeData.add(averagePlaytimeData);
         }
       }

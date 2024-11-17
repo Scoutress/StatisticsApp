@@ -40,8 +40,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   }
 
   @Override
-  public List<DailyPlaytime> calculateDailyPlaytime(
-      List<SessionDuration> sessions) {
+  public List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
 
     List<DailyPlaytime> handledDailyPlaytimeData = new ArrayList<>();
 
@@ -63,12 +62,12 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     for (Short aid : uniqueAids) {
       for (String server : uniqueServers) {
         for (LocalDate date : uniqueDates) {
-          int sessionPlaytimeInSec = sessions
+          double sessionPlaytimeInSec = sessions
               .stream()
-              .filter(session -> session.getAid() == aid)
+              .filter(session -> session.getAid().equals(aid))
               .filter(session -> session.getServer().equals(server))
               .filter(session -> session.getDate().equals(date))
-              .mapToInt(SessionDuration::getSingleSessionDuration)
+              .mapToDouble(SessionDuration::getSingleSessionDuration)
               .sum();
 
           DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
@@ -80,6 +79,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
         }
       }
     }
+
     handledDailyPlaytimeData.sort(Comparator.comparing(DailyPlaytime::getDate));
 
     return handledDailyPlaytimeData;

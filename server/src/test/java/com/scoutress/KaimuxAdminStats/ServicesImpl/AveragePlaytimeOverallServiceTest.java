@@ -46,8 +46,8 @@ public class AveragePlaytimeOverallServiceTest {
   @Test
   void testCalculateAveragePlaytime() {
     List<DailyPlaytime> playtimes = Arrays.asList(
-        new DailyPlaytime(1L, (short) 1, 120, LocalDate.now().minusDays(10), "Test"),
-        new DailyPlaytime(2L, (short) 1, 180, LocalDate.now().minusDays(9), "Test"));
+        new DailyPlaytime(1L, (short) 1, 120.0, LocalDate.now().minusDays(10), "Test"),
+        new DailyPlaytime(2L, (short) 1, 180.0, LocalDate.now().minusDays(9), "Test"));
     List<EmployeeCodes> employeeAids = Arrays.asList(
         new EmployeeCodes(1L, (short) 1, (short) 1, (short) 1, (short) 1, (short) 1, (short) 1, (short) 1,
             (short) 1, (short) 1, (short) 1));

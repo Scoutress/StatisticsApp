@@ -1,10 +1,9 @@
 package com.scoutress.KaimuxAdminStats.servicesimpl.playtime;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -37,32 +36,26 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
   }
 
   @Override
-  public List<AnnualPlaytime> calculateAnnualPlaytime(
-      List<DailyPlaytime> allPlaytime) {
-
-    List<AnnualPlaytime> handledAnnualPlaytimeData = new ArrayList<>();
-
-    Set<Short> uniqueAids = allPlaytime
-        .stream()
-        .map(DailyPlaytime::getAid)
-        .collect(Collectors.toSet());
+  public List<AnnualPlaytime> calculateAnnualPlaytime(List<DailyPlaytime> allPlaytime) {
 
     LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
 
-    for (Short aid : uniqueAids) {
-      int annualPlaytimeSumByPlayer = allPlaytime
-          .stream()
-          .filter(playtime -> playtime.getAid() == aid)
-          .filter(playtime -> playtime.getDate().isAfter(dateOneYearAgo))
-          .mapToInt(playtime -> playtime.getTime())
-          .sum();
+    Map<Short, Double> annualPlaytimeMap = allPlaytime.stream()
+        .filter(playtime -> !playtime.getDate().isBefore(dateOneYearAgo))
+        .collect(Collectors.groupingBy(
+            DailyPlaytime::getAid,
+            Collectors.summingDouble(DailyPlaytime::getTime)));
 
-      AnnualPlaytime annualPlaytimeData = new AnnualPlaytime();
-      annualPlaytimeData.setAid(aid);
-      annualPlaytimeData.setPlaytime(annualPlaytimeSumByPlayer);
-      handledAnnualPlaytimeData.add(annualPlaytimeData);
-    }
-    handledAnnualPlaytimeData.sort(Comparator.comparing(AnnualPlaytime::getAid));
+    List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap.entrySet().stream()
+        .map(entry -> {
+          AnnualPlaytime annualPlaytime = new AnnualPlaytime();
+          annualPlaytime.setAid(entry.getKey());
+          annualPlaytime.setPlaytime(entry.getValue());
+          return annualPlaytime;
+        })
+        .sorted(Comparator.comparing(AnnualPlaytime::getAid))
+        .collect(Collectors.toList());
+
     return handledAnnualPlaytimeData;
   }
 

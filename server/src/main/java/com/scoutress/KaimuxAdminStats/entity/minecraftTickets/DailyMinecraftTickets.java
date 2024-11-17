@@ -23,11 +23,11 @@ public class DailyMinecraftTickets {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "employee_id", nullable = false)
-  private Long employeeId;
+  @Column(name = "aid", nullable = false)
+  private Short aid;
 
   @Column(name = "ticket_count", nullable = false)
-  private String ticketCount;
+  private int ticketCount;
 
   @Column(name = "date", nullable = false)
   private LocalDate date;

@@ -22,8 +22,8 @@ public class AveragePlaytimeLastYear {
   private Long id;
 
   @Column(name = "aid", nullable = false)
-  private short aid;
+  private Short aid;
 
   @Column(name = "playtime", nullable = false)
-  private double playtime;
+  private Double playtime;
 }

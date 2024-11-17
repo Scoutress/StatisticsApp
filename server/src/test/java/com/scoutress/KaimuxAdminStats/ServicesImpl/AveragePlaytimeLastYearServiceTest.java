@@ -48,8 +48,8 @@ class AveragePlaytimeLastYearServiceTest {
   void testHandleAveragePlaytime() {
     // Arrange
     List<DailyPlaytime> dailyPlaytimes = Arrays.asList(
-        new DailyPlaytime(1L, (short) 1, 60, LocalDate.now(), "note"),
-        new DailyPlaytime(2L, (short) 1, 120, LocalDate.now().minusDays(1), "note"));
+        new DailyPlaytime(1L, (short) 1, 60.0, LocalDate.now(), "note"),
+        new DailyPlaytime(2L, (short) 1, 120.0, LocalDate.now().minusDays(1), "note"));
 
     List<EmployeeCodes> employeeCodes = Arrays.asList(
         new EmployeeCodes(1L, (short) 1, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
@@ -73,9 +73,9 @@ class AveragePlaytimeLastYearServiceTest {
   void testCalculateAveragePlaytime() {
     // Arrange
     List<DailyPlaytime> dailyPlaytimes = Arrays.asList(
-        new DailyPlaytime(1L, (short) 1, 60, LocalDate.now(), "note"), // First instance with a String
-        new DailyPlaytime(2L, (short) 1, 120, LocalDate.now().minusDays(1), "note") // Include a String for the
-                                                                                    // second instance
+        new DailyPlaytime(1L, (short) 1, 60.0, LocalDate.now(), "note"), // First instance with a String
+        new DailyPlaytime(2L, (short) 1, 120.0, LocalDate.now().minusDays(1), "note") // Include a String for the
+    // second instance
     );
 
     List<EmployeeCodes> employeeCodes = Arrays.asList(

@@ -24,7 +24,7 @@ public class SessionDuration {
   private Long id;
 
   @Column(name = "aid", nullable = false)
-  private short aid;
+  private Short aid;
 
   @Column(name = "single_session_duration", nullable = false)
   private int singleSessionDuration;

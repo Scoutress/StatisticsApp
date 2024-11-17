@@ -49,9 +49,9 @@ class AnnualyPlaytimeServiceTest {
     LocalDate dateWithinLastYear = now.minusMonths(6);
     LocalDate dateOlderThanOneYear = now.minusYears(2);
 
-    DailyPlaytime playtime1 = new DailyPlaytime(null, (short) 1, 1000, dateWithinLastYear, "Server1");
-    DailyPlaytime playtime2 = new DailyPlaytime(null, (short) 1, 2000, dateWithinLastYear, "Server1");
-    DailyPlaytime playtime3 = new DailyPlaytime(null, (short) 1, 1500, dateOlderThanOneYear, "Server1");
+    DailyPlaytime playtime1 = new DailyPlaytime(null, (short) 1, 1000.0, dateWithinLastYear, "Server1");
+    DailyPlaytime playtime2 = new DailyPlaytime(null, (short) 1, 2000.0, dateWithinLastYear, "Server1");
+    DailyPlaytime playtime3 = new DailyPlaytime(null, (short) 1, 1500.0, dateOlderThanOneYear, "Server1");
 
     List<DailyPlaytime> dailyPlaytimes = Arrays.asList(playtime1, playtime2, playtime3);
 
@@ -70,8 +70,8 @@ class AnnualyPlaytimeServiceTest {
     LocalDate now = LocalDate.now();
     LocalDate dateWithinLastYear = now.minusMonths(6);
 
-    DailyPlaytime playtime1 = new DailyPlaytime(null, (short) 1, 1000, dateWithinLastYear, "Server1");
-    DailyPlaytime playtime2 = new DailyPlaytime(null, (short) 2, 2000, dateWithinLastYear, "Server2");
+    DailyPlaytime playtime1 = new DailyPlaytime(null, (short) 1, 1000.0, dateWithinLastYear, "Server1");
+    DailyPlaytime playtime2 = new DailyPlaytime(null, (short) 2, 2000.0, dateWithinLastYear, "Server2");
 
     List<DailyPlaytime> dailyPlaytimes = Arrays.asList(playtime1, playtime2);
     when(dataExtractingService.getDailyPlaytimeData()).thenReturn(dailyPlaytimes);

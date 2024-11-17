@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.MinecraftTicketsAnswers;
-import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.MinecraftTicketsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 
@@ -18,11 +18,11 @@ import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTickets
 public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
 
   public final DataExtractingService dataExtractingService;
-  public final MinecraftTicketsRepository minecraftTicketsRepository;
+  public final DailyMinecraftTicketsRepository minecraftTicketsRepository;
 
   public MinecraftTicketsServiceImpl(
       DataExtractingService dataExtractingService,
-      MinecraftTicketsRepository discordTicketsRepository) {
+      DailyMinecraftTicketsRepository discordTicketsRepository) {
     this.dataExtractingService = dataExtractingService;
     this.minecraftTicketsRepository = discordTicketsRepository;
   }
@@ -49,23 +49,19 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   }
 
   public List<DailyMinecraftTickets> convertData(List<MinecraftTicketsAnswers> rawData) {
-    Map<Long, Map<LocalDate, Long>> groupedData = rawData
-        .stream()
+    Map<Long, Map<LocalDate, Long>> groupedData = rawData.stream()
         .collect(Collectors.groupingBy(
             MinecraftTicketsAnswers::getMinecraftTicketId,
             Collectors.groupingBy(
-                reaction -> reaction.getDateTime().toLocalDate(),
+                answer -> answer.getDateTime().toLocalDate(),
                 Collectors.counting())));
 
-    return groupedData.entrySet()
-        .stream()
-        .flatMap(adminEntry -> adminEntry.getValue()
-            .entrySet()
-            .stream()
+    return groupedData.entrySet().stream()
+        .flatMap(ticketEntry -> ticketEntry.getValue().entrySet().stream()
             .map(dateEntry -> new DailyMinecraftTickets(
                 null,
-                adminEntry.getKey(),
-                String.valueOf(dateEntry.getValue()),
+                ticketEntry.getKey().shortValue(),
+                dateEntry.getValue().intValue(),
                 dateEntry.getKey())))
         .collect(Collectors.toList());
   }

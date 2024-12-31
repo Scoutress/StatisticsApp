@@ -128,43 +128,103 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   @Override
   public void calculateDailyObjectiveProductivity() {
-    List<Employee> employees = employeeRepository.findAll();
-    List<DailyPlaytime> dailyPlaytime = dailyPlaytimeRepository.findAll();
-    List<DailyAfkPlaytime> dailyAfkPlaytime = dailyAfkPlaytimeRepository.findAll();
-    List<DailyDiscordTickets> dailyDiscordTickets = dailyDiscordTicketsRepository.findAll();
-    List<DailyDiscordTicketsCompared> dailyDiscordTicketsComp = dailyDiscordTicketsComparedRepository.findAll();
-    List<DailyDiscordMessages> dailyDiscordMessages = dailyDiscordMessagesRepository.findAll();
-    List<DailyDiscordMessagesCompared> dailyDiscordMessagesComp = dailyDiscordMessagesComparedRepository.findAll();
-    List<DailyMinecraftTickets> dailyMinecraftTickets = dailyMinecraftTicketsRepository.findAll();
-    List<DailyMinecraftTicketsCompared> dailyMinecraftTicketsComp = dailyMinecraftTicketsComparedRepository.findAll();
+    System.out.println("Starting daily productivity calculation...");
 
-    LocalDate oldestDate = findOldestDate(
+    List<Employee> employees = employeeRepository.findAll();
+    System.out.println("Loaded employees: " + employees.size());
+
+    List<DailyPlaytime> dailyPlaytime = dailyPlaytimeRepository.findAll();
+    System.out.println("Loaded daily playtime records: " + dailyPlaytime.size());
+
+    List<DailyAfkPlaytime> dailyAfkPlaytime = dailyAfkPlaytimeRepository.findAll();
+    System.out.println("Loaded daily AFK playtime records: " + dailyAfkPlaytime.size());
+
+    List<DailyDiscordTickets> dailyDiscordTickets = dailyDiscordTicketsRepository.findAll();
+    System.out.println("Loaded daily discord tickets: " + dailyDiscordTickets.size());
+
+    List<DailyDiscordTicketsCompared> dailyDiscordTicketsComp = dailyDiscordTicketsComparedRepository.findAll();
+    System.out.println("Loaded daily discord tickets compared: " + dailyDiscordTicketsComp.size());
+
+    List<DailyDiscordMessages> dailyDiscordMessages = dailyDiscordMessagesRepository.findAll();
+    System.out.println("Loaded daily discord messages: " + dailyDiscordMessages.size());
+
+    List<DailyDiscordMessagesCompared> dailyDiscordMessagesComp = dailyDiscordMessagesComparedRepository.findAll();
+    System.out.println("Loaded daily discord messages compared: " + dailyDiscordMessagesComp.size());
+
+    List<DailyMinecraftTickets> dailyMinecraftTickets = dailyMinecraftTicketsRepository.findAll();
+    System.out.println("Loaded daily Minecraft tickets: " + dailyMinecraftTickets.size());
+
+    List<DailyMinecraftTicketsCompared> dailyMinecraftTicketsComp = dailyMinecraftTicketsComparedRepository.findAll();
+    System.out.println("Loaded daily Minecraft tickets compared: " + dailyMinecraftTicketsComp.size());
+
+    LocalDate latestDateFromProductivity = dailyObjectiveProductivityRepository
+        .findTopByOrderByDateDesc()
+        .map(DailyObjectiveProductivity::getDate)
+        .orElse(null);
+
+    LocalDate oldestDateAllTables = findOldestDate(
         dailyPlaytime, dailyAfkPlaytime, dailyDiscordTickets, dailyDiscordTicketsComp,
         dailyDiscordMessages, dailyDiscordMessagesComp, dailyMinecraftTickets, dailyMinecraftTicketsComp);
+    System.out.println("Oldest date found: " + oldestDateAllTables);
 
     LocalDate today = LocalDate.now();
+    System.out.println("Today's date: " + today);
 
     List<DailyObjectiveProductivity> results = new ArrayList<>();
 
     for (Employee employee : employees) {
-      List<EmployeeLevel> levelHistory = employeeLevelRepository.findByAid(employee.getId());
+      System.out.println("Processing employee: " + employee.getId());
 
-      for (LocalDate date = oldestDate; date.isBefore(today); date = date.plusDays(1)) {
+      List<EmployeeLevel> levelHistory = employeeLevelRepository.findByAid(employee.getId());
+      System.out
+          .println("Loaded level history for employee " + employee.getId() + ": " + levelHistory.size() + " entries");
+
+      LocalDate newestDateForEmployee = levelHistory.stream()
+          .map(EmployeeLevel::getDate)
+          .max(LocalDate::compareTo)
+          .orElse(null);
+
+      if (oldestDateAllTables == null || newestDateForEmployee == null) {
+        System.out.println("No level history for employee " + employee.getId() + ". Skipping...");
+        continue;
+      }
+
+      System.out.println("Processing from " + oldestDateAllTables + " to " + newestDateForEmployee);
+
+      LocalDate startDate = (latestDateFromProductivity == null
+          || latestDateFromProductivity.isBefore(oldestDateAllTables))
+              ? oldestDateAllTables
+              : latestDateFromProductivity;
+
+      for (LocalDate date = startDate; date.isBefore(today)
+          && date.isBefore(newestDateForEmployee.plusDays(1)); date = date.plusDays(1)) {
+
+        System.out.println("Processing date: " + date);
+
         String level = getEmployeeLevelForDate(levelHistory, date);
+        System.out.println("Employee level for date " + date + ": " + level);
+
         Map<String, Double> constants = getConstantsForLevel(level);
+        System.out.println("Constants for level " + level + ": " + constants);
 
         double productivity = calculateObjectiveProductivityForThatDay(
             employee, date, constants,
             dailyPlaytime, dailyAfkPlaytime, dailyDiscordTickets, dailyDiscordTicketsComp,
             dailyDiscordMessages, dailyDiscordMessagesComp, dailyMinecraftTickets, dailyMinecraftTicketsComp);
 
+        System.out.println("Calculated productivity for " + employee.getId() + " on " + date + ": " + productivity);
+
         results.add(new DailyObjectiveProductivity(null, employee.getId(), productivity, date));
       }
     }
+
+    System.out.println("Saving results...");
     dailyObjectiveProductivityRepository.saveAll(results);
+    System.out.println("Saved " + results.size() + " daily productivity records.");
   }
 
   private LocalDate findOldestDate(List<?>... dataLists) {
+    System.out.println("Finding the oldest date...");
     return Arrays.stream(dataLists)
         .flatMap(list -> list.stream().map(this::getDate))
         .min(LocalDate::compareTo)
@@ -172,11 +232,14 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private String getEmployeeLevelForDate(List<EmployeeLevel> levelHistory, LocalDate date) {
+    System.out.println("Getting employee level for date: " + date);
     EmployeeLevel levelForDate = levelHistory
         .stream()
         .filter(level -> level.getDate().equals(date))
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No level found for date: " + date));
+
+    System.out.println("Found level: " + levelForDate.getLevel());
 
     return switch (levelForDate.getLevel()) {
       case 0 -> "organizer";
@@ -190,16 +253,17 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private Map<String, Double> getConstantsForLevel(String level) {
+    System.out.println("Getting constants for level: " + level);
     return switch (level) {
       case "helper" -> Map.ofEntries(
           Map.entry("playtime", CalculationConstants.PLAYTIME_HELPER),
           Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_HELPER),
           Map.entry("discordMessages", CalculationConstants.DISCORD_MESSAGES_HELPER),
           Map.entry("discordMessagesComp", CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER),
-          Map.entry("discordTickets", null),
-          Map.entry("discordTicketsComp", null),
-          Map.entry("minecraftTickets", null),
-          Map.entry("minecraftTicketsComp", null));
+          Map.entry("discordTickets", 0.0),
+          Map.entry("discordTicketsComp", 0.0),
+          Map.entry("minecraftTickets", 0.0),
+          Map.entry("minecraftTicketsComp", 0.0));
       case "support" -> Map.ofEntries(
           Map.entry("playtime", CalculationConstants.PLAYTIME_SUPPORT),
           Map.entry("afkPlaytime", CalculationConstants.AFK_PLAYTIME_SUPPORT),
@@ -253,27 +317,41 @@ public class ProductivityServiceImpl implements ProductivityService {
       List<DailyMinecraftTickets> dailyMinecraftTickets,
       List<DailyMinecraftTicketsCompared> dailyMinecraftTicketsComp) {
 
+    System.out.println("Calculating productivity for " + employee.getId() + " on " + date);
+
     double totalProductivity = 0.0;
     int categoriesCount = 8;
 
-    totalProductivity += calculateProductivityFromList(
-        dailyPlaytime, employee, date, constants.get("playtime"));
-    totalProductivity += calculateProductivityFromList(
-        dailyAfkPlaytime, employee, date, constants.get("afkPlaytime"));
-    totalProductivity += calculateProductivityFromList(
-        dailyDiscordTickets, employee, date, constants.get("discordTickets"));
-    totalProductivity += calculateProductivityFromList(
-        dailyDiscordTicketsComp, employee, date, constants.get("discordTicketsComp"));
-    totalProductivity += calculateProductivityFromList(
-        dailyDiscordMessages, employee, date, constants.get("discordMessages"));
-    totalProductivity += calculateProductivityFromList(
-        dailyDiscordMessagesComp, employee, date, constants.get("discordMessagesComp"));
-    totalProductivity += calculateProductivityFromList(
-        dailyMinecraftTickets, employee, date, constants.get("minecraftTickets"));
-    totalProductivity += calculateProductivityFromList(
-        dailyMinecraftTicketsComp, employee, date, constants.get("minecraftTicketsComp"));
+    double playtimeConstant = constants.get("playtime");
+    double afkPlaytimeConstant = constants.get("afkPlaytime");
+    double discordMsgConstant = constants.get("discordMessages");
+    double discordMsgCompConstant = constants.get("discordMessagesComp");
+    double discordTicketsConstant = constants.get("discordTickets");
+    double discordTicketsCompConstant = constants.get("discordTicketsComp");
+    double minecraftTicketsConstant = constants.get("minecraftTickets");
+    double minecraftTicketsCompConstant = constants.get("minecraftTicketsComp");
 
-    return totalProductivity / categoriesCount;
+    totalProductivity += calculateProductivityFromList(
+        dailyPlaytime, employee, date, playtimeConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyAfkPlaytime, employee, date, afkPlaytimeConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyDiscordMessages, employee, date, discordMsgConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyDiscordMessagesComp, employee, date, discordMsgCompConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyDiscordTickets, employee, date, discordTicketsConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyDiscordTicketsComp, employee, date, discordTicketsCompConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyMinecraftTickets, employee, date, minecraftTicketsConstant);
+    totalProductivity += calculateProductivityFromList(
+        dailyMinecraftTicketsComp, employee, date, minecraftTicketsCompConstant);
+
+    double finalProductivity = totalProductivity / categoriesCount;
+
+    System.out.println("Final productivity for " + employee.getId() + " on " + date + ": " + finalProductivity);
+    return finalProductivity;
   }
 
   private double calculateProductivityFromList(List<?> dataList, Employee employee, LocalDate date, Double constant) {

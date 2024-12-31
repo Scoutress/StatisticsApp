@@ -23,12 +23,12 @@ public class EmployeeLevel {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Short id;
 
-  @Column(name = "aid", nullable = false, unique = true)
+  @Column(name = "aid", nullable = false)
   private Short aid;
 
-  @Column(name = "level", nullable = true)
+  @Column(name = "level", nullable = false)
   private Short level;
 
-  @Column(name = "date", nullable = true)
+  @Column(name = "date", nullable = false)
   private LocalDate date;
 }

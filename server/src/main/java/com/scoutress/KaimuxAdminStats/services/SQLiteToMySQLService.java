@@ -4,4 +4,5 @@ public interface SQLiteToMySQLService {
 
   void initializeUsersDatabase();
 
+  void initializePlaytimeSessionsDatabase();
 }

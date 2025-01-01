@@ -42,6 +42,7 @@ public class ScheduledTasksConfig {
     System.out.println("");
 
     sQLiteToMySQLService.initializeUsersDatabase();
+    sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
 
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();

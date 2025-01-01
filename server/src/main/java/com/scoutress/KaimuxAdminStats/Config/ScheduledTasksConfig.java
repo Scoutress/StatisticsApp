@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
+import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
 import jakarta.transaction.Transactional;
@@ -22,16 +23,19 @@ public class ScheduledTasksConfig {
   private final DiscordTicketsService discordTicketsService;
   private final ProductivityService productivityService;
   private final SQLiteToMySQLService sQLiteToMySQLService;
+  private final EmployeeDataService employeeDataService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
       DiscordTicketsService discordTicketsService,
       ProductivityService productivityService,
-      SQLiteToMySQLService sQLiteToMySQLService) {
+      SQLiteToMySQLService sQLiteToMySQLService,
+      EmployeeDataService employeeDataService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
+    this.employeeDataService = employeeDataService;
   }
 
   @Scheduled(initialDelay = 1000, fixedRate = 86400000)
@@ -43,6 +47,7 @@ public class ScheduledTasksConfig {
 
     sQLiteToMySQLService.initializeUsersDatabase();
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
+    employeeDataService.updateEmployeeCodes();
 
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
+import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
@@ -20,14 +21,17 @@ public class ScheduledTasksConfig {
   private final DataFetchingService dataFetchingService;
   private final DiscordTicketsService discordTicketsService;
   private final ProductivityService productivityService;
+  private final SQLiteToMySQLService sQLiteToMySQLService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
       DiscordTicketsService discordTicketsService,
-      ProductivityService productivityService) {
+      ProductivityService productivityService,
+      SQLiteToMySQLService sQLiteToMySQLService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
+    this.sQLiteToMySQLService = sQLiteToMySQLService;
   }
 
   @Scheduled(initialDelay = 1000, fixedRate = 86400000)
@@ -36,6 +40,8 @@ public class ScheduledTasksConfig {
     System.out.println("-----------------------------------------------");
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
+
+    sQLiteToMySQLService.initializeUsersDatabase();
 
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();

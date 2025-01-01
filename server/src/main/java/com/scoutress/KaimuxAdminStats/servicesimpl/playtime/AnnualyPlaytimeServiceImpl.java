@@ -35,22 +35,23 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
     saveAnnualPlaytime(annualPlaytime);
   }
 
-  @Override
   public List<AnnualPlaytime> calculateAnnualPlaytime(List<DailyPlaytime> allPlaytime) {
-
     LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
 
-    Map<Short, Double> annualPlaytimeMap = allPlaytime.stream()
+    Map<Short, Double> annualPlaytimeMap = allPlaytime
+        .stream()
         .filter(playtime -> !playtime.getDate().isBefore(dateOneYearAgo))
         .collect(Collectors.groupingBy(
             DailyPlaytime::getAid,
             Collectors.summingDouble(DailyPlaytime::getTime)));
 
-    List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap.entrySet().stream()
+    List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap
+        .entrySet()
+        .stream()
         .map(entry -> {
           AnnualPlaytime annualPlaytime = new AnnualPlaytime();
           annualPlaytime.setAid(entry.getKey());
-          annualPlaytime.setPlaytime(entry.getValue());
+          annualPlaytime.setPlaytime(entry.getValue() / 3600);
           return annualPlaytime;
         })
         .sorted(Comparator.comparing(AnnualPlaytime::getAid))
@@ -59,8 +60,16 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
     return handledAnnualPlaytimeData;
   }
 
-  @Override
   public void saveAnnualPlaytime(List<AnnualPlaytime> annualPlaytimeData) {
-    annualPlaytimeData.forEach(annualPlaytimeRepository::save);
+    annualPlaytimeData.forEach(annualPlaytime -> {
+      AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByAid(annualPlaytime.getAid());
+
+      if (existingPlaytime != null) {
+        existingPlaytime.setPlaytime(annualPlaytime.getPlaytime());
+        annualPlaytimeRepository.save(existingPlaytime);
+      } else {
+        annualPlaytimeRepository.save(annualPlaytime);
+      }
+    });
   }
 }

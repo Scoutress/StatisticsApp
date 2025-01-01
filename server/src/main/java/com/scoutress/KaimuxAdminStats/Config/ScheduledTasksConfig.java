@@ -11,6 +11,7 @@ import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
+import com.scoutress.KaimuxAdminStats.services.playtime.AnnualyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
@@ -28,6 +29,7 @@ public class ScheduledTasksConfig {
   private final EmployeeDataService employeeDataService;
   private final SessionDurationService sessionDurationService;
   private final DailyPlaytimeService dailyPlaytimeService;
+  private final AnnualyPlaytimeService annualyPlaytimeService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -36,7 +38,8 @@ public class ScheduledTasksConfig {
       SQLiteToMySQLService sQLiteToMySQLService,
       EmployeeDataService employeeDataService,
       SessionDurationService sessionDurationService,
-      DailyPlaytimeService dailyPlaytimeService) {
+      DailyPlaytimeService dailyPlaytimeService,
+      AnnualyPlaytimeService annualyPlaytimeService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -44,6 +47,7 @@ public class ScheduledTasksConfig {
     this.employeeDataService = employeeDataService;
     this.sessionDurationService = sessionDurationService;
     this.dailyPlaytimeService = dailyPlaytimeService;
+    this.annualyPlaytimeService = annualyPlaytimeService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -53,11 +57,13 @@ public class ScheduledTasksConfig {
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
+    // Annual playtime calculations
     sQLiteToMySQLService.initializeUsersDatabase();
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
     employeeDataService.updateEmployeeCodes();
     sessionDurationService.processSessions();
     dailyPlaytimeService.handleDailyPlaytime();
+    annualyPlaytimeService.handleAnnualPlaytime();
 
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();

@@ -12,6 +12,7 @@ import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AnnualyPlaytimeService;
+import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
@@ -30,6 +31,7 @@ public class ScheduledTasksConfig {
   private final SessionDurationService sessionDurationService;
   private final DailyPlaytimeService dailyPlaytimeService;
   private final AnnualyPlaytimeService annualyPlaytimeService;
+  private final AveragePlaytimeOverallService averagePlaytimeOverallService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -39,7 +41,8 @@ public class ScheduledTasksConfig {
       EmployeeDataService employeeDataService,
       SessionDurationService sessionDurationService,
       DailyPlaytimeService dailyPlaytimeService,
-      AnnualyPlaytimeService annualyPlaytimeService) {
+      AnnualyPlaytimeService annualyPlaytimeService,
+      AveragePlaytimeOverallService averagePlaytimeOverallService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -48,6 +51,7 @@ public class ScheduledTasksConfig {
     this.sessionDurationService = sessionDurationService;
     this.dailyPlaytimeService = dailyPlaytimeService;
     this.annualyPlaytimeService = annualyPlaytimeService;
+    this.averagePlaytimeOverallService = averagePlaytimeOverallService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -66,16 +70,15 @@ public class ScheduledTasksConfig {
     dailyPlaytimeService.handleDailyPlaytime();
     annualyPlaytimeService.handleAnnualPlaytime();
 
+    // Average playtime per day calculations
+    averagePlaytimeOverallService.handleAveragePlaytime();
+
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();
     // runVisitorsDataExtractionFromAPI();
-
     // runDiscordTicketsRawDataDuplicateRemover();
-
     // runDiscordTicketsDataConvertor();
-
     // runDiscordTicketsConvertedDataDuplicateRemover();
-
     // runDailyObjectiveProductivityCalculations();
     // runDailyProductivityCalculations();
 

@@ -8,19 +8,30 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.SessionDurationRepository;
+import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
 import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
 
 @Service
 public class SessionDurationServiceImpl implements SessionDurationService {
 
   private final JdbcTemplate jdbcTemplate;
+  private final DataExtractingService dataExtractingService;
+  private final SessionDurationRepository sessionDurationRepository;
 
-  public SessionDurationServiceImpl(JdbcTemplate jdbcTemplate) {
+  public SessionDurationServiceImpl(
+      JdbcTemplate jdbcTemplate,
+      DataExtractingService dataExtractingService,
+      SessionDurationRepository sessionDurationRepository) {
     this.jdbcTemplate = jdbcTemplate;
+    this.dataExtractingService = dataExtractingService;
+    this.sessionDurationRepository = sessionDurationRepository;
   }
 
   @Override
@@ -113,5 +124,30 @@ public class SessionDurationServiceImpl implements SessionDurationService {
 
     int rowsInserted = jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
     System.out.println("Rows inserted: " + rowsInserted);
+  }
+
+  @Override
+  public void removeDuplicateSessionData() {
+    List<SessionDuration> allSessions = dataExtractingService.getSessionDurations();
+
+    Map<String, List<SessionDuration>> groupedByUniqueFields = allSessions
+        .stream()
+        .collect(Collectors.groupingBy(session -> session.getAid() + "-" +
+            session.getDate() + "-" +
+            session.getServer() + "-" +
+            session.getSingleSessionDuration()));
+
+    groupedByUniqueFields.values().forEach(group -> {
+      if (group.size() > 1) {
+        group.subList(1, group.size()).forEach(sessionDuration -> sessionDurationRepository.delete(sessionDuration));
+      }
+    });
+  }
+
+  public void delete(SessionDuration sessionDuration) {
+    if (sessionDuration == null) {
+      throw new IllegalArgumentException("SessionDuration must not be null.");
+    }
+    sessionDurationRepository.delete(sessionDuration);
   }
 }

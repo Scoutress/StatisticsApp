@@ -62,6 +62,7 @@ public class ScheduledTasksConfig {
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
     employeeDataService.updateEmployeeCodes();
     sessionDurationService.processSessions();
+    sessionDurationService.removeDuplicateSessionData();
     dailyPlaytimeService.handleDailyPlaytime();
     annualyPlaytimeService.handleAnnualPlaytime();
 

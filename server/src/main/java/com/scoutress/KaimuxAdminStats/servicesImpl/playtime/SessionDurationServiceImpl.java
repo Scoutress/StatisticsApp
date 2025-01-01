@@ -89,7 +89,7 @@ public class SessionDurationServiceImpl implements SessionDurationService {
         int sessionDuration = logoutTime - loginTime;
 
         if (sessionDuration <= 24 * 60 * 60) {
-          saveSessionDuration(employeeId, server, sessionDuration, loginTime / 86400);
+          saveSessionDuration(employeeId, server, sessionDuration, loginTime);
         }
       }
     }
@@ -110,6 +110,8 @@ public class SessionDurationServiceImpl implements SessionDurationService {
     LocalDate sessionDate = Instant.ofEpochSecond(loginTime).atZone(ZoneId.systemDefault()).toLocalDate();
 
     String query = "INSERT INTO session_duration (aid, single_session_duration, date, server) VALUES (?, ?, ?, ?)";
-    jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
+
+    int rowsInserted = jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
+    System.out.println("Rows inserted: " + rowsInserted);
   }
 }

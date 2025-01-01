@@ -47,7 +47,7 @@ public class ScheduledTasksConfig {
 
     // runDiscordTicketsConvertedDataDuplicateRemover();
 
-    runDailyObjectiveProductivityCalculations();
+    // runDailyObjectiveProductivityCalculations();
     // runDailyProductivityCalculations();
 
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

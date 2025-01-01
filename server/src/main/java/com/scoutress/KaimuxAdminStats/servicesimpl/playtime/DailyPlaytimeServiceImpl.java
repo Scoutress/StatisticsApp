@@ -24,24 +24,18 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   public DailyPlaytimeServiceImpl(
       DailyPlaytimeRepository dailyPlaytimeRepository,
       DataExtractingService dataExtractingService) {
-
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.dataExtractingService = dataExtractingService;
   }
 
   @Override
   public void handleDailyPlaytime() {
-
     List<SessionDuration> allSessions = dataExtractingService.getSessionDurations();
-
     List<DailyPlaytime> dailyPlaytimeData = calculateDailyPlaytime(allSessions);
-
     saveCalculatedPlaytime(dailyPlaytimeData);
   }
 
-  @Override
   public List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
-
     List<DailyPlaytime> handledDailyPlaytimeData = new ArrayList<>();
 
     Set<Short> uniqueAids = sessions
@@ -70,12 +64,18 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
               .mapToDouble(SessionDuration::getSingleSessionDuration)
               .sum();
 
-          DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
-          dailyPlaytimeData.setAid(aid);
-          dailyPlaytimeData.setServer(server);
-          dailyPlaytimeData.setDate(date);
-          dailyPlaytimeData.setTime(sessionPlaytimeInSec);
-          handledDailyPlaytimeData.add(dailyPlaytimeData);
+          if (sessionPlaytimeInSec < 0) {
+            throw new IllegalArgumentException("Playtime can not be less than 0!");
+          }
+
+          if (sessionPlaytimeInSec > 0) {
+            DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
+            dailyPlaytimeData.setAid(aid);
+            dailyPlaytimeData.setServer(server);
+            dailyPlaytimeData.setDate(date);
+            dailyPlaytimeData.setTime(sessionPlaytimeInSec);
+            handledDailyPlaytimeData.add(dailyPlaytimeData);
+          }
         }
       }
     }
@@ -85,7 +85,6 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     return handledDailyPlaytimeData;
   }
 
-  @Override
   public void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
     dailyPlaytimeData.forEach(dailyPlaytimeRepository::save);
   }

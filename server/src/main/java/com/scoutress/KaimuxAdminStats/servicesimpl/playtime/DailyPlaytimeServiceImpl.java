@@ -86,6 +86,18 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   }
 
   public void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
-    dailyPlaytimeData.forEach(dailyPlaytimeRepository::save);
+    dailyPlaytimeData.forEach(dailyPlaytime -> {
+      DailyPlaytime existingPlaytime = dailyPlaytimeRepository.findByAidAndDateAndServer(
+          dailyPlaytime.getAid(),
+          dailyPlaytime.getDate(),
+          dailyPlaytime.getServer());
+
+      if (existingPlaytime != null) {
+        existingPlaytime.setTime(dailyPlaytime.getTime());
+        dailyPlaytimeRepository.save(existingPlaytime);
+      } else {
+        dailyPlaytimeRepository.save(dailyPlaytime);
+      }
+    });
   }
 }

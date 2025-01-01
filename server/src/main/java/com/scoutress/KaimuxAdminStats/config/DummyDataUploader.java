@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DummyDataUploadingService;
 
@@ -22,7 +21,7 @@ public class DummyDataUploader {
     this.dummyDataUploadingService = dummyDataUploadingService;
   }
 
-  @Scheduled(initialDelay = 1000, fixedRate = 86400000)
+  // @Scheduled(initialDelay = 1000, fixedRate = 86400000)
   @Transactional
   public void runScheduledTasks() {
     System.out.println("-----------------------------------------------");

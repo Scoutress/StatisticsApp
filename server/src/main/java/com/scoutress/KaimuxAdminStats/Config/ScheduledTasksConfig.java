@@ -11,6 +11,7 @@ import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
+import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
 import jakarta.transaction.Transactional;
@@ -24,21 +25,24 @@ public class ScheduledTasksConfig {
   private final ProductivityService productivityService;
   private final SQLiteToMySQLService sQLiteToMySQLService;
   private final EmployeeDataService employeeDataService;
+  private final SessionDurationService sessionDurationService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
       DiscordTicketsService discordTicketsService,
       ProductivityService productivityService,
       SQLiteToMySQLService sQLiteToMySQLService,
-      EmployeeDataService employeeDataService) {
+      EmployeeDataService employeeDataService,
+      SessionDurationService sessionDurationService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
     this.employeeDataService = employeeDataService;
+    this.sessionDurationService = sessionDurationService;
   }
 
-  @Scheduled(initialDelay = 1000, fixedRate = 86400000)
+  @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
   @Transactional
   public void runScheduledTasks() {
     System.out.println("-----------------------------------------------");
@@ -48,6 +52,7 @@ public class ScheduledTasksConfig {
     sQLiteToMySQLService.initializeUsersDatabase();
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
     employeeDataService.updateEmployeeCodes();
+    sessionDurationService.processSessions();
 
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();

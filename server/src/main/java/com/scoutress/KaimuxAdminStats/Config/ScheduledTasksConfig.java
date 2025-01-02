@@ -11,6 +11,7 @@ import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
+import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AnnualyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
@@ -32,6 +33,7 @@ public class ScheduledTasksConfig {
   private final DailyPlaytimeService dailyPlaytimeService;
   private final AnnualyPlaytimeService annualyPlaytimeService;
   private final AveragePlaytimeOverallService averagePlaytimeOverallService;
+  private final MinecraftTicketsService minecraftTicketsService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -42,7 +44,8 @@ public class ScheduledTasksConfig {
       SessionDurationService sessionDurationService,
       DailyPlaytimeService dailyPlaytimeService,
       AnnualyPlaytimeService annualyPlaytimeService,
-      AveragePlaytimeOverallService averagePlaytimeOverallService) {
+      AveragePlaytimeOverallService averagePlaytimeOverallService,
+      MinecraftTicketsService minecraftTicketsService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -52,6 +55,7 @@ public class ScheduledTasksConfig {
     this.dailyPlaytimeService = dailyPlaytimeService;
     this.annualyPlaytimeService = annualyPlaytimeService;
     this.averagePlaytimeOverallService = averagePlaytimeOverallService;
+    this.minecraftTicketsService = minecraftTicketsService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -61,7 +65,7 @@ public class ScheduledTasksConfig {
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
-    // Annual playtime calculations
+    System.out.println("Annual playtime calculations");
     sQLiteToMySQLService.initializeUsersDatabase();
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
     employeeDataService.updateEmployeeCodes();
@@ -70,8 +74,29 @@ public class ScheduledTasksConfig {
     dailyPlaytimeService.handleDailyPlaytime();
     annualyPlaytimeService.handleAnnualPlaytime();
 
-    // Average playtime per day calculations
+    System.out.println("Average playtime per day calculations");
     averagePlaytimeOverallService.handleAveragePlaytime();
+
+    System.out.println("Average server tickets per day calculations");
+    minecraftTicketsService.convertMinecraftTicketsAnswers();
+    minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
+
+    // System.out.println("Average server tickets per playtime hour calculations");
+    //
+
+    // System.out.println("Average server tickets taking comparison per day
+    // calculations");
+    //
+
+    // System.out.println("Average discord messages per day calculations");
+    //
+
+    // System.out.println("Average discord messages taking comparison per day
+    // calculation");
+    //
+
+    // System.out.println("Complaints calculation");
+    //
 
     // runDiscordDataExtractionFromAPI();
     // runMinecraftDataExtractionFromAPI();

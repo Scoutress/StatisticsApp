@@ -410,7 +410,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     if (entity instanceof DailyDiscordMessagesCompared dailyDiscordMessagesCompared)
       return dailyDiscordMessagesCompared.getAid();
     if (entity instanceof DailyMinecraftTickets dailyMinecraftTickets)
-      return dailyMinecraftTickets.getAid();
+      return dailyMinecraftTickets.getEmployeeId();
     if (entity instanceof DailyMinecraftTicketsCompared dailyMinecraftTicketsCompared)
       return dailyMinecraftTicketsCompared.getAid();
 

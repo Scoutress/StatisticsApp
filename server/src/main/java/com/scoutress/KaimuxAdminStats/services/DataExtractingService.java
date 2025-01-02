@@ -37,5 +37,4 @@ public interface DataExtractingService {
   public List<SanitizedAfkSessionData> getSanitizedAfkStartFinishTimes();
 
   public List<AfkSessionDuration> getAfkSessionDurations();
-
 }

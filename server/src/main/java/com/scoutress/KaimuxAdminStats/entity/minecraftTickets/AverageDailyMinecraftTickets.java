@@ -1,7 +1,5 @@
 package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "minecraft_tickets")
+@Table(name = "avg_daily_minecraft_tickets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyMinecraftTickets {
+public class AverageDailyMinecraftTickets {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +24,6 @@ public class DailyMinecraftTickets {
   @Column(name = "employee_id", nullable = false)
   private Short employeeId;
 
-  @Column(name = "ticket_count", nullable = false)
-  private int ticketCount;
-
-  @Column(name = "date", nullable = false)
-  private LocalDate date;
-
+  @Column(name = "tickets", nullable = false)
+  private double tickets;
 }

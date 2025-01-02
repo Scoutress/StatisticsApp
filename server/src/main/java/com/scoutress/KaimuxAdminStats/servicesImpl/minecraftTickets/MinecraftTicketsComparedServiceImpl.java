@@ -44,7 +44,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
     return dailyTickets
         .stream()
         .collect(Collectors.groupingBy(
-            ticket -> ticket.getAid() + "_" + ticket.getDate()));
+            ticket -> ticket.getEmployeeId() + "_" + ticket.getDate()));
   }
 
   private Short extractAid(String key) {

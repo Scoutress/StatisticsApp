@@ -11,6 +11,7 @@ import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
+import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AnnualyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
@@ -34,6 +35,7 @@ public class ScheduledTasksConfig {
   private final AnnualyPlaytimeService annualyPlaytimeService;
   private final AveragePlaytimeOverallService averagePlaytimeOverallService;
   private final MinecraftTicketsService minecraftTicketsService;
+  private final MinecraftTicketsComparedService minecraftTicketsComparedService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -45,7 +47,8 @@ public class ScheduledTasksConfig {
       DailyPlaytimeService dailyPlaytimeService,
       AnnualyPlaytimeService annualyPlaytimeService,
       AveragePlaytimeOverallService averagePlaytimeOverallService,
-      MinecraftTicketsService minecraftTicketsService) {
+      MinecraftTicketsService minecraftTicketsService,
+      MinecraftTicketsComparedService minecraftTicketsComparedService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -56,6 +59,7 @@ public class ScheduledTasksConfig {
     this.annualyPlaytimeService = annualyPlaytimeService;
     this.averagePlaytimeOverallService = averagePlaytimeOverallService;
     this.minecraftTicketsService = minecraftTicketsService;
+    this.minecraftTicketsComparedService = minecraftTicketsComparedService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -87,10 +91,9 @@ public class ScheduledTasksConfig {
     System.out.println("Average Minecraft tickets per playtime hour calculations");
     minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
 
-    // System.out.println("");
-    // System.out.println("Average Minecraft tickets taking comparison per day
-    // calculations");
-    //
+    System.out.println("");
+    System.out.println("Average Minecraft tickets taking comparison per day calculations");
+    minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
 
     // System.out.println("");
     // System.out.println("Average discord messages per day calculations");

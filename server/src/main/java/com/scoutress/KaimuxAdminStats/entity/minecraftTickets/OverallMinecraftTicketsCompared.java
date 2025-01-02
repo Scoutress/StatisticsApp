@@ -1,7 +1,5 @@
 package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_minecraft_tickets_comp")
+@Table(name = "overall_minecraft_tickets_comp")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyMinecraftTicketsCompared {
+public class OverallMinecraftTicketsCompared {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +26,4 @@ public class DailyMinecraftTicketsCompared {
 
   @Column(name = "value", nullable = false)
   private Double value;
-
-  @Column(name = "date", nullable = false)
-  private LocalDate date;
-
 }

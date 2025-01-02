@@ -412,7 +412,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     if (entity instanceof DailyMinecraftTickets dailyMinecraftTickets)
       return dailyMinecraftTickets.getEmployeeId();
     if (entity instanceof DailyMinecraftTicketsCompared dailyMinecraftTicketsCompared)
-      return dailyMinecraftTicketsCompared.getAid();
+      return dailyMinecraftTicketsCompared.getEmployeeId();
 
     throw new IllegalArgumentException("Unsupported entity type: " + entity);
   }

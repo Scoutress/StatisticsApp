@@ -85,7 +85,7 @@ class DailyPlaytimeServiceTest {
 
     assertEquals(1, result.size(), "There should be 1 daily playtime entry.");
     DailyPlaytime dailyPlaytime = result.get(0);
-    assertEquals((short) 1, dailyPlaytime.getAid());
+    assertEquals((short) 1, dailyPlaytime.getEmployeeId());
     assertEquals("Server1", dailyPlaytime.getServer());
     assertEquals(LocalDate.of(2024, 11, 1), dailyPlaytime.getDate());
     assertEquals(300, dailyPlaytime.getTime(), "The total playtime should be 300 seconds.");
@@ -94,7 +94,7 @@ class DailyPlaytimeServiceTest {
   @Test
   void testSaveCalculatedPlaytime() {
     DailyPlaytime dailyPlaytime = new DailyPlaytime();
-    dailyPlaytime.setAid((short) 1);
+    dailyPlaytime.setEmployeeId((short) 1);
     dailyPlaytime.setServer("Server1");
     dailyPlaytime.setDate(LocalDate.of(2024, 11, 1));
     dailyPlaytime.setTime(300.0);

@@ -64,7 +64,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
 
     Set<Short> uniqueAids = allPlaytimes
         .stream()
-        .map(DailyPlaytime::getAid)
+        .map(DailyPlaytime::getEmployeeId)
         .collect(Collectors.toSet());
 
     for (Short aid : uniqueAids) {
@@ -76,7 +76,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
 
           double playtimesSum = allPlaytimes
               .stream()
-              .filter(pt -> pt.getAid().equals(aid))
+              .filter(pt -> pt.getEmployeeId().equals(aid))
               .filter(pt -> !pt.getDate().isBefore(joinDate))
               .mapToDouble(DailyPlaytime::getTime)
               .sum();

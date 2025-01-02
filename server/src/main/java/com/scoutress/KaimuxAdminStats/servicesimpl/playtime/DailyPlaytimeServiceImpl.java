@@ -70,7 +70,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
 
           if (sessionPlaytimeInSec > 0) {
             DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
-            dailyPlaytimeData.setAid(aid);
+            dailyPlaytimeData.setEmployeeId(aid);
             dailyPlaytimeData.setServer(server);
             dailyPlaytimeData.setDate(date);
             dailyPlaytimeData.setTime(sessionPlaytimeInSec);
@@ -87,8 +87,8 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
 
   public void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
     dailyPlaytimeData.forEach(dailyPlaytime -> {
-      DailyPlaytime existingPlaytime = dailyPlaytimeRepository.findByAidAndDateAndServer(
-          dailyPlaytime.getAid(),
+      DailyPlaytime existingPlaytime = dailyPlaytimeRepository.findByEmployeeIdAndDateAndServer(
+          dailyPlaytime.getEmployeeId(),
           dailyPlaytime.getDate(),
           dailyPlaytime.getServer());
 

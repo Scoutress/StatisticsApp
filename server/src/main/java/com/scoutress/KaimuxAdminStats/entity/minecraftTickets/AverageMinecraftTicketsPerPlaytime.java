@@ -1,6 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.playtime;
-
-import java.time.LocalDate;
+package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_playtime")
+@Table(name = "avg_minecraft_tickets_per_playtime")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyPlaytime {
+public class AverageMinecraftTicketsPerPlaytime {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,12 +24,6 @@ public class DailyPlaytime {
   @Column(name = "employee_id", nullable = false)
   private Short employeeId;
 
-  @Column(name = "time", nullable = false)
-  private Double time;
-
-  @Column(name = "date", nullable = false)
-  private LocalDate date;
-
-  @Column(name = "server", nullable = false)
-  private String server;
+  @Column(name = "value", nullable = false)
+  private double value;
 }

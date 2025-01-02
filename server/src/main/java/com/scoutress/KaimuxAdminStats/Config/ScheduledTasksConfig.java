@@ -74,27 +74,34 @@ public class ScheduledTasksConfig {
     dailyPlaytimeService.handleDailyPlaytime();
     annualyPlaytimeService.handleAnnualPlaytime();
 
+    System.out.println("");
     System.out.println("Average playtime per day calculations");
     averagePlaytimeOverallService.handleAveragePlaytime();
 
-    System.out.println("Average server tickets per day calculations");
+    System.out.println("");
+    System.out.println("Average Minecraft tickets per day calculations");
     minecraftTicketsService.convertMinecraftTicketsAnswers();
     minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
 
-    // System.out.println("Average server tickets per playtime hour calculations");
-    //
+    System.out.println("");
+    System.out.println("Average Minecraft tickets per playtime hour calculations");
+    minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
 
-    // System.out.println("Average server tickets taking comparison per day
+    // System.out.println("");
+    // System.out.println("Average Minecraft tickets taking comparison per day
     // calculations");
     //
 
+    // System.out.println("");
     // System.out.println("Average discord messages per day calculations");
     //
 
+    // System.out.println("");
     // System.out.println("Average discord messages taking comparison per day
     // calculation");
     //
 
+    // System.out.println("");
     // System.out.println("Complaints calculation");
     //
 

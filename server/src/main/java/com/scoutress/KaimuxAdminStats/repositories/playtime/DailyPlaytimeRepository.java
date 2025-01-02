@@ -8,5 +8,5 @@ import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 
 public interface DailyPlaytimeRepository extends JpaRepository<DailyPlaytime, Long> {
 
-  DailyPlaytime findByAidAndDateAndServer(Short aid, LocalDate date, String server);
+  DailyPlaytime findByEmployeeIdAndDateAndServer(Short employeeId, LocalDate date, String server);
 }

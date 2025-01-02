@@ -42,7 +42,7 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
         .stream()
         .filter(playtime -> !playtime.getDate().isBefore(dateOneYearAgo))
         .collect(Collectors.groupingBy(
-            DailyPlaytime::getAid,
+            DailyPlaytime::getEmployeeId,
             Collectors.summingDouble(DailyPlaytime::getTime)));
 
     List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap

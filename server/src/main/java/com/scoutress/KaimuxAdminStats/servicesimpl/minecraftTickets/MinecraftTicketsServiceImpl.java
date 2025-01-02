@@ -10,10 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageDailyMinecraftTickets;
+import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageMinecraftTicketsPerPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.MinecraftTicketsAnswers;
+import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageDailyMinecraftTicketsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageMinecraftTicketsPerPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 
@@ -23,14 +27,20 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   public final DataExtractingService dataExtractingService;
   public final DailyMinecraftTicketsRepository minecraftTicketsRepository;
   public final AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository;
+  public final DailyPlaytimeRepository dailyPlaytimeRepository;
+  public final AverageMinecraftTicketsPerPlaytimeRepository averageMinecraftTicketsPerPlaytimeRepository;
 
   public MinecraftTicketsServiceImpl(
       DataExtractingService dataExtractingService,
       DailyMinecraftTicketsRepository discordTicketsRepository,
-      AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository) {
+      AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository,
+      DailyPlaytimeRepository dailyPlaytimeRepository,
+      AverageMinecraftTicketsPerPlaytimeRepository averageMinecraftTicketsPerPlaytimeRepository) {
     this.dataExtractingService = dataExtractingService;
     this.minecraftTicketsRepository = discordTicketsRepository;
     this.averageDailyMinecraftTicketsRepository = averageDailyMinecraftTicketsRepository;
+    this.dailyPlaytimeRepository = dailyPlaytimeRepository;
+    this.averageMinecraftTicketsPerPlaytimeRepository = averageMinecraftTicketsPerPlaytimeRepository;
   }
 
   @Override
@@ -108,13 +118,12 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
 
   @Override
   public void calculateAverageDailyMinecraftTicketsValues() {
-    List<DailyMinecraftTickets> rawData = extractDataFromDailyMinecraftTicketsTable();
     List<Short> allEmployees = getAllEmployeesFromTheTable();
-    LocalDate oldestDate = checkForOldestDate(rawData);
+    LocalDate oldestDate = checkForOldestDate();
     int daysCount = calculateDaysAfterOldestDate(oldestDate);
 
     for (Short employee : allEmployees) {
-      int ticketsCountSinceOldestDate = calculateAllTicketsSinceOldestDate(rawData, employee);
+      int ticketsCountSinceOldestDate = calculateAllTicketsSinceOldestDate(employee);
       double averageValue = calculateAverageTicketsValue(ticketsCountSinceOldestDate, daysCount);
       saveAverageValueData(averageValue, employee);
     }
@@ -135,7 +144,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
     return employees;
   }
 
-  public LocalDate checkForOldestDate(List<DailyMinecraftTickets> rawData) {
+  public LocalDate checkForOldestDate() {
     LocalDate oldestDate = minecraftTicketsRepository
         .findAll()
         .stream()
@@ -152,7 +161,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
     return daysBetween;
   }
 
-  public int calculateAllTicketsSinceOldestDate(List<DailyMinecraftTickets> rawData, int targetEmployeeId) {
+  public int calculateAllTicketsSinceOldestDate(int targetEmployeeId) {
     int ticketsSum = minecraftTicketsRepository
         .findAll()
         .stream()
@@ -181,6 +190,57 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       newRecord.setEmployeeId(employeeId);
       newRecord.setTickets(averageValue);
       averageDailyMinecraftTicketsRepository.save(newRecord);
+    }
+  }
+
+  @Override
+  public void calculateAverageMinecraftTicketsPerPlaytime() {
+    List<Short> allEmployees = getAllEmployeesFromTheTable();
+    LocalDate oldestDate = checkForOldestDate();
+
+    for (Short employee : allEmployees) {
+      int ticketsCount = calculateAllTicketsSinceOldestDate(employee);
+      double playtimeSinceOldestDate = getAllPlaytimeSinceOldestDate(employee, oldestDate);
+      double ticketsPerPlaytime = calculateTicketsPerPlaytime(ticketsCount, playtimeSinceOldestDate);
+      saveTicketsPerPlaytime(ticketsPerPlaytime, employee);
+    }
+  }
+
+  public List<DailyPlaytime> extractDataFromDailyPlaytimeTable() {
+    return dailyPlaytimeRepository.findAll();
+  }
+
+  public double getAllPlaytimeSinceOldestDate(Short targetEmployeeId, LocalDate oldestDate) {
+    return dailyPlaytimeRepository
+        .findAll()
+        .stream()
+        .filter(ticket -> ticket.getEmployeeId().equals(targetEmployeeId))
+        .filter(ticket -> !ticket.getDate().isBefore(oldestDate))
+        .mapToDouble(DailyPlaytime::getTime)
+        .sum();
+  }
+
+  public double calculateTicketsPerPlaytime(int ticketsCount, double playtimeSinceOldestDate) {
+    if (playtimeSinceOldestDate == 0) {
+      return 0.0;
+    }
+
+    double playtimeInHours = playtimeSinceOldestDate / 3600;
+    return ticketsCount / playtimeInHours;
+  }
+
+  public void saveTicketsPerPlaytime(double ticketsPerPlaytime, Short employeeId) {
+    AverageMinecraftTicketsPerPlaytime existingRecord = averageMinecraftTicketsPerPlaytimeRepository
+        .findByEmployeeId(employeeId);
+
+    if (existingRecord != null) {
+      existingRecord.setValue(ticketsPerPlaytime);
+      averageMinecraftTicketsPerPlaytimeRepository.save(existingRecord);
+    } else {
+      AverageMinecraftTicketsPerPlaytime newRecord = new AverageMinecraftTicketsPerPlaytime();
+      newRecord.setEmployeeId(employeeId);
+      newRecord.setValue(ticketsPerPlaytime);
+      averageMinecraftTicketsPerPlaytimeRepository.save(newRecord);
     }
   }
 }

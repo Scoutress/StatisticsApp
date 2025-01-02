@@ -398,7 +398,7 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   private Object getAid(Object entity) {
     if (entity instanceof DailyPlaytime dailyPlaytime)
-      return dailyPlaytime.getAid();
+      return dailyPlaytime.getEmployeeId();
     if (entity instanceof DailyAfkPlaytime dailyAfkPlaytime)
       return dailyAfkPlaytime.getAid();
     if (entity instanceof DailyDiscordMessages dailyDiscordMessages)

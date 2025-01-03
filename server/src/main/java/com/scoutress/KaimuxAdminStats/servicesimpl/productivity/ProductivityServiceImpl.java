@@ -402,7 +402,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     if (entity instanceof DailyAfkPlaytime dailyAfkPlaytime)
       return dailyAfkPlaytime.getAid();
     if (entity instanceof DailyDiscordMessages dailyDiscordMessages)
-      return dailyDiscordMessages.getAid();
+      return dailyDiscordMessages.getEmployeeId();
     if (entity instanceof DailyDiscordTickets dailyDiscordTickets)
       return dailyDiscordTickets.getAid();
     if (entity instanceof DailyDiscordTicketsCompared dailyDiscordTicketsCompared)

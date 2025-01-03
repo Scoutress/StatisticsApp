@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
+import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
@@ -36,6 +37,7 @@ public class ScheduledTasksConfig {
   private final AveragePlaytimeOverallService averagePlaytimeOverallService;
   private final MinecraftTicketsService minecraftTicketsService;
   private final MinecraftTicketsComparedService minecraftTicketsComparedService;
+  private final DiscordMessagesService discordMessagesService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -48,7 +50,8 @@ public class ScheduledTasksConfig {
       AnnualyPlaytimeService annualyPlaytimeService,
       AveragePlaytimeOverallService averagePlaytimeOverallService,
       MinecraftTicketsService minecraftTicketsService,
-      MinecraftTicketsComparedService minecraftTicketsComparedService) {
+      MinecraftTicketsComparedService minecraftTicketsComparedService,
+      DiscordMessagesService discordMessagesService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -60,6 +63,7 @@ public class ScheduledTasksConfig {
     this.averagePlaytimeOverallService = averagePlaytimeOverallService;
     this.minecraftTicketsService = minecraftTicketsService;
     this.minecraftTicketsComparedService = minecraftTicketsComparedService;
+    this.discordMessagesService = discordMessagesService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -95,9 +99,9 @@ public class ScheduledTasksConfig {
     System.out.println("Average Minecraft tickets taking comparison per day calculations");
     minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
 
-    // System.out.println("");
-    // System.out.println("Average discord messages per day calculations");
-    //
+    System.out.println("");
+    System.out.println("Average discord messages per day calculations");
+    discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
 
     // System.out.println("");
     // System.out.println("Average discord messages taking comparison per day
@@ -107,15 +111,6 @@ public class ScheduledTasksConfig {
     // System.out.println("");
     // System.out.println("Complaints calculation");
     //
-
-    // runDiscordDataExtractionFromAPI();
-    // runMinecraftDataExtractionFromAPI();
-    // runVisitorsDataExtractionFromAPI();
-    // runDiscordTicketsRawDataDuplicateRemover();
-    // runDiscordTicketsDataConvertor();
-    // runDiscordTicketsConvertedDataDuplicateRemover();
-    // runDailyObjectiveProductivityCalculations();
-    // runDailyProductivityCalculations();
 
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");

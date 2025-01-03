@@ -44,7 +44,7 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
     return dailyMessages
         .stream()
         .collect(Collectors.groupingBy(
-            msg -> msg.getAid() + "_" + msg.getDate()));
+            msg -> msg.getEmployeeId() + "_" + msg.getDate()));
   }
 
   private Short extractAid(String key) {

@@ -7,16 +7,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
+import com.scoutress.KaimuxAdminStats.entity.Recommendations;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AnnualPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.productivity.Productivity;
+import com.scoutress.KaimuxAdminStats.repositories.RecommendationsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AnnualPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.productivity.ProductivityRepository;
@@ -32,6 +36,9 @@ class RecommendationsServiceImplTest {
 
   @Mock
   private EmployeeRepository employeeRepository;
+
+  @Mock
+  private RecommendationsRepository recommendationsRepository;
 
   @InjectMocks
   private RecommendationsServiceImpl recommendationsServiceImpl;
@@ -369,6 +376,55 @@ class RecommendationsServiceImplTest {
     double result = recommendationsServiceImpl.getProductivityForThisEmployee(mockData, (short) 1);
 
     assertEquals(85.5, result);
+  }
+
+  @Test
+  void testSaveRecommendationForExistingEmployeeWithDifferentRecommendation() {
+    Recommendations existingRecord = new Recommendations(1L, (short) 1, "oldRecommendation");
+    when(recommendationsRepository.findByEmployeeId((short) 1)).thenReturn(existingRecord);
+
+    String newRecommendation = "newRecommendation";
+
+    recommendationsServiceImpl.saveRecommendationForThisEmployee(newRecommendation, (short) 1);
+
+    assertEquals(newRecommendation, existingRecord.getValue());
+    verify(recommendationsRepository, times(1)).save(existingRecord);
+  }
+
+  @Test
+  void testSaveRecommendationForExistingEmployeeWithSameRecommendation() {
+    Recommendations existingRecord = new Recommendations(1L, (short) 1, "recommendation");
+    when(recommendationsRepository.findByEmployeeId((short) 1)).thenReturn(existingRecord);
+
+    recommendationsServiceImpl.saveRecommendationForThisEmployee("recommendation", (short) 1);
+
+    verify(recommendationsRepository, never()).save(existingRecord);
+  }
+
+  @Test
+  void testSaveRecommendationForNewEmployee() {
+    when(recommendationsRepository.findByEmployeeId((short) 1)).thenReturn(null);
+
+    String newRecommendation = "newRecommendation";
+
+    recommendationsServiceImpl.saveRecommendationForThisEmployee(newRecommendation, (short) 1);
+
+    ArgumentCaptor<Recommendations> captor = ArgumentCaptor.forClass(Recommendations.class);
+    verify(recommendationsRepository, times(1)).save(captor.capture());
+
+    Recommendations savedRecord = captor.getValue();
+    assertEquals((short) 1, savedRecord.getEmployeeId());
+    assertEquals(newRecommendation, savedRecord.getValue());
+  }
+
+  @Test
+  void testSaveRecommendationForNullRecommendation() {
+    Recommendations existingRecord = new Recommendations(1L, (short) 1, "oldRecommendation");
+    when(recommendationsRepository.findByEmployeeId((short) 1)).thenReturn(existingRecord);
+
+    recommendationsServiceImpl.saveRecommendationForThisEmployee(null, (short) 1);
+
+    verify(recommendationsRepository, never()).save(existingRecord);
   }
 
 }

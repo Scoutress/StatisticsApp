@@ -140,6 +140,10 @@ public class RecommendationsServiceImpl implements RecommendationsService {
   }
 
   public void saveRecommendationForThisEmployee(String recommendation, Short employeeId) {
+    if (recommendation == null) {
+      return;
+    }
+
     Recommendations existingRecord = recommendationsRepository.findByEmployeeId(employeeId);
 
     if (existingRecord != null) {

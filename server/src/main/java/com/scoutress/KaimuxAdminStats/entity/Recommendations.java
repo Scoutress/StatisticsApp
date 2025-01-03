@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.playtime;
+package com.scoutress.KaimuxAdminStats.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "annual_playtime")
+@Table(name = "recommendations")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnnualPlaytime {
+public class Recommendations {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,6 @@ public class AnnualPlaytime {
   @Column(name = "employee_id", nullable = false)
   private Short employeeId;
 
-  @Column(name = "playtime", nullable = false)
-  private Double playtime;
+  @Column(name = "value", nullable = false)
+  private String value;
 }

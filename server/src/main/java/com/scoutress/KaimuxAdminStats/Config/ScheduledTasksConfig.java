@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
+import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
@@ -42,6 +43,7 @@ public class ScheduledTasksConfig {
   private final DiscordMessagesService discordMessagesService;
   private final DiscordMessagesComparedService discordMessagesComparedService;
   private final ComplaintsService complaintsService;
+  private final RecommendationsService recommendationsService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -57,7 +59,8 @@ public class ScheduledTasksConfig {
       MinecraftTicketsComparedService minecraftTicketsComparedService,
       DiscordMessagesService discordMessagesService,
       DiscordMessagesComparedService discordMessagesComparedService,
-      ComplaintsService complaintsService) {
+      ComplaintsService complaintsService,
+      RecommendationsService recommendationsService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -72,6 +75,7 @@ public class ScheduledTasksConfig {
     this.discordMessagesService = discordMessagesService;
     this.discordMessagesComparedService = discordMessagesComparedService;
     this.complaintsService = complaintsService;
+    this.recommendationsService = recommendationsService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -122,6 +126,10 @@ public class ScheduledTasksConfig {
     System.out.println("");
     System.out.println("Productivity calculation");
     productivityService.calculateProductivity();
+
+    System.out.println("");
+    System.out.println("Recommendation evaluation");
+    recommendationsService.evaluateRecommendations();
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

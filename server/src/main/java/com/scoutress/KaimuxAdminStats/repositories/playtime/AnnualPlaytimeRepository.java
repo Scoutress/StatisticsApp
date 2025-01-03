@@ -6,5 +6,5 @@ import com.scoutress.KaimuxAdminStats.entity.playtime.AnnualPlaytime;
 
 public interface AnnualPlaytimeRepository extends JpaRepository<AnnualPlaytime, Long> {
 
-  AnnualPlaytime findByAid(Short aid);
+  AnnualPlaytime findByEmployeeId(Short employeeId);
 }

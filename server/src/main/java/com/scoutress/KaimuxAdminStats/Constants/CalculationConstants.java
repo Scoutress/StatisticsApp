@@ -84,8 +84,8 @@ public class CalculationConstants {
   public static final int WORK_TIME_OVERSEER = 570;
 
   public static final int MIN_ANNUAL_PLAYTIME = 4;
-  public static final int PROMOTION_VALUE = 90;
-  public static final int DEMOTION_VALUE = 10;
+  public static final double PROMOTION_VALUE = 0.9;
+  public static final double DEMOTION_VALUE = 0.1;
 
   private CalculationConstants() {
   }

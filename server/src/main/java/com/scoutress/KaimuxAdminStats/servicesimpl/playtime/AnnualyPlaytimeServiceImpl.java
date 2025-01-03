@@ -50,11 +50,11 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
         .stream()
         .map(entry -> {
           AnnualPlaytime annualPlaytime = new AnnualPlaytime();
-          annualPlaytime.setAid(entry.getKey());
+          annualPlaytime.setEmployeeId(entry.getKey());
           annualPlaytime.setPlaytime(entry.getValue() / 3600);
           return annualPlaytime;
         })
-        .sorted(Comparator.comparing(AnnualPlaytime::getAid))
+        .sorted(Comparator.comparing(AnnualPlaytime::getEmployeeId))
         .collect(Collectors.toList());
 
     return handledAnnualPlaytimeData;
@@ -62,7 +62,7 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
 
   public void saveAnnualPlaytime(List<AnnualPlaytime> annualPlaytimeData) {
     annualPlaytimeData.forEach(annualPlaytime -> {
-      AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByAid(annualPlaytime.getAid());
+      AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByEmployeeId(annualPlaytime.getEmployeeId());
 
       if (existingPlaytime != null) {
         existingPlaytime.setPlaytime(annualPlaytime.getPlaytime());

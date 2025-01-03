@@ -60,7 +60,7 @@ class AnnualyPlaytimeServiceTest {
 
     // Verify the result
     assertEquals(1, result.size());
-    assertEquals((short) 1, result.get(0).getAid());
+    assertEquals((short) 1, result.get(0).getEmployeeId());
     assertEquals(3000, result.get(0).getPlaytime());
   }
 

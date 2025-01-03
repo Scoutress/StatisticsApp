@@ -74,11 +74,7 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
     if (column != null) {
       try {
         String updateQuery = "UPDATE employee_codes SET " + column + " = ? WHERE employee_id = ?";
-        int rowsUpdated = jdbcTemplate.update(updateQuery, userId, employeeId);
-
-        if (rowsUpdated > 0) {
-          System.out.println("Employee with ID " + employeeId + " saved to " + server + " server.");
-        }
+        jdbcTemplate.update(updateQuery, userId, employeeId);
       } catch (DataAccessException e) {
       }
     }

@@ -122,8 +122,7 @@ public class SessionDurationServiceImpl implements SessionDurationService {
 
     String query = "INSERT INTO session_duration (aid, single_session_duration, date, server) VALUES (?, ?, ?, ?)";
 
-    int rowsInserted = jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
-    System.out.println("Rows inserted: " + rowsInserted);
+    jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
   }
 
   @Override

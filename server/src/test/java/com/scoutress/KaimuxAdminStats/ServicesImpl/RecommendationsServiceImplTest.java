@@ -322,4 +322,53 @@ class RecommendationsServiceImplTest {
     assertEquals(120.5, result);
   }
 
+  @Test
+  void testGetProductivityForThisEmployee_ValidEmployee() {
+    List<Productivity> mockData = List.of(
+        new Productivity(1L, (short) 1, 85.5),
+        new Productivity(2L, (short) 2, 92.0));
+
+    double result = recommendationsServiceImpl.getProductivityForThisEmployee(mockData, (short) 1);
+
+    assertEquals(85.5, result);
+  }
+
+  @Test
+  void testGetProductivityForThisEmployee_EmployeeNotFound() {
+    List<Productivity> mockData = List.of(
+        new Productivity(1L, (short) 1, 85.5),
+        new Productivity(2L, (short) 2, 92.0));
+
+    double result = recommendationsServiceImpl.getProductivityForThisEmployee(mockData, (short) 3);
+
+    assertEquals(0.0, result);
+  }
+
+  @Test
+  void testGetProductivityForThisEmployee_NullList() {
+    double result = recommendationsServiceImpl.getProductivityForThisEmployee(null, (short) 1);
+
+    assertEquals(0.0, result);
+  }
+
+  @Test
+  void testGetProductivityForThisEmployee_EmptyList() {
+    List<Productivity> mockData = List.of();
+
+    double result = recommendationsServiceImpl.getProductivityForThisEmployee(mockData, (short) 1);
+
+    assertEquals(0.0, result);
+  }
+
+  @Test
+  void testGetProductivityForThisEmployee_MultipleMatchingEmployees() {
+    List<Productivity> mockData = List.of(
+        new Productivity(1L, (short) 1, 85.5),
+        new Productivity(2L, (short) 1, 95.0));
+
+    double result = recommendationsServiceImpl.getProductivityForThisEmployee(mockData, (short) 1);
+
+    assertEquals(85.5, result);
+  }
+
 }

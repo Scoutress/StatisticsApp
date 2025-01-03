@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Temp. Data ###
+Survival.db
+Skyblock.db
+Creative.db
+Boxpvp.db
+Prison.db
+Events.db
+Lobby.db

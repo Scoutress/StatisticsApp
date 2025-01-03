@@ -54,7 +54,7 @@ public class AveragePlaytimeLastYearServiceImpl implements AveragePlaytimeLastYe
         .collect(Collectors.toMap(Employee::getId, employee -> employee));
 
     Set<Short> uniqueAids = allPlaytimes.stream()
-        .map(DailyPlaytime::getAid)
+        .map(DailyPlaytime::getEmployeeId)
         .collect(Collectors.toSet());
 
     Set<Short> validAids = allEmployeeAids.stream()
@@ -71,13 +71,13 @@ public class AveragePlaytimeLastYearServiceImpl implements AveragePlaytimeLastYe
 
         if (employee != null) {
           double totalPlaytime = allPlaytimes.stream()
-              .filter(pt -> pt.getAid().equals(aid))
+              .filter(pt -> pt.getEmployeeId().equals(aid))
               .filter(pt -> pt.getDate().isAfter(dateOneYearAgo))
               .mapToDouble(DailyPlaytime::getTime)
               .sum();
 
           long daysPlayed = allPlaytimes.stream()
-              .filter(pt -> pt.getAid().equals(aid))
+              .filter(pt -> pt.getEmployeeId().equals(aid))
               .filter(pt -> pt.getDate().isAfter(dateOneYearAgo))
               .map(DailyPlaytime::getDate)
               .distinct()

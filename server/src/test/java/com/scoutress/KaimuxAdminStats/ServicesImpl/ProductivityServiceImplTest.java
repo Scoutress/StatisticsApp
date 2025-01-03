@@ -23,7 +23,6 @@ import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordM
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DailyDiscordTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordTickets.DailyDiscordTicketsRepository;
-import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
@@ -31,9 +30,6 @@ import com.scoutress.KaimuxAdminStats.repositories.productivity.DailyObjectivePr
 import com.scoutress.KaimuxAdminStats.servicesImpl.productivity.ProductivityServiceImpl;
 
 class ProductivityServiceImplTest {
-
-  @Mock
-  private EmployeeRepository employeeRepository;
 
   @Mock
   private DailyPlaytimeRepository dailyPlaytimeRepository;
@@ -161,7 +157,7 @@ class ProductivityServiceImplTest {
     // when(employeeRepository.findById(1L)).thenReturn(java.util.Optional.of(employee));
 
     // Act: Call the method to test
-    productivityService.calculateDailyObjectiveProductivity();
+    productivityService.calculateProductivity();
 
     // Assert: Verify that saveAll was called once
     verify(dailyObjectiveProductivityRepository, times(1)).saveAll(any());

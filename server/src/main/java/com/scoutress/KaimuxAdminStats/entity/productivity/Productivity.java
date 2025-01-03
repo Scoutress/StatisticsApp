@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.playtime;
+package com.scoutress.KaimuxAdminStats.entity.productivity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,19 +11,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "average_playtime_overall")
+@Table(name = "productivity")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AveragePlaytimeOverall {
+public class Productivity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "employee_id", nullable = false)
+  @Column(name = "employee_id", nullable = false, unique = true)
   private Short employeeId;
 
-  @Column(name = "playtime", nullable = false)
-  private Double playtime;
+  @Column(name = "value", nullable = false)
+  private Double value;
 }

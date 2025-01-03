@@ -119,6 +119,11 @@ public class ScheduledTasksConfig {
     System.out.println("Complaints calculation");
     complaintsService.calculateComplaintsPerEachEmployee();
 
+    System.out.println("");
+    System.out.println("Productivity calculation");
+    productivityService.calculateProductivity();
+
+    System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
   }
@@ -168,22 +173,6 @@ public class ScheduledTasksConfig {
     System.out.println("Running: runDiscordTicketsConvertedDataDuplicateRemover");
     discordTicketsService.removeDuplicateTicketsData();
     System.out.println("Completed: runDiscordTicketsConvertedDataDuplicateRemover");
-    System.out.println("");
-  }
-
-  @SuppressWarnings("unused")
-  private void runDailyObjectiveProductivityCalculations() {
-    System.out.println("Running: runDailyObjectiveProductivityCalculations");
-    productivityService.calculateDailyObjectiveProductivity();
-    System.out.println("Completed: runDailyObjectiveProductivityCalculations");
-    System.out.println("");
-  }
-
-  @SuppressWarnings("unused")
-  private void runDailyProductivityCalculations() {
-    System.out.println("Running: runProductivityCalculations");
-    productivityService.calculateDailyProductivity();
-    System.out.println("Completed: runProductivityCalculations");
     System.out.println("");
   }
 

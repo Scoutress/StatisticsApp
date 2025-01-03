@@ -6,5 +6,5 @@ import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeOverall;
 
 public interface AveragePlaytimeOverallRepository extends JpaRepository<AveragePlaytimeOverall, Long> {
 
-  AveragePlaytimeOverall findByAid(Short aid);
+  AveragePlaytimeOverall findByEmployeeId(Short employeeId);
 }

@@ -86,14 +86,14 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
           double averagePlaytimeValue = daysAfterJoin > 0 ? (playtimesSum / 3600) / daysAfterJoin : 0;
 
           AveragePlaytimeOverall averagePlaytimeData = new AveragePlaytimeOverall();
-          averagePlaytimeData.setAid(aid);
+          averagePlaytimeData.setEmployeeId(aid);
           averagePlaytimeData.setPlaytime(averagePlaytimeValue);
           handledAveragePlaytimeData.add(averagePlaytimeData);
         }
       }
     }
 
-    handledAveragePlaytimeData.sort(Comparator.comparing(AveragePlaytimeOverall::getAid));
+    handledAveragePlaytimeData.sort(Comparator.comparing(AveragePlaytimeOverall::getEmployeeId));
 
     return handledAveragePlaytimeData;
   }
@@ -101,7 +101,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
   public void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
     averagePlaytimeData.forEach(averagePlaytimeOverall -> {
       AveragePlaytimeOverall existingPlaytime = averagePlaytimeOverallRepository
-          .findByAid(averagePlaytimeOverall.getAid());
+          .findByEmployeeId(averagePlaytimeOverall.getEmployeeId());
 
       if (existingPlaytime != null) {
         existingPlaytime.setPlaytime(averagePlaytimeOverall.getPlaytime());

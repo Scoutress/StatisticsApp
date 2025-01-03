@@ -273,4 +273,53 @@ class RecommendationsServiceImplTest {
     assertEquals("support", result);
   }
 
+  @Test
+  void testGetAnnualPlaytimeForThisEmployee_ValidEmployee() {
+    List<AnnualPlaytime> mockData = List.of(
+        new AnnualPlaytime(1L, (short) 1, 120.5),
+        new AnnualPlaytime(2L, (short) 2, 95.0));
+
+    double result = recommendationsServiceImpl.getAnnualPlaytimeForThisEmployee(mockData, (short) 1);
+
+    assertEquals(120.5, result);
+  }
+
+  @Test
+  void testGetAnnualPlaytimeForThisEmployee_EmployeeNotFound() {
+    List<AnnualPlaytime> mockData = List.of(
+        new AnnualPlaytime(1L, (short) 1, 120.5),
+        new AnnualPlaytime(2L, (short) 2, 95.0));
+
+    double result = recommendationsServiceImpl.getAnnualPlaytimeForThisEmployee(mockData, (short) 3);
+
+    assertEquals(0.0, result);
+  }
+
+  @Test
+  void testGetAnnualPlaytimeForThisEmployee_NullList() {
+    double result = recommendationsServiceImpl.getAnnualPlaytimeForThisEmployee(null, (short) 1);
+
+    assertEquals(0.0, result);
+  }
+
+  @Test
+  void testGetAnnualPlaytimeForThisEmployee_EmptyList() {
+    List<AnnualPlaytime> mockData = List.of();
+
+    double result = recommendationsServiceImpl.getAnnualPlaytimeForThisEmployee(mockData, (short) 1);
+
+    assertEquals(0.0, result);
+  }
+
+  @Test
+  void testGetAnnualPlaytimeForThisEmployee_MultipleMatchingEmployees() {
+    List<AnnualPlaytime> mockData = List.of(
+        new AnnualPlaytime(1L, (short) 1, 120.5),
+        new AnnualPlaytime(2L, (short) 1, 150.0));
+
+    double result = recommendationsServiceImpl.getAnnualPlaytimeForThisEmployee(mockData, (short) 1);
+
+    assertEquals(120.5, result);
+  }
+
 }

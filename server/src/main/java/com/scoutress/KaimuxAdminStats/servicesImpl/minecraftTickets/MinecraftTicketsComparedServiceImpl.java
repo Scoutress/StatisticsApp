@@ -32,9 +32,9 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
 
   @Override
   public void compareEachEmployeeDailyMcTicketsValues() {
-    List<DailyMinecraftTickets> dailyTickets = getAllMinecraftTickets();
-    List<LocalDate> allDates = getAllMinecraftTicketsDates(dailyTickets);
-    List<Short> allEmployees = getAllEmployeesFromDailyMinecraftTickets(dailyTickets);
+    List<DailyMinecraftTickets> rawData = getAllMinecraftTickets();
+    List<LocalDate> allDates = getAllMinecraftTicketsDates(rawData);
+    List<Short> allEmployees = getAllEmployeesFromDailyMinecraftTickets(rawData);
 
     for (Short employee : allEmployees) {
 
@@ -42,14 +42,14 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
       int datesCount = 0;
 
       for (LocalDate date : allDates) {
-        int ticketsThisDayThisEmployee = getTicketCountThisDayThisEmployee(dailyTickets, date, employee);
-        int ticketsThisDayAllEmployees = getTicketCountThisDayAllEmployees(dailyTickets, date);
-        double ticketRatioThisDayThisEmployee = calculateTicketRatioThisDay(
-            ticketsThisDayThisEmployee, ticketsThisDayAllEmployees);
+        int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawData, date, employee);
+        int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawData, date);
+        double ticketRatioThisDateThisEmployee = calculateTicketRatioThisDate(
+            ticketsThisDateThisEmployee, ticketsThisDateAllEmployees);
 
-        saveTicketRatioThisDayThisEmployee(ticketRatioThisDayThisEmployee, date, employee);
+        saveTicketRatioThisDateThisEmployee(ticketRatioThisDateThisEmployee, date, employee);
 
-        ticketRatioSumThisEmployee += ticketRatioThisDayThisEmployee;
+        ticketRatioSumThisEmployee += ticketRatioThisDateThisEmployee;
         datesCount++;
       }
 
@@ -81,7 +81,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
         .collect(Collectors.toList());
   }
 
-  public int getTicketCountThisDayThisEmployee(
+  public int getTicketCountThisDateThisEmployee(
       List<DailyMinecraftTickets> dailyTickets, LocalDate thisDate, Short thisEmployee) {
     return dailyTickets
         .stream()
@@ -91,7 +91,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
         .orElse(0);
   }
 
-  public int getTicketCountThisDayAllEmployees(List<DailyMinecraftTickets> dailyTickets, LocalDate thisDate) {
+  public int getTicketCountThisDateAllEmployees(List<DailyMinecraftTickets> dailyTickets, LocalDate thisDate) {
     return dailyTickets
         .stream()
         .filter(tickets -> tickets.getDate().equals(thisDate))
@@ -99,11 +99,11 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
         .sum();
   }
 
-  public double calculateTicketRatioThisDay(int ticketsThisDayThisEmployee, int ticketsThisDayAllEmployees) {
-    if (ticketsThisDayAllEmployees == 0) {
+  public double calculateTicketRatioThisDate(int ticketsThisDateThisEmployee, int ticketsThisDateAllEmployees) {
+    if (ticketsThisDateAllEmployees == 0) {
       return 0;
     }
-    return (double) ticketsThisDayThisEmployee / ticketsThisDayAllEmployees;
+    return (double) ticketsThisDateThisEmployee / ticketsThisDateAllEmployees;
   }
 
   public double calculateAverageTicketRatioThisEmployee(double ticketRatioSumThisEmployee, int datesCount) {
@@ -113,18 +113,18 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
     return (double) ticketRatioSumThisEmployee / datesCount;
   }
 
-  public void saveTicketRatioThisDayThisEmployee(double ticketRatioThisDayThisEmployee, LocalDate date,
+  public void saveTicketRatioThisDateThisEmployee(double ticketRatioThisDateThisEmployee, LocalDate date,
       Short employee) {
     DailyMinecraftTicketsCompared existingRecord = dailyMinecraftTicketsComparedRepository
         .findByEmployeeIdAndDate(employee, date);
 
     if (existingRecord != null) {
-      existingRecord.setValue(ticketRatioThisDayThisEmployee);
+      existingRecord.setValue(ticketRatioThisDateThisEmployee);
       dailyMinecraftTicketsComparedRepository.save(existingRecord);
     } else {
       DailyMinecraftTicketsCompared newRecord = new DailyMinecraftTicketsCompared();
       newRecord.setEmployeeId(employee);
-      newRecord.setValue(ticketRatioThisDayThisEmployee);
+      newRecord.setValue(ticketRatioThisDateThisEmployee);
       newRecord.setDate(date);
       dailyMinecraftTicketsComparedRepository.save(newRecord);
     }

@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
+import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesService;
 import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
@@ -38,6 +39,7 @@ public class ScheduledTasksConfig {
   private final MinecraftTicketsService minecraftTicketsService;
   private final MinecraftTicketsComparedService minecraftTicketsComparedService;
   private final DiscordMessagesService discordMessagesService;
+  private final DiscordMessagesComparedService discordMessagesComparedService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -51,7 +53,8 @@ public class ScheduledTasksConfig {
       AveragePlaytimeOverallService averagePlaytimeOverallService,
       MinecraftTicketsService minecraftTicketsService,
       MinecraftTicketsComparedService minecraftTicketsComparedService,
-      DiscordMessagesService discordMessagesService) {
+      DiscordMessagesService discordMessagesService,
+      DiscordMessagesComparedService discordMessagesComparedService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -64,6 +67,7 @@ public class ScheduledTasksConfig {
     this.minecraftTicketsService = minecraftTicketsService;
     this.minecraftTicketsComparedService = minecraftTicketsComparedService;
     this.discordMessagesService = discordMessagesService;
+    this.discordMessagesComparedService = discordMessagesComparedService;
   }
 
   @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
@@ -103,10 +107,9 @@ public class ScheduledTasksConfig {
     System.out.println("Average discord messages per day calculations");
     discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
 
-    // System.out.println("");
-    // System.out.println("Average discord messages taking comparison per day
-    // calculation");
-    //
+    System.out.println("");
+    System.out.println("Average discord messages taking comparison per day calculation");
+    discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
 
     // System.out.println("");
     // System.out.println("Complaints calculation");

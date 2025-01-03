@@ -1,7 +1,5 @@
 package com.scoutress.KaimuxAdminStats.entity.discordMessages;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,11 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_discord_messages_comp")
+@Table(name = "overall_discord_messages_comp")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyDiscordMessagesCompared {
+public class OverallDiscordMessagesCompared {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +26,4 @@ public class DailyDiscordMessagesCompared {
 
   @Column(name = "value", nullable = false)
   private Double value;
-
-  @Column(name = "date", nullable = false)
-  private LocalDate date;
-
 }

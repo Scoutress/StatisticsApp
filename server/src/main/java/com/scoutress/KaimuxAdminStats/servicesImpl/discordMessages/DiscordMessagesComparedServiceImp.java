@@ -2,15 +2,16 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessages;
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessagesCompared;
+import com.scoutress.KaimuxAdminStats.entity.discordMessages.OverallDiscordMessagesCompared;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.discordMessages.OverallDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
 
 @Service
@@ -18,65 +19,129 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
 
   private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
   private final DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository;
+  private final OverallDiscordMessagesComparedRepository overallDiscordMessagesComparedRepository;
 
   public DiscordMessagesComparedServiceImp(
       DailyDiscordMessagesRepository dailyDiscordMessagesRepository,
-      DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository) {
+      DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository,
+      OverallDiscordMessagesComparedRepository overallDiscordMessagesComparedRepository) {
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
     this.dailyDiscordMessagesComparedRepository = dailyDiscordMessagesComparedRepository;
+    this.overallDiscordMessagesComparedRepository = overallDiscordMessagesComparedRepository;
   }
 
   @Override
-  public void compareEachEmployeeDailyDcMsgsValues() {
-    List<DailyDiscordMessages> dailyMessages = dailyDiscordMessagesRepository.findAll();
+  public void compareEachEmployeeDailyDiscordMessagesValues() {
+    List<DailyDiscordMessages> rawData = getAllDiscordMessages();
+    List<LocalDate> allDates = getAllDiscordMessagesDates(rawData);
+    List<Short> allEmployees = getAllEmployeesFromDailyDiscordMessages(rawData);
 
-    Map<String, List<DailyDiscordMessages>> groupedMessages = groupMessagesByAidAndDate(dailyMessages);
+    for (Short employee : allEmployees) {
 
-    for (Map.Entry<String, List<DailyDiscordMessages>> entry : groupedMessages.entrySet()) {
-      Short aid = extractAid(entry.getKey());
-      LocalDate date = extractDate(entry.getKey());
-      int totalMessages = calculateTotalMessages(entry.getValue());
-      saveComparedData(entry.getValue(), aid, date, totalMessages);
+      double messagesRatioSumThisEmployee = 0;
+      int datesCount = 0;
+
+      for (LocalDate date : allDates) {
+        int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(rawData, date, employee);
+        int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(rawData, date);
+        double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
+            messagesThisDateThisEmployee, messagesThisDateAllEmployees);
+
+        saveMessagesRatioThisDateThisEmployee(messagesRatioThisDateThisEmployee, date, employee);
+
+        messagesRatioSumThisEmployee += messagesRatioThisDateThisEmployee;
+        datesCount++;
+      }
+
+      if (datesCount > 0) {
+        double averageValueOfMessagesRatiosThisEmployee = calculateAverageMessagesRatioThisEmployee(
+            messagesRatioSumThisEmployee, datesCount);
+        saveAverageMessagesRatioThisEmployee(averageValueOfMessagesRatiosThisEmployee, employee);
+      }
     }
   }
 
-  private Map<String, List<DailyDiscordMessages>> groupMessagesByAidAndDate(List<DailyDiscordMessages> dailyMessages) {
-    return dailyMessages
+  public List<DailyDiscordMessages> getAllDiscordMessages() {
+    return dailyDiscordMessagesRepository.findAll();
+  }
+
+  public List<LocalDate> getAllDiscordMessagesDates(List<DailyDiscordMessages> data) {
+    return data
         .stream()
-        .collect(Collectors.groupingBy(
-            msg -> msg.getEmployeeId() + "_" + msg.getDate()));
+        .map(DailyDiscordMessages::getDate)
+        .distinct()
+        .collect(Collectors.toList());
   }
 
-  private Short extractAid(String key) {
-    String[] keyParts = key.split("_");
-    return Short.valueOf(keyParts[0]);
-  }
-
-  private LocalDate extractDate(String key) {
-    String[] keyParts = key.split("_");
-    return LocalDate.parse(keyParts[1]);
-  }
-
-  private int calculateTotalMessages(List<DailyDiscordMessages> messages) {
-    return messages
+  public List<Short> getAllEmployeesFromDailyDiscordMessages(List<DailyDiscordMessages> data) {
+    return data
         .stream()
+        .map(DailyDiscordMessages::getEmployeeId)
+        .distinct()
+        .collect(Collectors.toList());
+  }
+
+  public int getMessagesCountThisDateThisEmployee(
+      List<DailyDiscordMessages> data, LocalDate thisDate, Short thisEmployee) {
+    return data
+        .stream()
+        .filter(messages -> messages.getEmployeeId().equals(thisEmployee) && messages.getDate().equals(thisDate))
+        .map(DailyDiscordMessages::getMsgCount)
+        .findFirst()
+        .orElse(0);
+  }
+
+  public int getMessagesCountThisDateAllEmployees(List<DailyDiscordMessages> data, LocalDate thisDate) {
+    return data
+        .stream()
+        .filter(messages -> messages.getDate().equals(thisDate))
         .mapToInt(DailyDiscordMessages::getMsgCount)
         .sum();
   }
 
-  private void saveComparedData(List<DailyDiscordMessages> messages, Short aid, LocalDate date, int totalMessages) {
-    for (DailyDiscordMessages msg : messages) {
-      double value = calculateMessageValue(msg.getMsgCount(), totalMessages);
-      DailyDiscordMessagesCompared comparedData = new DailyDiscordMessagesCompared(
-          null,
-          aid,
-          value,
-          date);
-      dailyDiscordMessagesComparedRepository.save(comparedData);
+  public double calculateMessagesRatioThisDate(int messagesThisDateThisEmployee, int messagesThisDateAllEmployees) {
+    if (messagesThisDateAllEmployees == 0) {
+      return 0;
+    }
+    return (double) messagesThisDateThisEmployee / messagesThisDateAllEmployees;
+  }
+
+  public double calculateAverageMessagesRatioThisEmployee(double messagesRatioSumThisEmployee, int datesCount) {
+    if (datesCount == 0) {
+      return 0;
+    }
+    return (double) messagesRatioSumThisEmployee / datesCount;
+  }
+
+  public void saveMessagesRatioThisDateThisEmployee(
+      double messagesRatioThisDateThisEmployee, LocalDate date, Short employee) {
+    DailyDiscordMessagesCompared existingRecord = dailyDiscordMessagesComparedRepository
+        .findByEmployeeIdAndDate(employee, date);
+
+    if (existingRecord != null) {
+      existingRecord.setValue(messagesRatioThisDateThisEmployee);
+      dailyDiscordMessagesComparedRepository.save(existingRecord);
+    } else {
+      DailyDiscordMessagesCompared newRecord = new DailyDiscordMessagesCompared();
+      newRecord.setEmployeeId(employee);
+      newRecord.setValue(messagesRatioThisDateThisEmployee);
+      newRecord.setDate(date);
+      dailyDiscordMessagesComparedRepository.save(newRecord);
     }
   }
 
-  private double calculateMessageValue(int messageCount, int totalMessages) {
-    return (double) messageCount / totalMessages;
+  public void saveAverageMessagesRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {
+    OverallDiscordMessagesCompared existingRecord = overallDiscordMessagesComparedRepository
+        .findByEmployeeId(employee);
+
+    if (existingRecord != null) {
+      existingRecord.setValue(averageValueOfTicketRatiosThisEmployee);
+      overallDiscordMessagesComparedRepository.save(existingRecord);
+    } else {
+      OverallDiscordMessagesCompared newRecord = new OverallDiscordMessagesCompared();
+      newRecord.setEmployeeId(employee);
+      newRecord.setValue(averageValueOfTicketRatiosThisEmployee);
+      overallDiscordMessagesComparedRepository.save(newRecord);
+    }
   }
 }

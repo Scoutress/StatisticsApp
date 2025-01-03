@@ -1,5 +1,6 @@
 package com.scoutress.KaimuxAdminStats.ServicesImpl;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,8 +13,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
+import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AnnualPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.productivity.Productivity;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AnnualPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.productivity.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.servicesImpl.RecommendationsServiceImpl;
@@ -25,6 +28,9 @@ class RecommendationsServiceImplTest {
 
   @Mock
   private AnnualPlaytimeRepository annualPlaytimeRepository;
+
+  @Mock
+  private EmployeeRepository employeeRepository;
 
   @InjectMocks
   private RecommendationsServiceImpl recommendationsServiceImpl;
@@ -110,4 +116,66 @@ class RecommendationsServiceImplTest {
     assertEquals(30.0, result.get(19).getPlaytime());
     verify(annualPlaytimeRepository, times(1)).findAll();
   }
+
+  @Test
+  void testGetAllEmployeesData() {
+    List<Employee> mockData = List.of(
+        new Employee((short) 1, "username1", "LT", "first_name1", "last_name1", "email1@example.com",
+            LocalDate.of(2025, 1, 1), "support"),
+        new Employee((short) 2, "username2", "EN", "first_name2", "last_name2", "email2@example.com",
+            LocalDate.of(2025, 2, 1), "manager"),
+        new Employee((short) 3, "username3", "LT", "first_name3", "last_name3", "email3@example.com",
+            LocalDate.of(2025, 3, 1), "helper"),
+        new Employee((short) 4, "username4", "EN", "first_name4", "last_name4", "email4@example.com",
+            LocalDate.of(2025, 4, 1), "support"),
+        new Employee((short) 5, "username5", "LT", "first_name5", "last_name5", "email5@example.com",
+            LocalDate.of(2025, 5, 1), "organizer"),
+        new Employee((short) 6, "username6", "EN", "first_name6", "last_name6", "email6@example.com",
+            LocalDate.of(2025, 6, 1), "chatmod"),
+        new Employee((short) 7, "username7", "LT", "first_name7", "last_name7", "email7@example.com",
+            LocalDate.of(2025, 7, 1), "support"),
+        new Employee((short) 8, "username8", "EN", "first_name8", "last_name8", "email8@example.com",
+            LocalDate.of(2025, 8, 1), "manager"),
+        new Employee((short) 9, "username9", "LT", "first_name9", "last_name9", "email9@example.com",
+            LocalDate.of(2025, 9, 1), "helper"),
+        new Employee((short) 10, "username10", "EN", "first_name10", "last_name10", "email10@example.com",
+            LocalDate.of(2025, 10, 1), "organizer"),
+        new Employee((short) 11, "username11", "LT", "first_name11", "last_name11", "email11@example.com",
+            LocalDate.of(2025, 11, 1), "support"),
+        new Employee((short) 12, "username12", "EN", "first_name12", "last_name12", "email12@example.com",
+            LocalDate.of(2025, 12, 1), "chatmod"),
+        new Employee((short) 13, "username13", "LT", "first_name13", "last_name13", "email13@example.com",
+            LocalDate.of(2026, 1, 1), "manager"),
+        new Employee((short) 14, "username14", "EN", "first_name14", "last_name14", "email14@example.com",
+            LocalDate.of(2026, 2, 1), "helper"),
+        new Employee((short) 15, "username15", "LT", "first_name15", "last_name15", "email15@example.com",
+            LocalDate.of(2026, 3, 1), "support"),
+        new Employee((short) 16, "username16", "EN", "first_name16", "last_name16", "email16@example.com",
+            LocalDate.of(2026, 4, 1), "organizer"),
+        new Employee((short) 17, "username17", "LT", "first_name17", "last_name17", "email17@example.com",
+            LocalDate.of(2026, 5, 1), "chatmod"),
+        new Employee((short) 18, "username18", "EN", "first_name18", "last_name18", "email18@example.com",
+            LocalDate.of(2026, 6, 1), "manager"),
+        new Employee((short) 19, "username19", "LT", "first_name19", "last_name19", "email19@example.com",
+            LocalDate.of(2026, 7, 1), "helper"),
+        new Employee((short) 20, "username20", "EN", "first_name20", "last_name20", "email20@example.com",
+            LocalDate.of(2026, 8, 1), "support"));
+
+    when(employeeRepository.findAll()).thenReturn(mockData);
+
+    List<Employee> result = recommendationsServiceImpl.getAllEmployeesData();
+
+    assertEquals(20, result.size());
+    assertEquals("username1", result.get(0).getUsername());
+    assertEquals("LT", result.get(0).getLanguage());
+    assertEquals(LocalDate.of(2025, 1, 1), result.get(0).getJoinDate());
+    assertEquals("support", result.get(0).getLevel());
+    assertEquals("username20", result.get(19).getUsername());
+    assertEquals("EN", result.get(19).getLanguage());
+    assertEquals(LocalDate.of(2026, 8, 1), result.get(19).getJoinDate());
+    assertEquals("support", result.get(19).getLevel());
+
+    verify(employeeRepository, times(1)).findAll();
+  }
+
 }

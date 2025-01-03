@@ -218,4 +218,59 @@ class RecommendationsServiceImplTest {
     assertEquals(List.of((short) 1), result);
   }
 
+  @Test
+  void testGetLevelForThisEmployee_ValidEmployee() {
+    List<Employee> mockData = List.of(
+        new Employee((short) 1, "username1", "LT", "first_name1", "last_name1", "email1@example.com",
+            LocalDate.of(2025, 1, 1), "support"),
+        new Employee((short) 2, "username2", "EN", "first_name2", "last_name2", "email2@example.com",
+            LocalDate.of(2025, 2, 1), "manager"));
+
+    String result = recommendationsServiceImpl.getLevelForThisEmployee(mockData, (short) 1);
+
+    assertEquals("support", result);
+  }
+
+  @Test
+  void testGetLevelForThisEmployee_EmployeeNotFound() {
+    List<Employee> mockData = List.of(
+        new Employee((short) 1, "username1", "LT", "first_name1", "last_name1", "email1@example.com",
+            LocalDate.of(2025, 1, 1), "support"),
+        new Employee((short) 2, "username2", "EN", "first_name2", "last_name2", "email2@example.com",
+            LocalDate.of(2025, 2, 1), "manager"));
+
+    String result = recommendationsServiceImpl.getLevelForThisEmployee(mockData, (short) 3);
+
+    assertEquals("n/a", result);
+  }
+
+  @Test
+  void testGetLevelForThisEmployee_NullList() {
+    String result = recommendationsServiceImpl.getLevelForThisEmployee(null, (short) 1);
+
+    assertEquals("n/a", result);
+  }
+
+  @Test
+  void testGetLevelForThisEmployee_EmptyList() {
+    List<Employee> mockData = List.of();
+
+    String result = recommendationsServiceImpl.getLevelForThisEmployee(mockData, (short) 1);
+
+    assertEquals("n/a", result);
+  }
+
+  @Test
+  void testGetLevelForThisEmployee_MultipleMatchingEmployees() {
+    List<Employee> mockData = List.of(
+        new Employee((short) 1, "username1", "LT", "first_name1", "last_name1", "email1@example.com",
+            LocalDate.of(2025, 1, 1), "support"),
+        new Employee((short) 1, "username2", "EN", "first_name2", "last_name2", "email2@example.com",
+            LocalDate.of(2025, 2, 1), "manager"));
+
+    String result = recommendationsServiceImpl.getLevelForThisEmployee(mockData, (short) 1);
+
+    assertEquals("support", result);
+  }
+
 }

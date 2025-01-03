@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -176,6 +177,45 @@ class RecommendationsServiceImplTest {
     assertEquals("support", result.get(19).getLevel());
 
     verify(employeeRepository, times(1)).findAll();
+  }
+
+  @Test
+  void testGetAllEmployeeIds() {
+    List<Employee> mockData = List.of(
+        new Employee((short) 1, "username1", "LT", "first_name1", "last_name1", "email1@example.com",
+            LocalDate.of(2025, 1, 1), "support"),
+        new Employee((short) 2, "username2", "EN", "first_name2", "last_name2", "email2@example.com",
+            LocalDate.of(2025, 2, 1), "manager"),
+        new Employee((short) 1, "username3", "LT", "first_name3", "last_name3", "email3@example.com",
+            LocalDate.of(2025, 3, 1), "helper"),
+        new Employee((short) 3, "username4", "EN", "first_name4", "last_name4", "email4@example.com",
+            LocalDate.of(2025, 4, 1), "support"),
+        new Employee((short) 2, "username5", "LT", "first_name5", "last_name5", "email5@example.com",
+            LocalDate.of(2025, 5, 1), "organizer"));
+
+    List<Short> result = recommendationsServiceImpl.getAllEmployeeIds(mockData);
+
+    assertEquals(3, result.size());
+    assertEquals(List.of((short) 1, (short) 2, (short) 3), result);
+    assertTrue(result.contains((short) 1));
+    assertTrue(result.contains((short) 2));
+    assertTrue(result.contains((short) 3));
+  }
+
+  @Test
+  void testGetAllEmployeeIdsWithEmptyList() {
+    List<Employee> mockData = List.of();
+    List<Short> result = recommendationsServiceImpl.getAllEmployeeIds(mockData);
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void testGetAllEmployeeIdsWithSingleEntry() {
+    List<Employee> mockData = List.of(
+        new Employee((short) 1, "username1", "LT", "first_name1", "last_name1", "email1@example.com",
+            LocalDate.of(2025, 1, 1), "support"));
+    List<Short> result = recommendationsServiceImpl.getAllEmployeeIds(mockData);
+    assertEquals(List.of((short) 1), result);
   }
 
 }

@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageMinecraftTicketsCompared;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTicketsCompared;
-import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.OverallMinecraftTicketsCompared;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageMinecraftTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
-import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.OverallMinecraftTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
 
 @Service
@@ -19,15 +19,15 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
 
   private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
   private final DailyMinecraftTicketsComparedRepository dailyMinecraftTicketsComparedRepository;
-  private final OverallMinecraftTicketsComparedRepository overallMinecraftTicketsComparedRepository;
+  private final AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository;
 
   public MinecraftTicketsComparedServiceImpl(
       DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository,
       DailyMinecraftTicketsComparedRepository dailyMinecraftTicketsComparedRepository,
-      OverallMinecraftTicketsComparedRepository overallMinecraftTicketsComparedRepository) {
+      AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository) {
     this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
     this.dailyMinecraftTicketsComparedRepository = dailyMinecraftTicketsComparedRepository;
-    this.overallMinecraftTicketsComparedRepository = overallMinecraftTicketsComparedRepository;
+    this.averageMinecraftTicketsComparedRepository = averageMinecraftTicketsComparedRepository;
   }
 
   @Override
@@ -131,17 +131,17 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
   }
 
   public void saveAverageTicketRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {
-    OverallMinecraftTicketsCompared existingRecord = overallMinecraftTicketsComparedRepository
+    AverageMinecraftTicketsCompared existingRecord = averageMinecraftTicketsComparedRepository
         .findByEmployeeId(employee);
 
     if (existingRecord != null) {
       existingRecord.setValue(averageValueOfTicketRatiosThisEmployee);
-      overallMinecraftTicketsComparedRepository.save(existingRecord);
+      averageMinecraftTicketsComparedRepository.save(existingRecord);
     } else {
-      OverallMinecraftTicketsCompared newRecord = new OverallMinecraftTicketsCompared();
+      AverageMinecraftTicketsCompared newRecord = new AverageMinecraftTicketsCompared();
       newRecord.setEmployeeId(employee);
       newRecord.setValue(averageValueOfTicketRatiosThisEmployee);
-      overallMinecraftTicketsComparedRepository.save(newRecord);
+      averageMinecraftTicketsComparedRepository.save(newRecord);
     }
   }
 }

@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.playtime;
+package com.scoutress.KaimuxAdminStats.entity.discordMessages;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,19 +11,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "average_playtime_last_year")
+@Table(name = "average_discord_messages_comp")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AveragePlaytimeLastYear {
+public class AverageDiscordMessagesCompared {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
-  @Column(name = "playtime", nullable = false)
-  private Double playtime;
+  @Column(name = "value", nullable = false)
+  private Double value;
 }

@@ -8,18 +8,18 @@ import org.springframework.stereotype.Service;
 import com.scoutress.KaimuxAdminStats.constants.CalculationConstants;
 import com.scoutress.KaimuxAdminStats.entity.complaints.ComplaintsSum;
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDailyDiscordMessages;
-import com.scoutress.KaimuxAdminStats.entity.discordMessages.OverallDiscordMessagesCompared;
+import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDiscordMessagesCompared;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageDailyMinecraftTickets;
-import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.OverallMinecraftTicketsCompared;
+import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageMinecraftTicketsCompared;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeOverall;
 import com.scoutress.KaimuxAdminStats.entity.productivity.Productivity;
 import com.scoutress.KaimuxAdminStats.repositories.complaints.ComplaintsSumRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDailyDiscordMessagesRepository;
-import com.scoutress.KaimuxAdminStats.repositories.discordMessages.OverallDiscordMessagesComparedRepository;
+import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageDailyMinecraftTicketsRepository;
-import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.OverallMinecraftTicketsComparedRepository;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageMinecraftTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AveragePlaytimeOverallRepository;
 import com.scoutress.KaimuxAdminStats.repositories.productivity.ProductivityRepository;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
@@ -29,9 +29,9 @@ public class ProductivityServiceImpl implements ProductivityService {
 
   private final EmployeeRepository employeeRepository;
   private final AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository;
-  private final OverallDiscordMessagesComparedRepository overallDiscordMessagesComparedRepository;
+  private final AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository;
   private final AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository;
-  private final OverallMinecraftTicketsComparedRepository overallMinecraftTicketsComparedRepository;
+  private final AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository;
   private final AveragePlaytimeOverallRepository averagePlaytimeOverallRepository;
   private final ComplaintsSumRepository complaintsSumRepository;
   private final ProductivityRepository productivityRepository;
@@ -39,17 +39,17 @@ public class ProductivityServiceImpl implements ProductivityService {
   public ProductivityServiceImpl(
       EmployeeRepository employeeRepository,
       AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository,
-      OverallDiscordMessagesComparedRepository overallDiscordMessagesComparedRepository,
+      AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository,
       AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository,
-      OverallMinecraftTicketsComparedRepository overallMinecraftTicketsComparedRepository,
+      AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository,
       AveragePlaytimeOverallRepository averagePlaytimeOverallRepository,
       ComplaintsSumRepository complaintsSumRepository,
       ProductivityRepository productivityRepository) {
     this.employeeRepository = employeeRepository;
     this.averageDailyDiscordMessagesRepository = averageDailyDiscordMessagesRepository;
-    this.overallDiscordMessagesComparedRepository = overallDiscordMessagesComparedRepository;
+    this.averageDiscordMessagesComparedRepository = averageDiscordMessagesComparedRepository;
     this.averageDailyMinecraftTicketsRepository = averageDailyMinecraftTicketsRepository;
-    this.overallMinecraftTicketsComparedRepository = overallMinecraftTicketsComparedRepository;
+    this.averageMinecraftTicketsComparedRepository = averageMinecraftTicketsComparedRepository;
     this.averagePlaytimeOverallRepository = averagePlaytimeOverallRepository;
     this.complaintsSumRepository = complaintsSumRepository;
     this.productivityRepository = productivityRepository;
@@ -197,7 +197,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   public double getAverageValueOfComparedDiscordMessages(Short employeeId) {
-    List<OverallDiscordMessagesCompared> data = overallDiscordMessagesComparedRepository.findAll();
+    List<AverageDiscordMessagesCompared> data = averageDiscordMessagesComparedRepository.findAll();
 
     if (data.isEmpty()) {
       return 0;
@@ -206,7 +206,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return data
         .stream()
         .filter(complaints -> complaints.getEmployeeId().equals(employeeId))
-        .map(OverallDiscordMessagesCompared::getValue)
+        .map(AverageDiscordMessagesCompared::getValue)
         .findFirst()
         .orElse(0.0);
   }
@@ -302,7 +302,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   public double getAverageValueOfMinecraftTicketsCompared(Short employeeId) {
-    List<OverallMinecraftTicketsCompared> data = overallMinecraftTicketsComparedRepository.findAll();
+    List<AverageMinecraftTicketsCompared> data = averageMinecraftTicketsComparedRepository.findAll();
 
     if (data.isEmpty()) {
       return 0;
@@ -311,7 +311,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return data
         .stream()
         .filter(complaints -> complaints.getEmployeeId().equals(employeeId))
-        .map(OverallMinecraftTicketsCompared::getValue)
+        .map(AverageMinecraftTicketsCompared::getValue)
         .findFirst()
         .orElse(0.0);
   }

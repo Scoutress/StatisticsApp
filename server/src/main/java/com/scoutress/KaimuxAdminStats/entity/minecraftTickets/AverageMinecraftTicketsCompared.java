@@ -1,6 +1,4 @@
-package com.scoutress.KaimuxAdminStats.entity.discordTickets;
-
-import java.time.LocalDate;
+package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,23 +11,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_discord_tickets_compared")
+@Table(name = "average_minecraft_tickets_comp")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyDiscordTicketsCompared {
+public class AverageMinecraftTicketsCompared {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
   @Column(name = "value", nullable = false)
   private Double value;
-
-  @Column(name = "date", nullable = false)
-  private LocalDate date;
-
 }

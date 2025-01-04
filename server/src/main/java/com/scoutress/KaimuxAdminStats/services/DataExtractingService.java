@@ -2,9 +2,6 @@ package com.scoutress.KaimuxAdminStats.services;
 
 import java.util.List;
 
-import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.AfkPlaytimeRawData;
-import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.AfkSessionDuration;
-import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.SanitizedAfkSessionData;
 import com.scoutress.KaimuxAdminStats.entity.discordTickets.DiscordTicketsReactions;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
@@ -31,10 +28,4 @@ public interface DataExtractingService {
   public List<DiscordTicketsReactions> getAllDcTicketReactions();
 
   public List<MinecraftTicketsAnswers> getAllMcTicketsAnswers();
-
-  public List<AfkPlaytimeRawData> getStartFinishTimes();
-
-  public List<SanitizedAfkSessionData> getSanitizedAfkStartFinishTimes();
-
-  public List<AfkSessionDuration> getAfkSessionDurations();
 }

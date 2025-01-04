@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDiscordMessagesCompared;
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessages;
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessagesCompared;
-import com.scoutress.KaimuxAdminStats.entity.discordMessages.OverallDiscordMessagesCompared;
+import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
-import com.scoutress.KaimuxAdminStats.repositories.discordMessages.OverallDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
 
 @Service
@@ -19,15 +19,15 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
 
   private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
   private final DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository;
-  private final OverallDiscordMessagesComparedRepository overallDiscordMessagesComparedRepository;
+  private final AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository;
 
   public DiscordMessagesComparedServiceImp(
       DailyDiscordMessagesRepository dailyDiscordMessagesRepository,
       DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository,
-      OverallDiscordMessagesComparedRepository overallDiscordMessagesComparedRepository) {
+      AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository) {
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
     this.dailyDiscordMessagesComparedRepository = dailyDiscordMessagesComparedRepository;
-    this.overallDiscordMessagesComparedRepository = overallDiscordMessagesComparedRepository;
+    this.averageDiscordMessagesComparedRepository = averageDiscordMessagesComparedRepository;
   }
 
   @Override
@@ -131,17 +131,17 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
   }
 
   public void saveAverageMessagesRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {
-    OverallDiscordMessagesCompared existingRecord = overallDiscordMessagesComparedRepository
+    AverageDiscordMessagesCompared existingRecord = averageDiscordMessagesComparedRepository
         .findByEmployeeId(employee);
 
     if (existingRecord != null) {
       existingRecord.setValue(averageValueOfTicketRatiosThisEmployee);
-      overallDiscordMessagesComparedRepository.save(existingRecord);
+      averageDiscordMessagesComparedRepository.save(existingRecord);
     } else {
-      OverallDiscordMessagesCompared newRecord = new OverallDiscordMessagesCompared();
+      AverageDiscordMessagesCompared newRecord = new AverageDiscordMessagesCompared();
       newRecord.setEmployeeId(employee);
       newRecord.setValue(averageValueOfTicketRatiosThisEmployee);
-      overallDiscordMessagesComparedRepository.save(newRecord);
+      averageDiscordMessagesComparedRepository.save(newRecord);
     }
   }
 }

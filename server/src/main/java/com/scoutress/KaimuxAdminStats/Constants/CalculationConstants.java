@@ -16,12 +16,6 @@ public class CalculationConstants {
   public static final double PLAYTIME_MAX_OVERSEER = 4;
   public static final double PLAYTIME_MAX_MANAGER = 8;
 
-  public static final double AFK_PLAYTIME_HELPER = 2;
-  public static final double AFK_PLAYTIME_SUPPORT = 5;
-  public static final double AFK_PLAYTIME_CHATMOD = 10;
-  public static final double AFK_PLAYTIME_OVERSEER = 20;
-  public static final double AFK_PLAYTIME_MANAGER = 50;
-
   // Coeficients for average Discord messages per day per level
   public static final double DISCORD_MESSAGES_HELPER = 0.66;
   public static final double DISCORD_MESSAGES_SUPPORT = 0.33;
@@ -42,16 +36,6 @@ public class CalculationConstants {
   public static final double DISCORD_MESSAGES_COMPARED_CHATMOD = 17;
   public static final double DISCORD_MESSAGES_COMPARED_OVERSEER = 8.5;
   public static final double DISCORD_MESSAGES_COMPARED_MANAGER = 4.2;
-
-  public static final double DISCORD_TICKETS_SUPPORT = 0.3275;
-  public static final double DISCORD_TICKETS_CHATMOD = 0.4803;
-  public static final double DISCORD_TICKETS_OVERSEER = 0.4803;
-  public static final double DISCORD_TICKETS_MANAGER = 0.9520;
-
-  public static final double DISCORD_TICKETS_COMPARED_SUPPORT = 1; // TODO
-  public static final double DISCORD_TICKETS_COMPARED_CHATMOD = 1; // TODO
-  public static final double DISCORD_TICKETS_COMPARED_OVERSEER = 1; // TODO
-  public static final double DISCORD_TICKETS_COMPARED_MANAGER = 1; // TODO
 
   // Coeficients for average Minecraft tickets per day per level
   public static final double MINECRAFT_TICKETS_SUPPORT = 2;

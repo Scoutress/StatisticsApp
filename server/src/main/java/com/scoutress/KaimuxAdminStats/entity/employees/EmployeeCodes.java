@@ -22,32 +22,32 @@ public class EmployeeCodes {
   private Long id;
 
   @Column(name = "employee_id", nullable = true)
-  private Short employeeId;
+  private Short employeeId; // Employee entity
 
   @Column(name = "survival_id", nullable = true)
-  private Short survivalId;
+  private Short survivalId; // Survival server CoreProtect
 
   @Column(name = "skyblock_id", nullable = true)
-  private Short skyblockId;
+  private Short skyblockId; // Skyblock server CoreProtect
 
   @Column(name = "creative_id", nullable = true)
-  private Short creativeId;
+  private Short creativeId; // Creative server CoreProtect
 
   @Column(name = "boxpvp_id", nullable = true)
-  private Short boxpvpId;
+  private Short boxpvpId; // Boxpvp server CoreProtect
 
   @Column(name = "prison_id", nullable = true)
-  private Short prisonId;
+  private Short prisonId; // Prison server CoreProtect
 
   @Column(name = "events_id", nullable = true)
-  private Short eventsId;
+  private Short eventsId; // Events server CoreProtect
 
   @Column(name = "lobby_id", nullable = true)
-  private Short lobbyId;
+  private Short lobbyId; // Lobby server CoreProtect
 
   @Column(name = "discord_id", nullable = true)
-  private Short discordId;
+  private Short discordId; // Kaimux website API Discord user code
 
   @Column(name = "minecraft_id", nullable = true)
-  private Short minecraftId;
+  private Short minecraftId; // Kaimux website API Minecraft user code
 }

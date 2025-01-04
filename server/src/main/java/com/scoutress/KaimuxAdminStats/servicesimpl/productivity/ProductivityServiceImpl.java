@@ -81,7 +81,7 @@ public class ProductivityServiceImpl implements ProductivityService {
       double averageValueOfAllFinals = calculateAverageValueOfAllFinals(
           afkPlaytimeFinalValue, discordMessagesFinalValue,
           discordMessagesComparedFinalValue, minecraftTicketsFinalValue,
-          minecraftTicketsComparedFinalValue, playtimeFinalValue);
+          minecraftTicketsComparedFinalValue, playtimeFinalValue, employeeLevel);
 
       double finalProductivityValue = calculateFinalProductivityValue(
           averageValueOfAllFinals, complaintsFinalValue);
@@ -440,13 +440,21 @@ public class ProductivityServiceImpl implements ProductivityService {
   public double calculateAverageValueOfAllFinals(
       double afkPlaytimeFinalValue, double discordMessagesFinalValue,
       double discordMessagesComparedFinalValue, double minecraftTicketsFinalValue,
-      double minecraftTicketsComparedFinalValue, double playtimeFinalValue) {
+      double minecraftTicketsComparedFinalValue, double playtimeFinalValue, String employeeLevel) {
 
-    double finalValuesSum = afkPlaytimeFinalValue + discordMessagesFinalValue
-        + discordMessagesComparedFinalValue + minecraftTicketsFinalValue
-        + minecraftTicketsComparedFinalValue + playtimeFinalValue;
+    double finalValuesSum;
+    int parametersCount;
 
-    int parametersCount = 6;
+    if (employeeLevel.equals("Helper")) {
+      finalValuesSum = afkPlaytimeFinalValue + discordMessagesFinalValue
+          + discordMessagesComparedFinalValue + playtimeFinalValue;
+      parametersCount = 4;
+    } else {
+      finalValuesSum = afkPlaytimeFinalValue + discordMessagesFinalValue
+          + discordMessagesComparedFinalValue + minecraftTicketsFinalValue
+          + minecraftTicketsComparedFinalValue + playtimeFinalValue;
+      parametersCount = 6;
+    }
 
     return finalValuesSum / parametersCount;
   }

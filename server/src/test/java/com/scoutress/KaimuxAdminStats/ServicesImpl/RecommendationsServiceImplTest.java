@@ -427,4 +427,12 @@ class RecommendationsServiceImplTest {
     verify(recommendationsRepository, never()).save(existingRecord);
   }
 
+  // TODO Still need to create tests for these cases:
+  // DismissRecommendation
+  // PromoteRecommendation
+  // DemoteRecommendation
+  // ErrorRecommendation
+  // EmployeeNotExist
+  // ProductivityDataMissing
+  // PlaytimeDataMissing
 }

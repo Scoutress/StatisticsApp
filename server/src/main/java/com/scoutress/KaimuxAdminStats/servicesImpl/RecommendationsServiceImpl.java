@@ -50,8 +50,8 @@ public class RecommendationsServiceImpl implements RecommendationsService {
       double productivity;
 
       if (levelForThisEmployee != null
-          && annualPlaytimeForThisEmployee > 0.0
-          && productivityForThisEmployee > 0.0) {
+          && annualPlaytimeForThisEmployee >= 0.0
+          && productivityForThisEmployee >= 0.0) {
 
         if (annualPlaytimeForThisEmployee < CalculationConstants.MIN_ANNUAL_PLAYTIME) {
           recommendation = "Dismiss";

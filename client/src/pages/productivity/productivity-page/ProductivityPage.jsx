@@ -23,14 +23,34 @@ const ProductivityPage = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchData = async () => {
       setError(null);
+
+      const sortByLevel = (data) => {
+        return data.sort((a, b) => {
+          return levelOrder.indexOf(a.level) - levelOrder.indexOf(b.level);
+        });
+      };
+
+      const levelOrder = [
+        "Owner",
+        "Operator",
+        "Manager",
+        "Organizer",
+        "Overseer",
+        "ChatMod",
+        "Support",
+        "Helper",
+      ];
+
       try {
         const response = await axios.get(
           "http://localhost:8080/stats/productivity"
         );
-        setProductivityData(response.data || []);
+        const sortedData = sortByLevel(response.data || []);
+        setProductivityData(sortedData);
       } catch (error) {
         setError("There was an error fetching the data! " + error.message);
       } finally {

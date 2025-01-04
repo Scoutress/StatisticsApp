@@ -53,25 +53,31 @@ public class RecommendationsServiceImpl implements RecommendationsService {
           && annualPlaytimeForThisEmployee >= 0.0
           && productivityForThisEmployee >= 0.0) {
 
-        if (annualPlaytimeForThisEmployee < CalculationConstants.MIN_ANNUAL_PLAYTIME) {
-          recommendation = "Dismiss";
+        if (!levelForThisEmployee.equals("Owner") ||
+            !levelForThisEmployee.equals("Operator")) {
+
+          if (annualPlaytimeForThisEmployee < CalculationConstants.MIN_ANNUAL_PLAYTIME) {
+            recommendation = "Dismiss";
+          } else {
+            if (!levelForThisEmployee.equals("Organizer")) {
+              productivity = productivityForThisEmployee;
+            } else {
+              productivity = productivityForThisEmployee + 0.1;
+            }
+
+            if (productivity > CalculationConstants.PROMOTION_VALUE) {
+              recommendation = "Promote";
+            } else if (productivity < CalculationConstants.DEMOTION_VALUE) {
+              recommendation = "Demote";
+            } else {
+              recommendation = "-";
+            }
+          }
+          saveRecommendationForThisEmployee(recommendation, employeeId);
         } else {
-
-          if (!levelForThisEmployee.equals("Organizer")) {
-            productivity = productivityForThisEmployee;
-          } else {
-            productivity = productivityForThisEmployee + 0.1;
-          }
-
-          if (productivity > CalculationConstants.PROMOTION_VALUE) {
-            recommendation = "Promote";
-          } else if (productivity < CalculationConstants.DEMOTION_VALUE) {
-            recommendation = "Demote";
-          } else {
-            recommendation = "-";
-          }
+          recommendation = "-";
+          saveRecommendationForThisEmployee(recommendation, employeeId);
         }
-        saveRecommendationForThisEmployee(recommendation, employeeId);
       } else {
         recommendation = "Error";
         saveRecommendationForThisEmployee(recommendation, employeeId);

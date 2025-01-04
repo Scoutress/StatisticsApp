@@ -19,6 +19,11 @@
       "name": "kaimux-api-token",
       "type": "java.lang.String",
       "description": "A description for 'kaimux-api-token'"
+    },
+    {
+      "name": "sqlite.db.path",
+      "type": "java.lang.String",
+      "description": "A description for 'sqlite.db.path'"
     }
   ]
 }

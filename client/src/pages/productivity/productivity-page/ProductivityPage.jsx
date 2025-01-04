@@ -9,16 +9,16 @@ const ProductivityPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      axios
-        .get("http://localhost:8080/stats/productivity")
-        .then((response) => {
-          setProductivityData(response.data);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          setError(error);
-          setIsLoading(false);
-        });
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/stats/productivity"
+        );
+        setProductivityData(response.data || []);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, []);
@@ -201,12 +201,9 @@ const ProductivityPage = () => {
             <th>Level</th>
             <th>Username</th>
             <th>Annual playtime, hours/year</th>
-            <th>Server tickets, tickets/day</th>
-            <th>Server tickets taken, %/day</th>
-            <th>Discord tickets, tickets/day</th>
-            <th>Discord tickets taken, %/day</th>
+            <th>Minecraft tickets, tickets/day</th>
+            <th>Minecraft tickets compared, %/day</th>
             <th>Playtime, hours/day</th>
-            <th>Afk playtime, %/day</th>
             <th>Productivity, %</th>
             <th>Recommendation</th>
           </tr>
@@ -214,15 +211,12 @@ const ProductivityPage = () => {
         <tbody>
           {productivityData.map((item) => (
             <tr key={item.id}>
-              <td>{item.employee ? item.employee.level : "N/A"}</td>
-              <td>{item.employee ? item.employee.username : "N/A"}</td>
+              <td>{item.level}</td>
+              <td>{item.username}</td>
               <td>{item.annualPlaytime.toFixed(2)}</td>
-              <td>{item.serverTickets.toFixed(2)}</td>
-              <td>{item.serverTicketsTaking.toFixed(2)}</td>
-              <td>{item.discordTickets.toFixed(2)}</td>
-              <td>{item.discordTicketsTaking.toFixed(2)}</td>
+              <td>{item.minecraftTickets.toFixed(2)}</td>
+              <td>{item.minecraftTicketsCompared.toFixed(2)}</td>
               <td>{item.playtime.toFixed(2)}</td>
-              <td>{item.afkPlaytime.toFixed(2)}</td>
               <td>{item.productivity.toFixed(2)}</td>
               <td>{item.recommendation}</td>
             </tr>
@@ -237,12 +231,12 @@ const ProductivityPage = () => {
           <tr>
             <th>Level</th>
             <th>Username</th>
-            <th>Annual Playtime</th>
-            <th>Annual Playtime (TEST)</th>
-            <th>Server Tickets /day</th>
-            <th>Server Tickets /day (TEST)</th>
-            <th>Server Tickets Taking %/day</th>
-            <th>Server Tickets Taking %/day (TEST)</th>
+            <th>Annual playtime</th>
+            <th>Annual playtime (TEST)</th>
+            <th>Minecraft tickets /day</th>
+            <th>Minecraft tickets /day (TEST)</th>
+            <th>Minecraft tickets compared %/day</th>
+            <th>Minecraft tickets compared %/day (TEST)</th>
             <th>Playtime hours/day</th>
             <th>Playtime hours/day (TEST)</th>
             <th>Productivity %</th>
@@ -254,17 +248,17 @@ const ProductivityPage = () => {
         <tbody>
           {productivityData.map((item, index) => (
             <tr key={item.id}>
-              <td>{item.employee ? item.employee.level : "N/A"}</td>
-              <td>{item.employee ? item.employee.username : "N/A"}</td>
-              <td>{item.annualPlaytime}</td>
+              <td>{item.level}</td>
+              <td>{item.username}</td>
+              <td>{item.annualPlaytime.toFixed(2)}</td>
               <td>{hardcodedData[index].annualPlaytime}</td>
-              <td>{item.serverTickets}</td>
+              <td>{item.minecraftTickets.toFixed(2)}</td>
               <td>{hardcodedData[index].serverTickets}</td>
-              <td>{item.serverTicketsTaking}</td>
+              <td>{item.minecraftTicketsCompared.toFixed(2)}</td>
               <td>{hardcodedData[index].serverTicketsTaking}</td>
-              <td>{item.playtime}</td>
+              <td>{item.playtime.toFixed(2)}</td>
               <td>{hardcodedData[index].playtime}</td>
-              <td>{item.productivity}</td>
+              <td>{item.productivity.toFixed(2)}</td>
               <td>{hardcodedData[index].productivity}</td>
               <td>{item.recommendation}</td>
               <td>{hardcodedData[index].recommendation}</td>

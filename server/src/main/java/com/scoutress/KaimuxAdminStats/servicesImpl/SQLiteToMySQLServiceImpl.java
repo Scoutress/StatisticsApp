@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,8 @@ import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 @Service
 public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
-  private static final String SQLITE_DB_PATH = "server/src/main/java/com/scoutress/KaimuxAdminStats/utils/rawCoreProtectData/";
+  @Value("${sqlite.db.path}")
+  private String SQLITE_DB_PATH;
 
   private static final List<String> servers = List.of(
       "Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events", "Lobby");

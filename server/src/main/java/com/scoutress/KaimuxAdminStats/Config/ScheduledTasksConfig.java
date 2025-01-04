@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
@@ -82,7 +81,7 @@ public class ScheduledTasksConfig {
     this.finalStatsService = finalStatsService;
   }
 
-  @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
+  // @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
   @Transactional
   public void runScheduledTasks() {
     System.out.println("-----------------------------------------------");

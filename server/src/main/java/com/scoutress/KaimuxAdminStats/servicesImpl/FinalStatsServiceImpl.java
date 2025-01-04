@@ -236,4 +236,9 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       finalStatsRepository.save(newRecord);
     }
   }
+
+  @Override
+  public List<FinalStats> getAllFinalStats() {
+    return finalStatsRepository.findAll();
+  }
 }

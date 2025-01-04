@@ -34,6 +34,6 @@ public class FinalStatsController {
   @PostMapping("/update")
   public ResponseEntity<String> triggerMethods() {
     taskService.runScheduledTasks();
-    return ResponseEntity.ok("OK");
+    return ResponseEntity.ok("Tasks completed successfully.");
   }
 }

@@ -1,43 +1,51 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Loading from "../../../components/loading/Loading.jsx";
+import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
 import styles from "./ProductivityPage.module.scss";
 
 const ProductivityPage = () => {
   const [productivityData, setProductivityData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleClick = async () => {
+  const runTasks = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      await fetch("http://localhost:8080/stats/update", { method: "POST" });
+      await fetch("http://localhost:8080/stats/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
     } catch (error) {
-      console.error("Error triggering methods:", error);
+      setError("There was an error fetching the data! " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
-
   useEffect(() => {
     const fetchData = async () => {
+      setError(null);
       try {
         const response = await axios.get(
           "http://localhost:8080/stats/productivity"
         );
         setProductivityData(response.data || []);
       } catch (error) {
-        console.error("Error fetching productivity data:", error);
-        setError(error);
+        setError("There was an error fetching the data! " + error.message);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (loading) {
+    return <Loading />;
   }
 
   if (error) {
-    return <div>There was an error fetching the data! {error.message}</div>;
+    return <div>{error && <ErrorMessage message={error} />}</div>;
   }
 
   const hardcodedData = [
@@ -204,7 +212,16 @@ const ProductivityPage = () => {
   return (
     <div className={styles.productivityPage}>
       <h1 className={styles.title}>Productivity Statistics</h1>
-      <button onClick={handleClick}>Update data</button>
+
+      <button onClick={runTasks} disabled={loading}>
+        {"Update data"}
+      </button>
+      {loading && (
+        <div className="spinner">
+          <p>Updating...</p>
+        </div>
+      )}
+
       <table className={styles.table}>
         <thead>
           <tr>

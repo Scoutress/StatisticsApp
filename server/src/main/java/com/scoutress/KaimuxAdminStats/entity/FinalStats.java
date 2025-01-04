@@ -21,6 +21,9 @@ public class FinalStats {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
+
   @Column(name = "level", nullable = false)
   private String level;
 

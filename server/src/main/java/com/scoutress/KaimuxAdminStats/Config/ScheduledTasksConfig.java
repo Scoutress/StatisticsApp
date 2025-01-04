@@ -5,8 +5,10 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
+import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
@@ -43,6 +45,7 @@ public class ScheduledTasksConfig {
   private final DiscordMessagesComparedService discordMessagesComparedService;
   private final ComplaintsService complaintsService;
   private final RecommendationsService recommendationsService;
+  private final FinalStatsService finalStatsService;
 
   public ScheduledTasksConfig(
       DataFetchingService dataFetchingService,
@@ -59,7 +62,8 @@ public class ScheduledTasksConfig {
       DiscordMessagesService discordMessagesService,
       DiscordMessagesComparedService discordMessagesComparedService,
       ComplaintsService complaintsService,
-      RecommendationsService recommendationsService) {
+      RecommendationsService recommendationsService,
+      FinalStatsService finalStatsService) {
     this.dataFetchingService = dataFetchingService;
     this.discordTicketsService = discordTicketsService;
     this.productivityService = productivityService;
@@ -75,9 +79,10 @@ public class ScheduledTasksConfig {
     this.discordMessagesComparedService = discordMessagesComparedService;
     this.complaintsService = complaintsService;
     this.recommendationsService = recommendationsService;
+    this.finalStatsService = finalStatsService;
   }
 
-  // @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
+  @Scheduled(/* initialDelay = 1000, */ fixedRate = 86400000)
   @Transactional
   public void runScheduledTasks() {
     System.out.println("-----------------------------------------------");
@@ -129,6 +134,10 @@ public class ScheduledTasksConfig {
     System.out.println("");
     System.out.println("Recommendation evaluation");
     recommendationsService.evaluateRecommendations();
+
+    System.out.println("");
+    System.out.println("Final stats updating");
+    finalStatsService.updateNewStatsData();
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

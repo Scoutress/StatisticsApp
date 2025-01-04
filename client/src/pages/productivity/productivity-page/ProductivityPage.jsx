@@ -262,9 +262,9 @@ const ProductivityPage = () => {
               <td>{item.username}</td>
               <td>{item.annualPlaytime.toFixed(2)}</td>
               <td>{item.minecraftTickets.toFixed(2)}</td>
-              <td>{item.minecraftTicketsCompared.toFixed(2)}</td>
+              <td>{(item.minecraftTicketsCompared * 100).toFixed(2)}</td>
               <td>{item.playtime.toFixed(2)}</td>
-              <td>{item.productivity.toFixed(2)}</td>
+              <td>{(item.productivity * 100).toFixed(2)}</td>
               <td>{item.recommendation}</td>
             </tr>
           ))}
@@ -301,11 +301,11 @@ const ProductivityPage = () => {
               <td>{hardcodedData[index].annualPlaytime}</td>
               <td>{item.minecraftTickets.toFixed(2)}</td>
               <td>{hardcodedData[index].serverTickets}</td>
-              <td>{item.minecraftTicketsCompared.toFixed(2)}</td>
+              <td>{(item.minecraftTicketsCompared * 100).toFixed(2)}</td>
               <td>{hardcodedData[index].serverTicketsTaking}</td>
               <td>{item.playtime.toFixed(2)}</td>
               <td>{hardcodedData[index].playtime}</td>
-              <td>{item.productivity.toFixed(2)}</td>
+              <td>{(item.productivity * 100).toFixed(2)}</td>
               <td>{hardcodedData[index].productivity}</td>
               <td>{item.recommendation}</td>
               <td>{hardcodedData[index].recommendation}</td>

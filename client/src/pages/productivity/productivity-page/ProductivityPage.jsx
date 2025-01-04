@@ -7,6 +7,14 @@ const ProductivityPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleClick = async () => {
+    try {
+      await fetch("http://localhost:8080/stats/update", { method: "POST" });
+    } catch (error) {
+      console.error("Error triggering methods:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -15,6 +23,7 @@ const ProductivityPage = () => {
         );
         setProductivityData(response.data || []);
       } catch (error) {
+        console.error("Error fetching productivity data:", error);
         setError(error);
       } finally {
         setIsLoading(false);
@@ -195,6 +204,7 @@ const ProductivityPage = () => {
   return (
     <div className={styles.productivityPage}>
       <h1 className={styles.title}>Productivity Statistics</h1>
+      <button onClick={handleClick}>Update data</button>
       <table className={styles.table}>
         <thead>
           <tr>

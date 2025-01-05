@@ -5,4 +5,6 @@ public interface SessionDurationService {
   void processSessions();
 
   void removeDuplicateSessionData();
+
+  void processSessionsFromBackup();
 }

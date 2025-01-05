@@ -38,9 +38,9 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   public List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
     List<DailyPlaytime> handledDailyPlaytimeData = new ArrayList<>();
 
-    Set<Short> uniqueAids = sessions
+    Set<Short> allEmployeeIds = sessions
         .stream()
-        .map(SessionDuration::getAid)
+        .map(SessionDuration::getEmployeeId)
         .collect(Collectors.toSet());
 
     Set<String> uniqueServers = sessions
@@ -53,15 +53,15 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
         .map(SessionDuration::getDate)
         .collect(Collectors.toSet());
 
-    for (Short aid : uniqueAids) {
+    for (Short employeeId : allEmployeeIds) {
       for (String server : uniqueServers) {
         for (LocalDate date : uniqueDates) {
           double sessionPlaytimeInSec = sessions
               .stream()
-              .filter(session -> session.getAid().equals(aid))
+              .filter(session -> session.getEmployeeId().equals(employeeId))
               .filter(session -> session.getServer().equals(server))
               .filter(session -> session.getDate().equals(date))
-              .mapToDouble(SessionDuration::getSingleSessionDuration)
+              .mapToDouble(SessionDuration::getSingleSessionDurationInSec)
               .sum();
 
           if (sessionPlaytimeInSec < 0) {
@@ -70,7 +70,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
 
           if (sessionPlaytimeInSec > 0) {
             DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
-            dailyPlaytimeData.setEmployeeId(aid);
+            dailyPlaytimeData.setEmployeeId(employeeId);
             dailyPlaytimeData.setServer(server);
             dailyPlaytimeData.setDate(date);
             dailyPlaytimeData.setTime(sessionPlaytimeInSec);

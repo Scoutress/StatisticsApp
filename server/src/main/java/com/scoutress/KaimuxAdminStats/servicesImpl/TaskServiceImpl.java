@@ -131,6 +131,20 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("-----------------------------------------------");
   }
 
+  @Override
+  @Transactional
+  public void runBackupDataUploadingTasks() {
+    System.out.println("-----------------------------------------------");
+    System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
+    System.out.println("");
+
+    sessionDurationService.processSessionsFromBackup();
+
+    System.out.println("");
+    System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
+    System.out.println("-----------------------------------------------");
+  }
+
   private String getCurrentTimestamp() {
     return java.time.LocalDateTime.now().toString();
   }

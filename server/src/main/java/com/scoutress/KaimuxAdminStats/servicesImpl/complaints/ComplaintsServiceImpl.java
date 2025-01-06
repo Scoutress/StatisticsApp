@@ -27,13 +27,21 @@ public class ComplaintsServiceImpl implements ComplaintsService {
   public void calculateComplaintsPerEachEmployee() {
     List<Complaints> rawData = getAllComplaints();
 
-    if (!rawData.isEmpty()) {
-      List<Short> allEmployees = getAllEmployeesFromComplaintsData(rawData);
+    if (rawData == null || rawData.isEmpty()) {
+      System.err.println("No complaints data found. Cannot proceed.");
+      return;
+    }
 
-      for (Short employee : allEmployees) {
-        int allComplaintsForThisEmployee = calculateAllComplaintsForThisEmployee(rawData, employee);
-        saveComplaintsSumForThisEmployee(allComplaintsForThisEmployee, employee);
-      }
+    List<Short> allEmployees = getAllEmployeesFromComplaintsData(rawData);
+
+    if (allEmployees == null || allEmployees.isEmpty()) {
+      System.err.println("No employees found in complaints data. Cannot proceed.");
+      return;
+    }
+
+    for (Short employee : allEmployees) {
+      int allComplaintsForThisEmployee = calculateAllComplaintsForThisEmployee(rawData, employee);
+      saveComplaintsSumForThisEmployee(allComplaintsForThisEmployee, employee);
     }
   }
 

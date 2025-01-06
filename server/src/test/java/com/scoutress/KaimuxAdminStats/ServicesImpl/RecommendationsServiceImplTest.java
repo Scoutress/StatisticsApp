@@ -119,9 +119,9 @@ class RecommendationsServiceImplTest {
 
     assertEquals(20, result.size());
     assertEquals((short) 1, result.get(0).getEmployeeId());
-    assertEquals(1.5, result.get(0).getPlaytime());
+    assertEquals(1.5, result.get(0).getPlaytimeInHours());
     assertEquals((short) 20, result.get(19).getEmployeeId());
-    assertEquals(30.0, result.get(19).getPlaytime());
+    assertEquals(30.0, result.get(19).getPlaytimeInHours());
     verify(annualPlaytimeRepository, times(1)).findAll();
   }
 

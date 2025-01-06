@@ -78,7 +78,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
               .stream()
               .filter(pt -> pt.getEmployeeId().equals(aid))
               .filter(pt -> !pt.getDate().isBefore(joinDate))
-              .mapToDouble(DailyPlaytime::getTime)
+              .mapToDouble(DailyPlaytime::getTimeInHours)
               .sum();
 
           long daysAfterJoin = ChronoUnit.DAYS.between(joinDate, today);

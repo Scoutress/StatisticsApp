@@ -56,24 +56,26 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     for (Short employeeId : allEmployeeIds) {
       for (String server : uniqueServers) {
         for (LocalDate date : uniqueDates) {
-          double sessionPlaytimeInSec = sessions
+          int sessionPlaytimeInSec = sessions
               .stream()
               .filter(session -> session.getEmployeeId().equals(employeeId))
               .filter(session -> session.getServer().equals(server))
               .filter(session -> session.getDate().equals(date))
-              .mapToDouble(SessionDuration::getSingleSessionDurationInSec)
+              .mapToInt(SessionDuration::getSingleSessionDurationInSec)
               .sum();
 
           if (sessionPlaytimeInSec < 0) {
             throw new IllegalArgumentException("Playtime can not be less than 0!");
           }
 
+          double sessionPlaytimeInHours = sessionPlaytimeInSec / 3600.0;
+
           if (sessionPlaytimeInSec > 0) {
             DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
             dailyPlaytimeData.setEmployeeId(employeeId);
             dailyPlaytimeData.setServer(server);
             dailyPlaytimeData.setDate(date);
-            dailyPlaytimeData.setTime(sessionPlaytimeInSec);
+            dailyPlaytimeData.setTimeInHours(sessionPlaytimeInHours);
             handledDailyPlaytimeData.add(dailyPlaytimeData);
           }
         }
@@ -93,7 +95,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
           dailyPlaytime.getServer());
 
       if (existingPlaytime != null) {
-        existingPlaytime.setTime(dailyPlaytime.getTime());
+        existingPlaytime.setTimeInHours(dailyPlaytime.getTimeInHours());
         dailyPlaytimeRepository.save(existingPlaytime);
       } else {
         dailyPlaytimeRepository.save(dailyPlaytime);

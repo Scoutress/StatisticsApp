@@ -27,7 +27,7 @@ public class DailyPlaytime {
   private Short employeeId;
 
   @Column(name = "time", nullable = false)
-  private Double time;
+  private Double timeInHours;
 
   @Column(name = "date", nullable = false)
   private LocalDate date;

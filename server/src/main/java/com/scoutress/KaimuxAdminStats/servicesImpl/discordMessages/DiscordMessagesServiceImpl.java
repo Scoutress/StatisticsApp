@@ -27,14 +27,26 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
 
   @Override
   public void calculateAverageValueOfDailyDiscordMessages() {
-    List<DailyDiscordMessages> rawData = getAllDiscordMessages();
-    List<Short> allEmployees = getAllEmployeesFromMessagesData(rawData);
-    LocalDate oldestDate = getOldestDateFromMessagesData(rawData);
+    try {
+      List<DailyDiscordMessages> rawData = getAllDiscordMessages();
 
-    for (Short employee : allEmployees) {
-      double averageValueOfDiscordMessagesThisEmployee = calculateAverageValueOfDiscordMessagesThisEmployee(
-          rawData, oldestDate, employee);
-      saveAverageValueForThisEmployee(averageValueOfDiscordMessagesThisEmployee, employee);
+      if (rawData == null || rawData.isEmpty()) {
+        throw new RuntimeException("No Discord messages found in the database.");
+      }
+
+      List<Short> allEmployees = getAllEmployeesFromMessagesData(rawData);
+      LocalDate oldestDate = getOldestDateFromMessagesData(rawData);
+
+      if (allEmployees == null || oldestDate == null) {
+        throw new RuntimeException("Missing required data (employees or oldest date).");
+      }
+
+      for (Short employee : allEmployees) {
+        double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(rawData, oldestDate, employee);
+        saveAverageValueForThisEmployee(averageValue, employee);
+      }
+    } catch (RuntimeException e) {
+      System.err.println("Error in calculateAverageValueOfDailyDiscordMessages: " + e.getMessage());
     }
   }
 

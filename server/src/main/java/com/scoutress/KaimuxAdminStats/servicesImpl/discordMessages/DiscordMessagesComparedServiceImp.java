@@ -33,30 +33,56 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
   @Override
   public void compareEachEmployeeDailyDiscordMessagesValues() {
     List<DailyDiscordMessages> rawData = getAllDiscordMessages();
+
+    if (rawData == null || rawData.isEmpty()) {
+      throw new RuntimeException("No Discord messages data found. Cannot proceed.");
+    }
+
     List<LocalDate> allDates = getAllDiscordMessagesDates(rawData);
+
+    if (allDates == null || allDates.isEmpty()) {
+      throw new RuntimeException("No dates found in Discord messages data. Cannot proceed.");
+    }
+
     List<Short> allEmployees = getAllEmployeesFromDailyDiscordMessages(rawData);
 
-    for (Short employee : allEmployees) {
+    if (allEmployees == null || allEmployees.isEmpty()) {
+      throw new RuntimeException("No employees found in Discord messages data. Cannot proceed.");
+    }
 
+    for (Short employee : allEmployees) {
       double messagesRatioSumThisEmployee = 0;
       int datesCount = 0;
 
       for (LocalDate date : allDates) {
-        int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(rawData, date, employee);
-        int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(rawData, date);
-        double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
-            messagesThisDateThisEmployee, messagesThisDateAllEmployees);
+        try {
+          int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(rawData, date, employee);
+          int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(rawData, date);
 
-        saveMessagesRatioThisDateThisEmployee(messagesRatioThisDateThisEmployee, date, employee);
+          if (messagesThisDateAllEmployees == 0) {
+            System.err.println("Total messages for all employees on " + date + " is zero. Skipping.");
+            continue;
+          }
 
-        messagesRatioSumThisEmployee += messagesRatioThisDateThisEmployee;
-        datesCount++;
+          double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
+              messagesThisDateThisEmployee, messagesThisDateAllEmployees);
+
+          saveMessagesRatioThisDateThisEmployee(messagesRatioThisDateThisEmployee, date, employee);
+
+          messagesRatioSumThisEmployee += messagesRatioThisDateThisEmployee;
+          datesCount++;
+        } catch (Exception e) {
+          System.err.println("Error processing employee " + employee + " on date " + date + ": " + e.getMessage());
+        }
       }
 
       if (datesCount > 0) {
         double averageValueOfMessagesRatiosThisEmployee = calculateAverageMessagesRatioThisEmployee(
             messagesRatioSumThisEmployee, datesCount);
+
         saveAverageMessagesRatioThisEmployee(averageValueOfMessagesRatiosThisEmployee, employee);
+      } else {
+        System.err.println("No valid data for employee " + employee + ". Skipping average calculation.");
       }
     }
   }

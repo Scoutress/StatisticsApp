@@ -25,5 +25,5 @@ public class AnnualPlaytime {
   private Short employeeId;
 
   @Column(name = "playtime", nullable = false)
-  private Double playtime;
+  private Double playtimeInHours;
 }

@@ -70,16 +70,19 @@ const ProductivityPage = () => {
 
   const hardcodedData = [
     {
+      //ItsVaidas
       id: 1,
-      annualPlaytime: 1181,
+      annualPlaytime: 1057,
     },
     {
+      //Scoutress
       id: 2,
-      annualPlaytime: 1201,
+      annualPlaytime: 1374,
     },
     {
+      //Mboti212
       id: 3,
-      annualPlaytime: 710,
+      annualPlaytime: 443,
       serverTickets: 1.8,
       serverTicketsTaking: 52,
       playtime: 0.99,
@@ -88,8 +91,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //Furija
       id: 4,
-      annualPlaytime: 407,
+      annualPlaytime: 564,
       serverTickets: 0.87,
       serverTicketsTaking: 18.3,
       playtime: 0.96,
@@ -98,8 +102,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //Ernestasltu12
       id: 5,
-      annualPlaytime: 726,
+      annualPlaytime: 475,
       serverTickets: 1.93,
       serverTicketsTaking: 27.56,
       playtime: 1.2,
@@ -108,8 +113,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //D0fka
       id: 6,
-      annualPlaytime: 256,
+      annualPlaytime: 111,
       serverTickets: 0.04,
       serverTicketsTaking: 4.4,
       playtime: 0.28,
@@ -118,8 +124,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //MelitaLove
       id: 7,
-      annualPlaytime: 387,
+      annualPlaytime: 429,
       serverTickets: 0.32,
       serverTicketsTaking: 10.2,
       playtime: 0.49,
@@ -128,8 +135,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //Libete
       id: 8,
-      annualPlaytime: 51,
+      annualPlaytime: 309,
       serverTickets: 0.15,
       serverTicketsTaking: 1.7,
       playtime: 0.05,
@@ -138,8 +146,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //Ariena
       id: 9,
-      annualPlaytime: 130,
+      annualPlaytime: 254,
       serverTickets: 0.33,
       serverTicketsTaking: 5.4,
       playtime: 0.17,
@@ -148,8 +157,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //RichPica
       id: 10,
-      annualPlaytime: 182,
+      annualPlaytime: 565,
       serverTickets: 0.77,
       serverTicketsTaking: 13,
       playtime: 0.15,
@@ -158,8 +168,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //plrxq
       id: 11,
-      annualPlaytime: 986,
+      annualPlaytime: 697,
       serverTickets: 2.3,
       serverTicketsTaking: 36,
       playtime: 2.3,
@@ -168,8 +179,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //Beche_
       id: 12,
-      annualPlaytime: 208,
+      annualPlaytime: 122,
       serverTickets: 0.5,
       serverTicketsTaking: 9,
       playtime: 0.41,
@@ -178,8 +190,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //everly
       id: 13,
-      annualPlaytime: 456,
+      annualPlaytime: 188,
       serverTickets: 0.57,
       serverTicketsTaking: 9,
       playtime: 0.77,
@@ -188,8 +201,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //Shizo
       id: 14,
-      annualPlaytime: 511,
+      annualPlaytime: 46,
       serverTickets: 1.2,
       serverTicketsTaking: 27,
       playtime: 2.28,
@@ -198,8 +212,9 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //3MAHH
       id: 15,
-      annualPlaytime: 297,
+      annualPlaytime: 174,
       serverTickets: 0.21,
       serverTicketsTaking: 0,
       playtime: 0.08,
@@ -208,6 +223,7 @@ const ProductivityPage = () => {
       recommendation: "-",
     },
     {
+      //BobsBuilder
       id: 16,
       annualPlaytime: 41,
       serverTickets: 0,
@@ -215,16 +231,6 @@ const ProductivityPage = () => {
       playtime: 0.21,
       afkPlaytime: 0,
       productivity: "30%",
-      recommendation: "-",
-    },
-    {
-      id: 17,
-      annualPlaytime: 174,
-      serverTickets: 0,
-      serverTicketsTaking: 0,
-      playtime: 0.8,
-      afkPlaytime: 0,
-      productivity: "56%",
       recommendation: "-",
     },
   ];

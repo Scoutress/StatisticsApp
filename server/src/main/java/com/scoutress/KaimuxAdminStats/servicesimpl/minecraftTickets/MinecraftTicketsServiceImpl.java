@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -46,9 +47,27 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   @Override
   public void convertMinecraftTicketsAnswers() {
     List<EmployeeCodes> employeeCodes = extractEmployeeCodes();
+
+    if (employeeCodes == null || employeeCodes.isEmpty()) {
+      throw new RuntimeException("No employee codes found. Cannot proceed.");
+    }
+
     List<MinecraftTicketsAnswers> ticketsAnswers = extractDataFromAnswersTable();
+
+    if (ticketsAnswers == null || ticketsAnswers.isEmpty()) {
+      throw new RuntimeException("No tickets answers found. Cannot proceed.");
+    }
+
     List<MinecraftTicketsAnswers> reactionsWithEmployeeIds = mapMinecraftToEmployeeIds(ticketsAnswers, employeeCodes);
+
+    if (reactionsWithEmployeeIds == null || reactionsWithEmployeeIds.isEmpty()) {
+      throw new RuntimeException("Failed to map tickets answers to employee IDs. Cannot proceed.");
+    }
+
     List<DailyMinecraftTickets> convertedData = convertData(reactionsWithEmployeeIds);
+    if (convertedData == null || convertedData.isEmpty()) {
+      throw new RuntimeException("Data conversion failed. Cannot proceed.");
+    }
 
     saveDataToNewTable(convertedData);
   }
@@ -119,8 +138,22 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   @Override
   public void calculateAverageDailyMinecraftTicketsValues() {
     List<Short> allEmployees = getAllEmployeesFromTheTable();
+
+    if (allEmployees == null || allEmployees.isEmpty()) {
+      throw new RuntimeException("No employees found in the table. Cannot proceed.");
+    }
+
     LocalDate oldestDate = checkForOldestDate();
+
+    if (oldestDate == null) {
+      throw new RuntimeException("No oldest date found. Cannot proceed.");
+    }
+
     int daysCount = calculateDaysAfterOldestDate(oldestDate);
+
+    if (daysCount <= 0) {
+      throw new RuntimeException("Invalid days count (" + daysCount + "). Cannot proceed.");
+    }
 
     for (Short employee : allEmployees) {
       int ticketsCountSinceOldestDate = calculateAllTicketsSinceOldestDate(employee);
@@ -145,13 +178,17 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   }
 
   public LocalDate checkForOldestDate() {
-    LocalDate oldestDate = minecraftTicketsRepository
+    Optional<LocalDate> oldestDate = minecraftTicketsRepository
         .findAll()
         .stream()
         .map(DailyMinecraftTickets::getDate)
-        .min(LocalDate::compareTo)
-        .orElseThrow(() -> new RuntimeException("No dates found in the database"));
-    return oldestDate;
+        .min(LocalDate::compareTo);
+
+    if (oldestDate.isEmpty()) {
+      System.err.println("No dates found in the database");
+      return null;
+    }
+    return oldestDate.get();
   }
 
   public int calculateDaysAfterOldestDate(LocalDate oldestDate) {
@@ -196,13 +233,32 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   @Override
   public void calculateAverageMinecraftTicketsPerPlaytime() {
     List<Short> allEmployees = getAllEmployeesFromTheTable();
+
+    if (allEmployees == null || allEmployees.isEmpty()) {
+      throw new RuntimeException("No employees found in the table. Cannot proceed.");
+    }
+
     LocalDate oldestDate = checkForOldestDate();
 
+    if (oldestDate == null) {
+      throw new RuntimeException("No oldest date found. Cannot proceed.");
+    }
+
     for (Short employee : allEmployees) {
-      int ticketsCount = calculateAllTicketsSinceOldestDate(employee);
-      double playtimeSinceOldestDate = getAllPlaytimeSinceOldestDate(employee, oldestDate);
-      double ticketsPerPlaytime = calculateTicketsPerPlaytime(ticketsCount, playtimeSinceOldestDate);
-      saveTicketsPerPlaytime(ticketsPerPlaytime, employee);
+      try {
+        int ticketsCount = calculateAllTicketsSinceOldestDate(employee);
+        double playtimeSinceOldestDate = getAllPlaytimeSinceOldestDate(employee, oldestDate);
+
+        if (playtimeSinceOldestDate <= 0) {
+          System.err.println("Invalid playtime for employee " + employee + ". Skipping.");
+          continue;
+        }
+
+        double ticketsPerPlaytime = calculateTicketsPerPlaytime(ticketsCount, playtimeSinceOldestDate);
+        saveTicketsPerPlaytime(ticketsPerPlaytime, employee);
+      } catch (Exception e) {
+        System.err.println("Error processing employee " + employee + ": " + e.getMessage());
+      }
     }
   }
 
@@ -216,7 +272,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
         .stream()
         .filter(ticket -> ticket.getEmployeeId().equals(targetEmployeeId))
         .filter(ticket -> !ticket.getDate().isBefore(oldestDate))
-        .mapToDouble(DailyPlaytime::getTime)
+        .mapToDouble(DailyPlaytime::getTimeInHours)
         .sum();
   }
 

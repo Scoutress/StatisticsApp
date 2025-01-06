@@ -33,30 +33,56 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
   @Override
   public void compareEachEmployeeDailyMcTicketsValues() {
     List<DailyMinecraftTickets> rawData = getAllMinecraftTickets();
+
+    if (rawData == null || rawData.isEmpty()) {
+      throw new RuntimeException("No Minecraft tickets data found. Cannot proceed.");
+    }
+
     List<LocalDate> allDates = getAllMinecraftTicketsDates(rawData);
+
+    if (allDates == null || allDates.isEmpty()) {
+      throw new RuntimeException("No dates found in Minecraft tickets data. Cannot proceed.");
+    }
+
     List<Short> allEmployees = getAllEmployeesFromDailyMinecraftTickets(rawData);
 
-    for (Short employee : allEmployees) {
+    if (allEmployees == null || allEmployees.isEmpty()) {
+      throw new RuntimeException("No employees found in Minecraft tickets data. Cannot proceed.");
+    }
 
+    for (Short employee : allEmployees) {
       double ticketRatioSumThisEmployee = 0;
       int datesCount = 0;
 
       for (LocalDate date : allDates) {
-        int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawData, date, employee);
-        int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawData, date);
-        double ticketRatioThisDateThisEmployee = calculateTicketRatioThisDate(
-            ticketsThisDateThisEmployee, ticketsThisDateAllEmployees);
+        try {
+          int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawData, date, employee);
+          int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawData, date);
 
-        saveTicketRatioThisDateThisEmployee(ticketRatioThisDateThisEmployee, date, employee);
+          if (ticketsThisDateAllEmployees == 0) {
+            System.err.println("Total tickets for all employees on " + date + " is zero. Skipping.");
+            continue;
+          }
 
-        ticketRatioSumThisEmployee += ticketRatioThisDateThisEmployee;
-        datesCount++;
+          double ticketRatioThisDateThisEmployee = calculateTicketRatioThisDate(
+              ticketsThisDateThisEmployee, ticketsThisDateAllEmployees);
+
+          saveTicketRatioThisDateThisEmployee(ticketRatioThisDateThisEmployee, date, employee);
+
+          ticketRatioSumThisEmployee += ticketRatioThisDateThisEmployee;
+          datesCount++;
+        } catch (Exception e) {
+          System.err.println("Error processing employee " + employee + " on date " + date + ": " + e.getMessage());
+        }
       }
 
       if (datesCount > 0) {
         double averageValueOfTicketRatiosThisEmployee = calculateAverageTicketRatioThisEmployee(
             ticketRatioSumThisEmployee, datesCount);
+
         saveAverageTicketRatioThisEmployee(averageValueOfTicketRatiosThisEmployee, employee);
+      } else {
+        System.err.println("No valid data for employee " + employee + ". Skipping average calculation.");
       }
     }
   }

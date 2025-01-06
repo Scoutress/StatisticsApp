@@ -138,7 +138,54 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
+    System.out.println("Annual playtime calculations");
     sessionDurationService.processSessionsFromBackup();
+    dailyPlaytimeService.handleDailyPlaytime();
+    annualyPlaytimeService.handleAnnualPlaytime();
+
+    System.out.println("");
+    System.out.println("Average playtime per day calculations");
+    averagePlaytimeOverallService.handleAveragePlaytime();
+
+    /////////////////////////////////////////////////////////////
+    // Below is temp. part
+    System.out.println("");
+    System.out.println("Average Minecraft tickets per day calculations");
+    minecraftTicketsService.convertMinecraftTicketsAnswers();
+    minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
+
+    System.out.println("");
+    System.out.println("Average Minecraft tickets per playtime hour calculations");
+    minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
+
+    System.out.println("");
+    System.out.println("Average Minecraft tickets taking comparison per day calculations");
+    minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
+
+    System.out.println("");
+    System.out.println("Average discord messages per day calculations");
+    discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
+
+    System.out.println("");
+    System.out.println("Average discord messages taking comparison per day calculation");
+    discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
+
+    System.out.println("");
+    System.out.println("Complaints calculation");
+    complaintsService.calculateComplaintsPerEachEmployee();
+
+    System.out.println("");
+    System.out.println("Productivity calculation");
+    productivityService.calculateProductivity();
+
+    System.out.println("");
+    System.out.println("Recommendation evaluation");
+    recommendationsService.evaluateRecommendations();
+
+    System.out.println("");
+    System.out.println("Final stats updating");
+    finalStatsService.updateNewStatsData();
+    /////////////////////////////////////////////////////////////
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

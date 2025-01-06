@@ -43,7 +43,7 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
         .filter(playtime -> !playtime.getDate().isBefore(dateOneYearAgo))
         .collect(Collectors.groupingBy(
             DailyPlaytime::getEmployeeId,
-            Collectors.summingDouble(DailyPlaytime::getTime)));
+            Collectors.summingDouble(DailyPlaytime::getTimeInHours)));
 
     List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap
         .entrySet()
@@ -51,7 +51,7 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
         .map(entry -> {
           AnnualPlaytime annualPlaytime = new AnnualPlaytime();
           annualPlaytime.setEmployeeId(entry.getKey());
-          annualPlaytime.setPlaytime(entry.getValue() / 3600);
+          annualPlaytime.setPlaytimeInHours(entry.getValue());
           return annualPlaytime;
         })
         .sorted(Comparator.comparing(AnnualPlaytime::getEmployeeId))
@@ -65,7 +65,7 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
       AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByEmployeeId(annualPlaytime.getEmployeeId());
 
       if (existingPlaytime != null) {
-        existingPlaytime.setPlaytime(annualPlaytime.getPlaytime());
+        existingPlaytime.setPlaytimeInHours(annualPlaytime.getPlaytimeInHours());
         annualPlaytimeRepository.save(existingPlaytime);
       } else {
         annualPlaytimeRepository.save(annualPlaytime);

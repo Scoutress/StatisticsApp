@@ -148,7 +148,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
     return rawAnnualPlaytimeData
         .stream()
         .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AnnualPlaytime::getPlaytime)
+        .map(AnnualPlaytime::getPlaytimeInHours)
         .findFirst()
         .orElse(0.0);
   }

@@ -58,11 +58,27 @@ public class ProductivityServiceImpl implements ProductivityService {
   @Override
   public void calculateProductivity() {
     List<Employee> allEmployeesData = getAllEmployeesData();
+
+    if (allEmployeesData == null || allEmployeesData.isEmpty()) {
+      System.err.println("No employee data found. Cannot proceed.");
+      return;
+    }
+
     List<Short> allEmployeeIds = getAllEmployeeIds(allEmployeesData);
 
+    if (allEmployeeIds == null || allEmployeeIds.isEmpty()) {
+      System.err.println("No employee IDs found. Cannot proceed.");
+      return;
+    }
+
     for (Short employeeId : allEmployeeIds) {
-      String employeeLevel = getEmployeeLevelForThisEmployee(
-          employeeId, allEmployeesData);
+      String employeeLevel = getEmployeeLevelForThisEmployee(employeeId, allEmployeesData);
+
+      if (employeeLevel == null) {
+        System.err.println("Employee level not found for employee ID: " + employeeId);
+        continue;
+      }
+
       double afkPlaytimeFinalValue = calculateAfkPlaytimeFinalValueForThisEmployee(
           employeeId, employeeLevel);
       double discordMessagesFinalValue = calculateDiscordMessagesFinalValueForThisEmployee(
@@ -75,7 +91,6 @@ public class ProductivityServiceImpl implements ProductivityService {
           employeeId, employeeLevel);
       double playtimeFinalValue = calculatePlaytimeFinalValueForThisEmployee(
           employeeId, employeeLevel);
-
       double complaintsFinalValue = getComplaintsFinalValueForThisEmployee(employeeId);
 
       double averageValueOfAllFinals = calculateAverageValueOfAllFinals(
@@ -83,8 +98,7 @@ public class ProductivityServiceImpl implements ProductivityService {
           discordMessagesComparedFinalValue, minecraftTicketsFinalValue,
           minecraftTicketsComparedFinalValue, playtimeFinalValue, employeeLevel);
 
-      double finalProductivityValue = calculateFinalProductivityValue(
-          averageValueOfAllFinals, complaintsFinalValue);
+      double finalProductivityValue = calculateFinalProductivityValue(averageValueOfAllFinals, complaintsFinalValue);
 
       saveProductivityValueForThisEmployee(finalProductivityValue, employeeId);
     }

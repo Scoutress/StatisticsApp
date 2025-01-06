@@ -36,18 +36,17 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
   @Override
   public void handleAveragePlaytime() {
     List<DailyPlaytime> allPlaytime = dataExtractingService.getDailyPlaytimeData();
-    List<EmployeeCodes> allEmployeeAids = dataExtractingService.getAllEmployeeCodes();
+    List<EmployeeCodes> allEmployeeCodes = dataExtractingService.getAllEmployeeCodes();
     List<Employee> allEmployees = dataExtractingService.getAllEmployees();
-
     List<AveragePlaytimeOverall> averagePlaytime = calculateAveragePlaytime(
-        allPlaytime, allEmployeeAids, allEmployees);
+        allPlaytime, allEmployeeCodes, allEmployees);
 
     saveAveragePlaytime(averagePlaytime);
   }
 
   public List<AveragePlaytimeOverall> calculateAveragePlaytime(
       List<DailyPlaytime> allPlaytimes,
-      List<EmployeeCodes> allEmployeeAids,
+      List<EmployeeCodes> allEmployeeCodes,
       List<Employee> allEmployees) {
 
     List<AveragePlaytimeOverall> handledAveragePlaytimeData = new ArrayList<>();
@@ -57,36 +56,45 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
         .stream()
         .collect(Collectors.toMap(Employee::getId, emp -> emp));
 
-    Set<Short> allAids = allEmployeeAids
+    Set<Short> allEmployeeIds = allEmployeeCodes
         .stream()
         .map(EmployeeCodes::getEmployeeId)
         .collect(Collectors.toSet());
 
-    Set<Short> uniqueAids = allPlaytimes
+    Set<Short> uniqueEmployeeIdsInPlaytime = allPlaytimes
         .stream()
         .map(DailyPlaytime::getEmployeeId)
         .collect(Collectors.toSet());
 
-    for (Short aid : uniqueAids) {
-      if (allAids.contains(aid)) {
-        Employee employee = employeeMap.get(aid);
+    for (Short employeeId : uniqueEmployeeIdsInPlaytime) {
+      if (allEmployeeIds.contains(employeeId)) {
+        Employee employee = employeeMap.get(employeeId);
 
         if (employee != null) {
           LocalDate joinDate = employee.getJoinDate();
 
           double playtimesSum = allPlaytimes
               .stream()
-              .filter(pt -> pt.getEmployeeId().equals(aid))
+              .filter(pt -> pt.getEmployeeId().equals(employeeId))
               .filter(pt -> !pt.getDate().isBefore(joinDate))
               .mapToDouble(DailyPlaytime::getTimeInHours)
               .sum();
 
-          long daysAfterJoin = ChronoUnit.DAYS.between(joinDate, today);
+          LocalDate oldestDateFromData = allPlaytimes
+              .stream()
+              .filter(date -> date.getEmployeeId().equals(employeeId))
+              .map(DailyPlaytime::getDate)
+              .min(LocalDate::compareTo)
+              .orElse(LocalDate.of(1970, 1, 1));
 
-          double averagePlaytimeValue = daysAfterJoin > 0 ? (playtimesSum / 3600) / daysAfterJoin : 0;
+          LocalDate processingDate = oldestDateFromData.isAfter(joinDate) ? oldestDateFromData : joinDate;
+
+          long daysAfterJoin = ChronoUnit.DAYS.between(processingDate, today);
+
+          double averagePlaytimeValue = daysAfterJoin > 0 ? playtimesSum / daysAfterJoin : 0;
 
           AveragePlaytimeOverall averagePlaytimeData = new AveragePlaytimeOverall();
-          averagePlaytimeData.setEmployeeId(aid);
+          averagePlaytimeData.setEmployeeId(employeeId);
           averagePlaytimeData.setPlaytime(averagePlaytimeValue);
           handledAveragePlaytimeData.add(averagePlaytimeData);
         }
@@ -100,8 +108,10 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
 
   public void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
     averagePlaytimeData.forEach(averagePlaytimeOverall -> {
+      Short employeeId = averagePlaytimeOverall.getEmployeeId();
+
       AveragePlaytimeOverall existingPlaytime = averagePlaytimeOverallRepository
-          .findByEmployeeId(averagePlaytimeOverall.getEmployeeId());
+          .findByEmployeeId(employeeId);
 
       if (existingPlaytime != null) {
         existingPlaytime.setPlaytime(averagePlaytimeOverall.getPlaytime());

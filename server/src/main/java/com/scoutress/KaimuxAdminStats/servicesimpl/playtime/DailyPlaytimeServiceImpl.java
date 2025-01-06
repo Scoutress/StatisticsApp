@@ -95,8 +95,10 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
           dailyPlaytime.getServer());
 
       if (existingPlaytime != null) {
-        existingPlaytime.setTimeInHours(dailyPlaytime.getTimeInHours());
-        dailyPlaytimeRepository.save(existingPlaytime);
+        if (!existingPlaytime.getTimeInHours().equals(dailyPlaytime.getTimeInHours())) {
+          existingPlaytime.setTimeInHours(dailyPlaytime.getTimeInHours());
+          dailyPlaytimeRepository.save(existingPlaytime);
+        }
       } else {
         dailyPlaytimeRepository.save(dailyPlaytime);
       }

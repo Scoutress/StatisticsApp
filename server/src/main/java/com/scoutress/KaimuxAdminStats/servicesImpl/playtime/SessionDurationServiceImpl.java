@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -252,12 +253,18 @@ public class SessionDurationServiceImpl implements SessionDurationService {
 
   public void saveSessionDurationWithLoginDate(
       Short employeeId, String server, int sessionDuration, LocalDate sessionLoginDate) {
-    SessionDuration newSessionDuration = new SessionDuration();
-    newSessionDuration.setEmployeeId(employeeId);
-    newSessionDuration.setServer(server);
-    newSessionDuration.setDate(sessionLoginDate);
-    newSessionDuration.setSingleSessionDurationInSec(sessionDuration);
 
-    sessionDurationRepository.save(newSessionDuration);
+    Optional<SessionDuration> existingSession = sessionDurationRepository
+        .findByEmployeeIdAndServerAndDate(employeeId, server, sessionLoginDate);
+
+    if (!existingSession.isPresent()) {
+      SessionDuration newSessionDuration = new SessionDuration();
+      newSessionDuration.setEmployeeId(employeeId);
+      newSessionDuration.setServer(server);
+      newSessionDuration.setDate(sessionLoginDate);
+      newSessionDuration.setSingleSessionDurationInSec(sessionDuration);
+
+      sessionDurationRepository.save(newSessionDuration);
+    }
   }
 }

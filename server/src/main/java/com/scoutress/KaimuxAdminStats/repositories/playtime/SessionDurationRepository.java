@@ -1,5 +1,8 @@
 package com.scoutress.KaimuxAdminStats.repositories.playtime;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
 
@@ -9,4 +12,7 @@ public interface SessionDurationRepository extends JpaRepository<SessionDuration
 
   @Override
   void delete(@NonNull SessionDuration sessionDuration);
+
+  Optional<SessionDuration> findByEmployeeIdAndServerAndDate(Short employeeId, String server, LocalDate date);
+
 }

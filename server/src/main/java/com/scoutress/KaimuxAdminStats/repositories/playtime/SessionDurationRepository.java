@@ -13,6 +13,7 @@ public interface SessionDurationRepository extends JpaRepository<SessionDuration
   @Override
   void delete(@NonNull SessionDuration sessionDuration);
 
-  Optional<SessionDuration> findByEmployeeIdAndServerAndDate(Short employeeId, String server, LocalDate date);
+  Optional<SessionDuration> findByEmployeeIdAndServerAndDateAndSingleSessionDurationInSec(
+      Short employeeId, String server, LocalDate date, int singleSessionDurationInSec);
 
 }

@@ -255,7 +255,8 @@ public class SessionDurationServiceImpl implements SessionDurationService {
       Short employeeId, String server, int sessionDuration, LocalDate sessionLoginDate) {
 
     Optional<SessionDuration> existingSession = sessionDurationRepository
-        .findByEmployeeIdAndServerAndDate(employeeId, server, sessionLoginDate);
+        .findByEmployeeIdAndServerAndDateAndSingleSessionDurationInSec(
+            employeeId, server, sessionLoginDate, sessionDuration);
 
     if (!existingSession.isPresent()) {
       SessionDuration newSessionDuration = new SessionDuration();

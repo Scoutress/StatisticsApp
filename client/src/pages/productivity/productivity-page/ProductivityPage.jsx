@@ -256,6 +256,8 @@ const ProductivityPage = () => {
             <th>Annual playtime, hours/year</th>
             <th>Minecraft tickets, tickets/day</th>
             <th>Minecraft tickets compared, %/day</th>
+            <th>Discord messages, msg/day</th>
+            <th>Discord messages compared, %/day</th>
             <th>Playtime, hours/day</th>
             <th>Productivity, %</th>
             <th>Recommendation</th>
@@ -269,6 +271,8 @@ const ProductivityPage = () => {
               <td>{item.annualPlaytime.toFixed(2)}</td>
               <td>{item.minecraftTickets.toFixed(2)}</td>
               <td>{(item.minecraftTicketsCompared * 100).toFixed(2)}</td>
+              <td>{item.discordMessages.toFixed(2)}</td>
+              <td>{(item.discordMessagesCompared * 100).toFixed(2)}</td>
               <td>{item.playtime.toFixed(2)}</td>
               <td>{(item.productivity * 100).toFixed(2)}</td>
               <td>{item.recommendation}</td>

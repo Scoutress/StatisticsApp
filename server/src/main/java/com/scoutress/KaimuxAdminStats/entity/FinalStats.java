@@ -39,6 +39,12 @@ public class FinalStats {
   @Column(name = "minecraft_tickets_compared", nullable = false)
   private double minecraftTicketsCompared;
 
+  @Column(name = "discord_messages", nullable = false)
+  private double discordMessages;
+
+  @Column(name = "discord_messages_compared", nullable = false)
+  private double discordMessagesCompared;
+
   @Column(name = "playtime", nullable = false)
   private double playtime;
 

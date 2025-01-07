@@ -144,7 +144,6 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
     List<DailyMinecraftTickets> rawData = getDailyMinecraftTicketsData();
     List<Employee> rawEmployeesData = getEmployeesData();
     List<Short> allEmployeeIds = getAllEmployeesFromTheTable(rawData);
-
     LocalDate oldestDateFromData = checkForOldestDate(rawData);
 
     for (Short employeeId : allEmployeeIds) {
@@ -218,7 +217,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
     if (daysCount == 0) {
       return 0.0;
     }
-    return ticketsCountSinceOldestDate / daysCount;
+    return (double) ticketsCountSinceOldestDate / daysCount;
   }
 
   public void saveAverageValueData(double averageValue, Short employeeId) {

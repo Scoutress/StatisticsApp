@@ -8,20 +8,25 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDailyDiscordMessages;
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessages;
+import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesService;
 
 @Service
 public class DiscordMessagesServiceImpl implements DiscordMessagesService {
 
-  public final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
-  public final AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository;
+  private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
+  private final EmployeeRepository employeeRepository;
+  private final AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository;
 
   public DiscordMessagesServiceImpl(
       DailyDiscordMessagesRepository dailyDiscordMessagesRepository,
+      EmployeeRepository employeeRepository,
       AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository) {
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
+    this.employeeRepository = employeeRepository;
     this.averageDailyDiscordMessagesRepository = averageDailyDiscordMessagesRepository;
   }
 
@@ -35,15 +40,18 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
       }
 
       List<Short> allEmployees = getAllEmployeesFromMessagesData(rawData);
-      LocalDate oldestDate = getOldestDateFromMessagesData(rawData);
+      LocalDate oldestDateFromDcMessagesData = getOldestDateFromMessagesData(rawData);
 
-      if (allEmployees == null || oldestDate == null) {
+      if (allEmployees == null || oldestDateFromDcMessagesData == null) {
         throw new RuntimeException("Missing required data (employees or oldest date).");
       }
 
-      for (Short employee : allEmployees) {
-        double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(rawData, oldestDate, employee);
-        saveAverageValueForThisEmployee(averageValue, employee);
+      for (Short employeeId : allEmployees) {
+        LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
+        LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
+            oldestDateFromDcMessagesData, joinDateThisEmployee);
+        double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(rawData, oldestDate, employeeId);
+        saveAverageValueForThisEmployee(averageValue, employeeId);
       }
     } catch (RuntimeException e) {
       System.err.println("Error in calculateAverageValueOfDailyDiscordMessages: " + e.getMessage());
@@ -71,13 +79,28 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
         .orElseThrow(() -> new RuntimeException("No dates found in the database"));
   }
 
+  public LocalDate getJoinDateThisEmployee(Short employeeId) {
+    return employeeRepository
+        .findAll()
+        .stream()
+        .filter(employee -> employee.getId().equals(employeeId))
+        .map(Employee::getJoinDate)
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No join date for this employee"));
+  }
+
+  public LocalDate checkIfJoinDateIsAfterOldestDateFromMsgData(
+      LocalDate oldestDateFromDcMessagesData, LocalDate joinDateThisEmployee) {
+    return joinDateThisEmployee.isAfter(oldestDateFromDcMessagesData)
+        ? joinDateThisEmployee
+        : oldestDateFromDcMessagesData;
+  }
+
   public double calculateAverageValueOfDiscordMessagesThisEmployee(
       List<DailyDiscordMessages> rawData, LocalDate oldestDate, Short employee) {
     int discordMessagesSumThisEmployee = calculateDiscordMessagesSumForThisEmployee(rawData, employee);
     int daysCountAfterOldestDate = calculateDaysAfterOldestDate(oldestDate);
-    double averageValue = calculateAverageValue(discordMessagesSumThisEmployee, daysCountAfterOldestDate);
-
-    return averageValue;
+    return calculateAverageValue(discordMessagesSumThisEmployee, daysCountAfterOldestDate);
   }
 
   public int calculateDiscordMessagesSumForThisEmployee(List<DailyDiscordMessages> rawData, Short employee) {
@@ -99,7 +122,7 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
     if (daysCountAfterOldestDate == 0) {
       return 0;
     }
-    return discordMessagesSumThisEmployee / daysCountAfterOldestDate;
+    return (double) discordMessagesSumThisEmployee / daysCountAfterOldestDate;
   }
 
   public void saveAverageValueForThisEmployee(double averageValueOfDiscordMessagesThisEmployee, Short employeeId) {

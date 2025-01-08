@@ -52,4 +52,4 @@ with open(sql_filename, mode='w') as sql_file:
                     )
                     sql_file.write(sql_statement)
 
-print(f"SQL file '{sql_filename}' successfully generate.")
+print(f"SQL file '{sql_filename}' successfully generated.")

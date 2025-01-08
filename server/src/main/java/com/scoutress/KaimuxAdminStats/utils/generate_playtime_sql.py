@@ -82,4 +82,4 @@ with open(sql_filename, mode='w') as sql_file:
                             )
                             sql_file.write(sql_statement)
 
-print(f"SQL insert statements for all employees were written to {sql_filename}")
+print(f"SQL file '{sql_filename}' successfully generated.")

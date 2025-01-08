@@ -58,12 +58,6 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
         try {
           int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(rawData, date, employee);
           int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(rawData, date);
-
-          if (messagesThisDateAllEmployees == 0) {
-            System.err.println("Total messages for all employees on " + date + " is zero. Skipping.");
-            continue;
-          }
-
           double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
               messagesThisDateThisEmployee, messagesThisDateAllEmployees);
 
@@ -132,13 +126,6 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
     return (double) messagesThisDateThisEmployee / messagesThisDateAllEmployees;
   }
 
-  public double calculateAverageMessagesRatioThisEmployee(double messagesRatioSumThisEmployee, int datesCount) {
-    if (datesCount == 0) {
-      return 0;
-    }
-    return (double) messagesRatioSumThisEmployee / datesCount;
-  }
-
   public void saveMessagesRatioThisDateThisEmployee(
       double messagesRatioThisDateThisEmployee, LocalDate date, Short employee) {
     DailyDiscordMessagesCompared existingRecord = dailyDiscordMessagesComparedRepository
@@ -154,6 +141,13 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
       newRecord.setDate(date);
       dailyDiscordMessagesComparedRepository.save(newRecord);
     }
+  }
+
+  public double calculateAverageMessagesRatioThisEmployee(double messagesRatioSumThisEmployee, int datesCount) {
+    if (datesCount == 0) {
+      return 0;
+    }
+    return (double) messagesRatioSumThisEmployee / datesCount;
   }
 
   public void saveAverageMessagesRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {

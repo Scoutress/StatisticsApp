@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.FinalStats;
 import com.scoutress.KaimuxAdminStats.entity.Recommendations;
+import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDailyDiscordMessages;
+import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDiscordMessagesCompared;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageDailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageMinecraftTicketsCompared;
@@ -14,6 +16,8 @@ import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeOverall;
 import com.scoutress.KaimuxAdminStats.entity.productivity.Productivity;
 import com.scoutress.KaimuxAdminStats.repositories.FinalStatsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.RecommendationsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDailyDiscordMessagesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageDailyMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageMinecraftTicketsComparedRepository;
@@ -29,6 +33,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   private final AnnualPlaytimeRepository annualPlaytimeRepository;
   private final AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository;
   private final AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository;
+  private final AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository;
+  private final AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository;
   private final AveragePlaytimeOverallRepository averagePlaytimeOverallRepository;
   private final ProductivityRepository productivityRepository;
   private final RecommendationsRepository recommendationsRepository;
@@ -39,6 +45,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       AnnualPlaytimeRepository annualPlaytimeRepository,
       AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository,
       AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository,
+      AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository,
+      AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository,
       AveragePlaytimeOverallRepository averagePlaytimeOverallRepository,
       ProductivityRepository productivityRepository,
       RecommendationsRepository recommendationsRepository,
@@ -47,6 +55,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
     this.annualPlaytimeRepository = annualPlaytimeRepository;
     this.averageDailyMinecraftTicketsRepository = averageDailyMinecraftTicketsRepository;
     this.averageMinecraftTicketsComparedRepository = averageMinecraftTicketsComparedRepository;
+    this.averageDailyDiscordMessagesRepository = averageDailyDiscordMessagesRepository;
+    this.averageDiscordMessagesComparedRepository = averageDiscordMessagesComparedRepository;
     this.averagePlaytimeOverallRepository = averagePlaytimeOverallRepository;
     this.productivityRepository = productivityRepository;
     this.recommendationsRepository = recommendationsRepository;
@@ -59,6 +69,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
     List<AnnualPlaytime> rawAnnualPlaytimeData = getRawAnnualPlaytimeData();
     List<AverageDailyMinecraftTickets> rawMinecraftTicketsData = getRawMinecraftTicketsData();
     List<AverageMinecraftTicketsCompared> rawMinecraftTicketsComparedData = getRawMinecraftTicketsComparedData();
+    List<AverageDailyDiscordMessages> rawDiscordMessagesData = getRawDiscordMessagesData();
+    List<AverageDiscordMessagesCompared> rawDiscordMessagesComparedData = getRawDiscordMessagesComparedData();
     List<AveragePlaytimeOverall> rawPlaytimeData = getRawPlaytimeData();
     List<Productivity> rawProductivityData = getRawProductivityData();
     List<Recommendations> rawRecommendationsData = getRawRecommendationsData();
@@ -76,6 +88,10 @@ public class FinalStatsServiceImpl implements FinalStatsService {
           rawMinecraftTicketsData, employeeId);
       double minecraftTicketsComparedForThisEmployee = getMinecraftTicketsComparedForThisEmployee(
           rawMinecraftTicketsComparedData, employeeId);
+      double discordMessagesForThisEmployee = getDiscordMessagesForThisEmployee(
+          rawDiscordMessagesData, employeeId);
+      double discordMessagesComparedForThisEmployee = getDiscordMessagesComparedForThisEmployee(
+          rawDiscordMessagesComparedData, employeeId);
       double playtimeForThisEmployee = getPlaytimeForThisEmployee(
           rawPlaytimeData, employeeId);
       double productivityForThisEmployee = getProductivityForThisEmployee(
@@ -85,6 +101,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
 
       saveNewFinalStatsData(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
           minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
+          discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
           playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
     }
   }
@@ -103,6 +120,14 @@ public class FinalStatsServiceImpl implements FinalStatsService {
 
   public List<AverageMinecraftTicketsCompared> getRawMinecraftTicketsComparedData() {
     return averageMinecraftTicketsComparedRepository.findAll();
+  }
+
+  public List<AverageDailyDiscordMessages> getRawDiscordMessagesData() {
+    return averageDailyDiscordMessagesRepository.findAll();
+  }
+
+  public List<AverageDiscordMessagesCompared> getRawDiscordMessagesComparedData() {
+    return averageDiscordMessagesComparedRepository.findAll();
   }
 
   public List<AveragePlaytimeOverall> getRawPlaytimeData() {
@@ -173,6 +198,26 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
+  public double getDiscordMessagesForThisEmployee(
+      List<AverageDailyDiscordMessages> rawDiscordMessagesData, Short employeeId) {
+    return rawDiscordMessagesData
+        .stream()
+        .filter(employee -> employee.getEmployeeId().equals(employeeId))
+        .map(AverageDailyDiscordMessages::getValue)
+        .findFirst()
+        .orElse(0.0);
+  }
+
+  public double getDiscordMessagesComparedForThisEmployee(
+      List<AverageDiscordMessagesCompared> rawDiscordMessagesComparedData, Short employeeId) {
+    return rawDiscordMessagesComparedData
+        .stream()
+        .filter(employee -> employee.getEmployeeId().equals(employeeId))
+        .map(AverageDiscordMessagesCompared::getValue)
+        .findFirst()
+        .orElse(0.0);
+  }
+
   public double getPlaytimeForThisEmployee(List<AveragePlaytimeOverall> rawPlaytimeData, Short employeeId) {
     return rawPlaytimeData
         .stream()
@@ -203,6 +248,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   public void saveNewFinalStatsData(Short employeeId, String employeeLevel,
       String employeeUsername, double annualPlaytimeForThisEmployee,
       double minecraftTicketsForThisEmployee, double minecraftTicketsComparedForThisEmployee,
+      double discordMessages, double discordMessagesCompared,
       double playtimeForThisEmployee, double productivityForThisEmployee, String recommendationsForThisEmployee) {
 
     FinalStats existingRecord = finalStatsRepository.findByEmployeeId(employeeId);
@@ -214,6 +260,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         existingRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
         existingRecord.setMinecraftTickets(minecraftTicketsForThisEmployee);
         existingRecord.setMinecraftTicketsCompared(minecraftTicketsComparedForThisEmployee);
+        existingRecord.setDiscordMessages(discordMessages);
+        existingRecord.setDiscordMessagesCompared(discordMessagesCompared);
         existingRecord.setPlaytime(playtimeForThisEmployee);
         existingRecord.setProductivity(productivityForThisEmployee);
         existingRecord.setRecommendation(recommendationsForThisEmployee);
@@ -229,6 +277,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       newRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
       newRecord.setMinecraftTickets(minecraftTicketsForThisEmployee);
       newRecord.setMinecraftTicketsCompared(minecraftTicketsComparedForThisEmployee);
+      newRecord.setDiscordMessages(discordMessages);
+      newRecord.setDiscordMessagesCompared(discordMessagesCompared);
       newRecord.setPlaytime(playtimeForThisEmployee);
       newRecord.setProductivity(productivityForThisEmployee);
       newRecord.setRecommendation(recommendationsForThisEmployee);

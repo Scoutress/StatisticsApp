@@ -85,7 +85,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
 
           saveTicketRatioThisDateThisEmployee(finalTicketRatio, date, employeeId);
 
-          ticketRatioSumThisEmployee += ticketRatioThisDateThisEmployee;
+          ticketRatioSumThisEmployee += finalTicketRatio;
           datesCount++;
         } catch (Exception e) {
           System.err.println("Error processing employee " + employeeId + " on date " + date + ": " + e.getMessage());

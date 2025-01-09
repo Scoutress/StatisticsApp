@@ -99,10 +99,17 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       String recommendationsForThisEmployee = getRecommendationsForThisEmployee(
           rawRecommendationsData, employeeId);
 
-      saveNewFinalStatsData(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
-          minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
-          discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
-          playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
+      if (!employeeLevel.equals("Owner") || !employeeLevel.equals("Operator")) {
+        saveNewFinalStatsDataAsModerator(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
+            minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
+            discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
+            playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
+      } else {
+        saveNewFinalStatsDataAsAdmin(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
+            minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
+            discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
+            playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
+      }
     }
   }
 
@@ -245,7 +252,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse("Error");
   }
 
-  public void saveNewFinalStatsData(Short employeeId, String employeeLevel,
+  public void saveNewFinalStatsDataAsModerator(Short employeeId, String employeeLevel,
       String employeeUsername, double annualPlaytimeForThisEmployee,
       double minecraftTicketsForThisEmployee, double minecraftTicketsComparedForThisEmployee,
       double discordMessages, double discordMessagesCompared,
@@ -282,6 +289,48 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       newRecord.setPlaytime(playtimeForThisEmployee);
       newRecord.setProductivity(productivityForThisEmployee);
       newRecord.setRecommendation(recommendationsForThisEmployee);
+
+      finalStatsRepository.save(newRecord);
+    }
+  }
+
+  public void saveNewFinalStatsDataAsAdmin(Short employeeId, String employeeLevel,
+      String employeeUsername, double annualPlaytimeForThisEmployee,
+      double minecraftTicketsForThisEmployee, double minecraftTicketsComparedForThisEmployee,
+      double discordMessages, double discordMessagesCompared,
+      double playtimeForThisEmployee, double productivityForThisEmployee, String recommendationsForThisEmployee) {
+
+    FinalStats existingRecord = finalStatsRepository.findByEmployeeId(employeeId);
+
+    if (existingRecord != null) {
+      if (existingRecord.getEmployeeId().equals(employeeId)) {
+        existingRecord.setLevel(employeeLevel);
+        existingRecord.setUsername(employeeUsername);
+        existingRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
+        existingRecord.setMinecraftTickets(0.0);
+        existingRecord.setMinecraftTicketsCompared(0.0);
+        existingRecord.setDiscordMessages(0.0);
+        existingRecord.setDiscordMessagesCompared(0.0);
+        existingRecord.setPlaytime(playtimeForThisEmployee);
+        existingRecord.setProductivity(0.0);
+        existingRecord.setRecommendation("-");
+
+        finalStatsRepository.save(existingRecord);
+      }
+    } else {
+      FinalStats newRecord = new FinalStats();
+
+      newRecord.setEmployeeId(employeeId);
+      newRecord.setLevel(employeeLevel);
+      newRecord.setUsername(employeeUsername);
+      newRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
+      newRecord.setMinecraftTickets(0.0);
+      newRecord.setMinecraftTicketsCompared(0.0);
+      newRecord.setDiscordMessages(0.0);
+      newRecord.setDiscordMessagesCompared(0.0);
+      newRecord.setPlaytime(playtimeForThisEmployee);
+      newRecord.setProductivity(0.0);
+      newRecord.setRecommendation("-");
 
       finalStatsRepository.save(newRecord);
     }

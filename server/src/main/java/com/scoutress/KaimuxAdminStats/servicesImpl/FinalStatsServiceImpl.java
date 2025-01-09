@@ -99,13 +99,11 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       String recommendationsForThisEmployee = getRecommendationsForThisEmployee(
           rawRecommendationsData, employeeId);
 
-      if (!employeeLevel.equals("Owner") || !employeeLevel.equals("Operator")) {
-        saveNewFinalStatsDataAsModerator(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
-            minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
-            discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
-            playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
+      if (employeeLevel.equals("Owner") || employeeLevel.equals("Operator")) {
+        saveNewFinalStatsDataAsAdmin(employeeId, employeeLevel, employeeUsername,
+            annualPlaytimeForThisEmployee, playtimeForThisEmployee);
       } else {
-        saveNewFinalStatsDataAsAdmin(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
+        saveNewFinalStatsDataAsModerator(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
             minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
             discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
             playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
@@ -295,10 +293,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   }
 
   public void saveNewFinalStatsDataAsAdmin(Short employeeId, String employeeLevel,
-      String employeeUsername, double annualPlaytimeForThisEmployee,
-      double minecraftTicketsForThisEmployee, double minecraftTicketsComparedForThisEmployee,
-      double discordMessages, double discordMessagesCompared,
-      double playtimeForThisEmployee, double productivityForThisEmployee, String recommendationsForThisEmployee) {
+      String employeeUsername, double annualPlaytimeForThisEmployee, double playtimeForThisEmployee) {
 
     FinalStats existingRecord = finalStatsRepository.findByEmployeeId(employeeId);
 

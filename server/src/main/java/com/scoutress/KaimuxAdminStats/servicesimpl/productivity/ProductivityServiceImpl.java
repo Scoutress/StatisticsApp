@@ -98,7 +98,16 @@ public class ProductivityServiceImpl implements ProductivityService {
           discordMessagesComparedFinalValue, minecraftTicketsFinalValue,
           minecraftTicketsComparedFinalValue, playtimeFinalValue, employeeLevel);
 
-      double finalProductivityValue = calculateFinalProductivityValue(averageValueOfAllFinals, complaintsFinalValue);
+      double productivityAfterComplaints = calculateFinalProductivityValue(averageValueOfAllFinals,
+          complaintsFinalValue);
+
+      double finalProductivityValue;
+
+      if (employeeLevel.equals("Organizer")) {
+        finalProductivityValue = productivityAfterComplaints + 0.1;
+      } else {
+        finalProductivityValue = productivityAfterComplaints;
+      }
 
       saveProductivityValueForThisEmployee(finalProductivityValue, employeeId);
     }

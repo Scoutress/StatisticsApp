@@ -47,37 +47,34 @@ public class RecommendationsServiceImpl implements RecommendationsService {
       double annualPlaytimeForThisEmployee = getAnnualPlaytimeForThisEmployee(rawAnnualPlaytimeData, employeeId);
       double productivityForThisEmployee = getProductivityForThisEmployee(rawProductivityData, employeeId);
 
-      double productivity;
-
       if (levelForThisEmployee != null
           && annualPlaytimeForThisEmployee >= 0.0
           && productivityForThisEmployee >= 0.0) {
 
         if (!levelForThisEmployee.equals("Owner") ||
-            !levelForThisEmployee.equals("Operator")) {
+            !levelForThisEmployee.equals("Operator") ||
+            !levelForThisEmployee.equals("Organizer")) {
 
           if (annualPlaytimeForThisEmployee < CalculationConstants.MIN_ANNUAL_PLAYTIME) {
             recommendation = "Dismiss";
           } else {
-            if (!levelForThisEmployee.equals("Organizer")) {
-              productivity = productivityForThisEmployee;
-            } else {
-              productivity = productivityForThisEmployee + 0.1;
-            }
 
-            if (productivity > CalculationConstants.PROMOTION_VALUE) {
+            if (productivityForThisEmployee > CalculationConstants.PROMOTION_VALUE) {
               recommendation = "Promote";
-            } else if (productivity < CalculationConstants.DEMOTION_VALUE) {
+            } else if (productivityForThisEmployee < CalculationConstants.DEMOTION_VALUE) {
               recommendation = "Demote";
             } else {
               recommendation = "-";
             }
+
           }
           saveRecommendationForThisEmployee(recommendation, employeeId);
+
         } else {
           recommendation = "-";
           saveRecommendationForThisEmployee(recommendation, employeeId);
         }
+
       } else {
         recommendation = "Error";
         saveRecommendationForThisEmployee(recommendation, employeeId);

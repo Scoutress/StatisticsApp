@@ -23,6 +23,10 @@ public class RecommendationsServiceImpl implements RecommendationsService {
   private final AnnualPlaytimeRepository annualPlaytimeRepository;
   private final RecommendationsRepository recommendationsRepository;
 
+  private static final double MIN_ANNUAL_PLAYTIME = CalculationConstants.MIN_ANNUAL_PLAYTIME;
+  private static final double PROMOTION_VALUE = CalculationConstants.PROMOTION_VALUE;
+  private static final double DEMOTION_VALUE = CalculationConstants.DEMOTION_VALUE;
+
   public RecommendationsServiceImpl(
       ProductivityRepository productivityRepository,
       EmployeeRepository employeeRepository,
@@ -47,31 +51,28 @@ public class RecommendationsServiceImpl implements RecommendationsService {
       double annualPlaytimeForThisEmployee = getAnnualPlaytimeForThisEmployee(rawAnnualPlaytimeData, employeeId);
       double productivityForThisEmployee = getProductivityForThisEmployee(rawProductivityData, employeeId);
 
-      if (levelForThisEmployee != null
-          && annualPlaytimeForThisEmployee >= 0.0
-          && productivityForThisEmployee >= 0.0) {
+      if (isValidEmployeeData(levelForThisEmployee, annualPlaytimeForThisEmployee, productivityForThisEmployee)) {
+        if (levelForThisEmployee.equals("Owner") ||
+            levelForThisEmployee.equals("Operator") ||
+            levelForThisEmployee.equals("Organizer")) {
 
-        if (!levelForThisEmployee.equals("Owner") ||
-            !levelForThisEmployee.equals("Operator") ||
-            !levelForThisEmployee.equals("Organizer")) {
+          recommendation = "-";
+          saveRecommendationForThisEmployee(recommendation, employeeId);
+        } else {
 
-          if (annualPlaytimeForThisEmployee < CalculationConstants.MIN_ANNUAL_PLAYTIME) {
+          if (annualPlaytimeForThisEmployee < MIN_ANNUAL_PLAYTIME) {
             recommendation = "Dismiss";
+
           } else {
 
-            if (productivityForThisEmployee > CalculationConstants.PROMOTION_VALUE) {
+            if (productivityForThisEmployee > PROMOTION_VALUE) {
               recommendation = "Promote";
-            } else if (productivityForThisEmployee < CalculationConstants.DEMOTION_VALUE) {
+            } else if (productivityForThisEmployee < DEMOTION_VALUE) {
               recommendation = "Demote";
             } else {
               recommendation = "-";
             }
-
           }
-          saveRecommendationForThisEmployee(recommendation, employeeId);
-
-        } else {
-          recommendation = "-";
           saveRecommendationForThisEmployee(recommendation, employeeId);
         }
 
@@ -140,6 +141,10 @@ public class RecommendationsServiceImpl implements RecommendationsService {
         .map(Productivity::getValue)
         .findFirst()
         .orElse(0.0);
+  }
+
+  public boolean isValidEmployeeData(String level, double playtime, double productivity) {
+    return level != null && playtime >= 0.0 && productivity >= 0.0;
   }
 
   public void saveRecommendationForThisEmployee(String recommendation, Short employeeId) {

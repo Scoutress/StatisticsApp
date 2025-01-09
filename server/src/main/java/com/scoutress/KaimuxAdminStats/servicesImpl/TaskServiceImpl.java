@@ -167,8 +167,6 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Average discord messages taking comparison per day calculation");
     discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
 
-    /////////////////////////////////////////////////////////////
-    // Below is temp. part
     System.out.println("");
     System.out.println("Complaints calculation");
     complaintsService.calculateComplaintsPerEachEmployee();
@@ -184,7 +182,6 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
     System.out.println("Final stats updating");
     finalStatsService.updateNewStatsData();
-    /////////////////////////////////////////////////////////////
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

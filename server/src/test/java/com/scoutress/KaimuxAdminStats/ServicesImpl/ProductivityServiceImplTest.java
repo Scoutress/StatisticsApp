@@ -143,7 +143,6 @@ class ProductivityServiceImplTest {
     assertEquals(24, result);
   }
 
-  ////////
   @Test
   void testCalculateAverageValueOfDiscordMessagesWithCoef_HelperLevel_MaxValue() {
     double result = service
@@ -222,5 +221,85 @@ class ProductivityServiceImplTest {
         .calculateAverageValueOfDiscordMessagesWithCoef(17, "Manager");
 
     assertEquals((17 * 0.042), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_HelperLevel_1() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Helper");
+
+    assertEquals((0.1 * 66), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_HelperLevel_2() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Helper");
+
+    assertEquals((0.25 * 66), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_SupportLevel_1() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Support");
+
+    assertEquals((0.1 * 33), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_SupportLevel_2() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Support");
+
+    assertEquals((0.25 * 33), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_ChatModLevel_1() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "ChatMod");
+
+    assertEquals((0.1 * 17), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_ChatModLevel_2() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "ChatMod");
+
+    assertEquals((0.25 * 17), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_OverseerLevel_1() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Overseer");
+
+    assertEquals((0.1 * 8.5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_OverseerLevel_2() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Overseer");
+
+    assertEquals((0.25 * 8.5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_ManagerLevel_1() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Manager");
+
+    assertEquals((0.1 * 4.2), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_ManagerLevel_2() {
+    double result = service
+        .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Manager");
+
+    assertEquals((0.25 * 4.2), result);
   }
 }

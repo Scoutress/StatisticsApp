@@ -654,4 +654,204 @@ class ProductivityServiceImplTest {
 
     assertEquals(0.9, result);
   }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_HelperLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(0.5, "Helper");
+
+    assertEquals(0.5, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_HelperLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(0.25, "Helper");
+
+    assertEquals(0.25, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_HelperLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(2.75, "Helper");
+
+    assertEquals(0.5, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_SupportLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(1, "Support");
+
+    assertEquals(1, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_SupportLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(0.8, "Support");
+
+    assertEquals(0.8, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_SupportLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(7.75, "Support");
+
+    assertEquals(1, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_ChatModLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(2, "ChatMod");
+
+    assertEquals(2, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_ChatModLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(1.5, "ChatMod");
+
+    assertEquals(1.5, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_ChatModLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(7.75, "ChatMod");
+
+    assertEquals(2, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_OverseerLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(4, "Overseer");
+
+    assertEquals(4, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_OverseerLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(3, "Overseer");
+
+    assertEquals(3, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_OverseerLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(25, "Overseer");
+
+    assertEquals(4, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_ManagerLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(8, "Manager");
+
+    assertEquals(8, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_ManagerLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(7, "Manager");
+
+    assertEquals(7, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfPlaytime_ManagerLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfPlaytime(99, "Manager");
+
+    assertEquals(8, result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_HelperLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(0.5, "Helper");
+
+    assertEquals((0.5 * 2), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_HelperLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(0.25, "Helper");
+
+    assertEquals((0.25 * 2), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_SupportLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(1, "Support");
+
+    assertEquals((1 * 1), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_SupportLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(0.9, "Support");
+
+    assertEquals((0.9 * 1), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_ChatModLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(2, "ChatMod");
+
+    assertEquals((2 * 0.5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_ChatModLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(1.7, "ChatMod");
+
+    assertEquals((1.7 * 0.5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_OverseerLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(4, "Overseer");
+
+    assertEquals((4 * 0.25), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_OverseerLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(3, "Overseer");
+
+    assertEquals((3 * 0.25), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_ManagerLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(8, "Manager");
+
+    assertEquals((8 * 0.125), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfPlaytimeWithCoef_ManagerLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfPlaytimeWithCoef(7, "Manager");
+
+    assertEquals((7 * 0.125), result);
+  }
 }

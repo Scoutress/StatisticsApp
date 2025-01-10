@@ -974,4 +974,224 @@ class ProductivityServiceImplTest {
 
     assertEquals((7 * 0.125), result);
   }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_HelperLevel_1() {
+    double afkPlaytimeFinalValue = 0.1;
+    double discordMessagesFinalValue = 0.2;
+    double discordMessagesComparedFinalValue = 0.3;
+    double minecraftTicketsFinalValue = 0.4;
+    double minecraftTicketsComparedFinalValue = 0.5;
+    double playtimeFinalValue = 0.6;
+    String employeeLevel = "Helper";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.1 + 0.2 + 0.3 + 0.6) / 4), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_HelperLevel_2() {
+    double afkPlaytimeFinalValue = 0.2;
+    double discordMessagesFinalValue = 0.5;
+    double discordMessagesComparedFinalValue = 0.8;
+    double minecraftTicketsFinalValue = 0.1;
+    double minecraftTicketsComparedFinalValue = 0.3;
+    double playtimeFinalValue = 0.9;
+    String employeeLevel = "Helper";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.2 + 0.5 + 0.8 + 0.9) / 4), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_SupportLevel_1() {
+    double afkPlaytimeFinalValue = 0.1;
+    double discordMessagesFinalValue = 0.2;
+    double discordMessagesComparedFinalValue = 0.3;
+    double minecraftTicketsFinalValue = 0.4;
+    double minecraftTicketsComparedFinalValue = 0.5;
+    double playtimeFinalValue = 0.6;
+    String employeeLevel = "Support";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.1 + 0.2 + 0.3 + 0.4 + 0.5 + 0.6) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_SupportLevel_2() {
+    double afkPlaytimeFinalValue = 0.2;
+    double discordMessagesFinalValue = 0.5;
+    double discordMessagesComparedFinalValue = 0.8;
+    double minecraftTicketsFinalValue = 0.1;
+    double minecraftTicketsComparedFinalValue = 0.3;
+    double playtimeFinalValue = 0.9;
+    String employeeLevel = "Support";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.2 + 0.5 + 0.8 + 0.1 + 0.3 + 0.9) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_ChatModLevel_1() {
+    double afkPlaytimeFinalValue = 0.9;
+    double discordMessagesFinalValue = 0.8;
+    double discordMessagesComparedFinalValue = 0.7;
+    double minecraftTicketsFinalValue = 0.6;
+    double minecraftTicketsComparedFinalValue = 0.5;
+    double playtimeFinalValue = 0.4;
+    String employeeLevel = "ChatMod";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.9 + 0.8 + 0.7 + 0.6 + 0.5 + 0.4) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_ChatModLevel_2() {
+    double afkPlaytimeFinalValue = 0.11;
+    double discordMessagesFinalValue = 0.33;
+    double discordMessagesComparedFinalValue = 0.55;
+    double minecraftTicketsFinalValue = 0.77;
+    double minecraftTicketsComparedFinalValue = 0.99;
+    double playtimeFinalValue = 0.22;
+    String employeeLevel = "ChatMod";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.11 + 0.33 + 0.55 + 0.77 + 0.99 + 0.22) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_OverseerLevel_1() {
+    double afkPlaytimeFinalValue = 0.123;
+    double discordMessagesFinalValue = 0.456;
+    double discordMessagesComparedFinalValue = 0.789;
+    double minecraftTicketsFinalValue = 0.147;
+    double minecraftTicketsComparedFinalValue = 0.258;
+    double playtimeFinalValue = 0.369;
+    String employeeLevel = "Overseer";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.123 + 0.456 + 0.789 + 0.147 + 0.258 + 0.369) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_OverseerLevel_2() {
+    double afkPlaytimeFinalValue = 0.963;
+    double discordMessagesFinalValue = 0.852;
+    double discordMessagesComparedFinalValue = 0.741;
+    double minecraftTicketsFinalValue = 0.987;
+    double minecraftTicketsComparedFinalValue = 0.654;
+    double playtimeFinalValue = 0.321;
+    String employeeLevel = "Overseer";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.963 + 0.852 + 0.741 + 0.987 + 0.654 + 0.321) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_ManagerLevel_1() {
+    double afkPlaytimeFinalValue = 0.11;
+    double discordMessagesFinalValue = 0.22;
+    double discordMessagesComparedFinalValue = 0.33;
+    double minecraftTicketsFinalValue = 0.44;
+    double minecraftTicketsComparedFinalValue = 0.55;
+    double playtimeFinalValue = 0.66;
+    String employeeLevel = "Manager";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.11 + 0.22 + 0.33 + 0.44 + 0.55 + 0.66) / 6), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOdAllFinals_ManagerLevel_2() {
+    double afkPlaytimeFinalValue = 0.99;
+    double discordMessagesFinalValue = 0.88;
+    double discordMessagesComparedFinalValue = 0.77;
+    double minecraftTicketsFinalValue = 0.66;
+    double minecraftTicketsComparedFinalValue = 0.55;
+    double playtimeFinalValue = 0.44;
+    String employeeLevel = "Manager";
+
+    double result = service.calculateAverageValueOfAllFinals(
+        afkPlaytimeFinalValue,
+        discordMessagesFinalValue,
+        discordMessagesComparedFinalValue,
+        minecraftTicketsFinalValue,
+        minecraftTicketsComparedFinalValue,
+        playtimeFinalValue,
+        employeeLevel);
+
+    assertEquals(((0.99 + 0.88 + 0.77 + 0.66 + 0.55 + 0.44) / 6), result);
+  }
 }

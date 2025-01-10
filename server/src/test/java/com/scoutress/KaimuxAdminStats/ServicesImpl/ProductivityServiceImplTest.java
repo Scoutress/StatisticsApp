@@ -304,25 +304,9 @@ class ProductivityServiceImplTest {
   }
 
   @Test
-  void testMaxOrCurrentValueOfMinecraftTickets_HelperLevel_MaxValue() {
+  void testMaxOrCurrentValueOfMinecraftTickets_HelperLevel_AnyValue() {
     double result = service
         .getMaxOrCurrentValueOfMinecraftTickets(1.5, "Helper");
-
-    assertEquals(0, result);
-  }
-
-  @Test
-  void testMaxOrCurrentValueOfMinecraftTickets_HelperLevel_LowerValue() {
-    double result = service
-        .getMaxOrCurrentValueOfMinecraftTickets(0.99, "Helper");
-
-    assertEquals(0, result);
-  }
-
-  @Test
-  void testMaxOrCurrentValueOfMinecraftTickets_HelperLevel_TooHighValue() {
-    double result = service
-        .getMaxOrCurrentValueOfMinecraftTickets(2.75, "Helper");
 
     assertEquals(0, result);
   }
@@ -424,17 +408,9 @@ class ProductivityServiceImplTest {
   }
 
   @Test
-  void testCalculateAverageValueOfMinecraftTicketsWithCoef_HelperLevel_MaxValue() {
+  void testCalculateAverageValueOfMinecraftTicketsWithCoef_HelperLevel_AnyValue() {
     double result = service
         .calculateAverageValueOfMinecraftTicketsWithCoef(1.5, "Helper");
-
-    assertEquals(0, result);
-  }
-
-  @Test
-  void testCalculateAverageValueOfMinecraftTicketsWithCoef_HelperLevel_LowerValue() {
-    double result = service
-        .calculateAverageValueOfMinecraftTicketsWithCoef(1.25, "Helper");
 
     assertEquals(0, result);
   }
@@ -501,5 +477,181 @@ class ProductivityServiceImplTest {
         .calculateAverageValueOfMinecraftTicketsWithCoef(3.25, "Manager");
 
     assertEquals((3.25 * 0.25), result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_HelperLevel_AnyValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(1.5, "Helper");
+
+    assertEquals(0, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_SupportLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.2, "Support");
+
+    assertEquals(0.2, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_SupportLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.15, "Support");
+
+    assertEquals(0.15, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_SupportLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.35, "Support");
+
+    assertEquals(0.2, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_ChatModLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.4, "ChatMod");
+
+    assertEquals(0.4, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_ChatModLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.3, "ChatMod");
+
+    assertEquals(0.3, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_ChatModLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.5, "ChatMod");
+
+    assertEquals(0.4, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_OverseerLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.85, "Overseer");
+
+    assertEquals(0.85, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_OverseerLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.7, "Overseer");
+
+    assertEquals(0.7, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_OverseerLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.9, "Overseer");
+
+    assertEquals(0.85, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_ManagerLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(1, "Manager");
+
+    assertEquals(1, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_ManagerLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(0.75, "Manager");
+
+    assertEquals(0.75, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfMinecraftTicketsCompared_ManagerLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfMinecraftTicketsCompared(1.25, "Manager");
+
+    assertEquals(1, result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_HelperLevel_AnyValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(1.5, "Helper");
+
+    assertEquals(0, result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_SupportLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.2, "Support");
+
+    assertEquals((0.2 * 5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_SupportLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.15, "Support");
+
+    assertEquals((0.15 * 5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_ChatModLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.4, "ChatMod");
+
+    assertEquals((0.4 * 2.5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_ChatModLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.3, "ChatMod");
+
+    assertEquals((0.3 * 2.5), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_OverseerLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.85, "Overseer");
+
+    assertEquals((0.85 * 1.17), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_OverseerLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.7, "Overseer");
+
+    assertEquals((0.7 * 1.17), result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_ManagerLevel_MaxValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(1, "Manager");
+
+    assertEquals(1, result);
+  }
+
+  @Test
+  void testCalculateAverageValueOfMinecraftTicketsComparedWithCoef_ManagerLevel_LowerValue() {
+    double result = service
+        .calculateAverageValueOfMinecraftTicketsComparedWithCoef(0.9, "Manager");
+
+    assertEquals(0.9, result);
   }
 }

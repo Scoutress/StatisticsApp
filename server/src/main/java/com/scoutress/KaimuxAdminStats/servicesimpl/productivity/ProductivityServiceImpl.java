@@ -213,6 +213,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   // Discord messages compared
   public double calculateDiscordMessagesComparedFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfComparedDiscordMessages = getAverageValueOfComparedDiscordMessages(employeeId);
+    // TODO Add check for max values
     double finalValueOfComparedDiscordMessages = calculateAverageValueOfComparedDiscordMessagesWithCoef(
         averageValueOfComparedDiscordMessages, employeeLevel);
 

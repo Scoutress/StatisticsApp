@@ -56,10 +56,10 @@ public class CalculationConstants {
   public static final double MINECRAFT_TICKETS_COMPARED_MANAGER = 1;
 
   // Max values of average compared Minecraft tickets per day per level
-  public static final double MINECRAFT_TICKETS_COMPARED_MAX_SUPPORT = 20;
-  public static final double MINECRAFT_TICKETS_COMPARED_MAX_CHATMOD = 40;
-  public static final double MINECRAFT_TICKETS_COMPARED_MAX_OVERSEER = 85;
-  public static final double MINECRAFT_TICKETS_COMPARED_MAX_MANAGER = 100;
+  public static final double MINECRAFT_TICKETS_COMPARED_MAX_SUPPORT = 0.2;
+  public static final double MINECRAFT_TICKETS_COMPARED_MAX_CHATMOD = 0.4;
+  public static final double MINECRAFT_TICKETS_COMPARED_MAX_OVERSEER = 0.85;
+  public static final double MINECRAFT_TICKETS_COMPARED_MAX_MANAGER = 1;
 
   // Minimum days to be promoted
   public static final int WORK_TIME_HELPER = 30;

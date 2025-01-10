@@ -224,6 +224,126 @@ class ProductivityServiceImplTest {
   }
 
   @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_HelperLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.0625, "Helper");
+
+    assertEquals(0.0625, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_HelperLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.01, "Helper");
+
+    assertEquals(0.01, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_HelperLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(2.75, "Helper");
+
+    assertEquals(0.0625, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_SupportLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.125, "Support");
+
+    assertEquals(0.125, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_SupportLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.1, "Support");
+
+    assertEquals(0.1, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_SupportLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(7.75, "Support");
+
+    assertEquals(0.125, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_ChatModLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.25, "ChatMod");
+
+    assertEquals(0.25, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_ChatModLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.1, "ChatMod");
+
+    assertEquals(0.1, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_ChatModLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(7.75, "ChatMod");
+
+    assertEquals(0.25, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_OverseerLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.5, "Overseer");
+
+    assertEquals(0.5, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_OverseerLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.4, "Overseer");
+
+    assertEquals(0.4, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_OverseerLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(25, "Overseer");
+
+    assertEquals(0.5, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_ManagerLevel_MaxValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(1, "Manager");
+
+    assertEquals(1, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_ManagerLevel_LowerValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(0.9, "Manager");
+
+    assertEquals(0.9, result);
+  }
+
+  @Test
+  void testMaxOrCurrentValueOfComparedDiscordMessages_ManagerLevel_TooHighValue() {
+    double result = service
+        .getMaxOrCurrentValueOfComparedDiscordMessages(99, "Manager");
+
+    assertEquals(1, result);
+  }
+
+  @Test
   void testCalculateAverageValueOfComparedDiscordMessagesWithCoef_HelperLevel_1() {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Helper");

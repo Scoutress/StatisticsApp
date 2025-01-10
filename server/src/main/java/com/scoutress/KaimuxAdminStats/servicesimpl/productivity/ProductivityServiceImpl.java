@@ -213,9 +213,10 @@ public class ProductivityServiceImpl implements ProductivityService {
   // Discord messages compared
   public double calculateDiscordMessagesComparedFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfComparedDiscordMessages = getAverageValueOfComparedDiscordMessages(employeeId);
-    // TODO Add check for max values
-    double finalValueOfComparedDiscordMessages = calculateAverageValueOfComparedDiscordMessagesWithCoef(
+    double checkedAverageValueOfComparedDiscordMessages = getMaxOrCurrentValueOfComparedDiscordMessages(
         averageValueOfComparedDiscordMessages, employeeLevel);
+    double finalValueOfComparedDiscordMessages = calculateAverageValueOfComparedDiscordMessagesWithCoef(
+        checkedAverageValueOfComparedDiscordMessages, employeeLevel);
 
     return finalValueOfComparedDiscordMessages;
   }
@@ -233,6 +234,39 @@ public class ProductivityServiceImpl implements ProductivityService {
         .map(AverageDiscordMessagesCompared::getValue)
         .findFirst()
         .orElse(0.0);
+  }
+
+  public double getMaxOrCurrentValueOfComparedDiscordMessages(
+      double averageValueOfComparedDiscordMessages, String employeeLevel) {
+    double managerMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_MANAGER;
+    double overseerMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_OVERSEER;
+    double chatmodMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_CHATMOD;
+    double supportMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_SUPPORT;
+    double helperMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_HELPER;
+
+    return switch (employeeLevel) {
+      case "Manager" ->
+        averageValueOfComparedDiscordMessages > managerMaxValue
+            ? managerMaxValue
+            : averageValueOfComparedDiscordMessages;
+      case "Overseer", "Organizer" ->
+        averageValueOfComparedDiscordMessages > overseerMaxValue
+            ? overseerMaxValue
+            : averageValueOfComparedDiscordMessages;
+      case "ChatMod" ->
+        averageValueOfComparedDiscordMessages > chatmodMaxValue
+            ? chatmodMaxValue
+            : averageValueOfComparedDiscordMessages;
+      case "Support" ->
+        averageValueOfComparedDiscordMessages > supportMaxValue
+            ? supportMaxValue
+            : averageValueOfComparedDiscordMessages;
+      case "Helper" ->
+        averageValueOfComparedDiscordMessages > helperMaxValue
+            ? helperMaxValue
+            : averageValueOfComparedDiscordMessages;
+      default -> 0;
+    };
   }
 
   public double calculateAverageValueOfComparedDiscordMessagesWithCoef(

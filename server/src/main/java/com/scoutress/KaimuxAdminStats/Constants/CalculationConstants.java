@@ -37,6 +37,13 @@ public class CalculationConstants {
   public static final double DISCORD_MESSAGES_COMPARED_OVERSEER = 8.5;
   public static final double DISCORD_MESSAGES_COMPARED_MANAGER = 4.2;
 
+  // Max values of average compared Discord messages per day per level
+  public static final double DISCORD_MESSAGES_COMPARED_MAX_HELPER = 0.0625;
+  public static final double DISCORD_MESSAGES_COMPARED_MAX_SUPPORT = 0.125;
+  public static final double DISCORD_MESSAGES_COMPARED_MAX_CHATMOD = 0.25;
+  public static final double DISCORD_MESSAGES_COMPARED_MAX_OVERSEER = 0.5;
+  public static final double DISCORD_MESSAGES_COMPARED_MAX_MANAGER = 1;
+
   // Coeficients for average Minecraft tickets per day per level
   public static final double MINECRAFT_TICKETS_SUPPORT = 2;
   public static final double MINECRAFT_TICKETS_CHATMOD = 1;

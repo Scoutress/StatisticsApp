@@ -1194,4 +1194,26 @@ class ProductivityServiceImplTest {
 
     assertEquals(((0.99 + 0.88 + 0.77 + 0.66 + 0.55 + 0.44) / 6), result);
   }
+
+  @Test
+  void testCalculateFinalProductivityValue_1() {
+    double averageValueOfAllFinals = 0.85;
+    double complaintsFinalValue = 5;
+
+    double result = service.calculateFinalProductivityValue(
+        averageValueOfAllFinals, complaintsFinalValue);
+
+    assertEquals((0.85 - (5 * 0.01)), result);
+  }
+
+  @Test
+  void testCalculateFinalProductivityValue_2() {
+    double averageValueOfAllFinals = 0.53;
+    double complaintsFinalValue = 7;
+
+    double result = service.calculateFinalProductivityValue(
+        averageValueOfAllFinals, complaintsFinalValue);
+
+    assertEquals((0.53 - (7 * 0.01)), result);
+  }
 }

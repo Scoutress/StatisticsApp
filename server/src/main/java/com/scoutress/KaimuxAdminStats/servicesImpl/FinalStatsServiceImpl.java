@@ -335,4 +335,10 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   public List<FinalStats> getAllFinalStats() {
     return finalStatsRepository.findAll();
   }
+
+  @Override
+  public double getProductivity(Short employeeId) {
+    FinalStats stats = finalStatsRepository.findByEmployeeId(employeeId);
+    return stats.getProductivity();
+  }
 }

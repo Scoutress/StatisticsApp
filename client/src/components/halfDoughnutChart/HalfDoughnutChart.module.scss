@@ -1,0 +1,16 @@
+.chartContainer {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: auto;
+}
+
+.centeredText {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}

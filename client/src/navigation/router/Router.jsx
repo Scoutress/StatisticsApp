@@ -15,6 +15,7 @@ import PlaytimePage from "../../pages/playtime/playtime-page/PlaytimePage";
 import PlaytimeAddFormPage from "../../pages/playtime/playtime-add-form-page/PlaytimeAddFormPage.jsx";
 import ComplainsPage from "../../pages/complains/ComplainsPage.jsx";
 import PromotionsPage from "../../pages/promotions/PromotionsPage.jsx";
+import EmployeePersonalStatsPage from "../../pages/employeePersonalStats/EmployeePersonalStatsPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -29,6 +30,12 @@ const Router = createBrowserRouter([
         path: Routes.productivityPage.link,
         element: <ProductivityPage />,
       },
+      {
+        path: Routes.employeePersonalStats.link,
+        element: <EmployeePersonalStatsPage />,
+      },
+      ///////////////////
+      // Old links
       {
         path: Routes.employeesPage.link,
         element: <EmployeesPage />,

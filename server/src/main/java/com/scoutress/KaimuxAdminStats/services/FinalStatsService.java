@@ -9,4 +9,6 @@ public interface FinalStatsService {
   void updateNewStatsData();
 
   List<FinalStats> getAllFinalStats();
+
+  double getProductivity(Short employeeId);
 }

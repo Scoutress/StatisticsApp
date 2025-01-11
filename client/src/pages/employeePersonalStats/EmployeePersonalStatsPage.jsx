@@ -4,6 +4,7 @@ import axios from "axios";
 import Loading from "../../components/loading/Loading.jsx";
 import ErrorMessage from "../../components/errorMessage/ErrorMessage.jsx";
 import HalfDoughnutChart from "../../components/halfDoughnutChart/HalfDoughnutChart.jsx";
+import EmployeeRankingOverall from "../../components/employeeRankingOverall/EmployeeRankingOverall.jsx";
 import styles from "./EmployeePersonalStatsPage.module.scss";
 
 const EmployeePersonalStatsPage = () => {
@@ -42,11 +43,17 @@ const EmployeePersonalStatsPage = () => {
 
   return (
     <div className={styles.employeeStatsPage}>
-      <h1>Employee Productivity</h1>
+      <h1>Productivity</h1>
       {productivity !== null ? (
         <HalfDoughnutChart productivity={productivity} />
       ) : (
         <p>No productivity data available.</p>
+      )}
+      <h1>Ranking</h1>
+      {employeeId !== null ? (
+        <EmployeeRankingOverall employeeId={employeeId} />
+      ) : (
+        <p>No ranking data available.</p>
       )}
     </div>
   );

@@ -1,6 +1,9 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -340,5 +343,23 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   public double getProductivity(Short employeeId) {
     FinalStats stats = finalStatsRepository.findByEmployeeId(employeeId);
     return stats.getProductivity();
+  }
+
+  @Override
+  public Map<String, Object> getEmployeeRanking(Short employeeId) {
+    List<FinalStats> productivityData = finalStatsRepository.findAll();
+    productivityData.sort(Comparator.comparingDouble(FinalStats::getProductivity).reversed());
+    int totalEmployees = productivityData.size();
+    int rank = 1;
+    for (FinalStats p : productivityData) {
+      if (p.getEmployeeId().equals(employeeId)) {
+        break;
+      }
+      rank++;
+    }
+    Map<String, Object> result = new HashMap<>();
+    result.put("rank", rank);
+    result.put("totalEmployees", totalEmployees);
+    return result;
   }
 }

@@ -1,0 +1,29 @@
+.rankingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 300px;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rankingContainer h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.rankingContainer p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.rankingContainer strong {
+  font-size: 2rem;
+  color: #4caf50;
+}

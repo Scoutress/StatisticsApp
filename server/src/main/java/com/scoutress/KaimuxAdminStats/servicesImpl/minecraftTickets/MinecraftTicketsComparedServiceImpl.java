@@ -39,66 +39,50 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
   public void compareEachEmployeeDailyMcTicketsValues() {
     List<DailyMinecraftTickets> rawData = getAllMinecraftTickets();
 
-    if (rawData == null || rawData.isEmpty()) {
-      throw new RuntimeException("No Minecraft tickets data found. Cannot proceed.");
-    }
+    if (rawData != null && !rawData.isEmpty()) {
+      List<DailyPlaytime> rawDailyPlaytimeData = getRawDailyPlaytimeData();
 
-    List<DailyPlaytime> rawDailyPlaytimeData = getRawDailyPlaytimeData();
+      if (rawDailyPlaytimeData != null && !rawDailyPlaytimeData.isEmpty()) {
+        List<LocalDate> allDates = getAllMinecraftTicketsDates(rawData);
 
-    if (rawDailyPlaytimeData == null || rawDailyPlaytimeData.isEmpty()) {
-      throw new RuntimeException("No Minecraft tickets data found. Cannot proceed.");
-    }
+        if (allDates != null && !allDates.isEmpty()) {
+          List<Short> allEmployees = getAllEmployeesFromDailyMinecraftTickets(rawData);
 
-    List<LocalDate> allDates = getAllMinecraftTicketsDates(rawData);
+          if (allEmployees != null && !allEmployees.isEmpty()) {
 
-    if (allDates == null || allDates.isEmpty()) {
-      throw new RuntimeException("No dates found in Minecraft tickets data. Cannot proceed.");
-    }
+            for (Short employeeId : allEmployees) {
+              double ticketRatioSumThisEmployee = 0;
+              int datesCount = 0;
 
-    List<Short> allEmployees = getAllEmployeesFromDailyMinecraftTickets(rawData);
+              for (LocalDate date : allDates) {
+                double playtimeForThisEmployeeThisDate = getPlaytimeForThisEmployeeThisDate(
+                    rawDailyPlaytimeData, employeeId, date);
+                int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawData, date, employeeId);
+                int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawData, date);
 
-    if (allEmployees == null || allEmployees.isEmpty()) {
-      throw new RuntimeException("No employees found in Minecraft tickets data. Cannot proceed.");
-    }
+                if (ticketsThisDateAllEmployees != 0) {
+                  double ticketRatioThisDateThisEmployee = calculateTicketRatioThisDate(
+                      ticketsThisDateThisEmployee, ticketsThisDateAllEmployees);
 
-    for (Short employeeId : allEmployees) {
-      double ticketRatioSumThisEmployee = 0;
-      int datesCount = 0;
+                  double finalTicketRatio = checkIfPlaytimeIsMoreThan5minutesAndHasAnyTicketsThatDate(
+                      ticketsThisDateThisEmployee, ticketRatioThisDateThisEmployee, playtimeForThisEmployeeThisDate);
 
-      for (LocalDate date : allDates) {
-        try {
-          double playtimeForThisEmployeeThisDate = getPlaytimeForThisEmployeeThisDate(
-              rawDailyPlaytimeData, employeeId, date);
-          int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawData, date, employeeId);
-          int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawData, date);
+                  saveTicketRatioThisDateThisEmployee(finalTicketRatio, date, employeeId);
 
-          if (ticketsThisDateAllEmployees == 0) {
-            System.err.println("Total tickets for all employees on " + date + " is zero. Skipping.");
-            continue;
+                  ticketRatioSumThisEmployee += finalTicketRatio;
+                  datesCount++;
+                }
+              }
+
+              if (datesCount > 0) {
+                double averageValueOfTicketRatiosThisEmployee = calculateAverageTicketRatioThisEmployee(
+                    ticketRatioSumThisEmployee, datesCount);
+
+                saveAverageTicketRatioThisEmployee(averageValueOfTicketRatiosThisEmployee, employeeId);
+              }
+            }
           }
-
-          double ticketRatioThisDateThisEmployee = calculateTicketRatioThisDate(
-              ticketsThisDateThisEmployee, ticketsThisDateAllEmployees);
-
-          double finalTicketRatio = checkIfPlaytimeIsMoreThan5minutesAndHasAnyTicketsThatDate(
-              ticketsThisDateThisEmployee, ticketRatioThisDateThisEmployee, playtimeForThisEmployeeThisDate);
-
-          saveTicketRatioThisDateThisEmployee(finalTicketRatio, date, employeeId);
-
-          ticketRatioSumThisEmployee += finalTicketRatio;
-          datesCount++;
-        } catch (Exception e) {
-          System.err.println("Error processing employee " + employeeId + " on date " + date + ": " + e.getMessage());
         }
-      }
-
-      if (datesCount > 0) {
-        double averageValueOfTicketRatiosThisEmployee = calculateAverageTicketRatioThisEmployee(
-            ticketRatioSumThisEmployee, datesCount);
-
-        saveAverageTicketRatioThisEmployee(averageValueOfTicketRatiosThisEmployee, employeeId);
-      } else {
-        System.err.println("No valid data for employee " + employeeId + ". Skipping average calculation.");
       }
     }
   }

@@ -32,29 +32,24 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
 
   @Override
   public void calculateAverageValueOfDailyDiscordMessages() {
-    try {
-      List<DailyDiscordMessages> rawData = getAllDiscordMessages();
+    List<DailyDiscordMessages> rawData = getAllDiscordMessages();
 
-      if (rawData == null || rawData.isEmpty()) {
-        throw new RuntimeException("No Discord messages found in the database.");
-      }
-
+    if (rawData != null && !rawData.isEmpty()) {
       List<Short> allEmployees = getAllEmployeesFromMessagesData(rawData);
       LocalDate oldestDateFromDcMessagesData = getOldestDateFromMessagesData(rawData);
 
-      if (allEmployees == null || oldestDateFromDcMessagesData == null) {
-        throw new RuntimeException("Missing required data (employees or oldest date).");
-      }
+      if (allEmployees != null && oldestDateFromDcMessagesData != null) {
 
-      for (Short employeeId : allEmployees) {
-        LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
-        LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
-            oldestDateFromDcMessagesData, joinDateThisEmployee);
-        double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(rawData, oldestDate, employeeId);
-        saveAverageValueForThisEmployee(averageValue, employeeId);
+        for (Short employeeId : allEmployees) {
+          LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
+          LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
+              oldestDateFromDcMessagesData, joinDateThisEmployee);
+          double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(
+              rawData, oldestDate, employeeId);
+
+          saveAverageValueForThisEmployee(averageValue, employeeId);
+        }
       }
-    } catch (RuntimeException e) {
-      System.err.println("Error in calculateAverageValueOfDailyDiscordMessages: " + e.getMessage());
     }
   }
 

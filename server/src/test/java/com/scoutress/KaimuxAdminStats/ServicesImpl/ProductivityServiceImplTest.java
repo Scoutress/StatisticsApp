@@ -148,7 +148,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(1.5, "Helper");
 
-    assertEquals((1.5 * 0.66), result);
+    assertEquals((1.5 * 0.666), result);
   }
 
   @Test
@@ -156,7 +156,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(1.25, "Helper");
 
-    assertEquals((1.25 * 0.66), result);
+    assertEquals((1.25 * 0.666), result);
   }
 
   @Test
@@ -164,7 +164,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(3, "Support");
 
-    assertEquals((3 * 0.33), result);
+    assertEquals((3 * 0.333), result);
   }
 
   @Test
@@ -172,7 +172,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(2.75, "Support");
 
-    assertEquals((2.75 * 0.33), result);
+    assertEquals((2.75 * 0.333), result);
   }
 
   @Test
@@ -180,7 +180,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(6, "ChatMod");
 
-    assertEquals((6 * 0.17), result);
+    assertEquals((6 * 0.1666), result);
   }
 
   @Test
@@ -188,7 +188,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(5.5, "ChatMod");
 
-    assertEquals((5.5 * 0.17), result);
+    assertEquals((5.5 * 0.1666), result);
   }
 
   @Test
@@ -196,7 +196,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(12, "Overseer");
 
-    assertEquals((12 * 0.085), result);
+    assertEquals((12 * 0.0832), result);
   }
 
   @Test
@@ -204,7 +204,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(10, "Overseer");
 
-    assertEquals((10 * 0.085), result);
+    assertEquals((10 * 0.0832), result);
   }
 
   @Test
@@ -212,7 +212,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(24, "Manager");
 
-    assertEquals((24 * 0.042), result);
+    assertEquals((24 * 0.0416), result);
   }
 
   @Test
@@ -220,7 +220,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfDiscordMessagesWithCoef(17, "Manager");
 
-    assertEquals((17 * 0.042), result);
+    assertEquals((17 * 0.0416), result);
   }
 
   @Test
@@ -348,7 +348,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Helper");
 
-    assertEquals((0.1 * 66), result);
+    assertEquals((0.1 * 16), result);
   }
 
   @Test
@@ -356,7 +356,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Helper");
 
-    assertEquals((0.25 * 66), result);
+    assertEquals((0.25 * 16), result);
   }
 
   @Test
@@ -364,7 +364,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Support");
 
-    assertEquals((0.1 * 33), result);
+    assertEquals((0.1 * 8), result);
   }
 
   @Test
@@ -372,7 +372,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Support");
 
-    assertEquals((0.25 * 33), result);
+    assertEquals((0.25 * 8), result);
   }
 
   @Test
@@ -380,7 +380,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "ChatMod");
 
-    assertEquals((0.1 * 17), result);
+    assertEquals((0.1 * 4), result);
   }
 
   @Test
@@ -388,7 +388,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "ChatMod");
 
-    assertEquals((0.25 * 17), result);
+    assertEquals((0.25 * 4), result);
   }
 
   @Test
@@ -396,7 +396,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Overseer");
 
-    assertEquals((0.1 * 8.5), result);
+    assertEquals((0.1 * 2), result);
   }
 
   @Test
@@ -404,7 +404,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Overseer");
 
-    assertEquals((0.25 * 8.5), result);
+    assertEquals((0.25 * 2), result);
   }
 
   @Test
@@ -412,7 +412,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.1, "Manager");
 
-    assertEquals((0.1 * 4.2), result);
+    assertEquals((0.1 * 1), result);
   }
 
   @Test
@@ -420,7 +420,7 @@ class ProductivityServiceImplTest {
     double result = service
         .calculateAverageValueOfComparedDiscordMessagesWithCoef(0.25, "Manager");
 
-    assertEquals((0.25 * 4.2), result);
+    assertEquals((0.25 * 1), result);
   }
 
   @Test

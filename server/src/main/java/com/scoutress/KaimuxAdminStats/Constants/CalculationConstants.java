@@ -17,11 +17,11 @@ public class CalculationConstants {
   public static final double PLAYTIME_MAX_MANAGER = 8;
 
   // Coeficients for average Discord messages per day per level
-  public static final double DISCORD_MESSAGES_HELPER = 0.66;
-  public static final double DISCORD_MESSAGES_SUPPORT = 0.33;
-  public static final double DISCORD_MESSAGES_CHATMOD = 0.17;
-  public static final double DISCORD_MESSAGES_OVERSEER = 0.085;
-  public static final double DISCORD_MESSAGES_MANAGER = 0.042;
+  public static final double DISCORD_MESSAGES_HELPER = 0.666;
+  public static final double DISCORD_MESSAGES_SUPPORT = 0.333;
+  public static final double DISCORD_MESSAGES_CHATMOD = 0.1666;
+  public static final double DISCORD_MESSAGES_OVERSEER = 0.0832;
+  public static final double DISCORD_MESSAGES_MANAGER = 0.0416;
 
   // Max values of average Discord messages per day per level
   public static final double DISCORD_MESSAGES_MAX_HELPER = 1.5;
@@ -31,11 +31,11 @@ public class CalculationConstants {
   public static final double DISCORD_MESSAGES_MAX_MANAGER = 24;
 
   // Coeficients for average compared Discord messages per day per level
-  public static final double DISCORD_MESSAGES_COMPARED_HELPER = 66;
-  public static final double DISCORD_MESSAGES_COMPARED_SUPPORT = 33;
-  public static final double DISCORD_MESSAGES_COMPARED_CHATMOD = 17;
-  public static final double DISCORD_MESSAGES_COMPARED_OVERSEER = 8.5;
-  public static final double DISCORD_MESSAGES_COMPARED_MANAGER = 4.2;
+  public static final double DISCORD_MESSAGES_COMPARED_HELPER = 16;
+  public static final double DISCORD_MESSAGES_COMPARED_SUPPORT = 8;
+  public static final double DISCORD_MESSAGES_COMPARED_CHATMOD = 4;
+  public static final double DISCORD_MESSAGES_COMPARED_OVERSEER = 2;
+  public static final double DISCORD_MESSAGES_COMPARED_MANAGER = 1;
 
   // Max values of average compared Discord messages per day per level
   public static final double DISCORD_MESSAGES_COMPARED_MAX_HELPER = 0.0625;

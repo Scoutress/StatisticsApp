@@ -85,8 +85,8 @@ const ProductivityPage = () => {
       annualPlaytime: 443.29,
       serverTickets: 1.45,
       serverTicketsTaking: 41.85,
-      discordMessages: 6.21,
-      discordMessagesCompared: 13.75,
+      discordMessages: 5.99,
+      discordMessagesCompared: 13.14,
       playtime: 2.05,
       afkPlaytime: 0,
       productivity: "47.93%",
@@ -98,8 +98,8 @@ const ProductivityPage = () => {
       annualPlaytime: 547.61,
       serverTickets: 0.92,
       serverTicketsTaking: 23.93,
-      discordMessages: 7.22,
-      discordMessagesCompared: 14.77,
+      discordMessages: 7.29,
+      discordMessagesCompared: 14.99,
       playtime: 1.27,
       afkPlaytime: 0,
       productivity: "42.54%",
@@ -111,8 +111,8 @@ const ProductivityPage = () => {
       annualPlaytime: 467.61,
       serverTickets: 1.5,
       serverTicketsTaking: 22.57,
-      discordMessages: 15.19,
-      discordMessagesCompared: 30.54,
+      discordMessages: 15.17,
+      discordMessagesCompared: 30.82,
       playtime: 1.7,
       afkPlaytime: 0,
       productivity: "83.96%",
@@ -124,8 +124,8 @@ const ProductivityPage = () => {
       annualPlaytime: 110.68,
       serverTickets: 0.03,
       serverTicketsTaking: 4.08,
-      discordMessages: 3.85,
-      discordMessagesCompared: 6.03,
+      discordMessages: 3.75,
+      discordMessagesCompared: 5.96,
       playtime: 0.46,
       afkPlaytime: 0,
       productivity: "43.65%",
@@ -137,8 +137,8 @@ const ProductivityPage = () => {
       annualPlaytime: 429.14,
       serverTickets: 0.31,
       serverTicketsTaking: 24.53,
-      discordMessages: 1.64,
-      discordMessagesCompared: 4.37,
+      discordMessages: 1.58,
+      discordMessagesCompared: 4.29,
       playtime: 1.02,
       afkPlaytime: 0,
       productivity: "36.83%",
@@ -150,8 +150,8 @@ const ProductivityPage = () => {
       annualPlaytime: 308.72,
       serverTickets: 0.21,
       serverTicketsTaking: 36.12,
-      discordMessages: 0.33,
-      discordMessagesCompared: 2.28,
+      discordMessages: 0.26,
+      discordMessagesCompared: 2.17,
       playtime: 0.59,
       afkPlaytime: 0,
       productivity: "31.64%",
@@ -163,8 +163,8 @@ const ProductivityPage = () => {
       annualPlaytime: 244.47,
       serverTickets: 0.32,
       serverTicketsTaking: 21.2,
-      discordMessages: 0.1,
-      discordMessagesCompared: 0.34,
+      discordMessages: 0.07,
+      discordMessagesCompared: 0.3,
       playtime: 0.6,
       afkPlaytime: 0,
       productivity: "26.59%",
@@ -176,8 +176,8 @@ const ProductivityPage = () => {
       annualPlaytime: 495.45,
       serverTickets: 1.51,
       serverTicketsTaking: 33.33,
-      discordMessages: 2.6,
-      discordMessagesCompared: 6.68,
+      discordMessages: 2.58,
+      discordMessagesCompared: 6.69,
       playtime: 2.5,
       afkPlaytime: 0,
       productivity: "59.30%",
@@ -202,8 +202,8 @@ const ProductivityPage = () => {
       annualPlaytime: 113.01,
       serverTickets: 0.38,
       serverTicketsTaking: 8.66,
-      discordMessages: 0.13,
-      discordMessagesCompared: 0.19,
+      discordMessages: 0.03,
+      discordMessagesCompared: 0.04,
       playtime: 0.52,
       afkPlaytime: 0,
       productivity: "31.76%",
@@ -215,8 +215,8 @@ const ProductivityPage = () => {
       annualPlaytime: 180.11,
       serverTickets: 0.4,
       serverTicketsTaking: 7.74,
-      discordMessages: 0.81,
-      discordMessagesCompared: 1.19,
+      discordMessages: 0.83,
+      discordMessagesCompared: 1.23,
       playtime: 0.93,
       afkPlaytime: 0,
       productivity: "39.94%",
@@ -228,8 +228,8 @@ const ProductivityPage = () => {
       annualPlaytime: 46.61,
       serverTickets: 0.16,
       serverTicketsTaking: 5,
-      discordMessages: 0.4,
-      discordMessagesCompared: 0.74,
+      discordMessages: 0.35,
+      discordMessagesCompared: 0.67,
       playtime: 0.58,
       afkPlaytime: 0,
       productivity: "42.07%",
@@ -322,12 +322,14 @@ const ProductivityPage = () => {
             <th>Minecraft tickets /day (TEST)</th>
             <th>Minecraft tickets compared %/day</th>
             <th>Minecraft tickets compared %/day (TEST)</th>
+            <th>Discord messages /day</th>
+            <th>Discord messages /day (TEST)</th>
+            <th>Discord messages compared %/day</th>
+            <th>Discord messages compared %/day (TEST)</th>
             <th>Playtime hours/day</th>
             <th>Playtime hours/day (TEST)</th>
             <th>Productivity %</th>
             <th>Productivity % (TEST)</th>
-            <th>Recommendation</th>
-            <th>Recommendation (TEST)</th>
           </tr>
         </thead>
         <tbody>
@@ -341,12 +343,14 @@ const ProductivityPage = () => {
               <td>{hardcodedData[index].serverTickets}</td>
               <td>{(item.minecraftTicketsCompared * 100).toFixed(2)}</td>
               <td>{hardcodedData[index].serverTicketsTaking}</td>
+              <td>{item.discordMessages.toFixed(2)}</td>
+              <td>{hardcodedData[index].discordMessages}</td>
+              <td>{(item.discordMessagesCompared * 100).toFixed(2)}</td>
+              <td>{hardcodedData[index].discordMessagesCompared}</td>
               <td>{item.playtime.toFixed(2)}</td>
               <td>{hardcodedData[index].playtime}</td>
               <td>{(item.productivity * 100).toFixed(2)}</td>
               <td>{hardcodedData[index].productivity}</td>
-              <td>{item.recommendation}</td>
-              <td>{hardcodedData[index].recommendation}</td>
             </tr>
           ))}
         </tbody>

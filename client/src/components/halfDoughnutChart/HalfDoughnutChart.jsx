@@ -34,10 +34,13 @@ const HalfDoughnutChart = ({ productivity }) => {
   };
 
   return (
-    <div className={styles.chartContainer}>
-      <Doughnut data={data} options={options} />
-      <div className={styles.centeredText}>{productivityPercent}%</div>
-    </div>
+    <>
+      <h2>Productivity</h2>
+      <div className={styles.chartContainer}>
+        <Doughnut data={data} options={options} />
+        <div className={styles.centeredText}>{productivityPercent}%</div>
+      </div>
+    </>
   );
 };
 

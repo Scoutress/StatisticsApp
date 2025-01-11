@@ -3,6 +3,7 @@ package com.scoutress.KaimuxAdminStats.servicesImpl;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
+import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.TaskService;
@@ -37,6 +38,7 @@ public class TaskServiceImpl implements TaskService {
   private final ComplaintsService complaintsService;
   private final RecommendationsService recommendationsService;
   private final FinalStatsService finalStatsService;
+  private final RecommendationUserService recommendationUserService;
 
   public TaskServiceImpl(
       ProductivityService productivityService,
@@ -52,7 +54,8 @@ public class TaskServiceImpl implements TaskService {
       DiscordMessagesComparedService discordMessagesComparedService,
       ComplaintsService complaintsService,
       RecommendationsService recommendationsService,
-      FinalStatsService finalStatsService) {
+      FinalStatsService finalStatsService,
+      RecommendationUserService recommendationUserService) {
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
     this.employeeDataService = employeeDataService;
@@ -67,6 +70,7 @@ public class TaskServiceImpl implements TaskService {
     this.complaintsService = complaintsService;
     this.recommendationsService = recommendationsService;
     this.finalStatsService = finalStatsService;
+    this.recommendationUserService = recommendationUserService;
   }
 
   @Override
@@ -127,6 +131,10 @@ public class TaskServiceImpl implements TaskService {
     finalStatsService.updateNewStatsData();
 
     System.out.println("");
+    System.out.println("User recommendation updating");
+    recommendationUserService.checkAndSaveRecommendations();
+
+    System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
   }
@@ -139,9 +147,9 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
 
     System.out.println("Annual playtime calculations");
-    sessionDurationService.processSessionsFromBackup();
-    dailyPlaytimeService.handleDailyPlaytime();
-    annualyPlaytimeService.handleAnnualPlaytime();
+    // sessionDurationService.processSessionsFromBackup();
+    // dailyPlaytimeService.handleDailyPlaytime();
+    // annualyPlaytimeService.handleAnnualPlaytime();
 
     System.out.println("");
     System.out.println("Average playtime per day calculations");
@@ -182,6 +190,10 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
     System.out.println("Final stats updating");
     finalStatsService.updateNewStatsData();
+
+    System.out.println("");
+    System.out.println("User recommendation updating");
+    recommendationUserService.checkAndSaveRecommendations();
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

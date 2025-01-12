@@ -19,8 +19,6 @@ const Routes = {
     link: "/complains/all-data",
     name: "Complaints data",
   },
-  ///////////////////
-  // Old links
   employeesPage: {
     link: "/employee/all",
     name: "Employees",
@@ -28,34 +26,6 @@ const Routes = {
   employeeAddPage: {
     link: "/employee/add",
     name: "Employee Add",
-  },
-  dcTicketsAddPage: {
-    link: "/dc-tickets/add",
-    name: "Dc Tickets Add",
-  },
-  dcTicketsPage: {
-    link: "/dc-tickets/all",
-    name: "Dc Tickets",
-  },
-  dcTicketsComparePage: {
-    link: "/dc-tickets/compare",
-    name: "Dc Tickets Compare",
-  },
-  mcTicketsPage: {
-    link: "/mc-tickets/all",
-    name: "Mc Tickets",
-  },
-  mcTicketsAddPage: {
-    link: "/mc-tickets/add",
-    name: "Mc Tickets Add",
-  },
-  playtimePage: {
-    link: "/playtime/all",
-    name: "Playtime",
-  },
-  playtimeAddPage: {
-    link: "/playtime/add",
-    name: "Playtime Add",
   },
 };
 

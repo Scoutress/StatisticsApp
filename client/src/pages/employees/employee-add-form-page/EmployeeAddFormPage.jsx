@@ -6,7 +6,7 @@ import styles from "./EmployeeAddFormPage.module.scss";
 const EmployeeAddFormPage = () => {
   const [formData, setFormData] = useState({
     username: "",
-    level: "",
+    level: "Helper",
     firstName: "",
     lastName: "",
     email: "",

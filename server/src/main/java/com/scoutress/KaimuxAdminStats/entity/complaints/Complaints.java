@@ -28,4 +28,7 @@ public class Complaints {
 
   @Column(name = "date", nullable = false)
   private LocalDate date;
+
+  @Column(name = "text", nullable = false)
+  private String text;
 }

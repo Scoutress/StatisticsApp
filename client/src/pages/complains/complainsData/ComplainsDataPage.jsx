@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Loading from "../../components/loading/Loading.jsx";
-import ErrorMessage from "../../components/errorMessage/ErrorMessage.jsx";
-import styles from "./ComplainsPage.module.scss";
+import Loading from "../../../components/loading/Loading.jsx";
+import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
+import styles from "./ComplainsDataPage.module.scss";
 
-const ComplainsPage = () => {
+const ComplainsDataPage = () => {
   const [complains, setComplains] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +13,7 @@ const ComplainsPage = () => {
     const fetchData = async () => {
       try {
         const complainsResponse = await axios.get(
-          "http://localhost:8080/complains/all"
+          "http://localhost:8080/complains/all-data"
         );
 
         const data = complainsResponse.data;
@@ -45,12 +45,13 @@ const ComplainsPage = () => {
 
   return (
     <div className={styles.complainsPage}>
-      <h1 className={styles.title}>Complains Sum</h1>
+      <h1 className={styles.title}>Complains</h1>
       <table className={styles.table}>
         <thead>
           <tr>
             <th>Employee ID</th>
-            <th>Complains Count</th>
+            <th>Data</th>
+            <th>Text</th>
           </tr>
         </thead>
         <tbody>
@@ -58,7 +59,8 @@ const ComplainsPage = () => {
             complains.map((complain) => (
               <tr key={complain.id}>
                 <td>{complain.employeeId}</td>
-                <td>{complain.value}</td>
+                <td>{complain.date}</td>
+                <td>{complain.text}</td>
               </tr>
             ))
           ) : (
@@ -72,4 +74,4 @@ const ComplainsPage = () => {
   );
 };
 
-export default ComplainsPage;
+export default ComplainsDataPage;

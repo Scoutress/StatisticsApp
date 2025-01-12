@@ -13,7 +13,8 @@ import McTicketsPage from "../../pages/mc-tickets/mc-tickets-page/McTicketsPage"
 import McTicketsAddFormPage from "../../pages/mc-tickets/mc-tickets-add-form-page/McTicketsAddFormPage";
 import PlaytimePage from "../../pages/playtime/playtime-page/PlaytimePage";
 import PlaytimeAddFormPage from "../../pages/playtime/playtime-add-form-page/PlaytimeAddFormPage.jsx";
-import ComplainsPage from "../../pages/complains/ComplainsPage.jsx";
+import ComplainsSumPage from "../../pages/complains/complainsSum/ComplainsSumPage.jsx";
+import ComplainsDataPage from "../../pages/complains/complainsData/ComplainsDataPage.jsx";
 import EmployeePersonalStatsPage from "../../pages/employeePersonalStats/EmployeePersonalStatsPage.jsx";
 
 const Router = createBrowserRouter([
@@ -32,6 +33,14 @@ const Router = createBrowserRouter([
       {
         path: Routes.employeePersonalStats.link,
         element: <EmployeePersonalStatsPage />,
+      },
+      {
+        path: Routes.complainsSumPage.link,
+        element: <ComplainsSumPage />,
+      },
+      {
+        path: Routes.complainsDataPage.link,
+        element: <ComplainsDataPage />,
       },
       ///////////////////
       // Old links
@@ -70,10 +79,6 @@ const Router = createBrowserRouter([
       {
         path: Routes.playtimeAddPage.link,
         element: <PlaytimeAddFormPage />,
-      },
-      {
-        path: Routes.complainsPage.link,
-        element: <ComplainsPage />,
       },
     ],
   },

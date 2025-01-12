@@ -49,7 +49,8 @@ const Homepage = () => {
       <div className={styles.category}>
         <h2>Complains</h2>
         <div className={styles.linkGroup}>
-          <Link to="/complains/all">Complains</Link>
+          <Link to="/complains/all-sums">Complains Sum</Link>
+          <Link to="/complains/all-data">Complains Data List</Link>
         </div>
       </div>
     </div>

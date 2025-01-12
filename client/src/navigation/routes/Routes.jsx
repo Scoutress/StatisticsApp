@@ -11,6 +11,14 @@ const Routes = {
     link: "/user/stats/:employeeId",
     name: "Productivity",
   },
+  complainsSumPage: {
+    link: "/complains/all-sums",
+    name: "Complaints sum",
+  },
+  complainsDataPage: {
+    link: "/complains/all-data",
+    name: "Complaints data",
+  },
   ///////////////////
   // Old links
   employeesPage: {
@@ -48,10 +56,6 @@ const Routes = {
   playtimeAddPage: {
     link: "/playtime/add",
     name: "Playtime Add",
-  },
-  complainsPage: {
-    link: "/complains/all",
-    name: "Playtime",
   },
 };
 

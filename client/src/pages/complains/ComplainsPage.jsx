@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Loading from "../../components/loading/Loading.jsx";
+import ErrorMessage from "../../components/errorMessage/ErrorMessage.jsx";
 import styles from "./ComplainsPage.module.scss";
 
 const ComplainsPage = () => {
@@ -34,22 +36,20 @@ const ComplainsPage = () => {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>There was an error fetching the data! {error.message}</div>;
+    return <div>{error && <ErrorMessage message={error} />}</div>;
   }
 
   return (
-    <div className={styles.dcTicketsPage}>
-      <h1 className={styles.title}>Complains List</h1>
+    <div className={styles.complainsPage}>
+      <h1 className={styles.title}>Complains Sum</h1>
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Employee ID</th>
-            <th>Date</th>
             <th>Complains Count</th>
           </tr>
         </thead>
@@ -57,10 +57,8 @@ const ComplainsPage = () => {
           {Array.isArray(complains) ? (
             complains.map((complain) => (
               <tr key={complain.id}>
-                <td>{complain.id}</td>
                 <td>{complain.employeeId}</td>
-                <td>{complain.date}</td>
-                <td>{complain.complainsCount}</td>
+                <td>{complain.value}</td>
               </tr>
             ))
           ) : (

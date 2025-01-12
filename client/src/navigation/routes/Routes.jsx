@@ -53,10 +53,6 @@ const Routes = {
     link: "/complains/all",
     name: "Playtime",
   },
-  promotionsPage: {
-    link: "/stats/promotions",
-    name: "Promotions",
-  },
 };
 
 export default Routes;

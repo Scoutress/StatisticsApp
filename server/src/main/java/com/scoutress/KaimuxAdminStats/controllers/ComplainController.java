@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,5 +68,16 @@ public class ComplainController {
     } catch (Exception e) {
       return ResponseEntity.status(500).body(null);
     }
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteComplaint(@PathVariable Long id) {
+    Optional<Complaints> optionalComplaints = complaintsRepository.findById(id);
+    if (!optionalComplaints.isPresent()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    complaintsRepository.deleteById(id);
+    return ResponseEntity.noContent().build();
   }
 }

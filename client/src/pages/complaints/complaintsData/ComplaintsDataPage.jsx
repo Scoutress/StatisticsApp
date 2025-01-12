@@ -3,6 +3,7 @@ import axios from "axios";
 import Loading from "../../../components/loading/Loading.jsx";
 import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
 import EditComplaintModal from "../editComplaintModal/EditComplaintModal.jsx";
+import ConfirmationModal from "../../../components/confirmationModal/ConfirmationModal.jsx"; // Importing ConfirmationModal
 import { Link } from "react-router-dom";
 import styles from "./ComplaintsDataPage.module.scss";
 
@@ -11,6 +12,8 @@ const ComplaintsDataPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [complaintToDelete, setComplaintToDelete] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +47,35 @@ const ComplaintsDataPage = () => {
 
   const closeModal = () => {
     setSelectedComplaint(null);
+  };
+
+  const handleDeleteClick = (complaint) => {
+    setComplaintToDelete(complaint);
+    setIsConfirmationModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    axios
+      .delete(`http://localhost:8080/complaints/${complaintToDelete.id}`)
+      .then(() => {
+        setComplaints(
+          complaints.filter(
+            (complaint) => complaint.id !== complaintToDelete.id
+          )
+        );
+        setIsConfirmationModalOpen(false);
+        setComplaintToDelete(null);
+      })
+      .catch((error) => {
+        console.error("There was an error deleting the complaint!", error);
+        setIsConfirmationModalOpen(false);
+        setComplaintToDelete(null);
+      });
+  };
+
+  const cancelDelete = () => {
+    setIsConfirmationModalOpen(false);
+    setComplaintToDelete(null);
   };
 
   if (isLoading) {
@@ -82,6 +114,9 @@ const ComplaintsDataPage = () => {
                   <button onClick={() => handleEditClick(complaint)}>
                     Edit
                   </button>
+                  <button onClick={() => handleDeleteClick(complaint)}>
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))
@@ -98,6 +133,14 @@ const ComplaintsDataPage = () => {
           complaint={selectedComplaint}
           onClose={closeModal}
           onUpdate={() => window.location.reload()}
+        />
+      )}
+
+      {isConfirmationModalOpen && (
+        <ConfirmationModal
+          message="Are you sure you want to delete this complaint?"
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
         />
       )}
     </div>

@@ -87,13 +87,11 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   }
 
   public List<EmployeeCodes> extractEmployeeCodes() {
-    List<EmployeeCodes> data = dataExtractingService.getAllEmployeeCodes();
-    return data;
+    return dataExtractingService.getAllEmployeeCodes();
   }
 
   public List<MinecraftTicketsAnswers> extractDataFromAnswersTable() {
-    List<MinecraftTicketsAnswers> data = dataExtractingService.getAllMcTicketsAnswers();
-    return data;
+    return dataExtractingService.getAllMcTicketsAnswers();
   }
 
   public List<MinecraftTicketsAnswers> mapMinecraftToEmployeeIds(

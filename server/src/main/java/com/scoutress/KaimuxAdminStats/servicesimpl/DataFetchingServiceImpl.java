@@ -30,6 +30,9 @@ import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 @Service
 public class DataFetchingServiceImpl implements DataFetchingService {
 
+  // TODO: Remove this class after data fetching will be remade for Discord
+  // tickets and visitors.
+
   private final RestTemplate restTemplate;
   private final KaimuxWebsiteConfig kaimuxWebsiteConfig;
   private final DiscordTicketsReactionsRepository discordTicketsReactionsRepository;

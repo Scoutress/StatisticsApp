@@ -35,6 +35,18 @@ public class ScheduledTasksConfig {
     System.out.println("-----------------------------------------------");
   }
 
+  // @Scheduled(cron = "0 * * * * *")
+  @Transactional
+  public void testTasks() {
+    System.out.println("-----------------------------------------------");
+    System.out.println("Started testing tasks at: " + getCurrentTimestamp());
+    System.out.println("");
+
+    System.out.println("");
+    System.out.println("Testing tasks completed at: " + getCurrentTimestamp());
+    System.out.println("-----------------------------------------------");
+  }
+
   private String getCurrentTimestamp() {
     return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }

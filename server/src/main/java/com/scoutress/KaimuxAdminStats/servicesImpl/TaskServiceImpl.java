@@ -2,6 +2,7 @@ package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import org.springframework.stereotype.Service;
 
+import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
@@ -24,6 +25,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class TaskServiceImpl implements TaskService {
 
+  private final ApiDataExtractionService apiDataExtractionService;
   private final ProductivityService productivityService;
   private final SQLiteToMySQLService sQLiteToMySQLService;
   private final EmployeeDataService employeeDataService;
@@ -41,6 +43,7 @@ public class TaskServiceImpl implements TaskService {
   private final RecommendationUserService recommendationUserService;
 
   public TaskServiceImpl(
+      ApiDataExtractionService apiDataExtractionService,
       ProductivityService productivityService,
       SQLiteToMySQLService sQLiteToMySQLService,
       EmployeeDataService employeeDataService,
@@ -56,6 +59,7 @@ public class TaskServiceImpl implements TaskService {
       RecommendationsService recommendationsService,
       FinalStatsService finalStatsService,
       RecommendationUserService recommendationUserService) {
+    this.apiDataExtractionService = apiDataExtractionService;
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
     this.employeeDataService = employeeDataService;
@@ -79,6 +83,12 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("-----------------------------------------------");
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
+
+    System.out.println("");
+    System.out.println("Getting data from the API");
+    apiDataExtractionService.handleMinecraftTicketsRawData();
+
+    ////////////
 
     System.out.println("Annual playtime calculations");
     sQLiteToMySQLService.initializeUsersDatabase();

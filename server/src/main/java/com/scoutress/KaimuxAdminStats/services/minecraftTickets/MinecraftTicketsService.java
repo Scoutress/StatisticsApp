@@ -7,4 +7,6 @@ public interface MinecraftTicketsService {
   void calculateAverageDailyMinecraftTicketsValues();
 
   void calculateAverageMinecraftTicketsPerPlaytime();
+
+  void calculateTotalMinecraftTickets();
 }

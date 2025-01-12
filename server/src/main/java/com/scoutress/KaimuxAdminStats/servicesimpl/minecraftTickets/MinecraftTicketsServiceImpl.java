@@ -14,11 +14,15 @@ import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageDailyMinecr
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.AverageMinecraftTicketsPerPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.MinecraftTicketsAnswers;
+import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.TotalMinecraftTickets;
+import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.TotalOldMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageDailyMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageMinecraftTicketsPerPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.TotalMinecraftTicketsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.TotalOldMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
@@ -32,6 +36,8 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
   public final AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository;
   public final DailyPlaytimeRepository dailyPlaytimeRepository;
   public final AverageMinecraftTicketsPerPlaytimeRepository averageMinecraftTicketsPerPlaytimeRepository;
+  public final TotalMinecraftTicketsRepository totalMinecraftTicketsRepository;
+  public final TotalOldMinecraftTicketsRepository totalOldMinecraftTicketsRepository;
 
   public MinecraftTicketsServiceImpl(
       DataExtractingService dataExtractingService,
@@ -39,13 +45,17 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       DailyMinecraftTicketsRepository discordTicketsRepository,
       AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository,
       DailyPlaytimeRepository dailyPlaytimeRepository,
-      AverageMinecraftTicketsPerPlaytimeRepository averageMinecraftTicketsPerPlaytimeRepository) {
+      AverageMinecraftTicketsPerPlaytimeRepository averageMinecraftTicketsPerPlaytimeRepository,
+      TotalMinecraftTicketsRepository totalMinecraftTicketsRepository,
+      TotalOldMinecraftTicketsRepository totalOldMinecraftTicketsRepository) {
     this.dataExtractingService = dataExtractingService;
     this.employeeRepository = employeeRepository;
     this.dailyMinecraftTicketsRepository = discordTicketsRepository;
     this.averageDailyMinecraftTicketsRepository = averageDailyMinecraftTicketsRepository;
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.averageMinecraftTicketsPerPlaytimeRepository = averageMinecraftTicketsPerPlaytimeRepository;
+    this.totalMinecraftTicketsRepository = totalMinecraftTicketsRepository;
+    this.totalOldMinecraftTicketsRepository = totalOldMinecraftTicketsRepository;
   }
 
   @Override
@@ -298,6 +308,78 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       newRecord.setEmployeeId(employeeId);
       newRecord.setValue(ticketsPerPlaytime);
       averageMinecraftTicketsPerPlaytimeRepository.save(newRecord);
+    }
+  }
+
+  @Override
+  public void calculateTotalMinecraftTickets() {
+    List<Short> allEmployeeIds = getAllEmployeeIds();
+    List<DailyMinecraftTickets> allDailyMcTicketsData = getAllDailyMcTicketsData();
+    List<TotalOldMinecraftTickets> allOldTotalMinecraftTicketsData = getOldTotalDailyMinecraftTicketsData();
+
+    for (Short employeeId : allEmployeeIds) {
+      int totalMinecraftTickets = getTotalMinecraftTicketsThisEmployee(
+          allDailyMcTicketsData, employeeId);
+      int totalOldMinecraftTickets = getTotalOldMinecraftTicketsThisEmployee(
+          allOldTotalMinecraftTicketsData, employeeId);
+      int sumWithOldTickets = calculateTotalMinecraftTicketsThisEmployeeWithOldOnes(
+          totalMinecraftTickets, totalOldMinecraftTickets);
+
+      saveTotalMinecraftTicketsThisEmployee(sumWithOldTickets, employeeId);
+    }
+  }
+
+  public List<Short> getAllEmployeeIds() {
+    return employeeRepository
+        .findAll()
+        .stream()
+        .map(Employee::getId)
+        .distinct()
+        .collect(Collectors.toList());
+  }
+
+  public List<DailyMinecraftTickets> getAllDailyMcTicketsData() {
+    return dailyMinecraftTicketsRepository.findAll();
+  }
+
+  public List<TotalOldMinecraftTickets> getOldTotalDailyMinecraftTicketsData() {
+    return totalOldMinecraftTicketsRepository.findAll();
+  }
+
+  public int getTotalMinecraftTicketsThisEmployee(
+      List<DailyMinecraftTickets> allDailyMcTicketsData, Short employeeId) {
+    return allDailyMcTicketsData
+        .stream()
+        .filter(dailyMcTickets -> dailyMcTickets.getEmployeeId().equals(employeeId))
+        .mapToInt(DailyMinecraftTickets::getTicketCount)
+        .sum();
+  }
+
+  public int getTotalOldMinecraftTicketsThisEmployee(
+      List<TotalOldMinecraftTickets> allOldTotalMinecraftTicketsData, Short employeeId) {
+    return allOldTotalMinecraftTicketsData
+        .stream()
+        .filter(oldTotal -> oldTotal.getEmployeeId().equals(employeeId))
+        .mapToInt(TotalOldMinecraftTickets::getTicketCount)
+        .sum();
+  }
+
+  public int calculateTotalMinecraftTicketsThisEmployeeWithOldOnes(
+      int totalMinecraftTickets, int totalOldMinecraftTickets) {
+    return totalMinecraftTickets + totalOldMinecraftTickets;
+  }
+
+  public void saveTotalMinecraftTicketsThisEmployee(int sumWithOldTickets, Short employeeId) {
+    TotalMinecraftTickets existingRecord = totalMinecraftTicketsRepository.findByEmployeeId(employeeId);
+
+    if (existingRecord != null) {
+      existingRecord.setTicketCount(sumWithOldTickets);
+      totalMinecraftTicketsRepository.save(existingRecord);
+    } else {
+      TotalMinecraftTickets newRecord = new TotalMinecraftTickets();
+      newRecord.setEmployeeId(employeeId);
+      newRecord.setTicketCount(sumWithOldTickets);
+      totalMinecraftTicketsRepository.save(newRecord);
     }
   }
 }

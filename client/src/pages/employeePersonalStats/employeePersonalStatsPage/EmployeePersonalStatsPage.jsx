@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import Loading from "../../components/loading/Loading.jsx";
-import ErrorMessage from "../../components/errorMessage/ErrorMessage.jsx";
-import HalfDoughnutChart from "../../components/halfDoughnutChart/HalfDoughnutChart.jsx";
-import EmployeeRankingOverall from "../../components/employeeRankingOverall/EmployeeRankingOverall.jsx";
-import UserRecommendationText from "../../components/userRecommendation/UserRecommendationText.jsx";
+import Loading from "../../../components/loading/Loading.jsx";
+import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
+import HalfDoughnutChart from "../../../components/halfDoughnutChart/HalfDoughnutChart.jsx";
+import EmployeeRankingOverall from "../../../components/employeeRankingOverall/EmployeeRankingOverall.jsx";
+import UserRecommendationText from "../../../components/userRecommendation/UserRecommendationText.jsx";
 import styles from "./EmployeePersonalStatsPage.module.scss";
+import EmployeeMcTickets from "../employeeMcTickets/EmployeeMcTickets.jsx";
 
 const EmployeePersonalStatsPage = () => {
   const { employeeId } = useParams();
@@ -56,6 +57,11 @@ const EmployeePersonalStatsPage = () => {
       )}
       {employeeId !== null ? (
         <UserRecommendationText employeeId={employeeId} />
+      ) : (
+        <p>No recommendation data available.</p>
+      )}
+      {employeeId !== null ? (
+        <EmployeeMcTickets employeeId={employeeId} />
       ) : (
         <p>No recommendation data available.</p>
       )}

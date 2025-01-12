@@ -107,6 +107,10 @@ public class TaskServiceImpl implements TaskService {
     minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
 
     System.out.println("");
+    System.out.println("Total Minecraft tickets updating");
+    minecraftTicketsService.calculateTotalMinecraftTickets();
+
+    System.out.println("");
     System.out.println("Average discord messages per day calculations");
     discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
 
@@ -166,6 +170,10 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
     System.out.println("Average Minecraft tickets taking comparison per day calculations");
     minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
+
+    System.out.println("");
+    System.out.println("Total Minecraft tickets updating");
+    minecraftTicketsService.calculateTotalMinecraftTickets();
 
     System.out.println("");
     System.out.println("Average discord messages per day calculations");

@@ -9,7 +9,7 @@ import EmployeeAddFormPage from "../../pages/employees/employeeAddFormPage/Emplo
 import ComplaintsSumPage from "../../pages/complaints/complaintsSum/ComplaintsSumPage.jsx";
 import ComplaintsDataPage from "../../pages/complaints/complaintsData/ComplaintsDataPage.jsx";
 import ComplaintsAddFormPage from "../../pages/complaints/complaintAddFormPage/ComplaintAddFormPage.jsx";
-import EmployeePersonalStatsPage from "../../pages/employeePersonalStats/EmployeePersonalStatsPage.jsx";
+import EmployeePersonalStatsPage from "../../pages/employeePersonalStats/employeePersonalStatsPage/EmployeePersonalStatsPage.jsx";
 
 const Router = createBrowserRouter([
   {

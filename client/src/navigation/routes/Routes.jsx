@@ -11,13 +11,17 @@ const Routes = {
     link: "/user/stats/:employeeId",
     name: "Productivity",
   },
-  complainsSumPage: {
-    link: "/complains/all-sums",
+  complaintsSumPage: {
+    link: "/complaints/all-sums",
     name: "Complaints sum",
   },
-  complainsDataPage: {
-    link: "/complains/all-data",
+  complaintsDataPage: {
+    link: "/complaints/all-data",
     name: "Complaints data",
+  },
+  complaintsAdd: {
+    link: "/complaints/add",
+    name: "Complaints add data",
   },
   employeesPage: {
     link: "/employee/all",

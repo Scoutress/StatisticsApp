@@ -2,26 +2,26 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Loading from "../../../components/loading/Loading.jsx";
 import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
-import styles from "./ComplainsSumPage.module.scss";
+import styles from "./ComplaintsSumPage.module.scss";
 
-const ComplainsSumPage = () => {
-  const [complains, setComplains] = useState([]);
+const ComplaintsSumPage = () => {
+  const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const complainsResponse = await axios.get(
-          "http://localhost:8080/complains/all-sums"
+        const complaintsResponse = await axios.get(
+          "http://localhost:8080/complaints/all-sums"
         );
 
-        const data = complainsResponse.data;
+        const data = complaintsResponse.data;
 
         console.log("API response:", data);
 
         if (Array.isArray(data)) {
-          setComplains(data);
+          setComplaints(data);
         } else {
           setError(new Error("Expected an array but got something else"));
         }
@@ -44,21 +44,21 @@ const ComplainsSumPage = () => {
   }
 
   return (
-    <div className={styles.complainsPage}>
-      <h1 className={styles.title}>Complains Sum</h1>
+    <div className={styles.complaintsPage}>
+      <h1 className={styles.title}>Complaints Sum</h1>
       <table className={styles.table}>
         <thead>
           <tr>
             <th>Employee ID</th>
-            <th>Complains Count</th>
+            <th>Complaints Count</th>
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(complains) ? (
-            complains.map((complain) => (
-              <tr key={complain.id}>
-                <td>{complain.employeeId}</td>
-                <td>{complain.value}</td>
+          {Array.isArray(complaints) ? (
+            complaints.map((complaint) => (
+              <tr key={complaint.id}>
+                <td>{complaint.employeeId}</td>
+                <td>{complaint.value}</td>
               </tr>
             ))
           ) : (
@@ -72,4 +72,4 @@ const ComplainsSumPage = () => {
   );
 };
 
-export default ComplainsSumPage;
+export default ComplaintsSumPage;

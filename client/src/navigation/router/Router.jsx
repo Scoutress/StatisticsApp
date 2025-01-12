@@ -6,8 +6,9 @@ import Homepage from "../../pages/home/HomePage";
 import ProductivityPage from "../../pages/productivity/productivityPage/ProductivityPage";
 import EmployeesPage from "../../pages/employees/employeesPage/EmployeesPage";
 import EmployeeAddFormPage from "../../pages/employees/employeeAddFormPage/EmployeeAddFormPage";
-import ComplainsSumPage from "../../pages/complains/complainsSum/ComplainsSumPage.jsx";
-import ComplainsDataPage from "../../pages/complains/complainsData/ComplainsDataPage.jsx";
+import ComplaintsSumPage from "../../pages/complaints/complaintsSum/ComplaintsSumPage.jsx";
+import ComplaintsDataPage from "../../pages/complaints/complaintsData/ComplaintsDataPage.jsx";
+import ComplaintsAddFormPage from "../../pages/complaints/complaintAddFormPage/ComplaintAddFormPage.jsx";
 import EmployeePersonalStatsPage from "../../pages/employeePersonalStats/EmployeePersonalStatsPage.jsx";
 
 const Router = createBrowserRouter([
@@ -28,12 +29,16 @@ const Router = createBrowserRouter([
         element: <EmployeePersonalStatsPage />,
       },
       {
-        path: Routes.complainsSumPage.link,
-        element: <ComplainsSumPage />,
+        path: Routes.complaintsSumPage.link,
+        element: <ComplaintsSumPage />,
       },
       {
-        path: Routes.complainsDataPage.link,
-        element: <ComplainsDataPage />,
+        path: Routes.complaintsDataPage.link,
+        element: <ComplaintsDataPage />,
+      },
+      {
+        path: Routes.complaintsAdd.link,
+        element: <ComplaintsAddFormPage />,
       },
       {
         path: Routes.employeesPage.link,

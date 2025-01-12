@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Loading from "../../../components/loading/Loading.jsx";
 import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
-import EditComplainModal from "./../../../components/editComplainModal/EditComplainModal.jsx";
-import styles from "./ComplainsDataPage.module.scss";
+import EditComplainModal from "../editComplaintModal/EditComplaintModal.jsx";
+import { Link } from "react-router-dom";
+import styles from "./ComplaintsDataPage.module.scss";
 
-const ComplainsDataPage = () => {
-  const [complains, setComplains] = useState([]);
+const ComplaintsDataPage = () => {
+  const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedComplain, setSelectedComplain] = useState(null);
@@ -14,16 +15,16 @@ const ComplainsDataPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const complainsResponse = await axios.get(
-          "http://localhost:8080/complains/all-data"
+        const complaintsResponse = await axios.get(
+          "http://localhost:8080/complaints/all-data"
         );
 
-        const data = complainsResponse.data;
+        const data = complaintsResponse.data;
 
         console.log("API response:", data);
 
         if (Array.isArray(data)) {
-          setComplains(data);
+          setComplaints(data);
         } else {
           setError(new Error("Expected an array but got something else"));
         }
@@ -54,8 +55,13 @@ const ComplainsDataPage = () => {
   }
 
   return (
-    <div className={styles.complainsPage}>
-      <h1 className={styles.title}>Complains</h1>
+    <div className={styles.complaintsPage}>
+      <h1 className={styles.title}>Complaints</h1>
+
+      <Link to="/complaints/add" key="complaints-add">
+        Complain add
+      </Link>
+
       <table className={styles.table}>
         <thead>
           <tr>
@@ -66,8 +72,8 @@ const ComplainsDataPage = () => {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(complains) ? (
-            complains.map((complain) => (
+          {Array.isArray(complaints) ? (
+            complaints.map((complain) => (
               <tr key={complain.id}>
                 <td>{complain.employeeId}</td>
                 <td>{complain.date}</td>
@@ -98,4 +104,4 @@ const ComplainsDataPage = () => {
   );
 };
 
-export default ComplainsDataPage;
+export default ComplaintsDataPage;

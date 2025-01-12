@@ -1,10 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
-import styles from "./EditComplainModal.module.scss";
+import styles from "./EditComplaintModal.module.scss";
 
-const EditComplainModal = ({ complain, onClose, onUpdate }) => {
-  const [formData, setFormData] = useState({ ...complain });
+const EditComplaintModal = ({ complaint, onClose, onUpdate }) => {
+  const [formData, setFormData] = useState({ ...complaint });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -14,21 +14,21 @@ const EditComplainModal = ({ complain, onClose, onUpdate }) => {
   const handleSave = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:8080/complains/${complain.id}`, formData)
+      .put(`http://localhost:8080/complaints/${complaint.id}`, formData)
       .then((response) => {
-        console.log("Complain updated", response.data);
+        console.log("Complaint updated", response.data);
         onUpdate();
         onClose();
       })
       .catch((error) => {
-        console.error("There was an error updating the complain!", error);
+        console.error("There was an error updating the complaint!", error);
       });
   };
 
   return (
     <div className={styles.modal}>
       <div className={styles.modalContent}>
-        <h2>Edit Complain</h2>
+        <h2>Edit Complaint</h2>
         <form onSubmit={handleSave} className={styles.form}>
           <label className={styles.label}>
             Employee ID:
@@ -55,7 +55,7 @@ const EditComplainModal = ({ complain, onClose, onUpdate }) => {
             />
           </label>
           <label className={styles.label}>
-            Text:
+            Complaint:
             <textarea
               name="text"
               value={formData.text}
@@ -82,15 +82,15 @@ const EditComplainModal = ({ complain, onClose, onUpdate }) => {
   );
 };
 
-EditComplainModal.propTypes = {
-  complain: PropTypes.shape({
+EditComplaintModal.propTypes = {
+  complaint: PropTypes.shape({
     id: PropTypes.number.isRequired,
     employeeId: PropTypes.number.isRequired,
     date: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
+    complaint: PropTypes.string.isRequired,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
 };
 
-export default EditComplainModal;
+export default EditComplaintModal;

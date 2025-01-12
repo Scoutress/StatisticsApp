@@ -18,7 +18,7 @@ import com.scoutress.KaimuxAdminStats.repositories.complaints.ComplaintsReposito
 import com.scoutress.KaimuxAdminStats.repositories.complaints.ComplaintsSumRepository;
 
 @RestController
-@RequestMapping("/complains")
+@RequestMapping("/complaints")
 public class ComplainController {
 
   private final ComplaintsSumRepository complaintsSumRepository;
@@ -32,35 +32,40 @@ public class ComplainController {
   }
 
   @GetMapping("/all-sums")
-  public List<ComplaintsSum> getAllComplainsSum() {
+  public List<ComplaintsSum> getAllComplaintsSum() {
     return complaintsSumRepository.findAll();
   }
 
   @GetMapping("/all-data")
-  public List<Complaints> getAllComplainsData() {
+  public List<Complaints> getAllComplaintsData() {
     return complaintsRepository.findAll();
-  }
-
-  @PostMapping("/add")
-  public Complaints addComplain(@RequestBody Complaints complain) {
-    return complaintsRepository.save(complain);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<Complaints> updateComplain(
-      @PathVariable Long id, @RequestBody Complaints complainDetails) {
-    Optional<Complaints> optionalComplain = complaintsRepository.findById(id);
+      @PathVariable Long id, @RequestBody Complaints complaintDetails) {
+    Optional<Complaints> optionalComplaint = complaintsRepository.findById(id);
 
-    if (!optionalComplain.isPresent()) {
+    if (!optionalComplaint.isPresent()) {
       return ResponseEntity.notFound().build();
     }
 
-    Complaints complain = optionalComplain.get();
-    complain.setEmployeeId(complainDetails.getEmployeeId());
-    complain.setDate(complainDetails.getDate());
-    complain.setText(complainDetails.getText());
-    Complaints updatedComplain = complaintsRepository.save(complain);
+    Complaints complaint = optionalComplaint.get();
+    complaint.setEmployeeId(complaintDetails.getEmployeeId());
+    complaint.setDate(complaintDetails.getDate());
+    complaint.setText(complaintDetails.getText());
+    Complaints updatedComplain = complaintsRepository.save(complaint);
 
     return ResponseEntity.ok(updatedComplain);
+  }
+
+  @PostMapping("/add")
+  public ResponseEntity<Complaints> addComplaint(@RequestBody Complaints complaint) {
+    try {
+      Complaints savedComplaint = complaintsRepository.save(complaint);
+      return ResponseEntity.ok(savedComplaint);
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(null);
+    }
   }
 }

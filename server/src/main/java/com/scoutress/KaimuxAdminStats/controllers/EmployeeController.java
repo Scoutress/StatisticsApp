@@ -1,6 +1,9 @@
 package com.scoutress.KaimuxAdminStats.controllers;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +28,15 @@ public class EmployeeController {
 
   @GetMapping("/all")
   public List<Employee> getAllEmployees() {
-    return employeeRepository.findAll();
+    List<String> levelOrder = Arrays.asList(
+        "Owner", "Operator", "Manager", "Organizer",
+        "Overseer", "ChatMod", "Support", "Helper");
+
+    return employeeRepository
+        .findAll()
+        .stream()
+        .sorted(Comparator.comparingInt(employee -> levelOrder.indexOf(employee.getLevel())))
+        .collect(Collectors.toList());
   }
 
   @PostMapping("/add")

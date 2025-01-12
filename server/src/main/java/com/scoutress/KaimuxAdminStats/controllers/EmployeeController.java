@@ -1,5 +1,6 @@
 package com.scoutress.KaimuxAdminStats.controllers;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
+import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeLevelChange;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeLevelChangeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 
 @RestController
@@ -24,10 +27,13 @@ import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 public class EmployeeController {
 
   private final EmployeeRepository employeeRepository;
+  private final EmployeeLevelChangeRepository employeeLevelChangeRepository;
 
   public EmployeeController(
-      EmployeeRepository employeeRepository) {
+      EmployeeRepository employeeRepository,
+      EmployeeLevelChangeRepository employeeLevelChangeRepository) {
     this.employeeRepository = employeeRepository;
+    this.employeeLevelChangeRepository = employeeLevelChangeRepository;
   }
 
   @GetMapping("/all")
@@ -56,13 +62,17 @@ public class EmployeeController {
   @PutMapping("/{id}")
   public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
     Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+
     if (!optionalEmployee.isPresent()) {
       return ResponseEntity.notFound().build();
     }
 
     Employee employee = optionalEmployee.get();
+    String oldLevel = employee.getLevel();
+    String newLevel = employeeDetails.getLevel();
+
     employee.setUsername(employeeDetails.getUsername());
-    employee.setLevel(employeeDetails.getLevel());
+    employee.setLevel(newLevel);
     employee.setFirstName(employeeDetails.getFirstName());
     employee.setLastName(employeeDetails.getLastName());
     employee.setEmail(employeeDetails.getEmail());
@@ -70,6 +80,14 @@ public class EmployeeController {
     employee.setJoinDate(employeeDetails.getJoinDate());
 
     Employee updatedEmployee = employeeRepository.save(employee);
+
+    if (!oldLevel.equals(newLevel)) {
+      EmployeeLevelChange levelChanging = new EmployeeLevelChange();
+      levelChanging.setEmployeeId(employee.getId());
+      levelChanging.setDate(LocalDate.now());
+      levelChanging.setAction(oldLevel + " to " + newLevel);
+      employeeLevelChangeRepository.save(levelChanging);
+    }
     return ResponseEntity.ok(updatedEmployee);
   }
 

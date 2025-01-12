@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Loading from "../../../components/loading/Loading.jsx";
 import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
-import EditComplainModal from "../editComplaintModal/EditComplaintModal.jsx";
+import EditComplaintModal from "../editComplaintModal/EditComplaintModal.jsx";
 import { Link } from "react-router-dom";
 import styles from "./ComplaintsDataPage.module.scss";
 
@@ -10,7 +10,7 @@ const ComplaintsDataPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedComplain, setSelectedComplain] = useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,12 +38,12 @@ const ComplaintsDataPage = () => {
     fetchData();
   }, []);
 
-  const handleEditClick = (complain) => {
-    setSelectedComplain(complain);
+  const handleEditClick = (complaint) => {
+    setSelectedComplaint(complaint);
   };
 
   const closeModal = () => {
-    setSelectedComplain(null);
+    setSelectedComplaint(null);
   };
 
   if (isLoading) {
@@ -73,13 +73,13 @@ const ComplaintsDataPage = () => {
         </thead>
         <tbody>
           {Array.isArray(complaints) ? (
-            complaints.map((complain) => (
-              <tr key={complain.id}>
-                <td>{complain.employeeId}</td>
-                <td>{complain.date}</td>
-                <td>{complain.text}</td>
+            complaints.map((complaint) => (
+              <tr key={complaint.id}>
+                <td>{complaint.employeeId}</td>
+                <td>{complaint.date}</td>
+                <td>{complaint.text}</td>
                 <td>
-                  <button onClick={() => handleEditClick(complain)}>
+                  <button onClick={() => handleEditClick(complaint)}>
                     Edit
                   </button>
                 </td>
@@ -93,9 +93,9 @@ const ComplaintsDataPage = () => {
         </tbody>
       </table>
 
-      {selectedComplain && (
-        <EditComplainModal
-          complain={selectedComplain}
+      {selectedComplaint && (
+        <EditComplaintModal
+          complaint={selectedComplaint}
           onClose={closeModal}
           onUpdate={() => window.location.reload()}
         />

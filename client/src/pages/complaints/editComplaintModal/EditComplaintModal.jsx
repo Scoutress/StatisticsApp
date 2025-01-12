@@ -33,7 +33,7 @@ const EditComplaintModal = ({ complaint, onClose, onUpdate }) => {
           <label className={styles.label}>
             Employee ID:
             <input
-              type="text"
+              type="number"
               name="employeeId"
               value={formData.employeeId}
               onChange={handleChange}
@@ -87,7 +87,7 @@ EditComplaintModal.propTypes = {
     id: PropTypes.number.isRequired,
     employeeId: PropTypes.number.isRequired,
     date: PropTypes.string.isRequired,
-    complaint: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,

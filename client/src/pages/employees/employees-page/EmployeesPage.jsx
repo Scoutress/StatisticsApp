@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Loading from "../../../components/loading/Loading.jsx";
+import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
 import styles from "./EmployeesPage.module.scss";
 import { Link } from "react-router-dom";
 
@@ -25,17 +27,27 @@ const EmployeesPage = () => {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div>There was an error fetching the data! {error.message}</div>;
+    return <div>{error && <ErrorMessage message={error.message} />}</div>;
   }
 
   return (
     <div className={styles.employeesPage}>
       <h1 className={styles.title}>Employees list</h1>
-      <Link to="/employee/add">Employee add</Link>
+
+      <Link to="/employee/add" key="employee-add">
+        Employee add
+      </Link>
+
+      {isLoading && (
+        <div className="spinner">
+          <p>Updating...</p>
+        </div>
+      )}
+
       <table className={styles.table}>
         <thead>
           <tr>

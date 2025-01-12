@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Loading from "../../../components/loading/Loading.jsx";
 import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
+import EditComplainModal from "./../../../components/editComplainModal/EditComplainModal.jsx";
 import styles from "./ComplainsDataPage.module.scss";
 
 const ComplainsDataPage = () => {
   const [complains, setComplains] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedComplain, setSelectedComplain] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,12 +37,20 @@ const ComplainsDataPage = () => {
     fetchData();
   }, []);
 
+  const handleEditClick = (complain) => {
+    setSelectedComplain(complain);
+  };
+
+  const closeModal = () => {
+    setSelectedComplain(null);
+  };
+
   if (isLoading) {
     return <Loading />;
   }
 
   if (error) {
-    return <div>{error && <ErrorMessage message={error} />}</div>;
+    return <div>{error && <ErrorMessage message={error.message} />}</div>;
   }
 
   return (
@@ -50,8 +60,9 @@ const ComplainsDataPage = () => {
         <thead>
           <tr>
             <th>Employee ID</th>
-            <th>Data</th>
+            <th>Date</th>
             <th>Text</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -61,6 +72,11 @@ const ComplainsDataPage = () => {
                 <td>{complain.employeeId}</td>
                 <td>{complain.date}</td>
                 <td>{complain.text}</td>
+                <td>
+                  <button onClick={() => handleEditClick(complain)}>
+                    Edit
+                  </button>
+                </td>
               </tr>
             ))
           ) : (
@@ -70,6 +86,14 @@ const ComplainsDataPage = () => {
           )}
         </tbody>
       </table>
+
+      {selectedComplain && (
+        <EditComplainModal
+          complain={selectedComplain}
+          onClose={closeModal}
+          onUpdate={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 };

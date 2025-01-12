@@ -2,7 +2,10 @@ package com.scoutress.KaimuxAdminStats.controllers;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +26,15 @@ public class EmployeeController {
   @GetMapping("/all")
   public List<Employee> getAllEmployees() {
     return employeeRepository.findAll();
+  }
+
+  @PostMapping("/add")
+  public ResponseEntity<Employee> addEmployee(@RequestBody Employee employee) {
+    try {
+      Employee savedEmployee = employeeRepository.save(employee);
+      return ResponseEntity.ok(savedEmployee);
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(null);
+    }
   }
 }

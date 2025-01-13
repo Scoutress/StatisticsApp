@@ -88,8 +88,6 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Getting data from the API");
     apiDataExtractionService.handleMinecraftTicketsRawData();
 
-    ////////////
-
     System.out.println("Annual playtime calculations");
     sQLiteToMySQLService.initializeUsersDatabase();
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();

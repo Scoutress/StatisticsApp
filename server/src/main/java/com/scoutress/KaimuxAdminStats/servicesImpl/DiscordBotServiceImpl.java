@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats;
+package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,14 +7,26 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-public class DiscordBotClient {
+import com.scoutress.KaimuxAdminStats.config.DcBotConfig;
+import com.scoutress.KaimuxAdminStats.services.DiscordBotService;
 
-  private static final String BOT_API_URL = "http://localhost:8085/check-messages";
+@Service
+public class DiscordBotServiceImpl implements DiscordBotService {
 
-  public static void main(String[] args) {
+  private final static DcBotConfig dcBotConfig = new DcBotConfig();
+
+  @Override
+  public void processDiscordMessagesCount(String[] args) {
     RestTemplate restTemplate = new RestTemplate();
+    String botApiUrl = dcBotConfig.getDcBotApi();
+
+    if (botApiUrl == null || !botApiUrl.startsWith("http")) {
+      System.err.println("Invalid bot API URL: " + botApiUrl);
+      return;
+    }
 
     // Example data for the loop
     long[] userIds = { 508674128006479872L, 123456789012345678L };
@@ -31,7 +43,7 @@ public class DiscordBotClient {
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(BOT_API_URL, requestEntity, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(botApiUrl, requestEntity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
           System.out.println("Response: " + response.getBody());

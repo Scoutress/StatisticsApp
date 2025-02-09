@@ -2,11 +2,13 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import asyncio
 import mysql.connector
 from mysql.connector import Error
 from aiohttp import web
+from collections import defaultdict
+import logging
 
 load_dotenv()
 
@@ -20,6 +22,8 @@ DB_TABLE = "discord_raw_message_counts"
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+message_cache = defaultdict(list)
 
 def connect_to_database():
     try:
@@ -63,18 +67,49 @@ def save_message_count_to_db(user_id, message_date, message_count):
         print(f"Error saving to MySQL database: {e}")
         return False
 
+async def fetch_messages_for_date(channel, target_date):
+    """Fetch all messages for a specific date in a channel."""
+    messages = []
+    start_date = datetime.combine(target_date, datetime.min.time())
+    end_date = start_date + timedelta(days=1)
+
+    while True:
+        try:
+            async for message in channel.history(limit=None, after=start_date, before=end_date):
+                messages.append(message)
+            break
+        except discord.HTTPException as e:
+            if e.status == 429:
+                retry_after = e.retry_after
+                logging.warning(f"Rate limited. Retrying in {retry_after} seconds.")
+                await asyncio.sleep(retry_after)
+            else:
+                raise
+        await asyncio.sleep(1)
+
+    return messages
+
+
 async def count_messages(user_id, target_date):
+    """Count messages for a specific user and date."""
     guild = bot.guilds[0]
-    message_count = 0
+    tasks = []
+    semaphore = asyncio.Semaphore(5)
+
+    async def fetch_with_semaphore(channel, date):
+        async with semaphore:
+            return await fetch_messages_for_date(channel, date)
 
     for channel in guild.text_channels:
-        try:
-            async for message in channel.history(limit=1000):
-                if message.author.id == user_id and message.created_at.date() == target_date:
-                    message_count += 1
-                await asyncio.sleep(0.1)
-        except discord.Forbidden:
-            continue
+        tasks.append(fetch_with_semaphore(channel, target_date))
+
+    results = await asyncio.gather(*tasks)
+
+    message_count = 0
+    for messages in results:
+        for message in messages:
+            if message.author.id == user_id:
+                message_count += 1
 
     return message_count
 

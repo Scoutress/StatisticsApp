@@ -30,14 +30,13 @@ public class DiscordBotServiceImpl implements DiscordBotService {
 
   private final EmployeeCodesRepository employeeCodesRepository;
   private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
-  private boolean testMode = true;
+  private boolean testMode = false;
 
   public DiscordBotServiceImpl(
       EmployeeCodesRepository employeeCodesRepository,
       DailyDiscordMessagesRepository dailyDiscordMessagesRepository) {
     this.employeeCodesRepository = employeeCodesRepository;
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
-    Runtime.getRuntime().addShutdownHook(new Thread(this::stopBot));
   }
 
   public void setTestMode(boolean testMode) {

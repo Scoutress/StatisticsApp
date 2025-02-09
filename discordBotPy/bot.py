@@ -23,17 +23,20 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 def connect_to_database():
     try:
-        if ":" in DB_URL:
-            host, port = DB_URL.split(":")
+        url_parts = DB_URL.split("//")[1]
+        host_port, db_name = url_parts.split("/", 1)
+        if ":" in host_port:
+            host, port = host_port.split(":")
         else:
-            host, port = DB_URL, 3306
+            host = host_port
+            port = 3306
 
         connection = mysql.connector.connect(
             host=host,
             port=int(port),
             user=DB_USERNAME,
             password=DB_PASSWORD,
-            database=DB_SCHEMA
+            database=db_name
         )
         return connection
     except Error as e:
@@ -79,6 +82,8 @@ async def handle_request(request):
     data = await request.json()
     user_id = data.get("user_id")
     message_date_str = data.get("message_date")
+
+    print(f"Received request: user_id={user_id}, message_date={message_date_str}")
 
     if isinstance(message_date_str, list):
         if len(message_date_str) == 1:

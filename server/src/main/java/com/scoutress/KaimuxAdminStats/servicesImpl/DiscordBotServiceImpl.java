@@ -183,7 +183,8 @@ public class DiscordBotServiceImpl implements DiscordBotService {
 
   private void stopBot() {
     try {
-      new ProcessBuilder("cmd.exe", "/c", "taskkill", "/F", "/IM", "python.exe", "/T").start();
+      new ProcessBuilder("powershell.exe", "/c", "Stop-Process -Name python -Force").start();
+      new ProcessBuilder("powershell.exe", "/c", "Stop-Process -Name cmd -Force").start();
       System.out.println("Bot stopped and terminal window closed.");
     } catch (IOException e) {
       System.err.println(e);

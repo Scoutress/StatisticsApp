@@ -28,8 +28,9 @@ import com.scoutress.KaimuxAdminStats.services.DiscordBotService;
 @Service
 public class DiscordBotServiceImpl implements DiscordBotService {
 
-  EmployeeCodesRepository employeeCodesRepository;
-  DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
+  private final EmployeeCodesRepository employeeCodesRepository;
+  private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
+  private boolean testMode = true;
 
   public DiscordBotServiceImpl(
       EmployeeCodesRepository employeeCodesRepository,
@@ -37,6 +38,10 @@ public class DiscordBotServiceImpl implements DiscordBotService {
     this.employeeCodesRepository = employeeCodesRepository;
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
     Runtime.getRuntime().addShutdownHook(new Thread(this::stopBot));
+  }
+
+  public void setTestMode(boolean testMode) {
+    this.testMode = testMode;
   }
 
   @Override
@@ -49,19 +54,27 @@ public class DiscordBotServiceImpl implements DiscordBotService {
       System.err.println(e);
     }
 
-    List<EmployeeCodes> employeeCodesData = getAddEmployeeCodesData();
-    List<Short> allEmployeeIds = getAllEmployeeIds(employeeCodesData);
-    LocalDate latestDateFromDcMsgsData = getLatestDateFromDiscordMessagesData();
-    LocalDate todaysDate = LocalDate.now();
-    List<LocalDate> allDatesFromLatestTillTodays = getAllDatesBetween(
-        latestDateFromDcMsgsData, todaysDate);
+    if (testMode) {
+      processDiscordMessagesCount(
+          508674128006479872L,
+          List.of(
+              LocalDate.of(2025, 2, 7),
+              LocalDate.of(2025, 2, 8)));
+    } else {
+      List<EmployeeCodes> employeeCodesData = getAddEmployeeCodesData();
+      List<Short> allEmployeeIds = getAllEmployeeIds(employeeCodesData);
+      LocalDate latestDateFromDcMsgsData = getLatestDateFromDiscordMessagesData();
+      LocalDate todaysDate = LocalDate.now();
+      List<LocalDate> allDatesFromLatestTillTodays = getAllDatesBetween(
+          latestDateFromDcMsgsData, todaysDate);
 
-    System.out.println("Discord messages processing was started...");
+      System.out.println("Discord messages processing was started...");
 
-    for (Short employeeId : allEmployeeIds) {
-      Long dcUserId = getDiscordUserIdForThisEmployee(employeeCodesData, employeeId);
+      for (Short employeeId : allEmployeeIds) {
+        Long dcUserId = getDiscordUserIdForThisEmployee(employeeCodesData, employeeId);
 
-      processDiscordMessagesCount(dcUserId, allDatesFromLatestTillTodays);
+        processDiscordMessagesCount(dcUserId, allDatesFromLatestTillTodays);
+      }
     }
 
     System.out.println("Discord messages processing was completed.");

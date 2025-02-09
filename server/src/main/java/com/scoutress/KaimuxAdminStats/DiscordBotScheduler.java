@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesImpl;
+package com.scoutress.KaimuxAdminStats;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,8 @@ public class DiscordBotScheduler {
     this.discordBotService = discordBotService;
   }
 
-  @Scheduled(fixedRate = 600000) // Run every 600 seconds
+  @Scheduled(cron = "0 02 11 * * *")
   public void scheduledProcessDiscordMessagesCount() {
-    discordBotService.processDiscordMessagesCount(new String[] {});
+    discordBotService.collectMessagesCountsFromDiscord();
   }
 }

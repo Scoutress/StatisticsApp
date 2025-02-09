@@ -50,4 +50,7 @@ public class EmployeeCodes {
 
   @Column(name = "minecraft_id", nullable = true)
   private Short minecraftId; // Kaimux website API Minecraft user code
+
+  @Column(name = "discord_user_id", nullable = true)
+  private Long discordUserId; // Default Discord user ID
 }

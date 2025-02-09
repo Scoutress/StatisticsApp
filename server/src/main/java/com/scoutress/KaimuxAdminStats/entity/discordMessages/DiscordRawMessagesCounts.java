@@ -23,8 +23,8 @@ public class DiscordRawMessagesCounts {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "username", nullable = false)
-  private String username;
+  @Column(name = "dc_user_id", nullable = false)
+  private String dcUserId;
 
   @Column(name = "message_date", nullable = false)
   private LocalDate messageDate;

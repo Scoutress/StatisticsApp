@@ -48,7 +48,7 @@ def save_message_count_to_db(user_id, message_date, message_count):
     try:
         cursor = connection.cursor()
         query = f"""
-        INSERT INTO {DB_TABLE} (username, message_date, message_count)
+        INSERT INTO {DB_TABLE} (dc_user_id, message_date, message_count)
         VALUES (%s, %s, %s)
         """
         cursor.execute(query, (user_id, message_date, message_count))
@@ -79,6 +79,12 @@ async def handle_request(request):
     data = await request.json()
     user_id = data.get("user_id")
     message_date_str = data.get("message_date")
+
+    if isinstance(message_date_str, list):
+        if len(message_date_str) == 1:
+            message_date_str = message_date_str[0]
+        else:
+            return web.json_response({"status": "error", "message": "Invalid date format. Use YYYY-MM-DD."}, status=400)
 
     try:
         message_date = datetime.strptime(message_date_str, "%Y-%m-%d").date()

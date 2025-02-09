@@ -3,6 +3,7 @@ package com.scoutress.KaimuxAdminStats.servicesImpl;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
+import com.scoutress.KaimuxAdminStats.services.DiscordBotService;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
@@ -25,6 +26,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class TaskServiceImpl implements TaskService {
 
+  private final DiscordBotService discordBotService;
   private final ApiDataExtractionService apiDataExtractionService;
   private final ProductivityService productivityService;
   private final SQLiteToMySQLService sQLiteToMySQLService;
@@ -43,6 +45,7 @@ public class TaskServiceImpl implements TaskService {
   private final RecommendationUserService recommendationUserService;
 
   public TaskServiceImpl(
+      DiscordBotService discordBotService,
       ApiDataExtractionService apiDataExtractionService,
       ProductivityService productivityService,
       SQLiteToMySQLService sQLiteToMySQLService,
@@ -59,6 +62,7 @@ public class TaskServiceImpl implements TaskService {
       RecommendationsService recommendationsService,
       FinalStatsService finalStatsService,
       RecommendationUserService recommendationUserService) {
+    this.discordBotService = discordBotService;
     this.apiDataExtractionService = apiDataExtractionService;
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
@@ -84,10 +88,26 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
+    System.out.println("Taking Discord messages with Discord robot");
+    discordBotService.collectMessagesCountsFromDiscord();
+
+    System.out.println("");
+    System.out.println("Discord messages convertion");
+    discordMessagesService.convertDailyDiscordMessagesValue();
+
+    System.out.println("");
+    System.out.println("Average discord messages per day calculations");
+    discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
+
+    System.out.println("");
+    System.out.println("Average discord messages taking comparison per day calculation");
+    discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
+
     System.out.println("");
     System.out.println("Getting data from the API");
     apiDataExtractionService.handleMinecraftTicketsRawData();
 
+    System.out.println("");
     System.out.println("Annual playtime calculations");
     sQLiteToMySQLService.initializeUsersDatabase();
     sQLiteToMySQLService.initializePlaytimeSessionsDatabase();
@@ -117,14 +137,6 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
     System.out.println("Total Minecraft tickets updating");
     minecraftTicketsService.calculateTotalMinecraftTickets();
-
-    System.out.println("");
-    System.out.println("Average discord messages per day calculations");
-    discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
-
-    System.out.println("");
-    System.out.println("Average discord messages taking comparison per day calculation");
-    discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
 
     System.out.println("");
     System.out.println("Complaints calculation");

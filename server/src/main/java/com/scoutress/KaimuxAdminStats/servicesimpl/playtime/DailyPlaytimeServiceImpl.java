@@ -24,29 +24,23 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   public DailyPlaytimeServiceImpl(
       DailyPlaytimeRepository dailyPlaytimeRepository,
       DataExtractingService dataExtractingService) {
-
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.dataExtractingService = dataExtractingService;
   }
 
   @Override
   public void handleDailyPlaytime() {
-
     List<SessionDuration> allSessions = dataExtractingService.getSessionDurations();
-
     List<DailyPlaytime> dailyPlaytimeData = calculateDailyPlaytime(allSessions);
-
     saveCalculatedPlaytime(dailyPlaytimeData);
   }
 
-  @Override
   public List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
-
     List<DailyPlaytime> handledDailyPlaytimeData = new ArrayList<>();
 
-    Set<Short> uniqueAids = sessions
+    Set<Short> allEmployeeIds = sessions
         .stream()
-        .map(SessionDuration::getAid)
+        .map(SessionDuration::getEmployeeId)
         .collect(Collectors.toSet());
 
     Set<String> uniqueServers = sessions
@@ -59,23 +53,31 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
         .map(SessionDuration::getDate)
         .collect(Collectors.toSet());
 
-    for (Short aid : uniqueAids) {
+    for (Short employeeId : allEmployeeIds) {
       for (String server : uniqueServers) {
         for (LocalDate date : uniqueDates) {
-          double sessionPlaytimeInSec = sessions
+          int sessionPlaytimeInSec = sessions
               .stream()
-              .filter(session -> session.getAid().equals(aid))
+              .filter(session -> session.getEmployeeId().equals(employeeId))
               .filter(session -> session.getServer().equals(server))
               .filter(session -> session.getDate().equals(date))
-              .mapToDouble(SessionDuration::getSingleSessionDuration)
+              .mapToInt(SessionDuration::getSingleSessionDurationInSec)
               .sum();
 
-          DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
-          dailyPlaytimeData.setAid(aid);
-          dailyPlaytimeData.setServer(server);
-          dailyPlaytimeData.setDate(date);
-          dailyPlaytimeData.setTime(sessionPlaytimeInSec);
-          handledDailyPlaytimeData.add(dailyPlaytimeData);
+          if (sessionPlaytimeInSec < 0) {
+            throw new IllegalArgumentException("Playtime can not be less than 0!");
+          }
+
+          double sessionPlaytimeInHours = sessionPlaytimeInSec / 3600.0;
+
+          if (sessionPlaytimeInSec > 0) {
+            DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
+            dailyPlaytimeData.setEmployeeId(employeeId);
+            dailyPlaytimeData.setServer(server);
+            dailyPlaytimeData.setDate(date);
+            dailyPlaytimeData.setTimeInHours(sessionPlaytimeInHours);
+            handledDailyPlaytimeData.add(dailyPlaytimeData);
+          }
         }
       }
     }
@@ -85,8 +87,21 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     return handledDailyPlaytimeData;
   }
 
-  @Override
   public void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
-    dailyPlaytimeData.forEach(dailyPlaytimeRepository::save);
+    dailyPlaytimeData.forEach(dailyPlaytime -> {
+      DailyPlaytime existingPlaytime = dailyPlaytimeRepository.findByEmployeeIdAndDateAndServer(
+          dailyPlaytime.getEmployeeId(),
+          dailyPlaytime.getDate(),
+          dailyPlaytime.getServer());
+
+      if (existingPlaytime != null) {
+        if (!existingPlaytime.getTimeInHours().equals(dailyPlaytime.getTimeInHours())) {
+          existingPlaytime.setTimeInHours(dailyPlaytime.getTimeInHours());
+          dailyPlaytimeRepository.save(existingPlaytime);
+        }
+      } else {
+        dailyPlaytimeRepository.save(dailyPlaytime);
+      }
+    });
   }
 }

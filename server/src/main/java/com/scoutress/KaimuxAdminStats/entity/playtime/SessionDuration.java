@@ -23,11 +23,11 @@ public class SessionDuration {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
   @Column(name = "single_session_duration", nullable = false)
-  private int singleSessionDuration;
+  private int singleSessionDurationInSec;
 
   @Column(name = "date", nullable = false)
   private LocalDate date;
@@ -35,9 +35,9 @@ public class SessionDuration {
   @Column(name = "server", nullable = false)
   private String server;
 
-  public SessionDuration(short aid, int singleSessionDuration, LocalDate date, String server) {
-    this.aid = aid;
-    this.singleSessionDuration = singleSessionDuration;
+  public SessionDuration(short employeeId, int singleSessionDuration, LocalDate date, String server) {
+    this.employeeId = employeeId;
+    this.singleSessionDurationInSec = singleSessionDuration;
     this.date = date;
     this.server = server;
   }

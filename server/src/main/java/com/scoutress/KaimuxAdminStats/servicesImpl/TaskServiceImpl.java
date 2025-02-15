@@ -103,10 +103,12 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Average discord messages taking comparison per day calculation");
     discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
 
+    System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
     System.out.println("Getting data from the API");
     apiDataExtractionService.handleMinecraftTicketsRawData();
 
+    System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
     System.out.println("Annual playtime calculations");
     sQLiteToMySQLService.initializeUsersDatabase();
@@ -121,6 +123,7 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Average playtime per day calculations");
     averagePlaytimeOverallService.handleAveragePlaytime();
 
+    System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
     System.out.println("Average Minecraft tickets per day calculations");
     minecraftTicketsService.convertMinecraftTicketsAnswers();
@@ -138,6 +141,7 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Total Minecraft tickets updating");
     minecraftTicketsService.calculateTotalMinecraftTickets();
 
+    System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
     System.out.println("Complaints calculation");
     complaintsService.calculateComplaintsPerEachEmployee();

@@ -41,7 +41,7 @@ const EmployeePlaytime = () => {
 
   return (
     <div className={styles.playtimeList}>
-      <h2>Employee Playtimes</h2>
+      <h2>Playtimes</h2>
       {playtimeData ? (
         <table className={styles.table}>
           <thead>

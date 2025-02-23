@@ -7,8 +7,9 @@ import HalfDoughnutChart from "../../../components/halfDoughnutChart/HalfDoughnu
 import EmployeeRankingOverall from "../../../components/employeeRankingOverall/EmployeeRankingOverall.jsx";
 import UserRecommendationText from "../../../components/userRecommendation/UserRecommendationText.jsx";
 import styles from "./EmployeePersonalStatsPage.module.scss";
-import EmployeeMcTickets from "../../../components/employeeMcTickets/EmployeeMcTickets.jsx";
 import EmployeePlaytime from "../../../components/employeePlaytime/EmployeePlaytime.jsx";
+import EmployeeMcTicketsOverall from "../../../components/EmployeeMcTicketsOverall/EmployeeMcTicketsOverall.jsx";
+import EmployeeMcTickets from "../../../components/employeeMcTickets/EmployeeMcTickets.jsx";
 
 const EmployeePersonalStatsPage = () => {
   const { employeeId } = useParams();
@@ -56,25 +57,17 @@ const EmployeePersonalStatsPage = () => {
       ) : (
         <p>No productivity data available.</p>
       )}
-      {employeeId !== null ? (
-        <EmployeeRankingOverall employeeId={employeeId} />
+
+      {employeeId ? (
+        <>
+          <EmployeeRankingOverall employeeId={employeeId} />
+          <UserRecommendationText employeeId={employeeId} />
+          <EmployeeMcTicketsOverall employeeId={employeeId} />
+          <EmployeeMcTickets employeeId={employeeId} />
+          <EmployeePlaytime employeeId={employeeId} />
+        </>
       ) : (
-        <p>No ranking data available.</p>
-      )}
-      {employeeId !== null ? (
-        <UserRecommendationText employeeId={employeeId} />
-      ) : (
-        <p>No recommendation data available.</p>
-      )}
-      {employeeId !== null ? (
-        <EmployeeMcTickets employeeId={employeeId} />
-      ) : (
-        <p>No Minecraft tickets data per employee available.</p>
-      )}
-      {employeeId !== null ? (
-        <EmployeePlaytime employeeId={employeeId} />
-      ) : (
-        <p>No playtime data per employee available.</p>
+        <p>No employee data available.</p>
       )}
     </div>
   );

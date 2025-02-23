@@ -1,52 +1,84 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import Loading from "../../components/loading/Loading.jsx";
 import styles from "./EmployeeMcTickets.module.scss";
 
 const EmployeeMcTickets = () => {
-  const [employees, setEmployees] = useState([]);
   const { employeeId } = useParams();
+  const [mcTicketsData, setMcTicketsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchMcTicketsData = async () => {
+      setError(null);
       try {
         const response = await axios.get(
-          "http://localhost:8080/user/total-tickets"
+          `http://localhost:8080/user/mcTickets/${employeeId}`
         );
-        setEmployees(response.data);
+        setMcTicketsData(response.data);
       } catch (error) {
-        console.error("Error fetching employees with tickets:", error);
+        setError("Error fetching mc tickets data: " + error.message);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchEmployees();
-  }, []);
+
+    if (employeeId) {
+      fetchMcTicketsData();
+    }
+  }, [employeeId]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <div>{error && <ErrorMessage message={error} />}</div>;
+  }
 
   return (
     <div className={styles.mcTicketsList}>
-      <h2>Minecraft tickets for each employee</h2>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Number</th>
-            <th>Username</th>
-            <th>Total Tickets</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((employee, index) => (
-            <tr
-              key={employee.id}
-              className={
-                employee.id.toString() === employeeId ? styles.highlight : ""
-              }
-            >
-              <td>{index + 1}</td>
-              <td>{employee.username}</td>
-              <td>{employee.totalTickets}</td>
+      <h2>Minecraft tickets</h2>
+      {mcTicketsData ? (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Time Period</th>
+              <th>Mc Tickets</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Last Day</td>
+              <td>
+                {mcTicketsData.lastDay !== undefined
+                  ? mcTicketsData.lastDay
+                  : "No data"}
+              </td>
+            </tr>
+            <tr>
+              <td>Last Week</td>
+              <td>
+                {mcTicketsData.lastWeek !== undefined
+                  ? mcTicketsData.lastWeek
+                  : "No data"}
+              </td>
+            </tr>
+            <tr>
+              <td>Last Month</td>
+              <td>
+                {mcTicketsData.lastMonth !== undefined
+                  ? mcTicketsData.lastMonth
+                  : "No data"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      ) : (
+        <p>No mc tickets data available.</p>
+      )}
     </div>
   );
 };

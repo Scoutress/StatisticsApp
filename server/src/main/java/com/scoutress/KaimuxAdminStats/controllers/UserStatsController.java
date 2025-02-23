@@ -19,6 +19,7 @@ import com.scoutress.KaimuxAdminStats.repositories.RecommendationUserRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.TotalMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
+import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 
 @RestController
@@ -29,6 +30,7 @@ public class UserStatsController {
   private final RecommendationUserRepository recommendationUserRepository;
   private final TotalMinecraftTicketsRepository totalMinecraftTicketsRepository;
   private final EmployeeRepository employeeRepository;
+  private final MinecraftTicketsService minecraftTicketsService;
   private final DailyPlaytimeService dailyPlaytimeService;
 
   public UserStatsController(
@@ -36,11 +38,13 @@ public class UserStatsController {
       RecommendationUserRepository recommendationUserRepository,
       TotalMinecraftTicketsRepository totalMinecraftTicketsRepository,
       EmployeeRepository employeeRepository,
+      MinecraftTicketsService minecraftTicketsService,
       DailyPlaytimeService dailyPlaytimeService) {
     this.finalStatsService = finalStatsService;
     this.recommendationUserRepository = recommendationUserRepository;
     this.totalMinecraftTicketsRepository = totalMinecraftTicketsRepository;
     this.employeeRepository = employeeRepository;
+    this.minecraftTicketsService = minecraftTicketsService;
     this.dailyPlaytimeService = dailyPlaytimeService;
   }
 
@@ -95,8 +99,28 @@ public class UserStatsController {
         .collect(Collectors.toList());
   }
 
+  @GetMapping("/mcTickets/{employeeId}")
+  public ResponseEntity<Map<String, Object>> getMinecraftTicketsForEmployeePerDuration(@PathVariable Short employeeId) {
+    Employee employee = employeeRepository.findById(employeeId).orElse(null);
+    if (employee == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Employee not found"));
+    }
+
+    Map<String, Object> mcTicketsData = new HashMap<>();
+
+    Double lastDay = minecraftTicketsService.getSumOfMcTicketsByEmployeeIdAndDuration(employeeId, (short) 1);
+    Double lastWeek = minecraftTicketsService.getSumOfMcTicketsByEmployeeIdAndDuration(employeeId, (short) 7);
+    Double lastMonth = minecraftTicketsService.getSumOfMcTicketsByEmployeeIdAndDuration(employeeId, (short) 30);
+
+    mcTicketsData.put("lastDay", lastDay);
+    mcTicketsData.put("lastWeek", lastWeek);
+    mcTicketsData.put("lastMonth", lastMonth);
+
+    return ResponseEntity.ok(mcTicketsData);
+  }
+
   @GetMapping("/playtime/{employeeId}")
-  public ResponseEntity<Map<String, Object>> getPlaytimeForEmployee(@PathVariable Short employeeId) {
+  public ResponseEntity<Map<String, Object>> getPlaytimeForEmployeePerDuration(@PathVariable Short employeeId) {
     Employee employee = employeeRepository.findById(employeeId).orElse(null);
     if (employee == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Employee not found"));

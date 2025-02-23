@@ -44,7 +44,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       EmployeeCodesRepository employeeCodesRepository,
       MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository,
       EmployeeRepository employeeRepository,
-      DailyMinecraftTicketsRepository discordTicketsRepository,
+      DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository,
       AverageDailyMinecraftTicketsRepository averageDailyMinecraftTicketsRepository,
       DailyPlaytimeRepository dailyPlaytimeRepository,
       AverageMinecraftTicketsPerPlaytimeRepository averageMinecraftTicketsPerPlaytimeRepository,
@@ -53,7 +53,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
     this.employeeCodesRepository = employeeCodesRepository;
     this.minecraftTicketsAnswersRepository = minecraftTicketsAnswersRepository;
     this.employeeRepository = employeeRepository;
-    this.dailyMinecraftTicketsRepository = discordTicketsRepository;
+    this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
     this.averageDailyMinecraftTicketsRepository = averageDailyMinecraftTicketsRepository;
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.averageMinecraftTicketsPerPlaytimeRepository = averageMinecraftTicketsPerPlaytimeRepository;
@@ -377,5 +377,33 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       newRecord.setTicketCount(sumWithOldTickets);
       totalMinecraftTicketsRepository.save(newRecord);
     }
+  }
+
+  @Override
+  public double getSumOfMcTicketsByEmployeeIdAndDuration(Short employeeId, Short days) {
+    List<DailyMinecraftTickets> rawMcTicketsData = getRawMcTicketsData();
+    List<DailyMinecraftTickets> mcTicketsThisEmployee = getMcTicketsForThisEmployee(rawMcTicketsData, employeeId);
+
+    return calculateMcTickets(mcTicketsThisEmployee, days);
+  }
+
+  public List<DailyMinecraftTickets> getRawMcTicketsData() {
+    return dailyMinecraftTicketsRepository.findAll();
+  }
+
+  public List<DailyMinecraftTickets> getMcTicketsForThisEmployee(
+      List<DailyMinecraftTickets> rawMcTicketsData, Short employeeId) {
+    return rawMcTicketsData
+        .stream()
+        .filter(mcTicketsData -> mcTicketsData.getEmployeeId().equals(employeeId))
+        .collect(Collectors.toList());
+  }
+
+  public Double calculateMcTickets(List<DailyMinecraftTickets> mcTicketsData, Short days) {
+    return mcTicketsData
+        .stream()
+        .filter(data -> data.getDate().isAfter(LocalDate.now().minusDays(days)))
+        .mapToDouble(DailyMinecraftTickets::getTicketCount)
+        .sum();
   }
 }

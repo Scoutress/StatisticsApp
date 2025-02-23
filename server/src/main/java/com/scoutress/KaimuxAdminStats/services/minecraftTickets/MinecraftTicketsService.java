@@ -9,4 +9,6 @@ public interface MinecraftTicketsService {
   void calculateAverageMinecraftTicketsPerPlaytime();
 
   void calculateTotalMinecraftTickets();
+
+  double getSumOfMcTicketsByEmployeeIdAndDuration(Short employeeId, Short days);
 }

@@ -60,7 +60,7 @@ public class EmployeeController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+  public ResponseEntity<Employee> updateEmployee(@PathVariable Short id, @RequestBody Employee employeeDetails) {
     Optional<Employee> optionalEmployee = employeeRepository.findById(id);
 
     if (!optionalEmployee.isPresent()) {
@@ -92,7 +92,7 @@ public class EmployeeController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteEmployee(@PathVariable Short id) {
     Optional<Employee> optionalEmployee = employeeRepository.findById(id);
     if (!optionalEmployee.isPresent()) {
       return ResponseEntity.notFound().build();

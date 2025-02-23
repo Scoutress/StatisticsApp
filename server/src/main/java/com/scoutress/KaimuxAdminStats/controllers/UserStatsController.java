@@ -40,9 +40,16 @@ public class UserStatsController {
   }
 
   @GetMapping("/stats/{employeeId}")
-  public ResponseEntity<Double> getProductivity(@PathVariable Short employeeId) {
+  public ResponseEntity<Map<String, Object>> getProductivity(@PathVariable Short employeeId) {
     Double productivity = finalStatsService.getProductivity(employeeId);
-    return ResponseEntity.ok(productivity);
+    Employee employee = employeeRepository.findById(employeeId).orElse(null);
+    String username = (employee != null) ? employee.getUsername() : "Unknown";
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("productivity", productivity);
+    response.put("username", username);
+
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/ranking/{employeeId}")

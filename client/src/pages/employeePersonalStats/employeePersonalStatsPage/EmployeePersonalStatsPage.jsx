@@ -11,6 +11,7 @@ import EmployeeMcTickets from "../../../components/employeeMcTickets/EmployeeMcT
 
 const EmployeePersonalStatsPage = () => {
   const { employeeId } = useParams();
+  const [username, setUsername] = useState(null);
   const [productivity, setProductivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +23,10 @@ const EmployeePersonalStatsPage = () => {
         const response = await axios.get(
           `http://localhost:8080/user/stats/${employeeId}`
         );
-        setProductivity(response.data);
+        setProductivity(response.data.productivity);
+        if (response.data.username) {
+          setUsername(response.data.username);
+        }
       } catch (error) {
         setError("There was an error fetching the data! " + error.message);
       } finally {
@@ -45,6 +49,7 @@ const EmployeePersonalStatsPage = () => {
 
   return (
     <div className={styles.employeeStatsPage}>
+      <h1>Employee: {username ? username : "Loading username..."}</h1>
       {productivity !== null ? (
         <HalfDoughnutChart productivity={productivity} />
       ) : (

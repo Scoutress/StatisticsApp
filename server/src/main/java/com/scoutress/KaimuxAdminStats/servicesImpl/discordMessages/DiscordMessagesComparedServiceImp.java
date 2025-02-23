@@ -120,7 +120,7 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
 
   public LocalDate getJoinDateThisEmployee(Short employeeId) {
     return employeeRepository
-        .findById(employeeId.longValue())
+        .findById(employeeId)
         .map(Employee::getJoinDate)
         .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
   }

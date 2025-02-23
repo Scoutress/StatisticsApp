@@ -8,6 +8,7 @@ import EmployeeRankingOverall from "../../../components/employeeRankingOverall/E
 import UserRecommendationText from "../../../components/userRecommendation/UserRecommendationText.jsx";
 import styles from "./EmployeePersonalStatsPage.module.scss";
 import EmployeeMcTickets from "../../../components/employeeMcTickets/EmployeeMcTickets.jsx";
+import EmployeePlaytime from "../../../components/employeePlaytime/EmployeePlaytime.jsx";
 
 const EmployeePersonalStatsPage = () => {
   const { employeeId } = useParams();
@@ -69,6 +70,11 @@ const EmployeePersonalStatsPage = () => {
         <EmployeeMcTickets employeeId={employeeId} />
       ) : (
         <p>No Minecraft tickets data per employee available.</p>
+      )}
+      {employeeId !== null ? (
+        <EmployeePlaytime employeeId={employeeId} />
+      ) : (
+        <p>No playtime data per employee available.</p>
       )}
     </div>
   );

@@ -104,4 +104,36 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
       }
     });
   }
+
+  @Override
+  public Double getSumOfPlaytimeByEmployeeIdAndDuration(Short employeeId, Short days) {
+    List<DailyPlaytime> rawPlaytimeData = getRawPlaytimeData();
+    List<DailyPlaytime> playtimeDataThisEmployee = getPlaytimeDataForThisEmployee(rawPlaytimeData, employeeId);
+
+    return calculatePlaytime(playtimeDataThisEmployee, days);
+  }
+
+  public List<DailyPlaytime> getRawPlaytimeData() {
+    return dailyPlaytimeRepository.findAll();
+  }
+
+  public List<DailyPlaytime> getPlaytimeDataForThisEmployee(
+      List<DailyPlaytime> rawPlaytimeData, Short employeeId) {
+    return rawPlaytimeData
+        .stream()
+        .filter(playtimeData -> playtimeData.getEmployeeId().equals(employeeId))
+        .collect(Collectors.toList());
+  }
+
+  public Double calculatePlaytime(List<DailyPlaytime> playtimeData, Short days) {
+    double totalPlaytime = playtimeData
+        .stream()
+        .filter(data -> data.getDate().isAfter(LocalDate.now().minusDays(days)))
+        .mapToDouble(DailyPlaytime::getTimeInHours)
+        .sum();
+
+    System.out.println("Playtime: " + totalPlaytime);
+
+    return totalPlaytime;
+  }
 }

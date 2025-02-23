@@ -126,14 +126,10 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   }
 
   public Double calculatePlaytime(List<DailyPlaytime> playtimeData, Short days) {
-    double totalPlaytime = playtimeData
+    return playtimeData
         .stream()
         .filter(data -> data.getDate().isAfter(LocalDate.now().minusDays(days)))
         .mapToDouble(DailyPlaytime::getTimeInHours)
         .sum();
-
-    System.out.println("Playtime: " + totalPlaytime);
-
-    return totalPlaytime;
   }
 }

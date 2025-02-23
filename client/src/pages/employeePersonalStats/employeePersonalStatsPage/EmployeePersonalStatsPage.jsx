@@ -7,7 +7,7 @@ import HalfDoughnutChart from "../../../components/halfDoughnutChart/HalfDoughnu
 import EmployeeRankingOverall from "../../../components/employeeRankingOverall/EmployeeRankingOverall.jsx";
 import UserRecommendationText from "../../../components/userRecommendation/UserRecommendationText.jsx";
 import styles from "./EmployeePersonalStatsPage.module.scss";
-import EmployeeMcTickets from "../employeeMcTickets/EmployeeMcTickets.jsx";
+import EmployeeMcTickets from "../../../components/employeeMcTickets/EmployeeMcTickets.jsx";
 
 const EmployeePersonalStatsPage = () => {
   const { employeeId } = useParams();
@@ -63,7 +63,7 @@ const EmployeePersonalStatsPage = () => {
       {employeeId !== null ? (
         <EmployeeMcTickets employeeId={employeeId} />
       ) : (
-        <p>No recommendation data available.</p>
+        <p>No Minecraft tickets data per employee available.</p>
       )}
     </div>
   );

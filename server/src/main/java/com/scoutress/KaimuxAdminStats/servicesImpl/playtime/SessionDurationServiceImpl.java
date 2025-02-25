@@ -133,7 +133,7 @@ public class SessionDurationServiceImpl implements SessionDurationService {
   public void saveSessionDuration(Integer employeeId, String server, Integer sessionDuration, Integer loginTime) {
     LocalDate sessionDate = Instant.ofEpochSecond(loginTime).atZone(ZoneId.systemDefault()).toLocalDate();
 
-    String query = "INSERT INTO session_duration (aid, single_session_duration, date, server) VALUES (?, ?, ?, ?)";
+    String query = "INSERT INTO session_duration (employee_id, single_session_duration, date, server) VALUES (?, ?, ?, ?)";
 
     jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
   }

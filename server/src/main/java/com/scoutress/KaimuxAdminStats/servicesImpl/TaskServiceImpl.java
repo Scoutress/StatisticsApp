@@ -3,15 +3,13 @@ package com.scoutress.KaimuxAdminStats.servicesImpl;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
-import com.scoutress.KaimuxAdminStats.services.DiscordBotService;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.TaskService;
 import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
-import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
-import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesService;
+import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesHandlingService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
@@ -21,12 +19,13 @@ import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
-  private final DiscordBotService discordBotService;
+  private final DiscordMessagesHandlingService discordMessagesHandlingService;
   private final ApiDataExtractionService apiDataExtractionService;
   private final ProductivityService productivityService;
   private final SQLiteToMySQLService sQLiteToMySQLService;
@@ -37,15 +36,13 @@ public class TaskServiceImpl implements TaskService {
   private final AveragePlaytimeOverallService averagePlaytimeOverallService;
   private final MinecraftTicketsService minecraftTicketsService;
   private final MinecraftTicketsComparedService minecraftTicketsComparedService;
-  private final DiscordMessagesService discordMessagesService;
-  private final DiscordMessagesComparedService discordMessagesComparedService;
   private final ComplaintsService complaintsService;
   private final RecommendationsService recommendationsService;
   private final FinalStatsService finalStatsService;
   private final RecommendationUserService recommendationUserService;
 
   public TaskServiceImpl(
-      DiscordBotService discordBotService,
+      DiscordMessagesHandlingService discordMessagesHandlingService,
       ApiDataExtractionService apiDataExtractionService,
       ProductivityService productivityService,
       SQLiteToMySQLService sQLiteToMySQLService,
@@ -56,13 +53,11 @@ public class TaskServiceImpl implements TaskService {
       AveragePlaytimeOverallService averagePlaytimeOverallService,
       MinecraftTicketsService minecraftTicketsService,
       MinecraftTicketsComparedService minecraftTicketsComparedService,
-      DiscordMessagesService discordMessagesService,
-      DiscordMessagesComparedService discordMessagesComparedService,
       ComplaintsService complaintsService,
       RecommendationsService recommendationsService,
       FinalStatsService finalStatsService,
       RecommendationUserService recommendationUserService) {
-    this.discordBotService = discordBotService;
+    this.discordMessagesHandlingService = discordMessagesHandlingService;
     this.apiDataExtractionService = apiDataExtractionService;
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
@@ -73,8 +68,6 @@ public class TaskServiceImpl implements TaskService {
     this.averagePlaytimeOverallService = averagePlaytimeOverallService;
     this.minecraftTicketsService = minecraftTicketsService;
     this.minecraftTicketsComparedService = minecraftTicketsComparedService;
-    this.discordMessagesService = discordMessagesService;
-    this.discordMessagesComparedService = discordMessagesComparedService;
     this.complaintsService = complaintsService;
     this.recommendationsService = recommendationsService;
     this.finalStatsService = finalStatsService;
@@ -82,26 +75,32 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  @PostConstruct
   @Transactional
   public void runScheduledTasks() {
     System.out.println("-----------------------------------------------");
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
-    System.out.println("Taking Discord messages with Discord robot");
-    discordBotService.collectMessagesCountsFromDiscord();
+    System.out.println("Handling Discord messages");
+    discordMessagesHandlingService.handleDiscordMessages();
 
     System.out.println("");
-    System.out.println("Discord messages convertion");
-    discordMessagesService.convertDailyDiscordMessagesValue();
+    System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
+    System.out.println("-----------------------------------------------");
+  }
 
+  @Override
+  @Transactional
+  public void runScheduledTasksOld() {
+    System.out.println("-----------------------------------------------");
+    System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
-    System.out.println("Average discord messages per day calculations");
-    discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
 
-    System.out.println("");
-    System.out.println("Average discord messages taking comparison per day calculation");
-    discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
+    // NEW
+    System.out.println("Handling Discord messages");
+    discordMessagesHandlingService.handleDiscordMessages();
+    //////////////////////////////////////////////////////////
 
     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
@@ -198,14 +197,6 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
     System.out.println("Total Minecraft tickets updating");
     minecraftTicketsService.calculateTotalMinecraftTickets();
-
-    System.out.println("");
-    System.out.println("Average discord messages per day calculations");
-    discordMessagesService.calculateAverageValueOfDailyDiscordMessages();
-
-    System.out.println("");
-    System.out.println("Average discord messages taking comparison per day calculation");
-    discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues();
 
     System.out.println("");
     System.out.println("Complaints calculation");

@@ -13,50 +13,48 @@ import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessage
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDiscordMessagesComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesComparedRepository;
-import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
 
 @Service
 public class DiscordMessagesComparedServiceImp implements DiscordMessagesComparedService {
 
-  private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
   private final DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository;
   private final AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository;
   private final EmployeeRepository employeeRepository;
 
   public DiscordMessagesComparedServiceImp(
-      DailyDiscordMessagesRepository dailyDiscordMessagesRepository,
       DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository,
       AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository,
       EmployeeRepository employeeRepository) {
-    this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
     this.dailyDiscordMessagesComparedRepository = dailyDiscordMessagesComparedRepository;
     this.averageDiscordMessagesComparedRepository = averageDiscordMessagesComparedRepository;
     this.employeeRepository = employeeRepository;
   }
 
   @Override
-  public void compareEachEmployeeDailyDiscordMessagesValues() {
-    List<DailyDiscordMessages> rawData = getAllDiscordMessages();
+  public void compareEachEmployeeDailyDiscordMessagesValues(
+      List<DailyDiscordMessages> allDailyDcMessages,
+      List<Short> allEmployeesFromDailyDcMessages) {
 
-    if (rawData != null && !rawData.isEmpty()) {
-      List<Short> allEmployeeIds = getAllEmployeesFromDailyDiscordMessages(rawData);
+    if (allDailyDcMessages != null && !allDailyDcMessages.isEmpty()) {
+      if (allEmployeesFromDailyDcMessages != null && !allEmployeesFromDailyDcMessages.isEmpty()) {
 
-      if (allEmployeeIds != null && !allEmployeeIds.isEmpty()) {
-        allEmployeeIds.forEach(employeeId -> {
+        allEmployeesFromDailyDcMessages.forEach(employeeId -> {
           double messagesRatioSumThisEmployee = 0;
           int datesCount = 0;
 
           LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
-          LocalDate oldestDateThisEmployee = getOldestDateThisEmployee(rawData, employeeId);
+          LocalDate oldestDateThisEmployee = getOldestDateThisEmployee(allDailyDcMessages, employeeId);
 
           List<LocalDate> allDatesSinceJoinDateOrOldestDate = getAllDatesSinceJoinDateOrOldestDate(
-              employeeId, rawData, oldestDateThisEmployee, joinDateThisEmployee);
+              employeeId, allDailyDcMessages, oldestDateThisEmployee, joinDateThisEmployee);
 
           for (LocalDate date : allDatesSinceJoinDateOrOldestDate) {
-            int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(rawData, date, employeeId);
-            int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(rawData, date);
+            int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(
+                allDailyDcMessages, date, employeeId);
+            int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(
+                allDailyDcMessages, date);
             double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
                 messagesThisDateThisEmployee, messagesThisDateAllEmployees);
 
@@ -75,38 +73,6 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
         });
       }
     }
-  }
-
-  public List<DailyDiscordMessages> getAllDiscordMessages() {
-    return dailyDiscordMessagesRepository.findAll();
-  }
-
-  public List<LocalDate> getAllDatesSinceOldest(List<DailyDiscordMessages> data) {
-    LocalDate oldestDate = getOldestDate(data).minusDays(1);
-    LocalDate yesterday;
-
-    if (oldestDate.isBefore(LocalDate.now())) {
-      yesterday = LocalDate.now().minusDays(1);
-      return oldestDate.datesUntil(yesterday).collect(Collectors.toList());
-    } else {
-      return null;
-    }
-  }
-
-  public LocalDate getOldestDate(List<DailyDiscordMessages> data) {
-    return data
-        .stream()
-        .map(DailyDiscordMessages::getDate)
-        .min(Comparator.naturalOrder())
-        .orElse(LocalDate.of(3000, 1, 1));
-  }
-
-  public List<Short> getAllEmployeesFromDailyDiscordMessages(List<DailyDiscordMessages> data) {
-    return data
-        .stream()
-        .map(DailyDiscordMessages::getEmployeeId)
-        .distinct()
-        .collect(Collectors.toList());
   }
 
   public List<LocalDate> getAllDatesSinceJoinDateOrOldestDate(

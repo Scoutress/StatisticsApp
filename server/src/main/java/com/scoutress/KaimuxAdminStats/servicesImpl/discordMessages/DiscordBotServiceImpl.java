@@ -1,4 +1,4 @@
-package com.scoutress.KaimuxAdminStats.servicesImpl;
+package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -19,76 +19,26 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.scoutress.KaimuxAdminStats.config.DcBotConfig;
-import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessages;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
-import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
-import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
-import com.scoutress.KaimuxAdminStats.services.DiscordBotService;
+import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordBotService;
 
 @Service
 public class DiscordBotServiceImpl implements DiscordBotService {
 
-  private final EmployeeCodesRepository employeeCodesRepository;
-  private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
-  private boolean testMode = false;
-
-  public DiscordBotServiceImpl(
-      EmployeeCodesRepository employeeCodesRepository,
-      DailyDiscordMessagesRepository dailyDiscordMessagesRepository) {
-    this.employeeCodesRepository = employeeCodesRepository;
-    this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
-  }
-
-  public void setTestMode(boolean testMode) {
-    this.testMode = testMode;
-  }
-
   @Override
-  public void collectMessagesCountsFromDiscord() {
-    startBot();
+  public void handleDcBotRequests(
+      List<EmployeeCodes> employeeCodesData,
+      LocalDate latestDateFromDcMsgsData,
+      LocalDate todaysDate) {
 
-    try {
-      Thread.sleep(60000);
-    } catch (InterruptedException e) {
-      System.err.println(e);
+    List<Short> allEmployeeIds = getAllEmployeeIds(employeeCodesData);
+    List<LocalDate> allDatesFromLatestTillTodays = getAllDatesBetween(
+        latestDateFromDcMsgsData, todaysDate);
+
+    for (Short employeeId : allEmployeeIds) {
+      Long dcUserId = getDiscordUserIdForThisEmployee(employeeCodesData, employeeId);
+      processDiscordMessagesCount(dcUserId, allDatesFromLatestTillTodays);
     }
-
-    if (testMode) {
-      processDiscordMessagesCount(
-          508674128006479872L,
-          List.of(
-              LocalDate.of(2025, 2, 7),
-              LocalDate.of(2025, 2, 8)));
-    } else {
-      List<EmployeeCodes> employeeCodesData = getAddEmployeeCodesData();
-      List<Short> allEmployeeIds = getAllEmployeeIds(employeeCodesData);
-      LocalDate latestDateFromDcMsgsData = getLatestDateFromDiscordMessagesData();
-      LocalDate todaysDate = LocalDate.now();
-      List<LocalDate> allDatesFromLatestTillTodays = getAllDatesBetween(
-          latestDateFromDcMsgsData, todaysDate);
-
-      System.out.println("Discord messages processing was started...");
-
-      for (Short employeeId : allEmployeeIds) {
-        Long dcUserId = getDiscordUserIdForThisEmployee(employeeCodesData, employeeId);
-
-        processDiscordMessagesCount(dcUserId, allDatesFromLatestTillTodays);
-      }
-    }
-
-    System.out.println("Discord messages processing was completed.");
-
-    try {
-      Thread.sleep(60000);
-    } catch (InterruptedException e) {
-      System.err.println(e);
-    }
-
-    stopBot();
-  }
-
-  public List<EmployeeCodes> getAddEmployeeCodesData() {
-    return employeeCodesRepository.findAll();
   }
 
   public List<Short> getAllEmployeeIds(List<EmployeeCodes> employeeCodesData) {
@@ -98,15 +48,6 @@ public class DiscordBotServiceImpl implements DiscordBotService {
         .distinct()
         .sorted()
         .toList();
-  }
-
-  public LocalDate getLatestDateFromDiscordMessagesData() {
-    return dailyDiscordMessagesRepository
-        .findAll()
-        .stream()
-        .map(DailyDiscordMessages::getDate)
-        .max(LocalDate::compareTo)
-        .orElse(LocalDate.parse("1970-01-01"));
   }
 
   public List<LocalDate> getAllDatesBetween(
@@ -170,7 +111,8 @@ public class DiscordBotServiceImpl implements DiscordBotService {
     }
   }
 
-  private void startBot() {
+  @Override
+  public void startBot() {
     try {
       new ProcessBuilder("cmd.exe", "/c", "start", "cmd.exe", "/k", "python",
           Paths.get("discordBotPy", "bot.py").toString()).start();
@@ -180,7 +122,17 @@ public class DiscordBotServiceImpl implements DiscordBotService {
     }
   }
 
-  private void stopBot() {
+  @Override
+  public void sleepForOneMin() {
+    try {
+      Thread.sleep(60000);
+    } catch (InterruptedException e) {
+      System.err.println(e);
+    }
+  }
+
+  @Override
+  public void stopBot() {
     try {
       new ProcessBuilder("powershell.exe", "/c", "Stop-Process -Name python -Force").start();
       new ProcessBuilder("powershell.exe", "/c", "Stop-Process -Name cmd -Force").start();

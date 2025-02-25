@@ -2,7 +2,10 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -13,10 +16,10 @@ import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
-import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DiscordRawMessagesCountsRepository;
-import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class DiscordMessagesServiceImpl implements DiscordMessagesService {
@@ -24,47 +27,32 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
   private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
   private final EmployeeRepository employeeRepository;
   private final AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository;
-  private final DiscordRawMessagesCountsRepository discordRawMessagesCountsRepository;
-  private final EmployeeCodesRepository employeeCodesRepository;
 
   public DiscordMessagesServiceImpl(
       DailyDiscordMessagesRepository dailyDiscordMessagesRepository,
       EmployeeRepository employeeRepository,
-      AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository,
-      DiscordRawMessagesCountsRepository discordRawMessagesCountsRepository,
-      EmployeeCodesRepository employeeCodesRepository) {
+      AverageDailyDiscordMessagesRepository averageDailyDiscordMessagesRepository) {
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
     this.employeeRepository = employeeRepository;
     this.averageDailyDiscordMessagesRepository = averageDailyDiscordMessagesRepository;
-    this.discordRawMessagesCountsRepository = discordRawMessagesCountsRepository;
-    this.employeeCodesRepository = employeeCodesRepository;
   }
 
   @Override
-  public void convertDailyDiscordMessagesValue() {
-    List<DiscordRawMessagesCounts> rawDcMessagesData = getAllRawDcMessagesData();
-    List<EmployeeCodes> allEmployeeCodes = getAllEmployeeCodes();
+  public void convertDailyDiscordMessages(
+      List<DiscordRawMessagesCounts> rawDcMessagesData,
+      List<EmployeeCodes> employeeCodesData) {
     List<String> allUserIds = getAllUserIdsFromRawData(rawDcMessagesData);
 
     for (String userID : allUserIds) {
-      Long userIdAsLong = convertUserIdToLong(userID);
-      Short employeeId = getEmployeeIdByUserId(allEmployeeCodes, userIdAsLong);
-      List<LocalDate> listOfDatesThisUser = getAllDatesForThisUserFromRawData(rawDcMessagesData, userIdAsLong);
+      Long userIdAsLong = Long.valueOf(userID);
+      Short employeeId = getEmployeeIdByUserId(employeeCodesData, userIdAsLong);
+      List<LocalDate> listOfDatesThisUser = getAllDatesForThisUserFromRawData(rawDcMessagesData, userID);
 
       for (LocalDate date : listOfDatesThisUser) {
-        int messagesValue = getMessagesValueForThisUserThisDate(rawDcMessagesData, userIdAsLong, date);
+        int messagesValue = getMessagesValueForThisUserThisDate(rawDcMessagesData, userID, date);
         saveConvertedValue(messagesValue, employeeId, date);
       }
     }
-    removeRawData();
-  }
-
-  public List<DiscordRawMessagesCounts> getAllRawDcMessagesData() {
-    return discordRawMessagesCountsRepository.findAll();
-  }
-
-  public List<EmployeeCodes> getAllEmployeeCodes() {
-    return employeeCodesRepository.findAll();
   }
 
   public List<String> getAllUserIdsFromRawData(List<DiscordRawMessagesCounts> rawDcMessagesData) {
@@ -74,10 +62,6 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
         .distinct()
         .sorted()
         .toList();
-  }
-
-  public Long convertUserIdToLong(String userId) {
-    return Long.valueOf(userId);
   }
 
   public Short getEmployeeIdByUserId(List<EmployeeCodes> allEmployeeCodes, Long userIdAsLong) {
@@ -90,10 +74,10 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
   }
 
   public List<LocalDate> getAllDatesForThisUserFromRawData(
-      List<DiscordRawMessagesCounts> rawDcMessagesData, Long userIdAsLong) {
+      List<DiscordRawMessagesCounts> rawDcMessagesData, String userID) {
     return rawDcMessagesData
         .stream()
-        .filter(dcMessage -> dcMessage.getDcUserId().equals(userIdAsLong.toString()))
+        .filter(dcMessage -> dcMessage.getDcUserId().equals(userID))
         .map(DiscordRawMessagesCounts::getMessageDate)
         .distinct()
         .sorted()
@@ -101,10 +85,10 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
   }
 
   public int getMessagesValueForThisUserThisDate(
-      List<DiscordRawMessagesCounts> rawDcMessagesData, Long userIdAsLong, LocalDate date) {
+      List<DiscordRawMessagesCounts> rawDcMessagesData, String userID, LocalDate date) {
     return rawDcMessagesData
         .stream()
-        .filter(dcMessage -> dcMessage.getDcUserId().equals(userIdAsLong.toString()))
+        .filter(dcMessage -> dcMessage.getDcUserId().equals(userID))
         .filter(dcMessage -> dcMessage.getMessageDate().equals(date))
         .mapToInt(DiscordRawMessagesCounts::getMessageCount)
         .sum();
@@ -125,48 +109,45 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
         dailyDiscordMessagesRepository.save(newRecord);
       }
     } catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
-      System.err.println(e);
+      System.err.println("Error: " + e.getMessage());
     }
-  }
-
-  public void removeRawData() {
-    discordRawMessagesCountsRepository.deleteAll();
   }
 
   @Override
-  public void calculateAverageValueOfDailyDiscordMessages() {
-    List<DailyDiscordMessages> rawData = getAllDiscordMessages();
+  @Transactional
+  public void removeDailyDiscordMessagesDuplicates(List<DailyDiscordMessages> allDailyDcMessages) {
+    Map<String, List<DailyDiscordMessages>> groupedByEmployeeIdAndDate = allDailyDcMessages
+        .stream()
+        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getDate()));
 
-    if (rawData != null && !rawData.isEmpty()) {
-      List<Short> allEmployees = getAllEmployeesFromMessagesData(rawData);
-      LocalDate oldestDateFromDcMessagesData = getOldestDateFromMessagesData(rawData);
+    groupedByEmployeeIdAndDate.forEach((key, messages) -> {
+      messages.stream()
+          .sorted(Comparator.comparing(DailyDiscordMessages::getId))
+          .skip(1)
+          .forEach(msg -> {
+            dailyDiscordMessagesRepository.delete(msg);
+          });
+    });
+  }
 
-      if (allEmployees != null && oldestDateFromDcMessagesData != null) {
+  @Override
+  public void calculateAverageValueOfDailyDiscordMessages(
+      List<DailyDiscordMessages> allDailyDcMessages,
+      List<Short> allEmployeesFromDailyDcMessages) {
 
-        for (Short employeeId : allEmployees) {
-          LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
-          LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
-              oldestDateFromDcMessagesData, joinDateThisEmployee);
-          double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(
-              rawData, oldestDate, employeeId);
+    if (allDailyDcMessages != null && !allDailyDcMessages.isEmpty()) {
+      LocalDate oldestDateFromDcMessagesData = getOldestDateFromMessagesData(allDailyDcMessages);
 
-          saveAverageValueForThisEmployee(averageValue, employeeId);
-        }
+      for (Short employeeId : allEmployeesFromDailyDcMessages) {
+        LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
+        LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
+            oldestDateFromDcMessagesData, joinDateThisEmployee);
+        double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(
+            allDailyDcMessages, oldestDate, employeeId);
+
+        saveAverageValueForThisEmployee(averageValue, employeeId);
       }
     }
-  }
-
-  public List<DailyDiscordMessages> getAllDiscordMessages() {
-    return dailyDiscordMessagesRepository.findAll();
-  }
-
-  public List<Short> getAllEmployeesFromMessagesData(List<DailyDiscordMessages> rawData) {
-    return rawData
-        .stream()
-        .map(DailyDiscordMessages::getEmployeeId)
-        .distinct()
-        .sorted()
-        .toList();
   }
 
   public LocalDate getOldestDateFromMessagesData(List<DailyDiscordMessages> rawData) {

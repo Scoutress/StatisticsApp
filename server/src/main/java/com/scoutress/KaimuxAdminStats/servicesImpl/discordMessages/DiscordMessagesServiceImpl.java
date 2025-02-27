@@ -2,11 +2,7 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDailyDiscordMessages;
@@ -18,8 +14,6 @@ import com.scoutress.KaimuxAdminStats.repositories.discordMessages.AverageDailyD
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesService;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class DiscordMessagesServiceImpl implements DiscordMessagesService {
@@ -111,23 +105,6 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
     } catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
       System.err.println("Error: " + e.getMessage());
     }
-  }
-
-  @Override
-  @Transactional
-  public void removeDailyDiscordMessagesDuplicates(List<DailyDiscordMessages> allDailyDcMessages) {
-    Map<String, List<DailyDiscordMessages>> groupedByEmployeeIdAndDate = allDailyDcMessages
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getDate()));
-
-    groupedByEmployeeIdAndDate.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(DailyDiscordMessages::getId))
-          .skip(1)
-          .forEach(msg -> {
-            dailyDiscordMessagesRepository.delete(msg);
-          });
-    });
   }
 
   @Override

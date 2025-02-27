@@ -10,9 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
 import com.scoutress.KaimuxAdminStats.services.TaskService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
 
 import jakarta.transaction.Transactional;
 
@@ -22,15 +20,9 @@ public class ScheduledTasksConfig {
 
   private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
   private final TaskService taskService;
-  private final ApiDataExtractionService apiDataExtractionService;
-  private final MinecraftTicketsService minecraftTicketsService;
 
-  public ScheduledTasksConfig(TaskService taskService,
-      ApiDataExtractionService apiDataExtractionService,
-      MinecraftTicketsService minecraftTicketsService) {
+  public ScheduledTasksConfig(TaskService taskService) {
     this.taskService = taskService;
-    this.apiDataExtractionService = apiDataExtractionService;
-    this.minecraftTicketsService = minecraftTicketsService;
   }
 
   @Scheduled(cron = "0 0 0 * * ?")
@@ -64,17 +56,17 @@ public class ScheduledTasksConfig {
   }
 
   private void runApiDataExtraction() {
-    apiDataExtractionService.handleMinecraftTicketsRawData();
+    // apiDataExtractionService.handleMinecraftTicketsRawData();
     System.out.println("handleMinecraftTicketsRawData completed at: " + getCurrentTimestamp());
   }
 
   private void runConvertMinecraftTicketsAnswers() {
-    minecraftTicketsService.convertMinecraftTicketsAnswers();
+    // minecraftTicketsService.convertMinecraftTicketsAnswers();
     System.out.println("convertMinecraftTicketsAnswers completed at: " + getCurrentTimestamp());
   }
 
   private void runCalculateAverageDailyMinecraftTicketsValues() {
-    minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
+    // minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
     System.out.println("calculateAverageDailyMinecraftTicketsValues completed at: " + getCurrentTimestamp());
   }
 

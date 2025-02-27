@@ -2,7 +2,6 @@ package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
@@ -11,8 +10,7 @@ import com.scoutress.KaimuxAdminStats.services.TaskService;
 import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesHandlingService;
 import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
+import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsHandlingService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AnnualyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
@@ -26,7 +24,6 @@ import jakarta.transaction.Transactional;
 public class TaskServiceImpl implements TaskService {
 
   private final DiscordMessagesHandlingService discordMessagesHandlingService;
-  private final ApiDataExtractionService apiDataExtractionService;
   private final ProductivityService productivityService;
   private final SQLiteToMySQLService sQLiteToMySQLService;
   private final EmployeeDataService employeeDataService;
@@ -34,16 +31,14 @@ public class TaskServiceImpl implements TaskService {
   private final DailyPlaytimeService dailyPlaytimeService;
   private final AnnualyPlaytimeService annualyPlaytimeService;
   private final AveragePlaytimeOverallService averagePlaytimeOverallService;
-  private final MinecraftTicketsService minecraftTicketsService;
-  private final MinecraftTicketsComparedService minecraftTicketsComparedService;
   private final ComplaintsService complaintsService;
   private final RecommendationsService recommendationsService;
   private final FinalStatsService finalStatsService;
   private final RecommendationUserService recommendationUserService;
+  private final MinecraftTicketsHandlingService minecraftTicketsHandlingService;
 
   public TaskServiceImpl(
       DiscordMessagesHandlingService discordMessagesHandlingService,
-      ApiDataExtractionService apiDataExtractionService,
       ProductivityService productivityService,
       SQLiteToMySQLService sQLiteToMySQLService,
       EmployeeDataService employeeDataService,
@@ -51,14 +46,12 @@ public class TaskServiceImpl implements TaskService {
       DailyPlaytimeService dailyPlaytimeService,
       AnnualyPlaytimeService annualyPlaytimeService,
       AveragePlaytimeOverallService averagePlaytimeOverallService,
-      MinecraftTicketsService minecraftTicketsService,
-      MinecraftTicketsComparedService minecraftTicketsComparedService,
       ComplaintsService complaintsService,
       RecommendationsService recommendationsService,
       FinalStatsService finalStatsService,
-      RecommendationUserService recommendationUserService) {
+      RecommendationUserService recommendationUserService,
+      MinecraftTicketsHandlingService minecraftTicketsHandlingService) {
     this.discordMessagesHandlingService = discordMessagesHandlingService;
-    this.apiDataExtractionService = apiDataExtractionService;
     this.productivityService = productivityService;
     this.sQLiteToMySQLService = sQLiteToMySQLService;
     this.employeeDataService = employeeDataService;
@@ -66,12 +59,11 @@ public class TaskServiceImpl implements TaskService {
     this.dailyPlaytimeService = dailyPlaytimeService;
     this.annualyPlaytimeService = annualyPlaytimeService;
     this.averagePlaytimeOverallService = averagePlaytimeOverallService;
-    this.minecraftTicketsService = minecraftTicketsService;
-    this.minecraftTicketsComparedService = minecraftTicketsComparedService;
     this.complaintsService = complaintsService;
     this.recommendationsService = recommendationsService;
     this.finalStatsService = finalStatsService;
     this.recommendationUserService = recommendationUserService;
+    this.minecraftTicketsHandlingService = minecraftTicketsHandlingService;
   }
 
   @Override
@@ -84,6 +76,9 @@ public class TaskServiceImpl implements TaskService {
 
     System.out.println("Handling Discord messages");
     discordMessagesHandlingService.handleDiscordMessages();
+
+    System.out.println("Handling Minecraft tickets");
+    minecraftTicketsHandlingService.handleMinecraftTickets();
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
@@ -105,7 +100,7 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
     System.out.println("Getting data from the API");
-    apiDataExtractionService.handleMinecraftTicketsRawData();
+    // apiDataExtractionService.handleMinecraftTicketsRawData();
 
     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
@@ -125,20 +120,20 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
     System.out.println("Average Minecraft tickets per day calculations");
-    minecraftTicketsService.convertMinecraftTicketsAnswers();
-    minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
+    // minecraftTicketsService.convertMinecraftTicketsAnswers();
+    // minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
 
     System.out.println("");
     System.out.println("Average Minecraft tickets per playtime hour calculations");
-    minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
+    // minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
 
     System.out.println("");
     System.out.println("Average Minecraft tickets taking comparison per day calculations");
-    minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
+    // minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
 
     System.out.println("");
     System.out.println("Total Minecraft tickets updating");
-    minecraftTicketsService.calculateTotalMinecraftTickets();
+    // minecraftTicketsService.calculateTotalMinecraftTickets();
 
     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     System.out.println("");
@@ -184,19 +179,19 @@ public class TaskServiceImpl implements TaskService {
 
     System.out.println("");
     System.out.println("Average Minecraft tickets per day calculations");
-    minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
+    // minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
 
     System.out.println("");
     System.out.println("Average Minecraft tickets per playtime hour calculations");
-    minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
+    // minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
 
     System.out.println("");
     System.out.println("Average Minecraft tickets taking comparison per day calculations");
-    minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
+    // minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
 
     System.out.println("");
     System.out.println("Total Minecraft tickets updating");
-    minecraftTicketsService.calculateTotalMinecraftTickets();
+    // minecraftTicketsService.calculateTotalMinecraftTickets();
 
     System.out.println("");
     System.out.println("Complaints calculation");

@@ -11,6 +11,7 @@ import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DailyDiscordMessagesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.discordMessages.DiscordRawMessagesCountsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
+import com.scoutress.KaimuxAdminStats.services.DuplicatesRemoverService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordBotService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesComparedService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesHandlingService;
@@ -25,6 +26,7 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
   private final DiscordRawMessagesCountsRepository discordRawMessagesCountsRepository;
   private final DiscordMessagesService discordMessagesService;
   private final DiscordMessagesComparedService discordMessagesComparedService;
+  private final DuplicatesRemoverService duplicatesRemoverService;
 
   public DiscordMessagesHandlingServiceImpl(
       EmployeeCodesRepository employeeCodesRepository,
@@ -32,13 +34,15 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
       DiscordBotService discordBotService,
       DiscordRawMessagesCountsRepository discordRawMessagesCountsRepository,
       DiscordMessagesService discordMessagesService,
-      DiscordMessagesComparedService discordMessagesComparedService) {
+      DiscordMessagesComparedService discordMessagesComparedService,
+      DuplicatesRemoverService duplicatesRemoverService) {
     this.employeeCodesRepository = employeeCodesRepository;
     this.dailyDiscordMessagesRepository = dailyDiscordMessagesRepository;
     this.discordBotService = discordBotService;
     this.discordRawMessagesCountsRepository = discordRawMessagesCountsRepository;
     this.discordMessagesService = discordMessagesService;
     this.discordMessagesComparedService = discordMessagesComparedService;
+    this.duplicatesRemoverService = duplicatesRemoverService;
   }
 
   @Override
@@ -60,7 +64,9 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
     List<Short> employeeIds = getAllEmployeesFromDailyDcMessages(dailyMessages);
 
     discordMessagesService.convertDailyDiscordMessages(rawMessages, employeeCodes);
-    discordMessagesService.removeDailyDiscordMessagesDuplicates(dailyMessages);
+
+    duplicatesRemoverService.removeDailyDiscordMessagesDuplicates();
+
     discordMessagesService.calculateAverageValueOfDailyDiscordMessages(dailyMessages, employeeIds);
 
     discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues(dailyMessages, employeeIds);

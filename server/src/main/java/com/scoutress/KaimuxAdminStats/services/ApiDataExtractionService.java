@@ -1,6 +1,8 @@
 package com.scoutress.KaimuxAdminStats.services;
 
+import java.time.LocalDate;
+
 public interface ApiDataExtractionService {
 
-  void handleMinecraftTicketsRawData();
+  void extractMinecraftTicketsFromAPI(LocalDate newestDateFromDailyMcTickets);
 }

@@ -2,7 +2,6 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.minecraftTickets;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -12,53 +11,42 @@ import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTick
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.AverageMinecraftTicketsComparedRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsComparedRepository;
-import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
-import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
 
 @Service
 public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComparedService {
 
-  private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
-  private final DailyPlaytimeRepository dailyPlaytimeRepository;
   private final DailyMinecraftTicketsComparedRepository dailyMinecraftTicketsComparedRepository;
   private final AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository;
 
   public MinecraftTicketsComparedServiceImpl(
-      DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository,
-      DailyPlaytimeRepository dailyPlaytimeRepository,
       DailyMinecraftTicketsComparedRepository dailyMinecraftTicketsComparedRepository,
       AverageMinecraftTicketsComparedRepository averageMinecraftTicketsComparedRepository) {
-    this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
-    this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.dailyMinecraftTicketsComparedRepository = dailyMinecraftTicketsComparedRepository;
     this.averageMinecraftTicketsComparedRepository = averageMinecraftTicketsComparedRepository;
   }
 
   @Override
-  public void compareEachEmployeeDailyMcTicketsValues() {
-    List<DailyMinecraftTickets> rawData = getAllMinecraftTickets();
+  public void compareEachEmployeeDailyMcTicketsValues(
+      List<DailyMinecraftTickets> rawDailyMcTicketsData,
+      List<DailyPlaytime> allPlaytimeData,
+      List<LocalDate> allDatesFromDailyMcTickets,
+      List<Short> allEmployeesFromDailyMcTickets) {
 
-    if (rawData != null && !rawData.isEmpty()) {
-      List<DailyPlaytime> rawDailyPlaytimeData = getRawDailyPlaytimeData();
-
-      if (rawDailyPlaytimeData != null && !rawDailyPlaytimeData.isEmpty()) {
-        List<LocalDate> allDates = getAllMinecraftTicketsDates(rawData);
-
-        if (allDates != null && !allDates.isEmpty()) {
-          List<Short> allEmployees = getAllEmployeesFromDailyMinecraftTickets(rawData);
-
-          if (allEmployees != null && !allEmployees.isEmpty()) {
-
-            for (Short employeeId : allEmployees) {
+    if (rawDailyMcTicketsData != null && !rawDailyMcTicketsData.isEmpty()) {
+      if (allPlaytimeData != null && !allPlaytimeData.isEmpty()) {
+        if (allDatesFromDailyMcTickets != null && !allDatesFromDailyMcTickets.isEmpty()) {
+          if (allEmployeesFromDailyMcTickets != null && !allEmployeesFromDailyMcTickets.isEmpty()) {
+            for (Short employeeId : allEmployeesFromDailyMcTickets) {
               double ticketRatioSumThisEmployee = 0;
               int datesCount = 0;
 
-              for (LocalDate date : allDates) {
+              for (LocalDate date : allDatesFromDailyMcTickets) {
                 double playtimeForThisEmployeeThisDate = getPlaytimeForThisEmployeeThisDate(
-                    rawDailyPlaytimeData, employeeId, date);
-                int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawData, date, employeeId);
-                int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawData, date);
+                    allPlaytimeData, employeeId, date);
+                int ticketsThisDateThisEmployee = getTicketCountThisDateThisEmployee(rawDailyMcTicketsData, date,
+                    employeeId);
+                int ticketsThisDateAllEmployees = getTicketCountThisDateAllEmployees(rawDailyMcTicketsData, date);
 
                 if (ticketsThisDateAllEmployees != 0) {
                   double ticketRatioThisDateThisEmployee = calculateTicketRatioThisDate(
@@ -87,31 +75,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
     }
   }
 
-  public List<DailyMinecraftTickets> getAllMinecraftTickets() {
-    return dailyMinecraftTicketsRepository.findAll();
-  }
-
-  public List<DailyPlaytime> getRawDailyPlaytimeData() {
-    return dailyPlaytimeRepository.findAll();
-  }
-
-  public List<LocalDate> getAllMinecraftTicketsDates(List<DailyMinecraftTickets> data) {
-    return data
-        .stream()
-        .map(DailyMinecraftTickets::getDate)
-        .distinct()
-        .collect(Collectors.toList());
-  }
-
-  public List<Short> getAllEmployeesFromDailyMinecraftTickets(List<DailyMinecraftTickets> data) {
-    return data
-        .stream()
-        .map(DailyMinecraftTickets::getEmployeeId)
-        .distinct()
-        .collect(Collectors.toList());
-  }
-
-  public double getPlaytimeForThisEmployeeThisDate(List<DailyPlaytime> rawDailyPlaytimeData, Short employeeId,
+  private double getPlaytimeForThisEmployeeThisDate(List<DailyPlaytime> rawDailyPlaytimeData, Short employeeId,
       LocalDate date) {
     return rawDailyPlaytimeData
         .stream()
@@ -122,7 +86,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
         .orElse(0.0);
   }
 
-  public int getTicketCountThisDateThisEmployee(
+  private int getTicketCountThisDateThisEmployee(
       List<DailyMinecraftTickets> dailyTickets, LocalDate thisDate, Short thisEmployee) {
     return dailyTickets
         .stream()
@@ -132,7 +96,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
         .orElse(0);
   }
 
-  public int getTicketCountThisDateAllEmployees(List<DailyMinecraftTickets> dailyTickets, LocalDate thisDate) {
+  private int getTicketCountThisDateAllEmployees(List<DailyMinecraftTickets> dailyTickets, LocalDate thisDate) {
     return dailyTickets
         .stream()
         .filter(tickets -> tickets.getDate().equals(thisDate))
@@ -140,14 +104,14 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
         .sum();
   }
 
-  public double calculateTicketRatioThisDate(int ticketsThisDateThisEmployee, int ticketsThisDateAllEmployees) {
+  private double calculateTicketRatioThisDate(int ticketsThisDateThisEmployee, int ticketsThisDateAllEmployees) {
     if (ticketsThisDateAllEmployees == 0) {
       return 0;
     }
     return (double) ticketsThisDateThisEmployee / ticketsThisDateAllEmployees;
   }
 
-  public double checkIfPlaytimeIsMoreThan5minutesAndHasAnyTicketsThatDate(int ticketsThisDateThisEmployee,
+  private double checkIfPlaytimeIsMoreThan5minutesAndHasAnyTicketsThatDate(int ticketsThisDateThisEmployee,
       double ticketRatioThisDateThisEmployee, double playtimeForThisEmployeeThisDate) {
     double playtimeInMinutes = playtimeForThisEmployeeThisDate * 60;
 
@@ -158,7 +122,7 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
     }
   }
 
-  public void saveTicketRatioThisDateThisEmployee(double ticketRatioThisDateThisEmployee, LocalDate date,
+  private void saveTicketRatioThisDateThisEmployee(double ticketRatioThisDateThisEmployee, LocalDate date,
       Short employee) {
     DailyMinecraftTicketsCompared existingRecord = dailyMinecraftTicketsComparedRepository
         .findByEmployeeIdAndDate(employee, date);
@@ -175,14 +139,14 @@ public class MinecraftTicketsComparedServiceImpl implements MinecraftTicketsComp
     }
   }
 
-  public double calculateAverageTicketRatioThisEmployee(double ticketRatioSumThisEmployee, int datesCount) {
+  private double calculateAverageTicketRatioThisEmployee(double ticketRatioSumThisEmployee, int datesCount) {
     if (datesCount == 0) {
       return 0;
     }
     return (double) ticketRatioSumThisEmployee / datesCount;
   }
 
-  public void saveAverageTicketRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {
+  private void saveAverageTicketRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {
     AverageMinecraftTicketsCompared existingRecord = averageMinecraftTicketsComparedRepository
         .findByEmployeeId(employee);
 

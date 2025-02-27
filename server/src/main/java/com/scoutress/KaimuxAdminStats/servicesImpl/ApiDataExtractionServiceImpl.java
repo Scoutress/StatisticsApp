@@ -3,9 +3,6 @@ package com.scoutress.KaimuxAdminStats.servicesImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -20,9 +17,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.scoutress.KaimuxAdminStats.config.KaimuxWebsiteConfig;
-import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.MinecraftTicketsAnswers;
-import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.MinecraftTicketsAnswersRepository;
 import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
 
@@ -32,45 +27,37 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
   private final RestTemplate restTemplate;
   private final KaimuxWebsiteConfig kaimuxWebsiteConfig;
   private final MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository;
-  private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
-  private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
   public ApiDataExtractionServiceImpl(
       RestTemplate restTemplate,
       KaimuxWebsiteConfig kaimuxWebsiteConfig,
-      MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository,
-      DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository) {
+      MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository) {
     this.restTemplate = restTemplate;
     this.kaimuxWebsiteConfig = kaimuxWebsiteConfig;
     this.minecraftTicketsAnswersRepository = minecraftTicketsAnswersRepository;
-    this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
   }
 
   @Override
-  public void handleMinecraftTicketsRawData() {
-    removeDataFromMinecraftTicketsAnswers();
-    fetchAndSaveData(1);
+  public void extractMinecraftTicketsFromAPI(LocalDate newestDateFromDailyMcTickets) {
+    fetchAndSaveData(1, newestDateFromDailyMcTickets);
   }
 
-  private void removeDataFromMinecraftTicketsAnswers() {
-    minecraftTicketsAnswersRepository.truncateTable();
-  }
-
-  private void fetchAndSaveData(int level) {
-    executorService.submit(() -> {
-      try {
-        LocalDate newestDateFromProcessedData = getNewestDateFromProcessedData();
-        String jsonData = fetchDataFromApi(level);
-        if (!isDataEmpty(jsonData)) {
-          boolean moreData = saveDataToDatabase(jsonData, newestDateFromProcessedData);
-          if (moreData) {
-            executorService.schedule(() -> fetchAndSaveData(level + 1), 2, TimeUnit.SECONDS);
-          }
+  private void fetchAndSaveData(int level, LocalDate newestDateFromDailyMcTickets) {
+    try {
+      String jsonData = fetchDataFromApi(level);
+      if (!isDataEmpty(jsonData)) {
+        boolean moreData = saveDataToDatabase(jsonData, newestDateFromDailyMcTickets);
+        if (moreData) {
+          Thread.sleep(2000);
+          fetchAndSaveData(level + 1, newestDateFromDailyMcTickets);
         }
-      } catch (JSONException | HttpClientErrorException e) {
-        System.err.println("Error fetching data for level " + level + ": " + e);
       }
-    });
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      System.err.println("Thread was interrupted: " + e);
+    } catch (JSONException | HttpClientErrorException e) {
+      System.err.println("Error fetching data for level " + level + ": " + e);
+    }
   }
 
   private String fetchDataFromApi(int level) throws JSONException {
@@ -104,7 +91,7 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
     return dataArray.length() == 0;
   }
 
-  private boolean saveDataToDatabase(String jsonData, LocalDate newestDateFromProcessedData) throws JSONException {
+  private boolean saveDataToDatabase(String jsonData, LocalDate newestDateFromDailyMcTickets) throws JSONException {
     JSONObject jsonObject = new JSONObject(jsonData);
     JSONArray dataArray = jsonObject.getJSONArray("data");
     boolean moreData = true;
@@ -112,8 +99,9 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
     for (int i = 0; i < dataArray.length(); i++) {
       JSONObject item = dataArray.getJSONObject(i);
       LocalDateTime dateTime = parseDate(item.getString("created_at"));
+      LocalDate date = dateTime.toLocalDate();
 
-      if (dateTime.toLocalDate().isBefore(newestDateFromProcessedData.minusDays(1))) {
+      if (!date.isAfter(newestDateFromDailyMcTickets)) {
         moreData = false;
         break;
       }
@@ -130,14 +118,5 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
 
   private LocalDateTime parseDate(String dateStr) {
     return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME);
-  }
-
-  private LocalDate getNewestDateFromProcessedData() {
-    return dailyMinecraftTicketsRepository
-        .findAll()
-        .stream()
-        .map(DailyMinecraftTickets::getDate)
-        .max(LocalDate::compareTo)
-        .orElse(LocalDate.parse("1970-01-01"));
   }
 }

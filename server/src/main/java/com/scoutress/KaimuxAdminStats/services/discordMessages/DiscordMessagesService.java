@@ -12,9 +12,6 @@ public interface DiscordMessagesService {
       List<DiscordRawMessagesCounts> rawDcMessagesData,
       List<EmployeeCodes> employeeCodesData);
 
-  void removeDailyDiscordMessagesDuplicates(
-      List<DailyDiscordMessages> allDailyDcMessages);
-
   void calculateAverageValueOfDailyDiscordMessages(
       List<DailyDiscordMessages> allDailyDcMessages,
       List<Short> allEmployeesFromDailyDcMessages);

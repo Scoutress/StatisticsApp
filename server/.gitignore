@@ -34,3 +34,5 @@ build/
 
 ### Temp. Data ###
 *.csv
+
+application.properties

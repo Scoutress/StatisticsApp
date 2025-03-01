@@ -80,6 +80,9 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Handling Minecraft tickets");
     minecraftTicketsHandlingService.handleMinecraftTickets();
 
+    System.out.println("Handling Playtime");
+    // playtimeHandlingService.handlePlaytime();
+
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");

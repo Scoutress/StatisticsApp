@@ -23,7 +23,9 @@ jobs:
         distribution: 'temurin'  # Use 'temurin' for AdoptOpenJDK builds
 
     - name: Build with Maven
+      working-directory: ./server  # Specify the correct directory (e.g., `backend`)
       run: mvn clean install -DskipTests=true  # Build the project
 
     - name: Run tests
+      working-directory: ./server  # Run tests in the same directory
       run: mvn test  # Run unit tests (optional, but recommended)

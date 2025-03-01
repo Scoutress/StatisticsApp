@@ -24,7 +24,7 @@ public class MinecraftTicketsAnswers {
   private Long id;
 
   @Column(name = "minecraft_ticket_id", nullable = false)
-  private Long minecraftTicketId;
+  private Short minecraftTicketId;
 
   @Column(name = "date_time", nullable = false)
   private LocalDateTime dateTime;

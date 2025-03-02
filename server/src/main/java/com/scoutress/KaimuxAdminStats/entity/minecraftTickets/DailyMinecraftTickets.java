@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_minecraft_tickets")
+@Table(name = "minecraft_tickets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,8 +23,8 @@ public class DailyMinecraftTickets {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
   @Column(name = "ticket_count", nullable = false)
   private int ticketCount;

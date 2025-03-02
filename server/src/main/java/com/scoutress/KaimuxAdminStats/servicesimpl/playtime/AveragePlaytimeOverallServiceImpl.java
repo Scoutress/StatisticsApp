@@ -15,88 +15,129 @@ import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeOverall;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AveragePlaytimeOverallRepository;
-import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
 
 @Service
 public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverallService {
 
-  private final DataExtractingService dataExtractingService;
-  private final AveragePlaytimeOverallRepository averagePlaytimeRepository;
+  private final AveragePlaytimeOverallRepository averagePlaytimeOverallRepository;
+  private final DailyPlaytimeRepository dailyPlaytimeRepository;
+  private final EmployeeCodesRepository employeeCodesRepository;
+  private final EmployeeRepository employeeRepository;
 
   public AveragePlaytimeOverallServiceImpl(
-      DataExtractingService dataExtractingService,
-      AveragePlaytimeOverallRepository averagePlaytimeRepository) {
-
-    this.dataExtractingService = dataExtractingService;
-    this.averagePlaytimeRepository = averagePlaytimeRepository;
+      AveragePlaytimeOverallRepository averagePlaytimeOverallRepository,
+      DailyPlaytimeRepository dailyPlaytimeRepository,
+      EmployeeCodesRepository employeeCodesRepository,
+      EmployeeRepository employeeRepository) {
+    this.averagePlaytimeOverallRepository = averagePlaytimeOverallRepository;
+    this.dailyPlaytimeRepository = dailyPlaytimeRepository;
+    this.employeeCodesRepository = employeeCodesRepository;
+    this.employeeRepository = employeeRepository;
   }
 
   @Override
   public void handleAveragePlaytime() {
-    List<DailyPlaytime> allPlaytime = dataExtractingService.getDailyPlaytimeData();
-    List<EmployeeCodes> allEmployeeAids = dataExtractingService.getAllEmployeeCodes();
-    List<Employee> allEmployees = dataExtractingService.getAllEmployees();
-
+    List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
+    List<EmployeeCodes> allEmployeeCodes = getAllEmployeeCodes();
+    List<Employee> allEmployees = getAllEmployees();
     List<AveragePlaytimeOverall> averagePlaytime = calculateAveragePlaytime(
-        allPlaytime, allEmployeeAids, allEmployees);
+        allPlaytime, allEmployeeCodes, allEmployees);
 
     saveAveragePlaytime(averagePlaytime);
   }
 
-  @Override
-  public List<AveragePlaytimeOverall> calculateAveragePlaytime(
+  private List<DailyPlaytime> getDailyPlaytimeData() {
+    return dailyPlaytimeRepository.findAll();
+  }
+
+  private List<EmployeeCodes> getAllEmployeeCodes() {
+    return employeeCodesRepository.findAll();
+  }
+
+  private List<Employee> getAllEmployees() {
+    return employeeRepository.findAll();
+  }
+
+  private List<AveragePlaytimeOverall> calculateAveragePlaytime(
       List<DailyPlaytime> allPlaytimes,
-      List<EmployeeCodes> allEmployeeAids,
+      List<EmployeeCodes> allEmployeeCodes,
       List<Employee> allEmployees) {
 
     List<AveragePlaytimeOverall> handledAveragePlaytimeData = new ArrayList<>();
     LocalDate today = LocalDate.now();
 
-    Map<Short, Employee> employeeMap = allEmployees.stream()
+    Map<Short, Employee> employeeMap = allEmployees
+        .stream()
         .collect(Collectors.toMap(Employee::getId, emp -> emp));
 
-    Set<Short> allAids = allEmployeeAids.stream()
+    Set<Short> allEmployeeIds = allEmployeeCodes
+        .stream()
         .map(EmployeeCodes::getEmployeeId)
         .collect(Collectors.toSet());
 
-    Set<Short> uniqueAids = allPlaytimes.stream()
-        .map(DailyPlaytime::getAid)
+    Set<Short> uniqueEmployeeIdsInPlaytime = allPlaytimes
+        .stream()
+        .map(DailyPlaytime::getEmployeeId)
         .collect(Collectors.toSet());
 
-    for (Short aid : uniqueAids) {
-      if (allAids.contains(aid)) {
-        Employee employee = employeeMap.get(aid);
+    for (Short employeeId : uniqueEmployeeIdsInPlaytime) {
+      if (allEmployeeIds.contains(employeeId)) {
+        Employee employee = employeeMap.get(employeeId);
 
         if (employee != null) {
           LocalDate joinDate = employee.getJoinDate();
 
-          double playtimesSum = allPlaytimes.stream()
-              .filter(pt -> pt.getAid().equals(aid))
+          double playtimesSum = allPlaytimes
+              .stream()
+              .filter(pt -> pt.getEmployeeId().equals(employeeId))
               .filter(pt -> !pt.getDate().isBefore(joinDate))
-              .mapToDouble(DailyPlaytime::getTime)
+              .mapToDouble(DailyPlaytime::getTimeInHours)
               .sum();
 
-          long daysAfterJoin = ChronoUnit.DAYS.between(joinDate, today);
+          LocalDate oldestDateFromData = allPlaytimes
+              .stream()
+              .filter(date -> date.getEmployeeId().equals(employeeId))
+              .map(DailyPlaytime::getDate)
+              .min(LocalDate::compareTo)
+              .orElse(LocalDate.of(1970, 1, 1));
+
+          LocalDate processingDate = oldestDateFromData.isAfter(joinDate) ? oldestDateFromData : joinDate;
+
+          long daysAfterJoin = ChronoUnit.DAYS.between(processingDate, today);
 
           double averagePlaytimeValue = daysAfterJoin > 0 ? playtimesSum / daysAfterJoin : 0;
 
           AveragePlaytimeOverall averagePlaytimeData = new AveragePlaytimeOverall();
-          averagePlaytimeData.setAid(aid);
+          averagePlaytimeData.setEmployeeId(employeeId);
           averagePlaytimeData.setPlaytime(averagePlaytimeValue);
           handledAveragePlaytimeData.add(averagePlaytimeData);
         }
       }
     }
 
-    handledAveragePlaytimeData.sort(Comparator.comparing(AveragePlaytimeOverall::getAid));
+    handledAveragePlaytimeData.sort(Comparator.comparing(AveragePlaytimeOverall::getEmployeeId));
 
     return handledAveragePlaytimeData;
   }
 
-  @Override
-  public void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
-    averagePlaytimeData.forEach(averagePlaytimeRepository::save);
+  private void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
+    averagePlaytimeData.forEach(averagePlaytimeOverall -> {
+      Short employeeId = averagePlaytimeOverall.getEmployeeId();
+
+      AveragePlaytimeOverall existingPlaytime = averagePlaytimeOverallRepository
+          .findByEmployeeId(employeeId);
+
+      if (existingPlaytime != null) {
+        existingPlaytime.setPlaytime(averagePlaytimeOverall.getPlaytime());
+        averagePlaytimeOverallRepository.save(existingPlaytime);
+      } else {
+        averagePlaytimeOverallRepository.save(averagePlaytimeOverall);
+      }
+    });
   }
 }

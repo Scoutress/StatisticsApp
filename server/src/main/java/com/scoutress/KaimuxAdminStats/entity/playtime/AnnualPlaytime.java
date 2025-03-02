@@ -21,9 +21,9 @@ public class AnnualPlaytime {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
   @Column(name = "playtime", nullable = false)
-  private Double playtime;
+  private Double playtimeInHours;
 }

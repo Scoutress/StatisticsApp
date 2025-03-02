@@ -1,17 +1,10 @@
 package com.scoutress.KaimuxAdminStats.services.playtime;
 
-import java.util.List;
-
-import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
-import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
-
 public interface DailyPlaytimeService {
 
-  public void handleDailyPlaytime();
+  void handleDailyPlaytime();
 
-  public List<DailyPlaytime> calculateDailyPlaytime(
-      List<SessionDuration> sessions);
+  void removeDuplicateDailyPlaytimes();
 
-  public void saveCalculatedPlaytime(
-      List<DailyPlaytime> dailyPlaytimeData);
+  Double getSumOfPlaytimeByEmployeeIdAndDuration(Short employeeId, Short days);
 }

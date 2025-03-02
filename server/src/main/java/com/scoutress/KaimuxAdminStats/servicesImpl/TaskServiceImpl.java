@@ -93,8 +93,8 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Handling productivity");
     productivityService.handleProductivity();
 
-    // System.out.println("Handling recommendation");
-    // recommendationsService.handleRecommendations();
+    System.out.println("Handling recommendation");
+    recommendationsService.handleRecommendations();
 
     // System.out.println("Handling final stats");
     // finalStatsService.handleFinalStats();

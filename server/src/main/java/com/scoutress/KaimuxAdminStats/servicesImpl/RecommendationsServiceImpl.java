@@ -39,7 +39,7 @@ public class RecommendationsServiceImpl implements RecommendationsService {
   }
 
   @Override
-  public void evaluateRecommendations() {
+  public void handleRecommendations() {
     List<Productivity> rawProductivityData = getAllProductivityData();
     List<AnnualPlaytime> rawAnnualPlaytimeData = getAllAnnualPlaytimeData();
     List<Employee> rawEmployeesData = getAllEmployeesData();
@@ -83,19 +83,19 @@ public class RecommendationsServiceImpl implements RecommendationsService {
     }
   }
 
-  public List<Productivity> getAllProductivityData() {
+  private List<Productivity> getAllProductivityData() {
     return productivityRepository.findAll();
   }
 
-  public List<AnnualPlaytime> getAllAnnualPlaytimeData() {
+  private List<AnnualPlaytime> getAllAnnualPlaytimeData() {
     return annualPlaytimeRepository.findAll();
   }
 
-  public List<Employee> getAllEmployeesData() {
+  private List<Employee> getAllEmployeesData() {
     return employeeRepository.findAll();
   }
 
-  public List<Short> getAllEmployeeIds(List<Employee> rawEmployeesData) {
+  private List<Short> getAllEmployeeIds(List<Employee> rawEmployeesData) {
     return rawEmployeesData
         .stream()
         .map(Employee::getId)
@@ -104,7 +104,7 @@ public class RecommendationsServiceImpl implements RecommendationsService {
         .toList();
   }
 
-  public String getLevelForThisEmployee(List<Employee> rawEmployeesData, Short employeeId) {
+  private String getLevelForThisEmployee(List<Employee> rawEmployeesData, Short employeeId) {
     if (rawEmployeesData == null) {
       return "n/a";
     }
@@ -117,7 +117,7 @@ public class RecommendationsServiceImpl implements RecommendationsService {
         .orElse("n/a");
   }
 
-  public double getAnnualPlaytimeForThisEmployee(List<AnnualPlaytime> rawAnnualPlaytimeData, Short employeeId) {
+  private double getAnnualPlaytimeForThisEmployee(List<AnnualPlaytime> rawAnnualPlaytimeData, Short employeeId) {
     if (rawAnnualPlaytimeData == null) {
       return 0.0;
     }
@@ -130,7 +130,7 @@ public class RecommendationsServiceImpl implements RecommendationsService {
         .orElse(0.0);
   }
 
-  public double getProductivityForThisEmployee(List<Productivity> rawProductivityData, Short employeeId) {
+  private double getProductivityForThisEmployee(List<Productivity> rawProductivityData, Short employeeId) {
     if (rawProductivityData == null) {
       return 0.0;
     }
@@ -143,11 +143,11 @@ public class RecommendationsServiceImpl implements RecommendationsService {
         .orElse(0.0);
   }
 
-  public boolean isValidEmployeeData(String level, double playtime, double productivity) {
+  private boolean isValidEmployeeData(String level, double playtime, double productivity) {
     return level != null && playtime >= 0.0 && productivity >= 0.0;
   }
 
-  public void saveRecommendationForThisEmployee(String recommendation, Short employeeId) {
+  private void saveRecommendationForThisEmployee(String recommendation, Short employeeId) {
     if (recommendation == null) {
       return;
     }

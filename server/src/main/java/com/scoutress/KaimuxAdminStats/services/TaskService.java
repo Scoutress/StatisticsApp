@@ -4,7 +4,5 @@ public interface TaskService {
 
   void runScheduledTasks();
 
-  void runScheduledTasksOld();
-
   void runBackupDataUploadingTasks();
 }

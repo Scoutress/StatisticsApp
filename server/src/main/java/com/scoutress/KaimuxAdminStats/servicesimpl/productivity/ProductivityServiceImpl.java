@@ -56,7 +56,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   @Override
-  public void calculateProductivity() {
+  public void handleProductivity() {
     List<Employee> allEmployeesData = getAllEmployeesData();
 
     if (allEmployeesData == null || allEmployeesData.isEmpty()) {
@@ -79,8 +79,6 @@ public class ProductivityServiceImpl implements ProductivityService {
         continue;
       }
 
-      double afkPlaytimeFinalValue = calculateAfkPlaytimeFinalValueForThisEmployee(
-          employeeId, employeeLevel);
       double discordMessagesFinalValue = calculateDiscordMessagesFinalValueForThisEmployee(
           employeeId, employeeLevel);
       double discordMessagesComparedFinalValue = calculateDiscordMessagesComparedFinalValueForThisEmployee(
@@ -94,9 +92,9 @@ public class ProductivityServiceImpl implements ProductivityService {
       double complaintsFinalValue = getComplaintsFinalValueForThisEmployee(employeeId);
 
       double averageValueOfAllFinals = calculateAverageValueOfAllFinals(
-          afkPlaytimeFinalValue, discordMessagesFinalValue,
-          discordMessagesComparedFinalValue, minecraftTicketsFinalValue,
-          minecraftTicketsComparedFinalValue, playtimeFinalValue, employeeLevel);
+          discordMessagesFinalValue, discordMessagesComparedFinalValue,
+          minecraftTicketsFinalValue, minecraftTicketsComparedFinalValue,
+          playtimeFinalValue, employeeLevel);
 
       double productivityAfterComplaints = calculateFinalProductivityValue(averageValueOfAllFinals,
           complaintsFinalValue);
@@ -113,11 +111,11 @@ public class ProductivityServiceImpl implements ProductivityService {
     }
   }
 
-  public List<Employee> getAllEmployeesData() {
+  private List<Employee> getAllEmployeesData() {
     return employeeRepository.findAll();
   }
 
-  public List<Short> getAllEmployeeIds(List<Employee> allEmployeesData) {
+  private List<Short> getAllEmployeeIds(List<Employee> allEmployeesData) {
     return allEmployeesData
         .stream()
         .map(Employee::getId)
@@ -126,7 +124,7 @@ public class ProductivityServiceImpl implements ProductivityService {
         .toList();
   }
 
-  public String getEmployeeLevelForThisEmployee(Short employeeId, List<Employee> allEmployeesData) {
+  private String getEmployeeLevelForThisEmployee(Short employeeId, List<Employee> allEmployeesData) {
     return allEmployeesData
         .stream()
         .filter(employee -> employee.getId().equals(employeeId))
@@ -135,16 +133,8 @@ public class ProductivityServiceImpl implements ProductivityService {
         .orElse(null);
   }
 
-  //
-  // Afk playtime
-  public double calculateAfkPlaytimeFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
-    // Atm there are no functionality for recording afk playtime data.
-    // Temporary fixed to the max value.
-    return 1;
-  }
-
   // Discord messages
-  public double calculateDiscordMessagesFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
+  private double calculateDiscordMessagesFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfDiscordMessages = getAverageValueOfDiscordMessages(employeeId);
     double checkedAverageValueOfDiscordMessages = getMaxOrCurrentValueOfDiscordMessages(
         averageValueOfDiscordMessages, employeeLevel);
@@ -154,7 +144,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return finalValueOfDiscordMessages;
   }
 
-  public double getAverageValueOfDiscordMessages(Short employeeId) {
+  private double getAverageValueOfDiscordMessages(Short employeeId) {
     List<AverageDailyDiscordMessages> data = averageDailyDiscordMessagesRepository.findAll();
 
     if (data.isEmpty()) {
@@ -170,7 +160,7 @@ public class ProductivityServiceImpl implements ProductivityService {
         .orElse(0.0);
   }
 
-  public double getMaxOrCurrentValueOfDiscordMessages(double averageValueOfDiscordMessages, String employeeLevel) {
+  private double getMaxOrCurrentValueOfDiscordMessages(double averageValueOfDiscordMessages, String employeeLevel) {
     double managerMaxValue = CalculationConstants.DISCORD_MESSAGES_MAX_MANAGER;
     double overseerMaxValue = CalculationConstants.DISCORD_MESSAGES_MAX_OVERSEER;
     double chatmodMaxValue = CalculationConstants.DISCORD_MESSAGES_MAX_CHATMOD;
@@ -192,7 +182,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     };
   }
 
-  public double calculateAverageValueOfDiscordMessagesWithCoef(
+  private double calculateAverageValueOfDiscordMessagesWithCoef(
       double checkedAverageValueOfDiscordMessages, String employeeLevel) {
     double managerCoef = CalculationConstants.DISCORD_MESSAGES_MANAGER;
     double overseerCoef = CalculationConstants.DISCORD_MESSAGES_OVERSEER;
@@ -211,7 +201,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   // Discord messages compared
-  public double calculateDiscordMessagesComparedFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
+  private double calculateDiscordMessagesComparedFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfComparedDiscordMessages = getAverageValueOfComparedDiscordMessages(employeeId);
     double checkedAverageValueOfComparedDiscordMessages = getMaxOrCurrentValueOfComparedDiscordMessages(
         averageValueOfComparedDiscordMessages, employeeLevel);
@@ -221,7 +211,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return finalValueOfComparedDiscordMessages;
   }
 
-  public double getAverageValueOfComparedDiscordMessages(Short employeeId) {
+  private double getAverageValueOfComparedDiscordMessages(Short employeeId) {
     List<AverageDiscordMessagesCompared> data = averageDiscordMessagesComparedRepository.findAll();
 
     if (data.isEmpty()) {
@@ -236,7 +226,7 @@ public class ProductivityServiceImpl implements ProductivityService {
         .orElse(0.0);
   }
 
-  public double getMaxOrCurrentValueOfComparedDiscordMessages(
+  private double getMaxOrCurrentValueOfComparedDiscordMessages(
       double averageValueOfComparedDiscordMessages, String employeeLevel) {
     double managerMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_MANAGER;
     double overseerMaxValue = CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_OVERSEER;
@@ -269,7 +259,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     };
   }
 
-  public double calculateAverageValueOfComparedDiscordMessagesWithCoef(
+  private double calculateAverageValueOfComparedDiscordMessagesWithCoef(
       double averageValueOfComparedDiscordMessages, String employeeLevel) {
     double managerCoef = CalculationConstants.DISCORD_MESSAGES_COMPARED_MANAGER;
     double overseerCoef = CalculationConstants.DISCORD_MESSAGES_COMPARED_OVERSEER;
@@ -288,7 +278,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   // Minecraft tickets
-  public double calculateMinecraftTicketsFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
+  private double calculateMinecraftTicketsFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfMinecraftTickets = getAverageValueOfMinecraftTickets(employeeId);
     double checkedAverageValueOfMinecraftTickets = getMaxOrCurrentValueOfMinecraftTickets(
         averageValueOfMinecraftTickets, employeeLevel);
@@ -298,7 +288,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return finalValueOfMinecraftTickets;
   }
 
-  public double getAverageValueOfMinecraftTickets(Short employeeId) {
+  private double getAverageValueOfMinecraftTickets(Short employeeId) {
     List<AverageDailyMinecraftTickets> data = averageDailyMinecraftTicketsRepository.findAll();
 
     if (data.isEmpty()) {
@@ -313,7 +303,7 @@ public class ProductivityServiceImpl implements ProductivityService {
         .orElse(0.0);
   }
 
-  public double getMaxOrCurrentValueOfMinecraftTickets(double averageValueOfMinecraftTickets, String employeeLevel) {
+  private double getMaxOrCurrentValueOfMinecraftTickets(double averageValueOfMinecraftTickets, String employeeLevel) {
     double managerMaxValue = CalculationConstants.MINECRAFT_TICKETS_MAX_MANAGER;
     double overseerMaxValue = CalculationConstants.MINECRAFT_TICKETS_MAX_OVERSEER;
     double chatmodMaxValue = CalculationConstants.MINECRAFT_TICKETS_MAX_CHATMOD;
@@ -332,7 +322,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     };
   }
 
-  public double calculateAverageValueOfMinecraftTicketsWithCoef(
+  private double calculateAverageValueOfMinecraftTicketsWithCoef(
       double checkedAverageValueOfMinecraftTickets, String employeeLevel) {
     double managerCoef = CalculationConstants.MINECRAFT_TICKETS_MANAGER;
     double overseerCoef = CalculationConstants.MINECRAFT_TICKETS_OVERSEER;
@@ -349,7 +339,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   // Minecraft tickets compared
-  public double calculateMinecraftTicketsComparedFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
+  private double calculateMinecraftTicketsComparedFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfMinecraftTicketsCompared = getAverageValueOfMinecraftTicketsCompared(employeeId);
     double checkedAverageValueOfMinecraftTicketsCompared = getMaxOrCurrentValueOfMinecraftTicketsCompared(
         averageValueOfMinecraftTicketsCompared, employeeLevel);
@@ -359,7 +349,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return finalValueOfMinecraftTicketsCompared;
   }
 
-  public double getAverageValueOfMinecraftTicketsCompared(Short employeeId) {
+  private double getAverageValueOfMinecraftTicketsCompared(Short employeeId) {
     List<AverageMinecraftTicketsCompared> data = averageMinecraftTicketsComparedRepository.findAll();
 
     if (data.isEmpty()) {
@@ -374,7 +364,7 @@ public class ProductivityServiceImpl implements ProductivityService {
         .orElse(0.0);
   }
 
-  public double getMaxOrCurrentValueOfMinecraftTicketsCompared(double averageValueOfMinecraftTicketsCompared,
+  private double getMaxOrCurrentValueOfMinecraftTicketsCompared(double averageValueOfMinecraftTicketsCompared,
       String employeeLevel) {
     double managerMaxValue = CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_MANAGER;
     double overseerMaxValue = CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_OVERSEER;
@@ -398,7 +388,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     };
   }
 
-  public double calculateAverageValueOfMinecraftTicketsComparedWithCoef(
+  private double calculateAverageValueOfMinecraftTicketsComparedWithCoef(
       double checkedAverageValueOfMinecraftTicketsCompared, String employeeLevel) {
     double managerCoef = CalculationConstants.MINECRAFT_TICKETS_COMPARED_MANAGER;
     double overseerCoef = CalculationConstants.MINECRAFT_TICKETS_COMPARED_OVERSEER;
@@ -415,7 +405,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   // Playtime
-  public double calculatePlaytimeFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
+  private double calculatePlaytimeFinalValueForThisEmployee(Short employeeId, String employeeLevel) {
     double averageValueOfPlaytime = getAverageValueOfPlaytime(employeeId);
     double checkedAverageValueOfPlaytime = getMaxOrCurrentValueOfPlaytime(averageValueOfPlaytime, employeeLevel);
     double finalValueOfPlaytime = calculateAverageValueOfPlaytimeWithCoef(checkedAverageValueOfPlaytime, employeeLevel);
@@ -423,7 +413,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     return finalValueOfPlaytime;
   }
 
-  public double getAverageValueOfPlaytime(Short employeeId) {
+  private double getAverageValueOfPlaytime(Short employeeId) {
     List<AveragePlaytimeOverall> data = averagePlaytimeOverallRepository.findAll();
 
     if (data.isEmpty()) {
@@ -438,7 +428,7 @@ public class ProductivityServiceImpl implements ProductivityService {
         .orElse(0.0);
   }
 
-  public double getMaxOrCurrentValueOfPlaytime(double averageValueOfPlaytime, String employeeLevel) {
+  private double getMaxOrCurrentValueOfPlaytime(double averageValueOfPlaytime, String employeeLevel) {
     double managerMaxValue = CalculationConstants.PLAYTIME_MAX_MANAGER;
     double overseerMaxValue = CalculationConstants.PLAYTIME_MAX_OVERSEER;
     double chatmodMaxValue = CalculationConstants.PLAYTIME_MAX_CHATMOD;
@@ -460,7 +450,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     };
   }
 
-  public double calculateAverageValueOfPlaytimeWithCoef(
+  private double calculateAverageValueOfPlaytimeWithCoef(
       double checkedAverageValueOfPlaytime, String employeeLevel) {
     double managerCoef = CalculationConstants.PLAYTIME_MANAGER;
     double overseerCoef = CalculationConstants.PLAYTIME_OVERSEER;
@@ -479,7 +469,7 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   // Complaints
-  public double getComplaintsFinalValueForThisEmployee(Short employeeId) {
+  private double getComplaintsFinalValueForThisEmployee(Short employeeId) {
     List<ComplaintsSum> data = complaintsSumRepository.findAll();
 
     if (data.isEmpty()) {
@@ -495,33 +485,33 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
   //
 
-  public double calculateAverageValueOfAllFinals(
-      double afkPlaytimeFinalValue, double discordMessagesFinalValue,
-      double discordMessagesComparedFinalValue, double minecraftTicketsFinalValue,
-      double minecraftTicketsComparedFinalValue, double playtimeFinalValue, String employeeLevel) {
+  private double calculateAverageValueOfAllFinals(
+      double discordMessagesFinalValue, double discordMessagesComparedFinalValue,
+      double minecraftTicketsFinalValue, double minecraftTicketsComparedFinalValue,
+      double playtimeFinalValue, String employeeLevel) {
 
     double finalValuesSum;
     int parametersCount;
 
     if (employeeLevel.equals("Helper")) {
-      finalValuesSum = afkPlaytimeFinalValue + discordMessagesFinalValue
+      finalValuesSum = discordMessagesFinalValue
           + discordMessagesComparedFinalValue + playtimeFinalValue;
-      parametersCount = 4;
+      parametersCount = 3;
     } else {
-      finalValuesSum = afkPlaytimeFinalValue + discordMessagesFinalValue
+      finalValuesSum = discordMessagesFinalValue
           + discordMessagesComparedFinalValue + minecraftTicketsFinalValue
           + minecraftTicketsComparedFinalValue + playtimeFinalValue;
-      parametersCount = 6;
+      parametersCount = 5;
     }
 
     return finalValuesSum / parametersCount;
   }
 
-  public double calculateFinalProductivityValue(double averageValueOfAllFinals, double complaintsFinalValue) {
+  private double calculateFinalProductivityValue(double averageValueOfAllFinals, double complaintsFinalValue) {
     return averageValueOfAllFinals - (complaintsFinalValue * 0.01);
   }
 
-  public void saveProductivityValueForThisEmployee(double finalProductivityValue, Short employeeId) {
+  private void saveProductivityValueForThisEmployee(double finalProductivityValue, Short employeeId) {
     Productivity existingRecord = productivityRepository.findByEmployeeId(employeeId);
 
     if (existingRecord != null) {

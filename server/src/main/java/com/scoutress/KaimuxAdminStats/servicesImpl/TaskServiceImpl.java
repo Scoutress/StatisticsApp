@@ -90,40 +90,21 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Handling Complaints");
     complaintsService.handleComplaints();
 
+    System.out.println("Handling productivity");
+    productivityService.handleProductivity();
+
+    // System.out.println("Handling recommendation");
+    // recommendationsService.handleRecommendations();
+
+    // System.out.println("Handling final stats");
+    // finalStatsService.handleFinalStats();
+
+    // System.out.println("Handling user recommendation");
+    // recommendationUserService.handleUserRecommendations();
+
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
-  }
-
-  @Override
-  @Transactional
-  public void runScheduledTasksOld() {
-    // System.out.println("-----------------------------------------------");
-    // System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
-
-    // System.out.println("");
-    // System.out.println("Complaints calculation");
-    // complaintsService.calculateComplaintsPerEachEmployee();
-
-    // System.out.println("");
-    // System.out.println("Productivity calculation");
-    // productivityService.calculateProductivity();
-
-    // System.out.println("");
-    // System.out.println("Recommendation evaluation");
-    // recommendationsService.evaluateRecommendations();
-
-    // System.out.println("");
-    // System.out.println("Final stats updating");
-    // finalStatsService.updateNewStatsData();
-
-    // System.out.println("");
-    // System.out.println("User recommendation updating");
-    // recommendationUserService.checkAndSaveRecommendations();
-
-    // System.out.println("");
-    // System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
-    // System.out.println("-----------------------------------------------");
   }
 
   @Override

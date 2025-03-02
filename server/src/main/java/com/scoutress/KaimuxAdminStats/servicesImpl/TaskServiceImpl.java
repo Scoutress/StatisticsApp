@@ -87,6 +87,9 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Handling Playtime");
     playtimeHandlingService.handlePlaytime();
 
+    System.out.println("Handling Complaints");
+    complaintsService.handleComplaints();
+
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");

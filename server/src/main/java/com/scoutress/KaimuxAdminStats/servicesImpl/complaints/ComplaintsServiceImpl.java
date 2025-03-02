@@ -24,7 +24,7 @@ public class ComplaintsServiceImpl implements ComplaintsService {
   }
 
   @Override
-  public void calculateComplaintsPerEachEmployee() {
+  public void handleComplaints() {
     List<Complaints> rawData = getAllComplaints();
 
     if (rawData != null && !rawData.isEmpty()) {
@@ -40,11 +40,11 @@ public class ComplaintsServiceImpl implements ComplaintsService {
     }
   }
 
-  public List<Complaints> getAllComplaints() {
+  private List<Complaints> getAllComplaints() {
     return complaintsRepository.findAll();
   }
 
-  public List<Short> getAllEmployeesFromComplaintsData(List<Complaints> rawData) {
+  private List<Short> getAllEmployeesFromComplaintsData(List<Complaints> rawData) {
     return rawData
         .stream()
         .map(Complaints::getEmployeeId)
@@ -53,14 +53,14 @@ public class ComplaintsServiceImpl implements ComplaintsService {
         .toList();
   }
 
-  public int calculateAllComplaintsForThisEmployee(List<Complaints> rawData, Short employee) {
+  private int calculateAllComplaintsForThisEmployee(List<Complaints> rawData, Short employee) {
     return (int) rawData
         .stream()
         .filter(messages -> messages.getEmployeeId().equals(employee))
         .count();
   }
 
-  public void saveComplaintsSumForThisEmployee(int allComplaintsForThisEmployee, Short employeeId) {
+  private void saveComplaintsSumForThisEmployee(int allComplaintsForThisEmployee, Short employeeId) {
     ComplaintsSum existingRecord = complaintsSumRepository.findByEmployeeId(employeeId);
 
     if (existingRecord != null) {

@@ -44,7 +44,7 @@ public class RecommendationUserServiceImpl implements RecommendationUserService 
 
   @Transactional
   @Override
-  public void checkAndSaveRecommendations() {
+  public void handleUserRecommendations() {
     List<Employee> employeesData = getAllEmployeeData();
     List<FinalStats> finalStatsData = getFinalStatsData();
     List<Complaints> complaintsData = getComplaintsData();

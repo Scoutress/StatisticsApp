@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface RecommendationUserService {
 
-  void checkAndSaveRecommendations();
+  void handleUserRecommendations();
 
   Map<String, Object> getEmployeeRecommendation(Short employeeId);
 }

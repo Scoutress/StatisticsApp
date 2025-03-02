@@ -5,17 +5,11 @@ import org.springframework.stereotype.Service;
 import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
 import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
-import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 import com.scoutress.KaimuxAdminStats.services.TaskService;
 import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
 import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesHandlingService;
-import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
 import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsHandlingService;
-import com.scoutress.KaimuxAdminStats.services.playtime.AnnualPlaytimeService;
-import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
-import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.PlaytimeHandlingService;
-import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
 import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
 
 import jakarta.annotation.PostConstruct;
@@ -26,12 +20,6 @@ public class TaskServiceImpl implements TaskService {
 
   private final DiscordMessagesHandlingService discordMessagesHandlingService;
   private final ProductivityService productivityService;
-  private final SQLiteToMySQLService sQLiteToMySQLService;
-  private final EmployeeDataService employeeDataService;
-  private final SessionDurationService sessionDurationService;
-  private final DailyPlaytimeService dailyPlaytimeService;
-  private final AnnualPlaytimeService annualyPlaytimeService;
-  private final AveragePlaytimeOverallService averagePlaytimeOverallService;
   private final ComplaintsService complaintsService;
   private final RecommendationsService recommendationsService;
   private final FinalStatsService finalStatsService;
@@ -42,12 +30,6 @@ public class TaskServiceImpl implements TaskService {
   public TaskServiceImpl(
       DiscordMessagesHandlingService discordMessagesHandlingService,
       ProductivityService productivityService,
-      SQLiteToMySQLService sQLiteToMySQLService,
-      EmployeeDataService employeeDataService,
-      SessionDurationService sessionDurationService,
-      DailyPlaytimeService dailyPlaytimeService,
-      AnnualPlaytimeService annualyPlaytimeService,
-      AveragePlaytimeOverallService averagePlaytimeOverallService,
       ComplaintsService complaintsService,
       RecommendationsService recommendationsService,
       FinalStatsService finalStatsService,
@@ -56,12 +38,6 @@ public class TaskServiceImpl implements TaskService {
       PlaytimeHandlingService playtimeHandlingService) {
     this.discordMessagesHandlingService = discordMessagesHandlingService;
     this.productivityService = productivityService;
-    this.sQLiteToMySQLService = sQLiteToMySQLService;
-    this.employeeDataService = employeeDataService;
-    this.sessionDurationService = sessionDurationService;
-    this.dailyPlaytimeService = dailyPlaytimeService;
-    this.annualyPlaytimeService = annualyPlaytimeService;
-    this.averagePlaytimeOverallService = averagePlaytimeOverallService;
     this.complaintsService = complaintsService;
     this.recommendationsService = recommendationsService;
     this.finalStatsService = finalStatsService;
@@ -99,8 +75,8 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Handling final stats");
     finalStatsService.handleFinalStats();
 
-    // System.out.println("Handling user recommendation");
-    // recommendationUserService.handleUserRecommendations();
+    System.out.println("Handling user recommendation");
+    recommendationUserService.handleUserRecommendations();
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

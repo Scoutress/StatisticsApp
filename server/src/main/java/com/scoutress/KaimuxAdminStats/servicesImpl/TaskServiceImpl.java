@@ -96,8 +96,8 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Handling recommendation");
     recommendationsService.handleRecommendations();
 
-    // System.out.println("Handling final stats");
-    // finalStatsService.handleFinalStats();
+    System.out.println("Handling final stats");
+    finalStatsService.handleFinalStats();
 
     // System.out.println("Handling user recommendation");
     // recommendationUserService.handleUserRecommendations();

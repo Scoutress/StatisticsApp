@@ -67,7 +67,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   }
 
   @Override
-  public void updateNewStatsData() {
+  public void handleFinalStats() {
     List<Employee> rawEmployeesData = getRawEmployeesData();
     List<AnnualPlaytime> rawAnnualPlaytimeData = getRawAnnualPlaytimeData();
     List<AverageDailyMinecraftTickets> rawMinecraftTicketsData = getRawMinecraftTicketsData();
@@ -114,43 +114,43 @@ public class FinalStatsServiceImpl implements FinalStatsService {
     }
   }
 
-  public List<Employee> getRawEmployeesData() {
+  private List<Employee> getRawEmployeesData() {
     return employeeRepository.findAll();
   }
 
-  public List<AnnualPlaytime> getRawAnnualPlaytimeData() {
+  private List<AnnualPlaytime> getRawAnnualPlaytimeData() {
     return annualPlaytimeRepository.findAll();
   }
 
-  public List<AverageDailyMinecraftTickets> getRawMinecraftTicketsData() {
+  private List<AverageDailyMinecraftTickets> getRawMinecraftTicketsData() {
     return averageDailyMinecraftTicketsRepository.findAll();
   }
 
-  public List<AverageMinecraftTicketsCompared> getRawMinecraftTicketsComparedData() {
+  private List<AverageMinecraftTicketsCompared> getRawMinecraftTicketsComparedData() {
     return averageMinecraftTicketsComparedRepository.findAll();
   }
 
-  public List<AverageDailyDiscordMessages> getRawDiscordMessagesData() {
+  private List<AverageDailyDiscordMessages> getRawDiscordMessagesData() {
     return averageDailyDiscordMessagesRepository.findAll();
   }
 
-  public List<AverageDiscordMessagesCompared> getRawDiscordMessagesComparedData() {
+  private List<AverageDiscordMessagesCompared> getRawDiscordMessagesComparedData() {
     return averageDiscordMessagesComparedRepository.findAll();
   }
 
-  public List<AveragePlaytimeOverall> getRawPlaytimeData() {
+  private List<AveragePlaytimeOverall> getRawPlaytimeData() {
     return averagePlaytimeOverallRepository.findAll();
   }
 
-  public List<Productivity> getRawProductivityData() {
+  private List<Productivity> getRawProductivityData() {
     return productivityRepository.findAll();
   }
 
-  public List<Recommendations> getRawRecommendationsData() {
+  private List<Recommendations> getRawRecommendationsData() {
     return recommendationsRepository.findAll();
   }
 
-  public List<Short> getAllEmployeeIds(List<Employee> rawEmployeesData) {
+  private List<Short> getAllEmployeeIds(List<Employee> rawEmployeesData) {
     return rawEmployeesData
         .stream()
         .map(Employee::getId)
@@ -159,7 +159,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .toList();
   }
 
-  public String getEmployeeLevel(List<Employee> rawEmployeesData, Short employeeId) {
+  private String getEmployeeLevel(List<Employee> rawEmployeesData, Short employeeId) {
     return rawEmployeesData
         .stream()
         .filter(employee -> employee.getId().equals(employeeId))
@@ -168,7 +168,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse("Error");
   }
 
-  public String getEmployeeUsername(List<Employee> rawEmployeesData, Short employeeId) {
+  private String getEmployeeUsername(List<Employee> rawEmployeesData, Short employeeId) {
     return rawEmployeesData
         .stream()
         .filter(employee -> employee.getId().equals(employeeId))
@@ -177,7 +177,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse("Error");
   }
 
-  public double getAnnualPlaytimeForThisEmployee(List<AnnualPlaytime> rawAnnualPlaytimeData, Short employeeId) {
+  private double getAnnualPlaytimeForThisEmployee(List<AnnualPlaytime> rawAnnualPlaytimeData, Short employeeId) {
     return rawAnnualPlaytimeData
         .stream()
         .filter(employee -> employee.getEmployeeId().equals(employeeId))
@@ -186,7 +186,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public double getMinecraftTicketsForThisEmployee(
+  private double getMinecraftTicketsForThisEmployee(
       List<AverageDailyMinecraftTickets> rawMinecraftTicketsData, Short employeeId) {
     return rawMinecraftTicketsData
         .stream()
@@ -196,7 +196,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public double getMinecraftTicketsComparedForThisEmployee(
+  private double getMinecraftTicketsComparedForThisEmployee(
       List<AverageMinecraftTicketsCompared> rawMinecraftTicketsComparedData, Short employeeId) {
     return rawMinecraftTicketsComparedData
         .stream()
@@ -206,7 +206,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public double getDiscordMessagesForThisEmployee(
+  private double getDiscordMessagesForThisEmployee(
       List<AverageDailyDiscordMessages> rawDiscordMessagesData, Short employeeId) {
     return rawDiscordMessagesData
         .stream()
@@ -216,7 +216,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public double getDiscordMessagesComparedForThisEmployee(
+  private double getDiscordMessagesComparedForThisEmployee(
       List<AverageDiscordMessagesCompared> rawDiscordMessagesComparedData, Short employeeId) {
     return rawDiscordMessagesComparedData
         .stream()
@@ -226,7 +226,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public double getPlaytimeForThisEmployee(List<AveragePlaytimeOverall> rawPlaytimeData, Short employeeId) {
+  private double getPlaytimeForThisEmployee(List<AveragePlaytimeOverall> rawPlaytimeData, Short employeeId) {
     return rawPlaytimeData
         .stream()
         .filter(employee -> employee.getEmployeeId().equals(employeeId))
@@ -235,7 +235,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public double getProductivityForThisEmployee(List<Productivity> rawProductivityData, Short employeeId) {
+  private double getProductivityForThisEmployee(List<Productivity> rawProductivityData, Short employeeId) {
     return rawProductivityData
         .stream()
         .filter(employee -> employee.getEmployeeId().equals(employeeId))
@@ -244,7 +244,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse(0.0);
   }
 
-  public String getRecommendationsForThisEmployee(List<Recommendations> rawRecommendationsData, Short employeeId) {
+  private String getRecommendationsForThisEmployee(List<Recommendations> rawRecommendationsData, Short employeeId) {
     return rawRecommendationsData
         .stream()
         .filter(employee -> employee.getEmployeeId().equals(employeeId))
@@ -253,7 +253,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         .orElse("Error");
   }
 
-  public void saveNewFinalStatsDataAsModerator(Short employeeId, String employeeLevel,
+  private void saveNewFinalStatsDataAsModerator(Short employeeId, String employeeLevel,
       String employeeUsername, double annualPlaytimeForThisEmployee,
       double minecraftTicketsForThisEmployee, double minecraftTicketsComparedForThisEmployee,
       double discordMessages, double discordMessagesCompared,
@@ -295,7 +295,7 @@ public class FinalStatsServiceImpl implements FinalStatsService {
     }
   }
 
-  public void saveNewFinalStatsDataAsAdmin(Short employeeId, String employeeLevel,
+  private void saveNewFinalStatsDataAsAdmin(Short employeeId, String employeeLevel,
       String employeeUsername, double annualPlaytimeForThisEmployee, double playtimeForThisEmployee) {
 
     FinalStats existingRecord = finalStatsRepository.findByEmployeeId(employeeId);

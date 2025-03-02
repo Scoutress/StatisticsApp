@@ -7,7 +7,7 @@ import com.scoutress.KaimuxAdminStats.entity.FinalStats;
 
 public interface FinalStatsService {
 
-  void updateNewStatsData();
+  void handleFinalStats();
 
   List<FinalStats> getAllFinalStats();
 

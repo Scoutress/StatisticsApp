@@ -1,17 +1,15 @@
 package com.scoutress.KaimuxAdminStats.config;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
-@Configuration
+@Component
 public class DcBotConfig {
 
   private final String dcBotApi;
 
-  public DcBotConfig() {
-    Dotenv dotenv = Dotenv.load();
-    this.dcBotApi = dotenv.get("BOT_API_URL");
+  public DcBotConfig(@Value("${bot.api.url}") String dcBotApi) {
+    this.dcBotApi = dcBotApi;
   }
 
   public String getDcBotApi() {

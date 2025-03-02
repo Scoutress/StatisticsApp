@@ -4,38 +4,47 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.ProcessedPlaytimeSessionsRepository;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 
 @Service
 public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
 
+  private static final Logger logger = LoggerFactory.getLogger(SessionDurationServiceImpl.class);
+
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
-  private final DataExtractingService dataExtractingService;
+  private final ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository;
 
   public DailyPlaytimeServiceImpl(
       DailyPlaytimeRepository dailyPlaytimeRepository,
-      DataExtractingService dataExtractingService) {
+      ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository) {
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
-    this.dataExtractingService = dataExtractingService;
+    this.processedPlaytimeSessionsRepository = processedPlaytimeSessionsRepository;
   }
 
   @Override
   public void handleDailyPlaytime() {
-    List<SessionDuration> allSessions = dataExtractingService.getSessionDurations();
+    List<SessionDuration> allSessions = getSessionDurations();
     List<DailyPlaytime> dailyPlaytimeData = calculateDailyPlaytime(allSessions);
     saveCalculatedPlaytime(dailyPlaytimeData);
   }
 
-  public List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
+  private List<SessionDuration> getSessionDurations() {
+    return processedPlaytimeSessionsRepository.findAll();
+  }
+
+  private List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
     List<DailyPlaytime> handledDailyPlaytimeData = new ArrayList<>();
 
     Set<Short> allEmployeeIds = sessions
@@ -87,7 +96,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     return handledDailyPlaytimeData;
   }
 
-  public void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
+  private void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
     dailyPlaytimeData.forEach(dailyPlaytime -> {
       DailyPlaytime existingPlaytime = dailyPlaytimeRepository.findByEmployeeIdAndDateAndServer(
           dailyPlaytime.getEmployeeId(),
@@ -106,6 +115,45 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
   }
 
   @Override
+  public void removeDuplicateDailyPlaytimes() {
+    List<DailyPlaytime> allDailyPlaytimes = getDailyPlaytimes();
+    Map<String, List<DailyPlaytime>> groupedDailyPlaytimes = groupDailyPlaytimesByUniqueFields(allDailyPlaytimes);
+    removeDuplicateDailyPlaytimes(groupedDailyPlaytimes);
+  }
+
+  private List<DailyPlaytime> getDailyPlaytimes() {
+    return dailyPlaytimeRepository.findAll();
+  }
+
+  private Map<String, List<DailyPlaytime>> groupDailyPlaytimesByUniqueFields(List<DailyPlaytime> allDailyPlaytimes) {
+    return allDailyPlaytimes
+        .stream()
+        .collect(Collectors.groupingBy(playtime -> playtime.getEmployeeId() + "-" +
+            playtime.getTimeInHours() + "-" +
+            playtime.getDate() + "-" +
+            playtime.getServer()));
+  }
+
+  private void removeDuplicateDailyPlaytimes(Map<String, List<DailyPlaytime>> groupedDailyPlaytimes) {
+    int totalDuplicatesRemoved = 0;
+
+    for (List<DailyPlaytime> group : groupedDailyPlaytimes.values()) {
+      if (group.size() > 1) {
+        totalDuplicatesRemoved += group.size() - 1;
+
+        logger.info("Removing {} duplicates from group: {}", group.size() - 1, group.get(0));
+
+        group.subList(1, group.size()).forEach(session -> {
+          logger.debug("Removing session: {}", session);
+          dailyPlaytimeRepository.delete(session);
+        });
+      }
+    }
+
+    logger.info("Total duplicates removed: {}", totalDuplicatesRemoved);
+  }
+
+  @Override
   public Double getSumOfPlaytimeByEmployeeIdAndDuration(Short employeeId, Short days) {
     List<DailyPlaytime> rawPlaytimeData = getRawPlaytimeData();
     List<DailyPlaytime> playtimeDataThisEmployee = getPlaytimeDataForThisEmployee(rawPlaytimeData, employeeId);
@@ -113,11 +161,11 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     return calculatePlaytime(playtimeDataThisEmployee, days);
   }
 
-  public List<DailyPlaytime> getRawPlaytimeData() {
+  private List<DailyPlaytime> getRawPlaytimeData() {
     return dailyPlaytimeRepository.findAll();
   }
 
-  public List<DailyPlaytime> getPlaytimeDataForThisEmployee(
+  private List<DailyPlaytime> getPlaytimeDataForThisEmployee(
       List<DailyPlaytime> rawPlaytimeData, Short employeeId) {
     return rawPlaytimeData
         .stream()
@@ -125,7 +173,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
         .collect(Collectors.toList());
   }
 
-  public Double calculatePlaytime(List<DailyPlaytime> playtimeData, Short days) {
+  private Double calculatePlaytime(List<DailyPlaytime> playtimeData, Short days) {
     return playtimeData
         .stream()
         .filter(data -> data.getDate().isAfter(LocalDate.now().minusDays(days)))

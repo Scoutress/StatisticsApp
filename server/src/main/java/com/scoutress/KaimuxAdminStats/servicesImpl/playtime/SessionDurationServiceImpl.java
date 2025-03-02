@@ -6,163 +6,336 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.playtime.LoginLogoutTimes;
+import com.scoutress.KaimuxAdminStats.entity.playtime.RawPlaytimeSession;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.LoginLogoutTimesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.ProcessedPlaytimeSessionsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.SessionDurationRepository;
-import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
 import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class SessionDurationServiceImpl implements SessionDurationService {
 
+  private static final Logger logger = LoggerFactory.getLogger(SessionDurationServiceImpl.class);
+
   private final JdbcTemplate jdbcTemplate;
-  private final DataExtractingService dataExtractingService;
+  private final ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository;
   private final SessionDurationRepository sessionDurationRepository;
   private final EmployeeRepository employeeRepository;
   private final LoginLogoutTimesRepository loginLogoutTimesRepository;
 
   public SessionDurationServiceImpl(
       JdbcTemplate jdbcTemplate,
-      DataExtractingService dataExtractingService,
+      ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository,
       SessionDurationRepository sessionDurationRepository,
       EmployeeRepository employeeRepository,
       LoginLogoutTimesRepository loginLogoutTimesRepository) {
     this.jdbcTemplate = jdbcTemplate;
-    this.dataExtractingService = dataExtractingService;
+    this.processedPlaytimeSessionsRepository = processedPlaytimeSessionsRepository;
     this.sessionDurationRepository = sessionDurationRepository;
     this.employeeRepository = employeeRepository;
     this.loginLogoutTimesRepository = loginLogoutTimesRepository;
   }
 
   @Override
-  public void processSessions() {
-    List<String> servers = getServers();
+  @Transactional
+  public void processLoginLogouts(List<String> servers) {
+    List<String> employeesUsernames = getAllEmployeesUsernames();
+    logger.info("Starting to process sessions for servers: {}", servers);
 
     for (String server : servers) {
-      List<Map<String, Object>> employees = getEmployeesForServer(server);
+      logger.info("Processing server: {}", server);
+      List<RawPlaytimeSession> allRawPlaytimes = getAllPlaytimeSessions(server);
 
-      for (Map<String, Object> employee : employees) {
-        Integer employeeId = (Integer) employee.get("employee_id");
-        Integer serverUserId = (Integer) employee.get("server_user_id");
+      for (String username : employeesUsernames) {
+        int userId = getUserIdByUsername(server, username);
+        if (userId == -1) {
+          continue;
+        }
 
-        List<Map<String, Object>> sessionData = getSessionData(server, serverUserId);
-        processEmployeeSessions(employeeId, server, sessionData);
+        List<RawPlaytimeSession> rawPlaytimes = getRawPlaytimesForUser(allRawPlaytimes, userId);
+        if (rawPlaytimes.isEmpty()) {
+          continue;
+        }
+
+        cleanAndSaveLoginLogout(rawPlaytimes, server);
       }
+    }
+    logger.info("Finished processing login logouts.");
+  }
+
+  private List<String> getAllEmployeesUsernames() {
+    return employeeRepository
+        .findAll()
+        .stream()
+        .map(Employee::getUsername)
+        .collect(Collectors.toList());
+  }
+
+  private Integer getUserIdByUsername(String server, String username) {
+    String tableName = "raw_user_data_" + server.toLowerCase();
+    String query = "SELECT user_id FROM " + tableName + " WHERE username = ?";
+
+    try {
+      return jdbcTemplate.queryForObject(query, Integer.class, username);
+    } catch (EmptyResultDataAccessException e) {
+      return -1;
     }
   }
 
-  public List<String> getServers() {
-    return Arrays.asList("Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events", "Lobby");
-  }
+  private List<RawPlaytimeSession> getAllPlaytimeSessions(String server) {
+    logger.debug("Fetching all playtime sessions for server: {}", server);
+    String tableName = "raw_playtime_sessions_data_" + server.toLowerCase();
+    String query = "SELECT id, user_id, time, action FROM " + tableName + " LIMIT ? OFFSET ?";
 
-  public List<Map<String, Object>> getEmployeesForServer(String server) {
-    String query = "SELECT employee_id, " + server.toLowerCase() + "_id AS server_user_id FROM employee_codes WHERE "
-        + server.toLowerCase() + "_id IS NOT NULL";
-    return jdbcTemplate.queryForList(query);
-  }
+    int pageSize = 1000;
+    int offset = 0;
+    List<RawPlaytimeSession> allSessions = new ArrayList<>();
 
-  public List<Map<String, Object>> getSessionData(String server, Integer userId) {
-    String query = "SELECT action, time FROM raw_playtime_sessions_data_" + server.toLowerCase()
-        + " WHERE user_id = ? ORDER BY time";
-    return jdbcTemplate.queryForList(query, userId);
-  }
+    while (true) {
+      List<RawPlaytimeSession> sessionBatch = jdbcTemplate.query(query,
+          (rs, rowNum) -> new RawPlaytimeSession(
+              rs.getLong("id"),
+              rs.getInt("user_id"),
+              rs.getInt("time"),
+              rs.getInt("action")),
+          pageSize, offset);
 
-  public void processEmployeeSessions(Integer employeeId, String server, List<Map<String, Object>> sessionData) {
-    List<Integer> logins = new ArrayList<>();
-    List<Integer> logouts = new ArrayList<>();
-
-    for (Map<String, Object> record : sessionData) {
-      Boolean action = (Boolean) record.get("action");
-      Integer playtime = (Integer) record.get("time");
-
-      if (action) {
-        logins.add(playtime);
-      } else {
-        logouts.add(playtime);
-      }
-    }
-
-    calculateAndSaveSessionDurations(employeeId, server, logins, logouts);
-  }
-
-  public void calculateAndSaveSessionDurations(Integer employeeId, String server, List<Integer> logins,
-      List<Integer> logouts) {
-    for (int i = 0; i < logins.size(); i++) {
-      if (i + 1 >= logins.size() || logouts.isEmpty()) {
+      if (sessionBatch.isEmpty()) {
         break;
       }
 
-      Integer loginTime = logins.get(i);
-      Integer nextLoginTime = logins.get(i + 1);
-      Integer logoutTime = findValidLogoutTime(logouts, loginTime, nextLoginTime);
+      allSessions.addAll(sessionBatch);
+      offset += pageSize;
+    }
+    logger.debug("Total sessions fetched: {}", allSessions.size());
+    return allSessions;
+  }
 
-      if (logoutTime != null) {
-        int sessionDuration = logoutTime - loginTime;
+  private List<RawPlaytimeSession> getRawPlaytimesForUser(List<RawPlaytimeSession> allRawPlaytimes, int userId) {
+    return allRawPlaytimes
+        .stream()
+        .filter(session -> session.getUserId() == userId)
+        .collect(Collectors.toList());
+  }
 
-        if (sessionDuration <= 24 * 60 * 60) {
-          saveSessionDuration(employeeId, server, sessionDuration, loginTime);
+  private void cleanAndSaveLoginLogout(List<RawPlaytimeSession> rawPlaytimes, String server) {
+    rawPlaytimes.sort(Comparator.comparing(RawPlaytimeSession::getTime));
+
+    int i = 0;
+    while (i < rawPlaytimes.size()) {
+      RawPlaytimeSession firstLogin = rawPlaytimes.get(i);
+
+      if (firstLogin.getAction() != 1) {
+        i++;
+        continue;
+      }
+
+      int secondLoginIndex = findNextLogin(rawPlaytimes, i + 1);
+
+      if (secondLoginIndex == -1) {
+        removeInvalidLogin(firstLogin);
+        break;
+      }
+
+      List<RawPlaytimeSession> logouts = findLogoutsBetween(rawPlaytimes, i + 1, secondLoginIndex);
+
+      if (!logouts.isEmpty()) {
+        RawPlaytimeSession logoutSession = logouts.get(logouts.size() - 1);
+        saveLoginLogoutPair(firstLogin, logoutSession, server);
+        i = secondLoginIndex + 1;
+      } else {
+        removeInvalidLogin(firstLogin);
+        i = secondLoginIndex + 1;
+      }
+    }
+  }
+
+  private void saveLoginLogoutPair(RawPlaytimeSession loginSession, RawPlaytimeSession logoutSession, String server) {
+    logger.debug("Saving login/logout time for user: {}", loginSession.getUserId());
+    LocalDateTime loginTime = Instant.ofEpochSecond(
+        loginSession.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+    LocalDateTime logoutTime = logoutSession != null
+        ? Instant.ofEpochSecond(
+            logoutSession.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+        : null;
+
+    saveLoginLogoutToDb(loginSession.getUserId(), server, loginTime, logoutTime);
+  }
+
+  private void saveLoginLogoutToDb(int userId, String server, LocalDateTime loginTime, LocalDateTime logoutTime) {
+    logger.debug("Saving to DB: User {}, Server {}, Login {}, Logout {}", userId, server, loginTime, logoutTime);
+    LoginLogoutTimes loginLogoutTimes = new LoginLogoutTimes();
+    loginLogoutTimes.setEmployeeId((short) userId);
+    loginLogoutTimes.setServerName(server);
+    loginLogoutTimes.setLoginTime(loginTime);
+    loginLogoutTimes.setLogoutTime(logoutTime);
+    loginLogoutTimesRepository.save(loginLogoutTimes);
+  }
+
+  private void removeInvalidLogin(RawPlaytimeSession loginSession) {
+    logger.debug("Removing invalid login for user: {}", loginSession.getUserId());
+  }
+
+  private int findNextLogin(List<RawPlaytimeSession> rawPlaytimes, int startIndex) {
+    for (int i = startIndex; i < rawPlaytimes.size(); i++) {
+      if (rawPlaytimes.get(i).getAction() == 1) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private List<RawPlaytimeSession> findLogoutsBetween(List<RawPlaytimeSession> rawPlaytimes, int startIndex,
+      int endIndex) {
+    List<RawPlaytimeSession> logouts = new ArrayList<>();
+
+    for (int i = startIndex; i < endIndex; i++) {
+      if (rawPlaytimes.get(i).getAction() == 0) {
+        logouts.add(rawPlaytimes.get(i));
+      }
+    }
+
+    return logouts;
+  }
+
+  @Override
+  public void removeLoginLogoutsDupe() {
+    List<LoginLogoutTimes> allLoginsLogouts = getAllLoginsLogouts();
+    logger.info("Fetched {} session records for duplicate removal.", allLoginsLogouts.size());
+
+    Map<String, List<LoginLogoutTimes>> groupedLoginsLogouts = groupLoginsLogoutsByUniqueFields(allLoginsLogouts);
+
+    removeDuplicateLoginsLogouts(groupedLoginsLogouts);
+  }
+
+  private List<LoginLogoutTimes> getAllLoginsLogouts() {
+    return loginLogoutTimesRepository.findAll();
+  }
+
+  private Map<String, List<LoginLogoutTimes>> groupLoginsLogoutsByUniqueFields(
+      List<LoginLogoutTimes> allLoginsLogouts) {
+    return allLoginsLogouts
+        .stream()
+        .collect(Collectors.groupingBy(logs -> logs.getEmployeeId() + "-" +
+            logs.getServerName() + "-" +
+            logs.getLoginTime() + "-" +
+            logs.getLogoutTime()));
+  }
+
+  private void removeDuplicateLoginsLogouts(Map<String, List<LoginLogoutTimes>> groupedLoginsLogouts) {
+    int totalDuplicatesRemoved = 0;
+
+    for (List<LoginLogoutTimes> group : groupedLoginsLogouts.values()) {
+      if (group.size() > 1) {
+        totalDuplicatesRemoved += group.size() - 1;
+
+        logger.info("Removing {} duplicates from group: {}", group.size() - 1, group.get(0));
+
+        group.subList(1, group.size()).forEach(session -> {
+          logger.debug("Removing session: {}", session);
+          loginLogoutTimesRepository.delete(session);
+        });
+      }
+    }
+
+    logger.info("Total duplicates removed: {}", totalDuplicatesRemoved);
+  }
+
+  @Override
+  public void processSessions(List<String> servers) {
+    for (String server : servers) {
+      logger.debug("Counting and saving session durations for server: {}", server);
+      LocalDate latestDate = sessionDurationRepository.findLatestDate();
+      LocalDateTime startOfDay = latestDate.atStartOfDay();
+
+      List<LoginLogoutTimes> cleanedRawPlaytimes = loginLogoutTimesRepository
+          .findByLoginTimeGreaterThanEqual(startOfDay);
+
+      for (int i = 0; i < cleanedRawPlaytimes.size(); i++) {
+        LoginLogoutTimes loginSession = cleanedRawPlaytimes.get(i);
+        if (i + 1 < cleanedRawPlaytimes.size()) {
+          LoginLogoutTimes logoutSession = cleanedRawPlaytimes.get(i + 1);
+
+          if (logoutSession.getLoginTime().isAfter(loginSession.getLoginTime())) {
+            long sessionDurationInSeconds = Duration.between(loginSession.getLoginTime(), logoutSession.getLogoutTime())
+                .getSeconds();
+            saveSessionDuration(loginSession.getEmployeeId(), sessionDurationInSeconds,
+                loginSession.getLoginTime().toLocalDate(), server);
+            i++;
+          }
         }
       }
     }
   }
 
-  public Integer findValidLogoutTime(List<Integer> logouts, Integer loginTime, Integer nextLoginTime) {
-    for (Iterator<Integer> iterator = logouts.iterator(); iterator.hasNext();) {
-      Integer logoutTime = iterator.next();
-      if (logoutTime >= loginTime && logoutTime < nextLoginTime) {
-        iterator.remove();
-        return logoutTime;
-      }
-    }
-    return null;
-  }
-
-  public void saveSessionDuration(Integer employeeId, String server, Integer sessionDuration, Integer loginTime) {
-    LocalDate sessionDate = Instant.ofEpochSecond(loginTime).atZone(ZoneId.systemDefault()).toLocalDate();
-
+  private void saveSessionDuration(int userId, long sessionDurationInSeconds, LocalDate date, String server) {
+    logger.debug("Saving session duration for user: {}, Duration: {}s, Date: {}", userId, sessionDurationInSeconds,
+        date);
     String query = "INSERT INTO session_duration (employee_id, single_session_duration, date, server) VALUES (?, ?, ?, ?)";
-
-    jdbcTemplate.update(query, employeeId, sessionDuration, sessionDate, server);
+    jdbcTemplate.update(query, userId, sessionDurationInSeconds, date, server);
   }
 
   @Override
   public void removeDuplicateSessionData() {
-    List<SessionDuration> allSessions = dataExtractingService.getSessionDurations();
+    List<SessionDuration> allSessions = getSessionDurations();
+    logger.info("Fetched {} session records for duplicate removal.", allSessions.size());
 
-    Map<String, List<SessionDuration>> groupedByUniqueFields = allSessions
+    Map<String, List<SessionDuration>> groupedSessions = groupSessionsByUniqueFields(allSessions);
+
+    removeDuplicateSessions(groupedSessions);
+  }
+
+  private List<SessionDuration> getSessionDurations() {
+    return processedPlaytimeSessionsRepository.findAll();
+  }
+
+  private Map<String, List<SessionDuration>> groupSessionsByUniqueFields(List<SessionDuration> allSessions) {
+    return allSessions
         .stream()
         .collect(Collectors.groupingBy(session -> session.getEmployeeId() + "-" +
             session.getDate() + "-" +
             session.getServer() + "-" +
             session.getSingleSessionDurationInSec()));
+  }
 
-    groupedByUniqueFields.values().forEach(group -> {
+  private void removeDuplicateSessions(Map<String, List<SessionDuration>> groupedSessions) {
+    int totalDuplicatesRemoved = 0;
+
+    for (List<SessionDuration> group : groupedSessions.values()) {
       if (group.size() > 1) {
-        group.subList(1, group.size()).forEach(sessionDuration -> sessionDurationRepository.delete(sessionDuration));
+        totalDuplicatesRemoved += group.size() - 1;
+
+        logger.info("Removing {} duplicates from group: {}", group.size() - 1, group.get(0));
+
+        group.subList(1, group.size()).forEach(session -> {
+          logger.debug("Removing session: {}", session);
+          sessionDurationRepository.delete(session);
+        });
       }
-    });
-  }
-
-  public void delete(SessionDuration sessionDuration) {
-    if (sessionDuration == null) {
-      throw new IllegalArgumentException("SessionDuration must not be null.");
     }
-    sessionDurationRepository.delete(sessionDuration);
+
+    logger.info("Total duplicates removed: {}", totalDuplicatesRemoved);
   }
 
+  // Temp. methods below
   @Override
   public void processSessionsFromBackup() {
     List<Short> allEmployeeIds = getEmployeeIds();

@@ -43,6 +43,8 @@ public class DataProcessingServiceImpl implements DataProcessingService {
     this.processedPlaytimeSessionsRepository = processedPlaytimeSessionsRepository;
   }
 
+  // TODO remove this class
+
   @Override
   public void calculateSingleSessionTime() {
     Map<String, Method> serverIdMethods = initializeServerIdMethods();

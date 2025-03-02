@@ -54,9 +54,9 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
     LocalDate todaysDate = LocalDate.now();
 
     discordBotService.startBot();
-    discordBotService.sleepForOneMin();
+    discordBotService.sleepForHalfMin();
     discordBotService.handleDcBotRequests(employeeCodes, latestDate, todaysDate);
-    discordBotService.sleepForOneMin();
+    discordBotService.sleepForHalfMin();
     discordBotService.stopBot();
 
     List<DiscordRawMessagesCounts> rawMessages = getAllRawDcMessagesData();

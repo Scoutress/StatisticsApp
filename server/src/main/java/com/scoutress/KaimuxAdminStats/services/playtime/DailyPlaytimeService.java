@@ -4,5 +4,7 @@ public interface DailyPlaytimeService {
 
   void handleDailyPlaytime();
 
+  void removeDuplicateDailyPlaytimes();
+
   Double getSumOfPlaytimeByEmployeeIdAndDuration(Short employeeId, Short days);
 }

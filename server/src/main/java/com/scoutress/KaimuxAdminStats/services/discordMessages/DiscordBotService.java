@@ -14,7 +14,7 @@ public interface DiscordBotService {
 
   void startBot();
 
-  void sleepForOneMin();
+  void sleepForHalfMin();
 
   void stopBot();
 }

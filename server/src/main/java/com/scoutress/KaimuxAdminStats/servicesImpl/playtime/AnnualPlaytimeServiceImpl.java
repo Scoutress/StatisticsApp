@@ -11,31 +11,34 @@ import org.springframework.stereotype.Service;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AnnualPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AnnualPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
-import com.scoutress.KaimuxAdminStats.services.playtime.AnnualyPlaytimeService;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
+import com.scoutress.KaimuxAdminStats.services.playtime.AnnualPlaytimeService;
 
 @Service
-public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
+public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
 
-  private final DataExtractingService dataExtractingService;
   private final AnnualPlaytimeRepository annualPlaytimeRepository;
+  private final DailyPlaytimeRepository dailyPlaytimeRepository;
 
-  public AnnualyPlaytimeServiceImpl(
-      DataExtractingService dataExtractingService,
-      AnnualPlaytimeRepository annualPlaytimeRepository) {
-
-    this.dataExtractingService = dataExtractingService;
+  public AnnualPlaytimeServiceImpl(
+      AnnualPlaytimeRepository annualPlaytimeRepository,
+      DailyPlaytimeRepository dailyPlaytimeRepository) {
     this.annualPlaytimeRepository = annualPlaytimeRepository;
+    this.dailyPlaytimeRepository = dailyPlaytimeRepository;
   }
 
   @Override
   public void handleAnnualPlaytime() {
-    List<DailyPlaytime> allPlaytime = dataExtractingService.getDailyPlaytimeData();
+    List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
     List<AnnualPlaytime> annualPlaytime = calculateAnnualPlaytime(allPlaytime);
     saveAnnualPlaytime(annualPlaytime);
   }
 
-  public List<AnnualPlaytime> calculateAnnualPlaytime(List<DailyPlaytime> allPlaytime) {
+  private List<DailyPlaytime> getDailyPlaytimeData() {
+    return dailyPlaytimeRepository.findAll();
+  }
+
+  private List<AnnualPlaytime> calculateAnnualPlaytime(List<DailyPlaytime> allPlaytime) {
     LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
 
     Map<Short, Double> annualPlaytimeMap = allPlaytime
@@ -60,7 +63,7 @@ public class AnnualyPlaytimeServiceImpl implements AnnualyPlaytimeService {
     return handledAnnualPlaytimeData;
   }
 
-  public void saveAnnualPlaytime(List<AnnualPlaytime> annualPlaytimeData) {
+  private void saveAnnualPlaytime(List<AnnualPlaytime> annualPlaytimeData) {
     annualPlaytimeData.forEach(annualPlaytime -> {
       AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByEmployeeId(annualPlaytime.getEmployeeId());
 

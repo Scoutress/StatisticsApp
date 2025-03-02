@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
@@ -16,4 +17,6 @@ public interface SessionDurationRepository extends JpaRepository<SessionDuration
   Optional<SessionDuration> findByEmployeeIdAndServerAndDateAndSingleSessionDurationInSec(
       Short employeeId, String server, LocalDate date, int singleSessionDurationInSec);
 
+  @Query("SELECT MAX(s.date) FROM SessionDuration s")
+  LocalDate findLatestDate();
 }

@@ -15,36 +15,55 @@ import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.AveragePlaytimeOverall;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.AveragePlaytimeOverallRepository;
-import com.scoutress.KaimuxAdminStats.services.DataExtractingService;
+import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
 
 @Service
 public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverallService {
 
-  private final DataExtractingService dataExtractingService;
   private final AveragePlaytimeOverallRepository averagePlaytimeOverallRepository;
+  private final DailyPlaytimeRepository dailyPlaytimeRepository;
+  private final EmployeeCodesRepository employeeCodesRepository;
+  private final EmployeeRepository employeeRepository;
 
   public AveragePlaytimeOverallServiceImpl(
-      DataExtractingService dataExtractingService,
-      AveragePlaytimeOverallRepository averagePlaytimeOverallRepository) {
-
-    this.dataExtractingService = dataExtractingService;
+      AveragePlaytimeOverallRepository averagePlaytimeOverallRepository,
+      DailyPlaytimeRepository dailyPlaytimeRepository,
+      EmployeeCodesRepository employeeCodesRepository,
+      EmployeeRepository employeeRepository) {
     this.averagePlaytimeOverallRepository = averagePlaytimeOverallRepository;
+    this.dailyPlaytimeRepository = dailyPlaytimeRepository;
+    this.employeeCodesRepository = employeeCodesRepository;
+    this.employeeRepository = employeeRepository;
   }
 
   @Override
   public void handleAveragePlaytime() {
-    List<DailyPlaytime> allPlaytime = dataExtractingService.getDailyPlaytimeData();
-    List<EmployeeCodes> allEmployeeCodes = dataExtractingService.getAllEmployeeCodes();
-    List<Employee> allEmployees = dataExtractingService.getAllEmployees();
+    List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
+    List<EmployeeCodes> allEmployeeCodes = getAllEmployeeCodes();
+    List<Employee> allEmployees = getAllEmployees();
     List<AveragePlaytimeOverall> averagePlaytime = calculateAveragePlaytime(
         allPlaytime, allEmployeeCodes, allEmployees);
 
     saveAveragePlaytime(averagePlaytime);
   }
 
-  public List<AveragePlaytimeOverall> calculateAveragePlaytime(
+  private List<DailyPlaytime> getDailyPlaytimeData() {
+    return dailyPlaytimeRepository.findAll();
+  }
+
+  private List<EmployeeCodes> getAllEmployeeCodes() {
+    return employeeCodesRepository.findAll();
+  }
+
+  private List<Employee> getAllEmployees() {
+    return employeeRepository.findAll();
+  }
+
+  private List<AveragePlaytimeOverall> calculateAveragePlaytime(
       List<DailyPlaytime> allPlaytimes,
       List<EmployeeCodes> allEmployeeCodes,
       List<Employee> allEmployees) {
@@ -106,7 +125,7 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
     return handledAveragePlaytimeData;
   }
 
-  public void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
+  private void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
     averagePlaytimeData.forEach(averagePlaytimeOverall -> {
       Short employeeId = averagePlaytimeOverall.getEmployeeId();
 

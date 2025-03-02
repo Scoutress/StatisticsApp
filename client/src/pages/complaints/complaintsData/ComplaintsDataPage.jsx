@@ -3,7 +3,7 @@ import axios from "axios";
 import Loading from "../../../components/loading/Loading.jsx";
 import ErrorMessage from "../../../components/errorMessage/ErrorMessage.jsx";
 import EditComplaintModal from "../editComplaintModal/EditComplaintModal.jsx";
-import ConfirmationModal from "../../../components/confirmationModal/ConfirmationModal.jsx"; // Importing ConfirmationModal
+import ConfirmationModal from "../../../components/confirmationModal/ConfirmationModal.jsx";
 import { Link } from "react-router-dom";
 import styles from "./ComplaintsDataPage.module.scss";
 

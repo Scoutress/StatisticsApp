@@ -25,6 +25,14 @@ import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordBotService
 @Service
 public class DiscordBotServiceImpl implements DiscordBotService {
 
+  private final DcBotConfig dcBotConfig;
+  private final RestTemplate restTemplate;
+
+  public DiscordBotServiceImpl(DcBotConfig dcBotConfig) {
+    this.dcBotConfig = dcBotConfig;
+    this.restTemplate = new RestTemplate();
+  }
+
   @Override
   public void handleDcBotRequests(
       List<EmployeeCodes> employeeCodesData,
@@ -74,10 +82,6 @@ public class DiscordBotServiceImpl implements DiscordBotService {
   }
 
   public void processDiscordMessagesCount(Long dcUserId, List<LocalDate> allDates) {
-
-    RestTemplate restTemplate = new RestTemplate();
-    DcBotConfig dcBotConfig = new DcBotConfig();
-
     String botApiUrl = dcBotConfig.getDcBotApi();
 
     if (botApiUrl == null || !botApiUrl.startsWith("http")) {
@@ -123,9 +127,9 @@ public class DiscordBotServiceImpl implements DiscordBotService {
   }
 
   @Override
-  public void sleepForOneMin() {
+  public void sleepForHalfMin() {
     try {
-      Thread.sleep(60000);
+      Thread.sleep(30000);
     } catch (InterruptedException e) {
       System.err.println(e);
     }

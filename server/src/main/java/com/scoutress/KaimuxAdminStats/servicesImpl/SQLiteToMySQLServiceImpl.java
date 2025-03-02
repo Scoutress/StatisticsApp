@@ -1,5 +1,6 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -8,7 +9,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -19,12 +19,7 @@ import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 @Service
 public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
-  @Value("${sqlite.db.path}")
-  private String SQLITE_DB_PATH;
-
-  private static final List<String> servers = List.of(
-      "Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events", "Lobby");
-
+  private final String SQLITE_DB_PATH = "C:\\Users\\Asus\\Desktop\\KAIMUX databases\\testCoreProtectData\\";
   private final JdbcTemplate mysqlJdbcTemplate;
 
   public SQLiteToMySQLServiceImpl(JdbcTemplate mysqlJdbcTemplate) {
@@ -32,7 +27,7 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
   }
 
   @Override
-  public void initializeUsersDatabase() {
+  public void initializeUsersDatabase(List<String> servers) {
     dropAndCreateUsersTable(servers);
     transferUsersData(servers);
   }
@@ -52,25 +47,39 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
     }
   }
 
-  public void transferUsersData(List<String> servers) {
+  private void transferUsersData(List<String> servers) {
     for (String server : servers) {
       String sqliteUrl = "jdbc:sqlite:" + SQLITE_DB_PATH + server + ".db";
+      File sqliteFile = new File(SQLITE_DB_PATH + server + ".db");
+
+      if (!sqliteFile.exists()) {
+        continue;
+      }
 
       try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl)) {
+        String checkTableQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name='co_user'";
+
+        try (Statement stmt = sqliteConnection.createStatement(); ResultSet rs = stmt.executeQuery(checkTableQuery)) {
+          if (!rs.next()) {
+            continue;
+          }
+        } catch (SQLException e) {
+          continue;
+        }
+
         String query = "SELECT id, user FROM co_user";
-
-        try (Statement stmt = sqliteConnection.createStatement();
-            ResultSet rs = stmt.executeQuery(query)) {
-
+        try (Statement stmt = sqliteConnection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
           while (rs.next()) {
             int userId = rs.getInt("id");
             String username = rs.getString("user");
-
             saveUsersDataToMySQL(userId, username, server);
           }
+        } catch (SQLException e) {
+          System.out.println("Error executing SELECT query for server " + server + ": " + e.getMessage());
         }
 
-      } catch (Exception e) {
+      } catch (SQLException e) {
+        System.out.println("Error connecting to SQLite database for server " + server + ": " + e.getMessage());
       }
     }
   }
@@ -82,7 +91,7 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
   }
 
   @Override
-  public void initializePlaytimeSessionsDatabase() {
+  public void initializePlaytimeSessionsDatabase(List<String> servers) {
     dropAndCreatePlaytimeSessionsTable(servers);
     transferPlaytimeSessionsData(servers);
   }
@@ -104,15 +113,14 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
     }
   }
 
-  public void transferPlaytimeSessionsData(List<String> servers) {
+  private void transferPlaytimeSessionsData(List<String> servers) {
     for (String server : servers) {
       String sqliteUrl = "jdbc:sqlite:" + SQLITE_DB_PATH + server + ".db";
 
       try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl)) {
         String query = "SELECT time, user, action FROM co_session";
 
-        try (Statement stmt = sqliteConnection.createStatement();
-            ResultSet rs = stmt.executeQuery(query)) {
+        try (Statement stmt = sqliteConnection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
 
           List<RawPlaytimeSession> sessions = new ArrayList<>();
           while (rs.next()) {
@@ -123,11 +131,16 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
             sessions.add(new RawPlaytimeSession(null, userId, time, action));
           }
 
-          batchInsertPlaytimeSessionsDataToMySQL(sessions, server);
+          if (!sessions.isEmpty()) {
+            batchInsertPlaytimeSessionsDataToMySQL(sessions, server);
+          }
 
+        } catch (SQLException e) {
+          System.out.println("Error executing query for server " + server + ": " + e.getMessage());
         }
 
       } catch (SQLException e) {
+        System.out.println("Error connecting to SQLite database for server " + server + ": " + e.getMessage());
       }
     }
   }

@@ -28,6 +28,8 @@ public class DataSanitizationServiceImpl implements DataSanitizationService {
     this.dataFilterService = dataFilterService;
   }
 
+  // TODO remove this class
+
   @Override
   public void sanitizeData(List<SessionDataItem> sessionDataItems) {
 

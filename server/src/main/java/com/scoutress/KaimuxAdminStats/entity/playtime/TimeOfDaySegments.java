@@ -23,16 +23,16 @@ public class TimeOfDaySegments {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
+  @Column(name = "employee_id", nullable = false)
   private short employeeId;
 
-  @Column(nullable = false)
+  @Column(name = "server", nullable = false)
   private String server;
 
-  @Column(nullable = false)
+  @Column(name = "date", nullable = false)
   private LocalDate date;
 
-  @Column(nullable = false)
+  @Column(name = "time_segment", nullable = false)
   private int timeSegment;
 
   public TimeOfDaySegments(short employeeId, String server, LocalDate date, int timeSegment) {

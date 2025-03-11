@@ -2,9 +2,13 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,11 +27,13 @@ import com.scoutress.KaimuxAdminStats.repositories.playtime.TimeOfDaySegmentsRep
 import com.scoutress.KaimuxAdminStats.services.playtime.TimeOfDayPlaytimeService;
 import com.scoutress.KaimuxAdminStats.utils.TimeUtils;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
 
-  private final int BATCH_SIZE = 10000;
-  private final int PAGE_SIZE = 500;
+  private final int BATCH_SIZE = 1000;
+  private final int PAGE_SIZE = 5000;
 
   private final TimeOfDaySegmentsRepository timeOfDaySegmentsRepository;
   private final LoginLogoutTimesRepository loginLogoutTimesRepository;
@@ -52,6 +58,8 @@ public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
   public void handleTimeOfDayPlaytime() {
     System.out.println("Starting batch processing of time-of-day playtime.");
 
+    truncateAllTimeOfDaySegments();
+
     int totalRecords = (int) loginLogoutTimesRepository.count();
     int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
     int processedRecords = 0;
@@ -68,15 +76,18 @@ public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
     System.out.println("Time-of-day playtime processing completed.");
   }
 
+  @Transactional
+  public void truncateAllTimeOfDaySegments() {
+    timeOfDaySegmentsRepository.deleteAll();
+  }
+
   private void processSessions(List<LoginLogoutTimes> sessions) {
     if (sessions == null || sessions.isEmpty()) {
       System.err.println("No sessions to process!");
       return;
     }
 
-    for (LoginLogoutTimes session : sessions) {
-      processSingleSession(session);
-    }
+    sessions.parallelStream().forEach(this::processSingleSession);
   }
 
   private void processSingleSession(LoginLogoutTimes session) {
@@ -137,109 +148,115 @@ public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
   public void handleProcessedTimeOfDayPlaytime(List<String> servers) {
     System.out.println("Starting processing of time-of-day playtime...");
 
-    List<Short> employeeIds = getAllEmployeeIds();
-    System.out.println("Fetched " + employeeIds.size() + " employee IDs.");
+    truncateAllSegmentData();
 
-    for (Short employeeId : employeeIds) {
-      System.out.println("Processing employee ID: " + employeeId);
+    List<Object[]> results = timeOfDaySegmentsRepository.findAllSegmentCounts();
 
-      for (String server : servers) {
-        System.out.println("Processing server: " + server + " for employee ID: " + employeeId);
-        processEmployeeServerSegments(employeeId, server);
+    Set<String> validServers = getValidServers();
+    Set<Short> validEmployeeIds = getValidEmployeeIds();
+
+    Map<Short, Map<String, Map<Integer, Integer>>> employeeServerData = new HashMap<>();
+
+    for (Object[] row : results) {
+      Short employeeId = (Short) row[0];
+      String server = (String) row[1];
+      int timeSegment = (int) row[2];
+      int count = ((Number) row[3]).intValue();
+
+      if (!validServers.contains(server.trim().toLowerCase())) {
+        System.err.println("Invalid server name: " + server + " for Employee ID: " + employeeId);
+        continue;
       }
 
-      System.out.println("Processing combined segments for all servers for employee ID: " + employeeId);
-      processEmployeeAllServersSegments(employeeId);
+      if (!validEmployeeIds.contains(employeeId)) {
+        System.err.println("Invalid Employee ID: " + employeeId + " for Server: " + server);
+        continue;
+      }
+
+      employeeServerData
+          .computeIfAbsent(employeeId, k -> new HashMap<>())
+          .computeIfAbsent(server, k -> new HashMap<>())
+          .put(timeSegment, count);
     }
+
+    System.out.println("Data aggregation completed. Starting to save segment counts...");
+
+    employeeServerData.forEach((employeeId, serverData) -> {
+      serverData.forEach((server, segmentCounts) -> {
+        saveSegmentCounts(segmentCounts, employeeId, server);
+      });
+
+      Map<Integer, Integer> combinedCounts = new HashMap<>();
+      serverData.forEach((server, segmentCounts) -> {
+        segmentCounts.forEach((minute, count) -> {
+          combinedCounts.merge(minute, count, Integer::sum);
+        });
+      });
+
+      saveAllServerSegmentCounts(combinedCounts, employeeId);
+    });
 
     System.out.println("Completed processing of time-of-day playtime.");
   }
 
-  private void processEmployeeServerSegments(Short employeeId, String server) {
-    System.out.println("Starting segment processing for server: " + server + " and employee ID: " + employeeId);
-
-    Map<Integer, Integer> segmentCounts = new HashMap<>();
-
-    for (int minute = 1; minute <= 1440; minute++) {
-      int count = getSegmentCount(employeeId, server, minute);
-
-      if (count > 0) {
-        segmentCounts.put(minute, count);
-        System.out.println(
-            "Employee ID: " + employeeId + ", Server: " + server + ", Minute: " + minute + " -> Count: " + count);
-      }
-    }
-
-    System.out.println("Saving segment counts for server: " + server + " and employee ID: " + employeeId);
-    saveSegmentCounts(segmentCounts, employeeId, server);
-  }
-
-  private void processEmployeeAllServersSegments(Short employeeId) {
-    System.out.println("Starting combined segment processing for all servers for employee ID: " + employeeId);
-
-    Map<Integer, Integer> segmentCounts = new HashMap<>();
-
-    for (int minute = 1; minute <= 1440; minute++) {
-      int totalCount = 0;
-
-      for (String server : List.of("survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby")) {
-        totalCount += getSegmentCount(employeeId, server, minute);
-      }
-
-      if (totalCount > 0) {
-        segmentCounts.put(minute, totalCount);
-        System.out.println(
-            "Employee ID: " + employeeId + ", Minute: " + minute + " -> Total Count Across Servers: " + totalCount);
-      }
-    }
-
-    System.out.println("Saving combined segment counts for all servers for employee ID: " + employeeId);
-    saveAllServerSegmentCounts(segmentCounts, employeeId);
-  }
-
-  private int getSegmentCount(Short employeeId, String server, int minute) {
-    int count = (int) timeOfDaySegmentsRepository.countByEmployeeIdAndServerAndTimeSegment(employeeId, server, minute);
-    System.out.println("Count fetched for Employee ID: " + employeeId + ", Server: " + server + ", Minute: " + minute
-        + " -> Count: " + count);
-    return count;
+  @Transactional
+  public void truncateAllSegmentData() {
+    segmentCountByServerRepository.deleteAll();
+    segmentCountAllServersRepository.deleteAll();
   }
 
   private void saveSegmentCounts(Map<Integer, Integer> segmentCounts, Short employeeId, String server) {
+    List<SegmentCountByServer> batch = new ArrayList<>();
+
     for (Map.Entry<Integer, Integer> entry : segmentCounts.entrySet()) {
       SegmentCountByServer segment = new SegmentCountByServer();
       segment.setEmployeeId(employeeId);
       segment.setServerName(server);
       segment.setTimeSegment(entry.getKey());
       segment.setCount(entry.getValue());
+      batch.add(segment);
 
-      segmentCountByServerRepository.save(segment);
+      if (batch.size() >= BATCH_SIZE) {
+        segmentCountByServerRepository.saveAll(batch);
+        batch.clear();
+      }
+    }
 
-      System.out.println("Saved segment for Employee ID: " + employeeId + ", Server: " + server + ", Minute: "
-          + entry.getKey() + " -> Count: " + entry.getValue());
+    if (!batch.isEmpty()) {
+      segmentCountByServerRepository.saveAll(batch);
     }
   }
 
   private void saveAllServerSegmentCounts(Map<Integer, Integer> segmentCounts, Short employeeId) {
+    List<SegmentCountAllServers> batch = new ArrayList<>();
+
     for (Map.Entry<Integer, Integer> entry : segmentCounts.entrySet()) {
       SegmentCountAllServers segment = new SegmentCountAllServers();
       segment.setEmployeeId(employeeId);
       segment.setTimeSegment(entry.getKey());
       segment.setCount(entry.getValue());
+      batch.add(segment);
 
-      segmentCountAllServersRepository.save(segment);
+      if (batch.size() >= BATCH_SIZE) {
+        segmentCountAllServersRepository.saveAll(batch);
+        batch.clear();
+      }
+    }
 
-      System.out.println("Saved combined segment for Employee ID: " + employeeId + ", Minute: " + entry.getKey()
-          + " -> Total Count: " + entry.getValue());
+    if (!batch.isEmpty()) {
+      segmentCountAllServersRepository.saveAll(batch);
     }
   }
 
-  private List<Short> getAllEmployeeIds() {
-    System.out.println("Fetching all employee IDs...");
-    return employeeRepository.findAll()
+  private Set<String> getValidServers() {
+    return new HashSet<>(Arrays.asList("survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby"));
+  }
+
+  private Set<Short> getValidEmployeeIds() {
+    return employeeRepository
+        .findAll()
         .stream()
         .map(Employee::getId)
-        .distinct()
-        .sorted()
-        .toList();
+        .collect(Collectors.toSet());
   }
 }

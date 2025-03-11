@@ -43,6 +43,13 @@ const Homepage = () => {
       </div>
 
       <div className={styles.category}>
+        <h2>Playtime</h2>
+        <div className={styles.linkGroup}>
+          <Link to="/stats/segments">Playtime</Link>
+        </div>
+      </div>
+
+      <div className={styles.category}>
         <h2>Employees</h2>
         <div className={styles.linkGroup}>
           <Link to="/employee/all">Employees</Link>

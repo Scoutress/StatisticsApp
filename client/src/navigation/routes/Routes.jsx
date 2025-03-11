@@ -31,6 +31,10 @@ const Routes = {
     link: "/employee/add",
     name: "Employee Add",
   },
+  playtimeSegments: {
+    link: "/stats/segments",
+    name: "Playtime Segments",
+  },
 };
 
 export default Routes;

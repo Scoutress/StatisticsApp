@@ -10,6 +10,7 @@ import ComplaintsSumPage from "../../pages/complaints/complaintsSum/ComplaintsSu
 import ComplaintsDataPage from "../../pages/complaints/complaintsData/ComplaintsDataPage.jsx";
 import ComplaintsAddFormPage from "../../pages/complaints/complaintAddFormPage/ComplaintAddFormPage.jsx";
 import EmployeePersonalStatsPage from "../../pages/employeePersonalStats/employeePersonalStatsPage/EmployeePersonalStatsPage.jsx";
+import SegmentStatsPage from "../../pages/playtime/SegmentStatsPage.jsx";
 
 const Router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ const Router = createBrowserRouter([
       {
         path: Routes.employeeAddPage.link,
         element: <EmployeeAddFormPage />,
+      },
+      {
+        path: Routes.playtimeSegments.link,
+        element: <SegmentStatsPage />,
       },
     ],
   },

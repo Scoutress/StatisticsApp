@@ -1,0 +1,50 @@
+.visualizationContainer {
+  position: relative;
+  margin: 20px;
+}
+
+.timeBarContainer {
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.001px;
+  margin: 1px auto;
+}
+
+.timeBar {
+  display: flex;
+  height: 20px;
+  width: 100%;
+  position: relative;
+}
+
+.segment {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.axisLabels {
+  position: relative;
+  display: block;
+  height: 20px;
+}
+
+.label {
+  position: absolute;
+  font-size: 12px;
+  color: #333;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.hoverInfo {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+}

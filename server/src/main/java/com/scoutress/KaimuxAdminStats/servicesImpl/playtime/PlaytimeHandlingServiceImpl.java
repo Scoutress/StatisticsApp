@@ -4,37 +4,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
-import com.scoutress.KaimuxAdminStats.services.playtime.AnnualPlaytimeService;
-import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallService;
-import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 import com.scoutress.KaimuxAdminStats.services.playtime.PlaytimeHandlingService;
-import com.scoutress.KaimuxAdminStats.services.playtime.SessionDurationService;
-import com.scoutress.KaimuxAdminStats.services.playtime.TimeOfDayPlaytimeService;
+import com.scoutress.KaimuxAdminStats.servicesImpl.SQLiteToMySQLServiceImpl;
 
 @Service
 public class PlaytimeHandlingServiceImpl implements PlaytimeHandlingService {
 
-  private final SQLiteToMySQLService sqLiteToMySQLService;
-  private final SessionDurationService sessionDurationService;
-  private final DailyPlaytimeService dailyPlaytimeService;
-  private final AnnualPlaytimeService annualPlaytimeService;
-  private final AveragePlaytimeOverallService averagePlaytimeOverallService;
-  private final TimeOfDayPlaytimeService timeOfDayPlaytimeService;
+  private final SQLiteToMySQLServiceImpl sqLiteToMySQLServiceImpl;
+  private final SessionDurationServiceImpl sessionDurationServiceImpl;
+  private final DailyPlaytimeServiceImpl dailyPlaytimeServiceImpl;
+  private final AnnualPlaytimeServiceImpl annualPlaytimeServiceImpl;
+  private final AveragePlaytimeOverallServiceImpl averagePlaytimeOverallServiceImpl;
+  private final TimeOfDayPlaytimeServiceImpl timeOfDayPlaytimeServiceImpl;
 
   public PlaytimeHandlingServiceImpl(
-      SQLiteToMySQLService sqLiteToMySQLService,
-      SessionDurationService sessionDurationService,
-      DailyPlaytimeService dailyPlaytimeService,
-      AnnualPlaytimeService annualPlaytimeService,
-      AveragePlaytimeOverallService averagePlaytimeOverallService,
-      TimeOfDayPlaytimeService timeOfDayPlaytimeService) {
-    this.sqLiteToMySQLService = sqLiteToMySQLService;
-    this.sessionDurationService = sessionDurationService;
-    this.dailyPlaytimeService = dailyPlaytimeService;
-    this.annualPlaytimeService = annualPlaytimeService;
-    this.averagePlaytimeOverallService = averagePlaytimeOverallService;
-    this.timeOfDayPlaytimeService = timeOfDayPlaytimeService;
+      SQLiteToMySQLServiceImpl sqLiteToMySQLServiceImpl,
+      SessionDurationServiceImpl sessionDurationServiceImpl,
+      DailyPlaytimeServiceImpl dailyPlaytimeServiceImpl,
+      AnnualPlaytimeServiceImpl annualPlaytimeServiceImpl,
+      AveragePlaytimeOverallServiceImpl averagePlaytimeOverallServiceImpl,
+      TimeOfDayPlaytimeServiceImpl timeOfDayPlaytimeServiceImpl) {
+    this.sqLiteToMySQLServiceImpl = sqLiteToMySQLServiceImpl;
+    this.sessionDurationServiceImpl = sessionDurationServiceImpl;
+    this.dailyPlaytimeServiceImpl = dailyPlaytimeServiceImpl;
+    this.annualPlaytimeServiceImpl = annualPlaytimeServiceImpl;
+    this.averagePlaytimeOverallServiceImpl = averagePlaytimeOverallServiceImpl;
+    this.timeOfDayPlaytimeServiceImpl = timeOfDayPlaytimeServiceImpl;
   }
 
   private static final List<String> servers = List.of(
@@ -48,51 +43,51 @@ public class PlaytimeHandlingServiceImpl implements PlaytimeHandlingService {
 
     // Initialize databases
     long initStartTime = System.currentTimeMillis();
-    sqLiteToMySQLService.initializeUsersDatabase(servers);
-    sqLiteToMySQLService.initializePlaytimeSessionsDatabase(servers);
+    sqLiteToMySQLServiceImpl.initializeUsersDatabase(servers);
+    sqLiteToMySQLServiceImpl.initializePlaytimeSessionsDatabase(servers);
     long initEndTime = System.currentTimeMillis();
     System.out.println("Database initialization completed in " + (initEndTime - initStartTime) + " ms");
 
     // Process login logouts
     long loginLogoutsStartTime = System.currentTimeMillis();
-    sessionDurationService.processLoginLogouts(servers);
-    sessionDurationService.removeLoginLogoutsDupe();
+    sessionDurationServiceImpl.processLoginLogouts(servers);
+    sessionDurationServiceImpl.removeLoginLogoutsDupe();
     long loginLogoutsEndTime = System.currentTimeMillis();
     System.out.println("Login/Logout processing completed in " + (loginLogoutsEndTime - loginLogoutsStartTime) + " ms");
 
     // Process sessions
     long sessionStartTime = System.currentTimeMillis();
-    sessionDurationService.processSessions(servers);
-    sessionDurationService.removeDuplicateSessionData();
+    sessionDurationServiceImpl.processSessions(servers);
+    sessionDurationServiceImpl.removeDuplicateSessionData();
     long sessionEndTime = System.currentTimeMillis();
     System.out.println("Session processing completed in " + (sessionEndTime - sessionStartTime) + " ms");
 
     // Handle daily playtime
     long dailyPlaytimeStartTime = System.currentTimeMillis();
-    dailyPlaytimeService.handleDailyPlaytime();
-    dailyPlaytimeService.removeDuplicateDailyPlaytimes();
+    dailyPlaytimeServiceImpl.handleDailyPlaytime();
+    dailyPlaytimeServiceImpl.removeDuplicateDailyPlaytimes();
     long dailyPlaytimeEndTime = System.currentTimeMillis();
     System.out
         .println("Daily playtime handling completed in " + (dailyPlaytimeEndTime - dailyPlaytimeStartTime) + " ms");
 
     // Handle annual playtime
     long annualPlaytimeStartTime = System.currentTimeMillis();
-    annualPlaytimeService.handleAnnualPlaytime();
+    annualPlaytimeServiceImpl.handleAnnualPlaytime();
     long annualPlaytimeEndTime = System.currentTimeMillis();
     System.out
         .println("Annual playtime handling completed in " + (annualPlaytimeEndTime - annualPlaytimeStartTime) + " ms");
 
     // Handle average playtime overall
     long avgPlaytimeStartTime = System.currentTimeMillis();
-    averagePlaytimeOverallService.handleAveragePlaytime();
+    averagePlaytimeOverallServiceImpl.handleAveragePlaytime();
     long avgPlaytimeEndTime = System.currentTimeMillis();
     System.out.println(
         "Average playtime overall handling completed in " + (avgPlaytimeEndTime - avgPlaytimeStartTime) + " ms");
 
     // Handle time of day playtime
     long timeOfDayPlaytimeStartTime = System.currentTimeMillis();
-    timeOfDayPlaytimeService.handleTimeOfDayPlaytime();
-    timeOfDayPlaytimeService.handleProcessedTimeOfDayPlaytime(servers);
+    timeOfDayPlaytimeServiceImpl.handleTimeOfDayPlaytime();
+    timeOfDayPlaytimeServiceImpl.handleProcessedTimeOfDayPlaytime(servers);
     long timeOfDayPlaytimeEndTime = System.currentTimeMillis();
     System.out.println("Time of day playtime handling completed in "
         + (timeOfDayPlaytimeEndTime - timeOfDayPlaytimeStartTime) + " ms");

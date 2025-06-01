@@ -128,7 +128,7 @@ public class DataFetchingServiceImpl implements DataFetchingService {
         }
         case "minecraft" -> {
           MinecraftTicketsAnswers entity = new MinecraftTicketsAnswers();
-          entity.setMinecraftTicketId((short) item.getInt("player_id"));
+          entity.setKmxWebApiMcTickets((short) item.getInt("player_id"));
 
           String createdAt = item.getString("created_at");
           LocalDateTime dateTime = parseDate(createdAt);

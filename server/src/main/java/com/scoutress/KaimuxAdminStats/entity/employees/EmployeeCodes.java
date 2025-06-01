@@ -45,12 +45,9 @@ public class EmployeeCodes {
   @Column(name = "lobby_id", nullable = true)
   private Short lobbyId; // Lobby server CoreProtect
 
-  @Column(name = "discord_id", nullable = true)
-  private Short discordId; // Kaimux website API Discord user code
-
-  @Column(name = "minecraft_id", nullable = true)
-  private Short minecraftId; // Kaimux website API Minecraft user code
+  @Column(name = "kmx_web_api", nullable = true)
+  private Short kmxWebApi; // Kaimux website API Discord and Minecraft user code
 
   @Column(name = "discord_user_id", nullable = true)
-  private Long discordUserId; // Default Discord user ID
+  private Long discordUserId; // Discord user ID
 }

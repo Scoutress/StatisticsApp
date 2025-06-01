@@ -1,6 +1,6 @@
 package com.scoutress.KaimuxAdminStats.services.minecraftTickets;
 
-public interface MinecraftTicketsHandlingService {
+public interface MinecraftTicketsRawService {
 
   void handleMinecraftTickets();
 }

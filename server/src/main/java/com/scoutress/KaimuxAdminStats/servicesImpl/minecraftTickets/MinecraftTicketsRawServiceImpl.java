@@ -1,6 +1,7 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl.minecraftTickets;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,99 +10,125 @@ import org.springframework.stereotype.Service;
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.DailyMinecraftTickets;
+import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.McTicketsLastCheck;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.MinecraftTicketsAnswers;
 import com.scoutress.KaimuxAdminStats.entity.minecraftTickets.TotalOldMinecraftTickets;
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.DailyMinecraftTicketsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.McTicketsLastCheckRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.MinecraftTicketsAnswersRepository;
 import com.scoutress.KaimuxAdminStats.repositories.minecraftTickets.TotalOldMinecraftTicketsRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
-import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
-import com.scoutress.KaimuxAdminStats.services.DuplicatesRemoverService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsComparedService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsHandlingService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsService;
+import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsRawService;
+import com.scoutress.KaimuxAdminStats.servicesImpl.ApiDataExtractionServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.DuplicatesRemoverServiceImpl;
 
 @Service
-public class MinecraftTicketsHandlingServiceImpl implements MinecraftTicketsHandlingService {
+public class MinecraftTicketsRawServiceImpl implements MinecraftTicketsRawService {
 
   private final MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository;
-  private final ApiDataExtractionService apiDataExtractionService;
+  private final ApiDataExtractionServiceImpl apiDataExtractionServiceImpl;
   private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
-  private final MinecraftTicketsService minecraftTicketsService;
+  private final MinecraftTicketsServiceImpl minecraftTicketsServiceImpl;
   private final EmployeeCodesRepository employeeCodesRepository;
   private final EmployeeRepository employeeRepository;
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
-  private final MinecraftTicketsComparedService minecraftTicketsComparedService;
+  private final MinecraftTicketsComparedServiceImpl minecraftTicketsComparedServiceImpl;
   private final TotalOldMinecraftTicketsRepository totalOldMinecraftTicketsRepository;
-  private final DuplicatesRemoverService duplicatesRemoverService;
+  private final DuplicatesRemoverServiceImpl duplicatesRemoverServiceImpl;
+  private final McTicketsLastCheckRepository mcTicketsLastCheckRepository;
 
-  public MinecraftTicketsHandlingServiceImpl(
+  public MinecraftTicketsRawServiceImpl(
       MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository,
-      ApiDataExtractionService apiDataExtractionService,
+      ApiDataExtractionServiceImpl apiDataExtractionServiceImpl,
       DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository,
-      MinecraftTicketsService minecraftTicketsService,
+      MinecraftTicketsServiceImpl minecraftTicketsServiceImpl,
       EmployeeCodesRepository employeeCodesRepository,
       EmployeeRepository employeeRepository,
       DailyPlaytimeRepository dailyPlaytimeRepository,
-      MinecraftTicketsComparedService minecraftTicketsComparedService,
+      MinecraftTicketsComparedServiceImpl minecraftTicketsComparedServiceImpl,
       TotalOldMinecraftTicketsRepository totalOldMinecraftTicketsRepository,
-      DuplicatesRemoverService duplicatesRemoverService) {
+      DuplicatesRemoverServiceImpl duplicatesRemoverServiceImpl,
+      McTicketsLastCheckRepository mcTicketsLastCheckRepository) {
     this.minecraftTicketsAnswersRepository = minecraftTicketsAnswersRepository;
-    this.apiDataExtractionService = apiDataExtractionService;
+    this.apiDataExtractionServiceImpl = apiDataExtractionServiceImpl;
     this.dailyMinecraftTicketsRepository = dailyMinecraftTicketsRepository;
-    this.minecraftTicketsService = minecraftTicketsService;
+    this.minecraftTicketsServiceImpl = minecraftTicketsServiceImpl;
     this.employeeCodesRepository = employeeCodesRepository;
     this.employeeRepository = employeeRepository;
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
-    this.minecraftTicketsComparedService = minecraftTicketsComparedService;
+    this.minecraftTicketsComparedServiceImpl = minecraftTicketsComparedServiceImpl;
     this.totalOldMinecraftTicketsRepository = totalOldMinecraftTicketsRepository;
-    this.duplicatesRemoverService = duplicatesRemoverService;
+    this.duplicatesRemoverServiceImpl = duplicatesRemoverServiceImpl;
+    this.mcTicketsLastCheckRepository = mcTicketsLastCheckRepository;
   }
 
   @Override
   public void handleMinecraftTickets() {
     removeRawMcTicketsData();
 
-    LocalDate newestDateFromDailyMcTickets = getNewestDateFromDailyMcTickets();
-    apiDataExtractionService.extractMinecraftTicketsFromAPI(newestDateFromDailyMcTickets);
-
-    List<MinecraftTicketsAnswers> rawMcTicketsData = extractRawMcTicketsData();
     List<EmployeeCodes> employeeCodes = extractEmployeeCodes();
     List<Short> allEmployeeIds = getAllEmployeeIdsFromEmployeeCodes(employeeCodes);
-    minecraftTicketsService.convertRawMcTicketsData(
+    LocalDate newestDateFromDailyMcTickets = getNewestDateFromDailyMcTickets();
+    List<DailyMinecraftTickets> allDailyMcTickets = getDailyMinecraftTicketsData();
+    List<LocalDate> joinDates = new ArrayList<>();
+
+    for (Short employeeId : allEmployeeIds) {
+      boolean hasEmployeeData = hasEmployeeMcTicketsData(employeeId, allDailyMcTickets);
+
+      if (!hasEmployeeData) {
+        boolean wasEmployeeCheckedBefore = wasEmployeeCheckedBefore(employeeId);
+
+        if (!wasEmployeeCheckedBefore) {
+          LocalDate joinDateOfEmployeeWithoutData = getJoinDateOfEmployeeWithoutData(employeeId);
+          joinDates.add(joinDateOfEmployeeWithoutData);
+        }
+      }
+    }
+
+    if (!joinDates.isEmpty()) {
+      LocalDate oldestJoinDate = getOldestJoinDate(joinDates);
+      apiDataExtractionServiceImpl.extractMinecraftTicketsFromAPI(oldestJoinDate);
+    } else {
+      apiDataExtractionServiceImpl.extractMinecraftTicketsFromAPI(newestDateFromDailyMcTickets);
+    }
+
+    updateMcTicketsLastCheck(allEmployeeIds);
+
+    List<MinecraftTicketsAnswers> rawMcTicketsData = extractRawMcTicketsData();
+    minecraftTicketsServiceImpl.convertRawMcTicketsData(
         rawMcTicketsData, employeeCodes, allEmployeeIds);
 
-    duplicatesRemoverService.removeDuplicatesFromDailyMcTickets();
+    duplicatesRemoverServiceImpl.removeDuplicatesFromDailyMcTickets();
 
     List<DailyMinecraftTickets> rawDailyMcTicketsData = getDailyMinecraftTicketsData();
     List<Employee> rawEmployeesData = getEmployeesData();
     LocalDate oldestDateFromData = checkForOldestDate(rawDailyMcTicketsData);
-    minecraftTicketsService.calcAvgDailyMcTicketsPerEmployee(
+    minecraftTicketsServiceImpl.calcAvgDailyMcTicketsPerEmployee(
         allEmployeeIds, rawEmployeesData, oldestDateFromData, rawDailyMcTicketsData);
 
-    duplicatesRemoverService.removeDuplicatesFromAvgDailyMcTickets();
+    duplicatesRemoverServiceImpl.removeDuplicatesFromAvgDailyMcTickets();
 
     List<DailyPlaytime> allPlaytimeData = getAllPlaytimeData();
-    minecraftTicketsService.calcAvgMcTicketsPerPlaytime(
+    minecraftTicketsServiceImpl.calcAvgMcTicketsPerPlaytime(
         rawDailyMcTicketsData, rawEmployeesData, allEmployeeIds, oldestDateFromData, allPlaytimeData);
 
-    duplicatesRemoverService.removeDuplicatesFromMcTicketsPerPlaytime();
+    duplicatesRemoverServiceImpl.removeDuplicatesFromMcTicketsPerPlaytime();
 
     List<TotalOldMinecraftTickets> allOldTotalMinecraftTicketsData = getOldTotalDailyMinecraftTicketsData();
-    minecraftTicketsService.calcTotalMinecraftTickets(
+    minecraftTicketsServiceImpl.calcTotalMinecraftTickets(
         allEmployeeIds, rawDailyMcTicketsData, allOldTotalMinecraftTicketsData);
 
-    duplicatesRemoverService.removeDuplicatesFromTotalMcTickets();
+    duplicatesRemoverServiceImpl.removeDuplicatesFromTotalMcTickets();
 
     List<LocalDate> allDatesFromDailyMcTickets = getAllMinecraftTicketsDates(rawDailyMcTicketsData);
     List<Short> allEmployeesFromDailyMcTickets = getAllEmployeesFromDailyMinecraftTickets(rawDailyMcTicketsData);
-    minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues(
+    minecraftTicketsComparedServiceImpl.compareEachEmployeeDailyMcTicketsValues(
         rawDailyMcTicketsData, allPlaytimeData, allDatesFromDailyMcTickets, allEmployeesFromDailyMcTickets);
 
-    duplicatesRemoverService.removeDuplicatesFromComparedMcTickets();
+    duplicatesRemoverServiceImpl.removeDuplicatesFromComparedMcTickets();
   }
 
   private void removeRawMcTicketsData() {
@@ -117,8 +144,49 @@ public class MinecraftTicketsHandlingServiceImpl implements MinecraftTicketsHand
         .orElse(LocalDate.parse("1970-01-01"));
   }
 
+  private boolean hasEmployeeMcTicketsData(
+      Short employeeId, List<DailyMinecraftTickets> allDailyMcTickets) {
+    return allDailyMcTickets
+        .stream()
+        .filter(employee -> employee.getEmployeeId().equals(employeeId))
+        .anyMatch(employee -> employee.getDate() != null && employee.getTicketCount() > 0);
+  }
+
+  private LocalDate getJoinDateOfEmployeeWithoutData(Short employeeId) {
+    return employeeRepository
+        .findAll()
+        .stream()
+        .filter(employee -> employee.getId().equals(employeeId))
+        .map(Employee::getJoinDate)
+        .findFirst()
+        .orElse(null);
+  }
+
+  private LocalDate getOldestJoinDate(List<LocalDate> joinDates) {
+    return joinDates
+        .stream()
+        .min(LocalDate::compareTo)
+        .orElseThrow();
+  }
+
+  private boolean wasEmployeeCheckedBefore(Short emplocyeeId) {
+    return mcTicketsLastCheckRepository
+        .findAll()
+        .stream()
+        .filter(employee -> emplocyeeId.equals(employee.getEmployeeId()))
+        .anyMatch(employee -> employee.getDate() != null);
+  }
+
   private List<MinecraftTicketsAnswers> extractRawMcTicketsData() {
     return minecraftTicketsAnswersRepository.findAll();
+  }
+
+  private void updateMcTicketsLastCheck(List<Short> allEmployeeIds) {
+    mcTicketsLastCheckRepository.deleteAll();
+
+    for (Short employeeId : allEmployeeIds) {
+      mcTicketsLastCheckRepository.save(new McTicketsLastCheck(employeeId, LocalDate.now()));
+    }
   }
 
   private List<EmployeeCodes> extractEmployeeCodes() {

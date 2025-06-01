@@ -35,42 +35,50 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
   @Override
   public void compareEachEmployeeDailyDiscordMessagesValues(
       List<DailyDiscordMessages> allDailyDcMessages,
-      List<Short> allEmployeesFromDailyDcMessages) {
+      List<Short> allEmployeesFromDailyDcMessages,
+      List<Short> employeeIdsWithoutData) {
 
     if (allDailyDcMessages != null && !allDailyDcMessages.isEmpty()) {
       if (allEmployeesFromDailyDcMessages != null && !allEmployeesFromDailyDcMessages.isEmpty()) {
+        for (Short employeeId : allEmployeesFromDailyDcMessages) {
+          if (!employeeIdsWithoutData.contains(employeeId)) {
+            double messagesRatioSumThisEmployee = 0;
+            int datesCount = 0;
 
-        allEmployeesFromDailyDcMessages.forEach(employeeId -> {
-          double messagesRatioSumThisEmployee = 0;
-          int datesCount = 0;
+            LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
+            LocalDate oldestDateThisEmployee = getOldestDateThisEmployee(allDailyDcMessages, employeeId);
 
-          LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
-          LocalDate oldestDateThisEmployee = getOldestDateThisEmployee(allDailyDcMessages, employeeId);
+            if (oldestDateThisEmployee == null || joinDateThisEmployee == null) {
+              System.out.println("No data found for employee ID: " + employeeId);
+              System.out.println("Skipping employee ID: " + employeeId);
+              continue;
+            }
 
-          List<LocalDate> allDatesSinceJoinDateOrOldestDate = getAllDatesSinceJoinDateOrOldestDate(
-              employeeId, allDailyDcMessages, oldestDateThisEmployee, joinDateThisEmployee);
+            List<LocalDate> allDatesSinceJoinDateOrOldestDate = getAllDatesSinceJoinDateOrOldestDate(
+                employeeId, allDailyDcMessages, oldestDateThisEmployee, joinDateThisEmployee);
 
-          for (LocalDate date : allDatesSinceJoinDateOrOldestDate) {
-            int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(
-                allDailyDcMessages, date, employeeId);
-            int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(
-                allDailyDcMessages, date);
-            double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
-                messagesThisDateThisEmployee, messagesThisDateAllEmployees);
+            for (LocalDate date : allDatesSinceJoinDateOrOldestDate) {
+              int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(
+                  allDailyDcMessages, date, employeeId);
+              int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(
+                  allDailyDcMessages, date);
+              double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
+                  messagesThisDateThisEmployee, messagesThisDateAllEmployees);
 
-            saveMessagesRatioThisDateThisEmployee(messagesRatioThisDateThisEmployee, date, employeeId);
+              saveMessagesRatioThisDateThisEmployee(messagesRatioThisDateThisEmployee, date, employeeId);
 
-            messagesRatioSumThisEmployee += messagesRatioThisDateThisEmployee;
-            datesCount++;
+              messagesRatioSumThisEmployee += messagesRatioThisDateThisEmployee;
+              datesCount++;
+            }
+
+            if (datesCount > 0) {
+              double averageValueOfMessagesRatiosThisEmployee = calculateAverageMessagesRatioThisEmployee(
+                  messagesRatioSumThisEmployee, datesCount);
+
+              saveAverageMessagesRatioThisEmployee(averageValueOfMessagesRatiosThisEmployee, employeeId);
+            }
           }
-
-          if (datesCount > 0) {
-            double averageValueOfMessagesRatiosThisEmployee = calculateAverageMessagesRatioThisEmployee(
-                messagesRatioSumThisEmployee, datesCount);
-
-            saveAverageMessagesRatioThisEmployee(averageValueOfMessagesRatiosThisEmployee, employeeId);
-          }
-        });
+        }
       }
     }
   }

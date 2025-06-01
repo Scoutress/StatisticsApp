@@ -32,7 +32,7 @@ public class ScheduledTasksConfig {
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
-    taskService.runScheduledTasks();
+    taskService.processCalculations();
 
     System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());

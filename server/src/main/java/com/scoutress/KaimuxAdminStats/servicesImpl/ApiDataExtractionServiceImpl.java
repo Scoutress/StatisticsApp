@@ -107,7 +107,7 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
       }
 
       MinecraftTicketsAnswers entity = new MinecraftTicketsAnswers();
-      entity.setMinecraftTicketId((short) item.getInt("player_id"));
+      entity.setKmxWebApiMcTickets((short) item.getInt("player_id"));
       entity.setDateTime(dateTime);
 
       minecraftTicketsAnswersRepository.save(entity);

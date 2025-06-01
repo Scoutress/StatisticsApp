@@ -71,7 +71,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
     return employeeCodes
         .stream()
         .filter(employeeCode -> employeeCode.getEmployeeId().equals(employeeId))
-        .map(EmployeeCodes::getMinecraftId)
+        .map(EmployeeCodes::getKmxWebApi)
         .findFirst()
         .orElse(null);
   }
@@ -80,7 +80,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       List<MinecraftTicketsAnswers> ticketsAnswers, Short minecraftUserCode) {
     return ticketsAnswers
         .stream()
-        .filter(ticketAnswer -> ticketAnswer.getMinecraftTicketId().equals(minecraftUserCode))
+        .filter(ticketAnswer -> ticketAnswer.getKmxWebApiMcTickets().equals(minecraftUserCode))
         .collect(Collectors.toList());
   }
 

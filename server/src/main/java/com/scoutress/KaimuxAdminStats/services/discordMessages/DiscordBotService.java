@@ -7,10 +7,13 @@ import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
 
 public interface DiscordBotService {
 
+  void checkOrStartDiscordBot();
+
   void handleDcBotRequests(
       List<EmployeeCodes> employeeCodesData,
       LocalDate latestDateFromDcMsgsData,
-      LocalDate todaysDate);
+      LocalDate todaysDate,
+      List<Short> employeeIdsWithoutData);
 
   void startBot();
 

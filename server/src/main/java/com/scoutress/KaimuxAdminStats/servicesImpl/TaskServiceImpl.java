@@ -1,16 +1,16 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
-import com.scoutress.KaimuxAdminStats.services.RecommendationUserService;
-import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
 import com.scoutress.KaimuxAdminStats.services.TaskService;
-import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
-import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesHandlingService;
-import com.scoutress.KaimuxAdminStats.services.minecraftTickets.MinecraftTicketsHandlingService;
-import com.scoutress.KaimuxAdminStats.services.playtime.PlaytimeHandlingService;
-import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
+import com.scoutress.KaimuxAdminStats.servicesImpl.complaints.ComplaintsServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages.DiscordMessagesHandlingServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.minecraftTickets.MinecraftTicketsRawServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.playtime.PlaytimeHandlingServiceImpl;
+import com.scoutress.KaimuxAdminStats.servicesImpl.productivity.ProductivityServiceImpl;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -18,68 +18,76 @@ import jakarta.transaction.Transactional;
 @Service
 public class TaskServiceImpl implements TaskService {
 
-  private final DiscordMessagesHandlingService discordMessagesHandlingService;
-  private final ProductivityService productivityService;
-  private final ComplaintsService complaintsService;
-  private final RecommendationsService recommendationsService;
-  private final FinalStatsService finalStatsService;
-  private final RecommendationUserService recommendationUserService;
-  private final MinecraftTicketsHandlingService minecraftTicketsHandlingService;
-  private final PlaytimeHandlingService playtimeHandlingService;
+  private final EmployeeDataServiceImpl employeeDataServiceImpl;
+  private final DiscordMessagesHandlingServiceImpl discordMessagesHandlingServiceImpl;
+  private final MinecraftTicketsRawServiceImpl minecraftTicketsRawServiceImpl;
+  private final ProductivityServiceImpl productivityServiceImpl;
+  private final ComplaintsServiceImpl complaintsServiceImpl;
+  private final RecommendationsServiceImpl recommendationsServiceImpl;
+  private final FinalStatsServiceImpl finalStatsServiceImpl;
+  private final RecommendationUserServiceImpl recommendationUserServiceImpl;
+  private final PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl;
 
   public TaskServiceImpl(
-      DiscordMessagesHandlingService discordMessagesHandlingService,
-      ProductivityService productivityService,
-      ComplaintsService complaintsService,
-      RecommendationsService recommendationsService,
-      FinalStatsService finalStatsService,
-      RecommendationUserService recommendationUserService,
-      MinecraftTicketsHandlingService minecraftTicketsHandlingService,
-      PlaytimeHandlingService playtimeHandlingService) {
-    this.discordMessagesHandlingService = discordMessagesHandlingService;
-    this.productivityService = productivityService;
-    this.complaintsService = complaintsService;
-    this.recommendationsService = recommendationsService;
-    this.finalStatsService = finalStatsService;
-    this.recommendationUserService = recommendationUserService;
-    this.minecraftTicketsHandlingService = minecraftTicketsHandlingService;
-    this.playtimeHandlingService = playtimeHandlingService;
+      EmployeeDataServiceImpl employeeDataServiceImpl,
+      DiscordMessagesHandlingServiceImpl discordMessagesHandlingServiceImpl,
+      MinecraftTicketsRawServiceImpl minecraftTicketsRawServiceImpl,
+      ProductivityServiceImpl productivityServiceImpl,
+      ComplaintsServiceImpl complaintsServiceImpl,
+      RecommendationsServiceImpl recommendationsServiceImpl,
+      FinalStatsServiceImpl finalStatsServiceImpl,
+      RecommendationUserServiceImpl recommendationUserServiceImpl,
+      PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl) {
+    this.employeeDataServiceImpl = employeeDataServiceImpl;
+    this.discordMessagesHandlingServiceImpl = discordMessagesHandlingServiceImpl;
+    this.minecraftTicketsRawServiceImpl = minecraftTicketsRawServiceImpl;
+    this.productivityServiceImpl = productivityServiceImpl;
+    this.complaintsServiceImpl = complaintsServiceImpl;
+    this.recommendationsServiceImpl = recommendationsServiceImpl;
+    this.finalStatsServiceImpl = finalStatsServiceImpl;
+    this.recommendationUserServiceImpl = recommendationUserServiceImpl;
+    this.playtimeHandlingServiceImpl = playtimeHandlingServiceImpl;
   }
 
-  @Override
+  // @Override
   @PostConstruct
   @Transactional
-  public void runScheduledTasks() {
+  public void processCalculations() {
     System.out.println("-----------------------------------------------");
-    System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
+    System.out.println("Started calculations at: " + getCurrentTimestamp());
     System.out.println("");
+
+    System.out.println("Checking nessesary employee data");
+    List<Short> employeeIdsWithoutData = new ArrayList<>();
+    employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
+    System.out.println("Employee IDs without data: " + employeeIdsWithoutData);
 
     System.out.println("Handling Discord messages");
-    discordMessagesHandlingService.handleDiscordMessages();
-
-    System.out.println("Handling Minecraft tickets");
-    minecraftTicketsHandlingService.handleMinecraftTickets();
+    discordMessagesHandlingServiceImpl.handleDiscordMessages();
 
     System.out.println("Handling Playtime");
-    playtimeHandlingService.handlePlaytime();
+    playtimeHandlingServiceImpl.handlePlaytime();
+
+    System.out.println("Handling Minecraft tickets");
+    minecraftTicketsRawServiceImpl.handleMinecraftTickets();
 
     System.out.println("Handling Complaints");
-    complaintsService.handleComplaints();
+    complaintsServiceImpl.handleComplaints();
 
     System.out.println("Handling productivity");
-    productivityService.handleProductivity();
+    productivityServiceImpl.handleProductivity();
 
     System.out.println("Handling recommendation");
-    recommendationsService.handleRecommendations();
+    recommendationsServiceImpl.handleRecommendations();
 
     System.out.println("Handling final stats");
-    finalStatsService.handleFinalStats();
+    finalStatsServiceImpl.handleFinalStats();
 
     System.out.println("Handling user recommendation");
-    recommendationUserService.handleUserRecommendations();
+    recommendationUserServiceImpl.handleUserRecommendations();
 
     System.out.println("");
-    System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
+    System.out.println("Calculations completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
   }
 

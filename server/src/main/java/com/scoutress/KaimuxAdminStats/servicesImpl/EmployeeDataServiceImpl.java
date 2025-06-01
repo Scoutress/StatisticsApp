@@ -1,16 +1,35 @@
-package com.scoutress.KaimuxAdminStats.servicesImpl.employees;
+package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.services.employees.EmployeeDataService;
+import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
+import com.scoutress.KaimuxAdminStats.entity.employees.EmployeeCodes;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeCodesRepository;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
+import com.scoutress.KaimuxAdminStats.services.EmployeeDataService;
 
 @Service
 public class EmployeeDataServiceImpl implements EmployeeDataService {
+
+  private EmployeeRepository employeeRepository;
+  private EmployeeCodesRepository employeeCodesRepository;
+  private final JdbcTemplate jdbcTemplate;
+
+  public EmployeeDataServiceImpl(
+      EmployeeRepository employeeRepository,
+      EmployeeCodesRepository employeeCodesRepository,
+      JdbcTemplate jdbcTemplate) {
+    this.employeeRepository = employeeRepository;
+    this.employeeCodesRepository = employeeCodesRepository;
+    this.jdbcTemplate = jdbcTemplate;
+  }
 
   private static final Map<String, Integer> realEmployeeData = new HashMap<>();
 
@@ -31,6 +50,7 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
     realEmployeeData.put("BobsBuilder", 15);
     realEmployeeData.put("plrxq", 16);
     realEmployeeData.put("3MAHH", 17);
+    realEmployeeData.put("Honske", 18);
   }
 
   private static final Map<String, String> serverColumnMap = Map.of(
@@ -41,12 +61,6 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
       "Prison", "prison_id",
       "Events", "events_id",
       "Lobby", "lobby_id");
-
-  private final JdbcTemplate jdbcTemplate;
-
-  public EmployeeDataServiceImpl(JdbcTemplate jdbcTemplate) {
-    this.jdbcTemplate = jdbcTemplate;
-  }
 
   @Override
   public void updateEmployeeCodes() {
@@ -78,5 +92,49 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
       } catch (DataAccessException e) {
       }
     }
+  }
+
+  @Override
+  public List<Short> checkNessesaryEmployeeData() {
+    List<Short> employeeIds = getAllEmployeeIds();
+    List<Short> employeeIdsWithoutData = new ArrayList<>();
+    List<EmployeeCodes> employeeCodesData = getAllEmployeeCodesData();
+
+    for (Short employeeId : employeeIds) {
+      boolean employeeHasData = hasEmployeeData(employeeId, employeeCodesData);
+
+      if (!employeeHasData) {
+        employeeIdsWithoutData.add(employeeId);
+      }
+    }
+
+    return employeeIdsWithoutData;
+  }
+
+  private List<Short> getAllEmployeeIds() {
+    List<Employee> employeesData = getAllEmployeesData();
+    return employeesData
+        .stream()
+        .map(Employee::getId)
+        .distinct()
+        .sorted()
+        .toList();
+  }
+
+  private List<Employee> getAllEmployeesData() {
+    return employeeRepository
+        .findAll();
+  }
+
+  private List<EmployeeCodes> getAllEmployeeCodesData() {
+    return employeeCodesRepository
+        .findAll();
+  }
+
+  private boolean hasEmployeeData(Short employeeId, List<EmployeeCodes> employeeCodesData) {
+    return employeeCodesData
+        .stream()
+        .filter(employee -> employee.getEmployeeId().equals(employeeId))
+        .anyMatch(employee -> employee.getKmxWebApi() != null && employee.getDiscordUserId() != null);
   }
 }

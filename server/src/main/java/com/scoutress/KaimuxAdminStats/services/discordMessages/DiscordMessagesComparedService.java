@@ -8,5 +8,6 @@ public interface DiscordMessagesComparedService {
 
   void compareEachEmployeeDailyDiscordMessagesValues(
       List<DailyDiscordMessages> allDailyDcMessages,
-      List<Short> allEmployeesFromDailyDcMessages);
+      List<Short> allEmployeesFromDailyDcMessages,
+      List<Short> employeeIdsWithoutData);
 }

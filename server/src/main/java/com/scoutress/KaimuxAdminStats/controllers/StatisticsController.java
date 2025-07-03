@@ -10,8 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.scoutress.KaimuxAdminStats.entity.LatestActivity;
+import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SegmentCountAllServers;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SegmentCountByServer;
+import com.scoutress.KaimuxAdminStats.repositories.LatestActivityRepository;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.SegmentCountAllServersRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.SegmentCountByServerRepository;
 
@@ -21,12 +25,18 @@ public class StatisticsController {
 
   private final SegmentCountAllServersRepository segmentCountAllServersRepository;
   private final SegmentCountByServerRepository segmentCountByServerRepository;
+  private final LatestActivityRepository latestActivityRepository;
+  private final EmployeeRepository employeeRepository;
 
   public StatisticsController(
       SegmentCountAllServersRepository segmentCountAllServersRepository,
-      SegmentCountByServerRepository segmentCountByServerRepository) {
+      SegmentCountByServerRepository segmentCountByServerRepository,
+      LatestActivityRepository latestActivityRepository,
+      EmployeeRepository employeeRepository) {
     this.segmentCountAllServersRepository = segmentCountAllServersRepository;
     this.segmentCountByServerRepository = segmentCountByServerRepository;
+    this.latestActivityRepository = latestActivityRepository;
+    this.employeeRepository = employeeRepository;
   }
 
   @GetMapping("/segments/{employeeId}")
@@ -63,6 +73,44 @@ public class StatisticsController {
           return map;
         })
         .collect(Collectors.toList());
+    return result;
+  }
+
+  @GetMapping("/latest-activity/dc-chat")
+  public List<Map<String, Object>> getLatestActivity() {
+    List<LatestActivity> latestActivities = latestActivityRepository.findAll();
+    List<Employee> employees = employeeRepository.findAll();
+
+    Map<Short, String> employeeIdToUsername = employees
+        .stream()
+        .collect(Collectors.toMap(
+            Employee::getId,
+            Employee::getUsername));
+
+    List<Map<String, Object>> result = latestActivities
+        .stream()
+        .map(activity -> {
+          Map<String, Object> map = new HashMap<>();
+          map.put("employeeId", activity.getEmployeeId());
+          map.put("username", employeeIdToUsername.getOrDefault(activity.getEmployeeId(), "Unknown"));
+          map.put("daysSinceLastDiscordChat", activity.getDaysSinceLastDiscordChat());
+          return map;
+        })
+        .sorted((a, b) -> {
+          Number valA = (Number) a.get("daysSinceLastDiscordChat");
+          Number valB = (Number) b.get("daysSinceLastDiscordChat");
+          int intA = valA != null ? valA.intValue() : -1;
+          int intB = valB != null ? valB.intValue() : -1;
+          if (intA == -1 && intB == -1)
+            return 0;
+          if (intA == -1)
+            return 1;
+          if (intB == -1)
+            return -1;
+          return Integer.compare(intA, intB);
+        })
+        .collect(Collectors.toList());
+
     return result;
   }
 }

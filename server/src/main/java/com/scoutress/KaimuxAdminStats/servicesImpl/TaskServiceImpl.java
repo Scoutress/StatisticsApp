@@ -1,6 +1,5 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -27,6 +26,8 @@ public class TaskServiceImpl implements TaskService {
   private final FinalStatsServiceImpl finalStatsServiceImpl;
   private final RecommendationUserServiceImpl recommendationUserServiceImpl;
   private final PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl;
+  private final LatestActivityServiceImpl latestActivityServiceImpl;
+  private final DiscordTicketsServiceImpl discordTicketsServiceImpl;
 
   public TaskServiceImpl(
       EmployeeDataServiceImpl employeeDataServiceImpl,
@@ -37,7 +38,9 @@ public class TaskServiceImpl implements TaskService {
       RecommendationsServiceImpl recommendationsServiceImpl,
       FinalStatsServiceImpl finalStatsServiceImpl,
       RecommendationUserServiceImpl recommendationUserServiceImpl,
-      PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl) {
+      PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl,
+      LatestActivityServiceImpl latestActivityServiceImpl,
+      DiscordTicketsServiceImpl discordTicketsServiceImpl) {
     this.employeeDataServiceImpl = employeeDataServiceImpl;
     this.discordMessagesHandlingServiceImpl = discordMessagesHandlingServiceImpl;
     this.minecraftTicketsRawServiceImpl = minecraftTicketsRawServiceImpl;
@@ -47,9 +50,11 @@ public class TaskServiceImpl implements TaskService {
     this.finalStatsServiceImpl = finalStatsServiceImpl;
     this.recommendationUserServiceImpl = recommendationUserServiceImpl;
     this.playtimeHandlingServiceImpl = playtimeHandlingServiceImpl;
+    this.latestActivityServiceImpl = latestActivityServiceImpl;
+    this.discordTicketsServiceImpl = discordTicketsServiceImpl;
   }
 
-  // @Override
+  @Override
   @PostConstruct
   @Transactional
   public void processCalculations() {
@@ -58,8 +63,7 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("");
 
     System.out.println("Checking nessesary employee data");
-    List<Short> employeeIdsWithoutData = new ArrayList<>();
-    employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
+    List<Short> employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
     System.out.println("Employee IDs without data: " + employeeIdsWithoutData);
 
     System.out.println("Handling Discord messages");
@@ -85,6 +89,12 @@ public class TaskServiceImpl implements TaskService {
 
     System.out.println("Handling user recommendation");
     recommendationUserServiceImpl.handleUserRecommendations();
+
+    System.out.println("Handling discord tickets (to DailyDiscordTickets)");
+    discordTicketsServiceImpl.processDiscordTickets();
+
+    System.out.println("Handling latest activity");
+    latestActivityServiceImpl.calculateLatestActivity();
 
     System.out.println("");
     System.out.println("Calculations completed at: " + getCurrentTimestamp());

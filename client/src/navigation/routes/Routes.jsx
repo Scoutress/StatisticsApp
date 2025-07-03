@@ -7,6 +7,10 @@ const Routes = {
     link: "/stats/productivity",
     name: "Productivity",
   },
+  latestActivityPage: {
+    link: "/stats/latest-activities",
+    name: "Latest Activities",
+  },
   employeePersonalStats: {
     link: "/user/stats/:employeeId",
     name: "Productivity",

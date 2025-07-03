@@ -24,6 +24,7 @@ const Homepage = () => {
         <h2>Productivity</h2>
         <div className={styles.linkGroup}>
           <Link to="/stats/productivity">Productivity</Link>
+          <Link to="/stats/latest-activities">Latest Activities</Link>
         </div>
       </div>
 

@@ -47,7 +47,6 @@ const LatestActivityPage = () => {
   return (
     <div className={styles.latestActivityPage}>
       {endpoints.map((endpoint, idx) => {
-        // Add note for Minecraft Helpop
         let helpopDays = null;
         if (
           endpoint.valueKey === "daysSinceLastMinecraftTicket" &&
@@ -81,17 +80,19 @@ const LatestActivityPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {tables[idx].map((item, i) => (
-                  <tr key={item.employeeId}>
-                    <td>{i + 1}</td>
-                    <td>{item.username}</td>
-                    <td>
-                      {item[endpoint.valueKey] === -1
-                        ? "n/d"
-                        : item[endpoint.valueKey]}
-                    </td>
-                  </tr>
-                ))}
+                {tables[idx].map((item, i) => {
+                  const isNoDate = item[endpoint.valueKey] === -1;
+                  return (
+                    <tr
+                      key={item.employeeId}
+                      className={isNoDate ? styles.noDateRow : undefined}
+                    >
+                      <td>{i + 1}</td>
+                      <td>{item.username}</td>
+                      <td>{isNoDate ? "n/d" : item[endpoint.valueKey]}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

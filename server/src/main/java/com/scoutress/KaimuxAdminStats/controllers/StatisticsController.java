@@ -77,7 +77,7 @@ public class StatisticsController {
   }
 
   @GetMapping("/latest-activity/dc-chat")
-  public List<Map<String, Object>> getLatestActivity() {
+  public List<Map<String, Object>> getLatestActivityDcChat() {
     List<LatestActivity> latestActivities = latestActivityRepository.findAll();
     List<Employee> employees = employeeRepository.findAll();
 
@@ -99,6 +99,120 @@ public class StatisticsController {
         .sorted((a, b) -> {
           Number valA = (Number) a.get("daysSinceLastDiscordChat");
           Number valB = (Number) b.get("daysSinceLastDiscordChat");
+          int intA = valA != null ? valA.intValue() : -1;
+          int intB = valB != null ? valB.intValue() : -1;
+          if (intA == -1 && intB == -1)
+            return 0;
+          if (intA == -1)
+            return 1;
+          if (intB == -1)
+            return -1;
+          return Integer.compare(intA, intB);
+        })
+        .collect(Collectors.toList());
+
+    return result;
+  }
+
+  @GetMapping("/latest-activity/dc-ticket")
+  public List<Map<String, Object>> getLatestActivityDcTickets() {
+    List<LatestActivity> latestActivities = latestActivityRepository.findAll();
+    List<Employee> employees = employeeRepository.findAll();
+
+    Map<Short, String> employeeIdToUsername = employees
+        .stream()
+        .collect(Collectors.toMap(
+            Employee::getId,
+            Employee::getUsername));
+
+    List<Map<String, Object>> result = latestActivities
+        .stream()
+        .map(activity -> {
+          Map<String, Object> map = new HashMap<>();
+          map.put("employeeId", activity.getEmployeeId());
+          map.put("username", employeeIdToUsername.getOrDefault(activity.getEmployeeId(), "Unknown"));
+          map.put("daysSinceLastDiscordTicket", activity.getDaysSinceLastDiscordTicket());
+          return map;
+        })
+        .sorted((a, b) -> {
+          Number valA = (Number) a.get("daysSinceLastDiscordTicket");
+          Number valB = (Number) b.get("daysSinceLastDiscordTicket");
+          int intA = valA != null ? valA.intValue() : -1;
+          int intB = valB != null ? valB.intValue() : -1;
+          if (intA == -1 && intB == -1)
+            return 0;
+          if (intA == -1)
+            return 1;
+          if (intB == -1)
+            return -1;
+          return Integer.compare(intA, intB);
+        })
+        .collect(Collectors.toList());
+
+    return result;
+  }
+
+  @GetMapping("/latest-activity/mc-ticket")
+  public List<Map<String, Object>> getLatestActivityMcTickets() {
+    List<LatestActivity> latestActivities = latestActivityRepository.findAll();
+    List<Employee> employees = employeeRepository.findAll();
+
+    Map<Short, String> employeeIdToUsername = employees
+        .stream()
+        .collect(Collectors.toMap(
+            Employee::getId,
+            Employee::getUsername));
+
+    List<Map<String, Object>> result = latestActivities
+        .stream()
+        .map(activity -> {
+          Map<String, Object> map = new HashMap<>();
+          map.put("employeeId", activity.getEmployeeId());
+          map.put("username", employeeIdToUsername.getOrDefault(activity.getEmployeeId(), "Unknown"));
+          map.put("daysSinceLastMinecraftTicket", activity.getDaysSinceLastMinecraftTicket());
+          return map;
+        })
+        .sorted((a, b) -> {
+          Number valA = (Number) a.get("daysSinceLastMinecraftTicket");
+          Number valB = (Number) b.get("daysSinceLastMinecraftTicket");
+          int intA = valA != null ? valA.intValue() : -1;
+          int intB = valB != null ? valB.intValue() : -1;
+          if (intA == -1 && intB == -1)
+            return 0;
+          if (intA == -1)
+            return 1;
+          if (intB == -1)
+            return -1;
+          return Integer.compare(intA, intB);
+        })
+        .collect(Collectors.toList());
+
+    return result;
+  }
+
+  @GetMapping("/latest-activity/playtime")
+  public List<Map<String, Object>> getLatestActivityPlaytime() {
+    List<LatestActivity> latestActivities = latestActivityRepository.findAll();
+    List<Employee> employees = employeeRepository.findAll();
+
+    Map<Short, String> employeeIdToUsername = employees
+        .stream()
+        .collect(Collectors.toMap(
+            Employee::getId,
+            Employee::getUsername));
+
+    List<Map<String, Object>> result = latestActivities
+        .stream()
+        .map(activity -> {
+          Map<String, Object> map = new HashMap<>();
+          map.put("employeeId", activity.getEmployeeId());
+          map.put("username", employeeIdToUsername.getOrDefault(activity.getEmployeeId(), "Unknown"));
+          map.put("daysSinceLastPlaytime", activity.getDaysSinceLastPlaytime());
+          return map;
+        })
+        .sorted((a, b) -> {
+          Number valA = (Number) a.get("daysSinceLastPlaytime");
+          Number valB = (Number) b.get("daysSinceLastPlaytime");
           int intA = valA != null ? valA.intValue() : -1;
           int intB = valB != null ? valB.intValue() : -1;
           if (intA == -1 && intB == -1)

@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./LatestActivityPage.module.scss";
 
+const startDates = [
+  "2023-07-01", // Discord Chat
+  "2024-04-20", // Discord Ticket
+  "2023-06-02", // Minecraft Helpop
+  "2023-05-28", // Playtime
+];
+
 const endpoints = [
   {
     url: "http://localhost:8080/statistics/latest-activity/dc-chat",
@@ -24,6 +31,12 @@ const endpoints = [
     valueKey: "daysSinceLastPlaytime",
   },
 ];
+
+const getDaysSince = (dateStr) => {
+  const start = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now - start) / (1000 * 60 * 60 * 24));
+};
 
 const LatestActivityPage = () => {
   const [tables, setTables] = useState([[], [], [], []]);
@@ -60,6 +73,9 @@ const LatestActivityPage = () => {
           }
         }
 
+        const sinceDate = startDates[idx];
+        const sinceDays = getDaysSince(sinceDate);
+
         return (
           <div className={styles.tableContainer} key={endpoint.url}>
             <h3>
@@ -95,6 +111,9 @@ const LatestActivityPage = () => {
                 })}
               </tbody>
             </table>
+            <div className={styles.sinceNote}>
+              Data since {sinceDate} ({sinceDays} days)
+            </div>
           </div>
         );
       })}

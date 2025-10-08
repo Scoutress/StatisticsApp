@@ -49,3 +49,6 @@ yarn-error.log*
 *.backup
 
 ToDoList.txt
+application.properties
+
+/.github/

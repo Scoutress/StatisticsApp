@@ -19,7 +19,7 @@ import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 @Service
 public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
-  private final String SQLITE_DB_PATH = "C:\\Users\\Asus\\Desktop\\KAIMUX databases\\testCoreProtectData\\";
+  private final String SQLITE_DB_PATH = "C:\\Users\\Asus\\Desktop\\KAIMUX databases\\uploadToDatabase\\";
   private final JdbcTemplate mysqlJdbcTemplate;
 
   public SQLiteToMySQLServiceImpl(JdbcTemplate mysqlJdbcTemplate) {

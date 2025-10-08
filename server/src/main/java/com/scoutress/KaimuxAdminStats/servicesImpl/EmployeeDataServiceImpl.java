@@ -18,8 +18,8 @@ import com.scoutress.KaimuxAdminStats.services.EmployeeDataService;
 @Service
 public class EmployeeDataServiceImpl implements EmployeeDataService {
 
-  private EmployeeRepository employeeRepository;
-  private EmployeeCodesRepository employeeCodesRepository;
+  private final EmployeeRepository employeeRepository;
+  private final EmployeeCodesRepository employeeCodesRepository;
   private final JdbcTemplate jdbcTemplate;
 
   public EmployeeDataServiceImpl(

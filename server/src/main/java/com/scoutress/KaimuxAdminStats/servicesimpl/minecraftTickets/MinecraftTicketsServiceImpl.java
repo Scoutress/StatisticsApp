@@ -200,14 +200,14 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
         double playtimeSinceOldestDate = getAllPlaytimeSinceOldestDate(playtimeData, employeeId, oldestDateFromData);
 
         if (playtimeSinceOldestDate <= 0) {
-          System.err.println("Invalid playtime for employee " + employeeId + ". Skipping.");
+          System.err.println("ALERT: Invalid playtime for employee " + employeeId + ". Skipping.");
           continue;
         }
 
         double ticketsPerPlaytime = calculateTicketsPerPlaytime(ticketsCountSinceOldestDate, playtimeSinceOldestDate);
         saveTicketsPerPlaytime(ticketsPerPlaytime, employeeId);
       } catch (Exception e) {
-        System.err.println("Error processing employee " + employeeId + ": " + e.getMessage());
+        System.err.println("ALERT: Error processing employee " + employeeId + ": " + e.getMessage());
       }
     }
   }

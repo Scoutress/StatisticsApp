@@ -27,7 +27,6 @@ public class TaskServiceImpl implements TaskService {
   private final RecommendationUserServiceImpl recommendationUserServiceImpl;
   private final PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl;
   private final LatestActivityServiceImpl latestActivityServiceImpl;
-  private final DiscordTicketsServiceImpl discordTicketsServiceImpl;
 
   public TaskServiceImpl(
       EmployeeDataServiceImpl employeeDataServiceImpl,
@@ -39,8 +38,7 @@ public class TaskServiceImpl implements TaskService {
       FinalStatsServiceImpl finalStatsServiceImpl,
       RecommendationUserServiceImpl recommendationUserServiceImpl,
       PlaytimeHandlingServiceImpl playtimeHandlingServiceImpl,
-      LatestActivityServiceImpl latestActivityServiceImpl,
-      DiscordTicketsServiceImpl discordTicketsServiceImpl) {
+      LatestActivityServiceImpl latestActivityServiceImpl) {
     this.employeeDataServiceImpl = employeeDataServiceImpl;
     this.discordMessagesHandlingServiceImpl = discordMessagesHandlingServiceImpl;
     this.minecraftTicketsRawServiceImpl = minecraftTicketsRawServiceImpl;
@@ -51,7 +49,6 @@ public class TaskServiceImpl implements TaskService {
     this.recommendationUserServiceImpl = recommendationUserServiceImpl;
     this.playtimeHandlingServiceImpl = playtimeHandlingServiceImpl;
     this.latestActivityServiceImpl = latestActivityServiceImpl;
-    this.discordTicketsServiceImpl = discordTicketsServiceImpl;
   }
 
   @Override
@@ -62,102 +59,46 @@ public class TaskServiceImpl implements TaskService {
     System.out.println("Started calculations at: " + getCurrentTimestamp());
     System.out.println("");
 
-    System.out.println("Checking nessesary employee data");
-    List<Short> employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
-    System.out.println("Employee IDs without data: " + employeeIdsWithoutData);
+    try {
+      System.out.println("Checking necessary employee data");
+      List<Short> employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
+      System.out.println("Employee IDs without data: " + employeeIdsWithoutData);
 
-    System.out.println("Handling Discord messages");
-    discordMessagesHandlingServiceImpl.handleDiscordMessages();
+      System.out.println("Handling Discord messages");
+      discordMessagesHandlingServiceImpl.handleDiscordMessages();
 
-    System.out.println("Handling Playtime");
-    playtimeHandlingServiceImpl.handlePlaytime();
+      System.out.println("Handling Playtime");
+      playtimeHandlingServiceImpl.handlePlaytime();
 
-    System.out.println("Handling Minecraft tickets");
-    minecraftTicketsRawServiceImpl.handleMinecraftTickets();
+      System.out.println("Handling Minecraft tickets");
+      minecraftTicketsRawServiceImpl.handleMinecraftTickets();
 
-    System.out.println("Handling Complaints");
-    complaintsServiceImpl.handleComplaints();
+      System.out.println("Handling Complaints");
+      complaintsServiceImpl.handleComplaints();
 
-    System.out.println("Handling productivity");
-    productivityServiceImpl.handleProductivity();
+      System.out.println("Handling productivity");
+      productivityServiceImpl.handleProductivity();
 
-    System.out.println("Handling recommendation");
-    recommendationsServiceImpl.handleRecommendations();
+      System.out.println("Handling recommendation");
+      recommendationsServiceImpl.handleRecommendations();
 
-    System.out.println("Handling final stats");
-    finalStatsServiceImpl.handleFinalStats();
+      System.out.println("Handling final stats");
+      finalStatsServiceImpl.handleFinalStats();
 
-    System.out.println("Handling user recommendation");
-    recommendationUserServiceImpl.handleUserRecommendations();
+      System.out.println("Handling user recommendation");
+      recommendationUserServiceImpl.handleUserRecommendations();
 
-    System.out.println("Handling discord tickets (to DailyDiscordTickets)");
-    discordTicketsServiceImpl.processDiscordTickets();
+      System.out.println("Handling latest activity");
+      latestActivityServiceImpl.calculateLatestActivity();
 
-    System.out.println("Handling latest activity");
-    latestActivityServiceImpl.calculateLatestActivity();
+    } catch (Exception e) {
+      System.out.println("ALERT: Error during processCalculations at startup: " + e.getMessage());
+      e.printStackTrace(System.out);
+    }
 
     System.out.println("");
     System.out.println("Calculations completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
-  }
-
-  @Override
-  @Transactional
-  public void runBackupDataUploadingTasks() {
-    // System.out.println("-----------------------------------------------");
-    // System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
-    // System.out.println("");
-
-    // System.out.println("Annual playtime calculations");
-    // sessionDurationService.processSessionsFromBackup();
-    // dailyPlaytimeService.handleDailyPlaytime();
-    // annualyPlaytimeService.handleAnnualPlaytime();
-
-    // System.out.println("");
-    // System.out.println("Average playtime per day calculations");
-    // averagePlaytimeOverallService.handleAveragePlaytime();
-
-    // System.out.println("");
-    // System.out.println("Average Minecraft tickets per day calculations");
-    // minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
-
-    // System.out.println("");
-    // System.out.println("Average Minecraft tickets per playtime hour
-    // calculations");
-    // minecraftTicketsService.calculateAverageMinecraftTicketsPerPlaytime();
-
-    // System.out.println("");
-    // System.out.println("Average Minecraft tickets taking comparison per day
-    // calculations");
-    // minecraftTicketsComparedService.compareEachEmployeeDailyMcTicketsValues();
-
-    // System.out.println("");
-    // System.out.println("Total Minecraft tickets updating");
-    // minecraftTicketsService.calculateTotalMinecraftTickets();
-
-    // System.out.println("");
-    // System.out.println("Complaints calculation");
-    // complaintsService.calculateComplaintsPerEachEmployee();
-
-    // System.out.println("");
-    // System.out.println("Productivity calculation");
-    // productivityService.calculateProductivity();
-
-    // System.out.println("");
-    // System.out.println("Recommendation evaluation");
-    // recommendationsService.evaluateRecommendations();
-
-    // System.out.println("");
-    // System.out.println("Final stats updating");
-    // finalStatsService.updateNewStatsData();
-
-    // System.out.println("");
-    // System.out.println("User recommendation updating");
-    // recommendationUserService.checkAndSaveRecommendations();
-
-    // System.out.println("");
-    // System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
-    // System.out.println("-----------------------------------------------");
   }
 
   private String getCurrentTimestamp() {

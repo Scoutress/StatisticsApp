@@ -4,5 +4,4 @@ public interface TaskService {
 
   void processCalculations();
 
-  void runBackupDataUploadingTasks();
 }

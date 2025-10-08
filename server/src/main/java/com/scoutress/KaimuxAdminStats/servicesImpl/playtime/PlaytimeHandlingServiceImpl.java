@@ -84,13 +84,14 @@ public class PlaytimeHandlingServiceImpl implements PlaytimeHandlingService {
     System.out.println(
         "Average playtime overall handling completed in " + (avgPlaytimeEndTime - avgPlaytimeStartTime) + " ms");
 
+    // TODO
     // Handle time of day playtime
-    long timeOfDayPlaytimeStartTime = System.currentTimeMillis();
-    timeOfDayPlaytimeServiceImpl.handleTimeOfDayPlaytime();
-    timeOfDayPlaytimeServiceImpl.handleProcessedTimeOfDayPlaytime(servers);
-    long timeOfDayPlaytimeEndTime = System.currentTimeMillis();
-    System.out.println("Time of day playtime handling completed in "
-        + (timeOfDayPlaytimeEndTime - timeOfDayPlaytimeStartTime) + " ms");
+    // long timeOfDayPlaytimeStartTime = System.currentTimeMillis();
+    // timeOfDayPlaytimeServiceImpl.handleTimeOfDayPlaytime();
+    // timeOfDayPlaytimeServiceImpl.handleProcessedTimeOfDayPlaytime(servers);
+    // long timeOfDayPlaytimeEndTime = System.currentTimeMillis();
+    // System.out.println("Time of day playtime handling completed in " +
+    // (timeOfDayPlaytimeEndTime - timeOfDayPlaytimeStartTime) + " ms");
 
     long endTime = System.currentTimeMillis();
     System.out.println("Total playtime handling process completed in " + (endTime - startTime) + " ms");

@@ -58,28 +58,37 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
     List<DiscordTicketsRawData> allDcTicketsRawData = getDiscordTicketsRawData();
 
     List<LocalDate> allLatestDates = new ArrayList<>();
-    LocalDate latestDate;
 
     for (Short employeeId : allEmployeeIds) {
       Short employeeCode = getEmployeeCodeByEmployeeId(employeeCodes, employeeId);
       boolean hasEmployeeData = hasEmployeeDcTicketsData(employeeCode, allDcTicketsRawData);
 
+      LocalDate latestDateForEmployee = null;
+
       if (hasEmployeeData) {
         LocalDateTime latestDateTime = getLatestDateFromThisEmployeeData(employeeCode, allDcTicketsRawData);
-        latestDate = latestDateTime != null ? latestDateTime.toLocalDate() : null;
+        latestDateForEmployee = latestDateTime != null ? latestDateTime.toLocalDate() : null;
       } else {
         LocalDate latestDateRaw = getJoinDateOfEmployeeWithoutData(employeeId);
-        latestDate = latestDateRaw.minusDays(1);
+
+        if (latestDateRaw != null) {
+          latestDateForEmployee = latestDateRaw.minusDays(1);
+        } else {
+          System.out.println("ALERT: Skipping employee " + employeeId + " because no tickets and no join date");
+        }
       }
-      allLatestDates.add(latestDate);
+
+      if (latestDateForEmployee != null) {
+        allLatestDates.add(latestDateForEmployee);
+      }
     }
 
     LocalDate oldestDate = allLatestDates
         .stream()
-        .filter(date -> date != null)
         .min(LocalDate::compareTo)
         .orElse(LocalDate.now());
 
+    System.out.println("Processing Discord tickets from oldest date: " + oldestDate);
     apiDataExtractionServiceImpl.extractDiscordTicketsFromAPI(oldestDate);
     moveDcTicketsReactionsToRawData();
 

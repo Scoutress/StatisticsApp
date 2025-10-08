@@ -1,8 +1,10 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDailyDiscordMessages;
@@ -112,18 +114,35 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
       List<DailyDiscordMessages> allDailyDcMessages,
       List<Short> allEmployeesFromDailyDcMessages) {
 
-    if (allDailyDcMessages != null && !allDailyDcMessages.isEmpty()) {
-      LocalDate oldestDateFromDcMessagesData = getOldestDateFromMessagesData(allDailyDcMessages);
+    if (allDailyDcMessages == null || allDailyDcMessages.isEmpty()) {
+      System.out.println("ALERT: No Discord messages data found, skipping calculation.");
+      return;
+    }
 
-      for (Short employeeId : allEmployeesFromDailyDcMessages) {
-        LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
-        LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
-            oldestDateFromDcMessagesData, joinDateThisEmployee);
-        double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(
-            allDailyDcMessages, oldestDate, employeeId);
+    if (allEmployeesFromDailyDcMessages == null || allEmployeesFromDailyDcMessages.isEmpty()) {
+      System.out.println("ALERT: No employees found in Discord messages data, skipping calculation.");
+      return;
+    }
 
-        saveAverageValueForThisEmployee(averageValue, employeeId);
+    LocalDate oldestDateFromDcMessagesData = getOldestDateFromMessagesData(allDailyDcMessages);
+
+    for (Short employeeId : allEmployeesFromDailyDcMessages) {
+      LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
+
+      if (joinDateThisEmployee == null) {
+        System.out.println(
+            "[" + LocalDateTime.now() + "] ALERT: Skipping employee " + employeeId +
+                " because join date is missing or employee not found");
+        continue;
       }
+
+      LocalDate oldestDate = checkIfJoinDateIsAfterOldestDateFromMsgData(
+          oldestDateFromDcMessagesData, joinDateThisEmployee);
+
+      double averageValue = calculateAverageValueOfDiscordMessagesThisEmployee(
+          allDailyDcMessages, oldestDate, employeeId);
+
+      saveAverageValueForThisEmployee(averageValue, employeeId);
     }
   }
 
@@ -142,7 +161,7 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
         .filter(employee -> employee.getId().equals(employeeId))
         .map(Employee::getJoinDate)
         .findFirst()
-        .orElseThrow(() -> new RuntimeException("No join date for this employee"));
+        .orElse(null);
   }
 
   public LocalDate checkIfJoinDateIsAfterOldestDateFromMsgData(

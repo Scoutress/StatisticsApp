@@ -3,6 +3,7 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.minecraftTickets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -154,26 +155,34 @@ public class MinecraftTicketsRawServiceImpl implements MinecraftTicketsRawServic
 
   private LocalDate getJoinDateOfEmployeeWithoutData(Short employeeId) {
     return employeeRepository
-        .findAll()
-        .stream()
-        .filter(employee -> employee.getId().equals(employeeId))
+        .findById(employeeId)
         .map(Employee::getJoinDate)
-        .findFirst()
-        .orElse(null);
+        .filter(Objects::nonNull)
+        .orElseGet(() -> {
+          System.err.println("ALERT: Employee " + employeeId + " has no join date — skipping.");
+          return null;
+        });
   }
 
   private LocalDate getOldestJoinDate(List<LocalDate> joinDates) {
-    return joinDates
+    LocalDate oldest = joinDates
         .stream()
+        .filter(Objects::nonNull)
         .min(LocalDate::compareTo)
-        .orElseThrow();
+        .orElse(null);
+
+    if (oldest == null) {
+      System.err.println("ALERT: No valid join dates found — skipping this calculation.");
+    }
+
+    return oldest;
   }
 
-  private boolean wasEmployeeCheckedBefore(Short emplocyeeId) {
+  private boolean wasEmployeeCheckedBefore(Short employeeId) {
     return mcTicketsLastCheckRepository
         .findAll()
         .stream()
-        .filter(employee -> emplocyeeId.equals(employee.getEmployeeId()))
+        .filter(employee -> employeeId.equals(employee.getEmployeeId()))
         .anyMatch(employee -> employee.getDate() != null);
   }
 

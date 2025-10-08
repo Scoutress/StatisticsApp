@@ -242,6 +242,11 @@ public class SessionDurationServiceImpl implements SessionDurationService {
   public void processSessions(List<String> servers) {
     for (String server : servers) {
       LocalDate latestDate = sessionDurationRepository.findLatestDate();
+
+      if (latestDate == null) {
+        latestDate = LocalDate.of(2016, 1, 1);
+      }
+
       LocalDateTime startOfDay = latestDate.atStartOfDay();
 
       List<LoginLogoutTimes> cleanedRawPlaytimes = loginLogoutTimesRepository

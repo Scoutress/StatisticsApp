@@ -3,6 +3,7 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -96,7 +97,11 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
     return employeeRepository
         .findById(employeeId)
         .map(Employee::getJoinDate)
-        .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+        .filter(Objects::nonNull)
+        .orElseGet(() -> {
+          System.err.println("ALERT: Employee ID " + employeeId + " has no join date — returning null.");
+          return null;
+        });
   }
 
   public LocalDate getOldestDateThisEmployee(List<DailyDiscordMessages> rawData, Short employeeId) {

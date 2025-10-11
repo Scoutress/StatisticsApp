@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.entity;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecommendationUser {
+public class RecommendationUser implements HasEmployeeId {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -25,4 +27,9 @@ public class RecommendationUser {
 
   @Column(name = "text", nullable = false)
   private String text;
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }

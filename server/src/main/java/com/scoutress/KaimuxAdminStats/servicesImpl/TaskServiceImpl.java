@@ -64,6 +64,8 @@ public class TaskServiceImpl implements TaskService {
       List<Short> employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
       System.out.println("Employee IDs without data: " + employeeIdsWithoutData);
 
+      runOtherTasks();
+
       System.out.println("Handling Discord messages");
       discordMessagesHandlingServiceImpl.handleDiscordMessages();
 
@@ -103,5 +105,10 @@ public class TaskServiceImpl implements TaskService {
 
   private String getCurrentTimestamp() {
     return java.time.LocalDateTime.now().toString();
+  }
+
+  public void runOtherTasks() {
+    System.out.println("Removing NOT employees data");
+    employeeDataServiceImpl.removeNotEmployeesData();
   }
 }

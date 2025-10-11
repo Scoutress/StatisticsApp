@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AverageDailyMinecraftTickets {
+public class AverageDailyMinecraftTickets implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +28,9 @@ public class AverageDailyMinecraftTickets {
 
   @Column(name = "tickets", nullable = false)
   private double tickets;
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }

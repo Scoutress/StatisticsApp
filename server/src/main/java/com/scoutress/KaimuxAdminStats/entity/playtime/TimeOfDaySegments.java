@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.entity.playtime;
 
 import java.time.LocalDate;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "time_of_day_segments")
-public class TimeOfDaySegments {
+public class TimeOfDaySegments implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,5 +42,10 @@ public class TimeOfDaySegments {
     this.server = server;
     this.date = date;
     this.timeSegment = timeSegment;
+  }
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
   }
 }

@@ -56,24 +56,53 @@ public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
 
   @Override
   public void handleTimeOfDayPlaytime() {
-    System.out.println("Starting batch processing of time-of-day playtime.");
+    System.out.println("=== [START] Time-of-day playtime batch processing ===");
 
+    System.out.println("Truncating all TimeOfDaySegments...");
     truncateAllTimeOfDaySegments();
+    System.out.println("✔ All existing time-of-day segments truncated.");
 
     int totalRecords = (int) loginLogoutTimesRepository.count();
+    System.out.println("Total login/logout records found: " + totalRecords);
+
+    if (totalRecords == 0) {
+      System.out.println("⚠ No records found in loginLogoutTimesRepository — exiting early.");
+      return;
+    }
+
     int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
+    System.out.println("Total pages to process: " + totalPages + " (page size = " + PAGE_SIZE + ")");
+
     int processedRecords = 0;
 
     for (int page = 0; page < totalPages; page++) {
+      System.out.println("\n--- Processing page " + (page + 1) + " of " + totalPages + " ---");
+
       Page<LoginLogoutTimes> pageData = loginLogoutTimesRepository.findAll(PageRequest.of(page, PAGE_SIZE));
-      processSessions(pageData.getContent());
-      processedRecords += pageData.getNumberOfElements();
+      int pageSize = pageData.getNumberOfElements();
+      System.out.println("Fetched " + pageSize + " records from database.");
+
+      if (pageSize == 0) {
+        System.out.println("⚠ Page " + (page + 1) + " returned no data — skipping.");
+        continue;
+      }
+
+      try {
+        processSessions(pageData.getContent());
+        System.out.println("✔ Page " + (page + 1) + " processed successfully.");
+      } catch (Exception e) {
+        System.err.println("❌ Error processing page " + (page + 1) + ": " + e.getMessage());
+        e.printStackTrace();
+      }
+
+      processedRecords += pageSize;
 
       int progress = (int) (((double) processedRecords / totalRecords) * 100);
-      System.out.println("Progress: " + progress + "% (Processed " + processedRecords + "/" + totalRecords + ")");
+      System.out
+          .println("Progress: " + progress + "% (" + processedRecords + "/" + totalRecords + " records processed)");
     }
 
-    System.out.println("Time-of-day playtime processing completed.");
+    System.out.println("=== [DONE] Time-of-day playtime batch processing completed successfully ===");
   }
 
   @Transactional
@@ -83,11 +112,46 @@ public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
 
   private void processSessions(List<LoginLogoutTimes> sessions) {
     if (sessions == null || sessions.isEmpty()) {
-      System.err.println("No sessions to process!");
+      System.err.println("⚠️ No sessions to process!");
       return;
     }
 
-    sessions.parallelStream().forEach(this::processSingleSession);
+    System.out.println("Processing " + sessions.size() + " sessions in batches of 100...");
+
+    int batchSize = 100;
+    int totalSessions = sessions.size();
+    int processed = 0;
+
+    for (int i = 0; i < totalSessions; i += batchSize) {
+      int end = Math.min(i + batchSize, totalSessions);
+      List<LoginLogoutTimes> batch = sessions.subList(i, end);
+
+      try {
+        for (LoginLogoutTimes session : batch) {
+          try {
+            processSingleSession(session);
+          } catch (Exception e) {
+            System.err.println("❌ Error processing session ID " + session.getId() + ": " + e.getMessage());
+            e.printStackTrace();
+          }
+        }
+
+        processed += batch.size();
+        System.out.println(
+            "✔ Processed batch of " + batch.size() + " sessions. Total processed: " + processed + "/" + totalSessions);
+
+      } catch (Exception e) {
+        System.err.println("❌ Unexpected error while processing batch " + (i / batchSize + 1) + ": " + e.getMessage());
+        e.printStackTrace();
+      }
+
+      try {
+        Thread.sleep(50);
+      } catch (InterruptedException ignored) {
+      }
+    }
+
+    System.out.println("✅ Completed processing of all " + totalSessions + " sessions.");
   }
 
   private void processSingleSession(LoginLogoutTimes session) {

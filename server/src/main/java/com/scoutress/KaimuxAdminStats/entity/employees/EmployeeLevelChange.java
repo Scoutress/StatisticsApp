@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.entity.employees;
 
 import java.time.LocalDate;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeeLevelChange {
+public class EmployeeLevelChange implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,4 +33,9 @@ public class EmployeeLevelChange {
 
   @Column(name = "action", nullable = false)
   private String action;
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }

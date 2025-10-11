@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.entity.playtime;
 
 import java.time.LocalDateTime;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "login_logout_times")
-public class LoginLogoutTimes {
+public class LoginLogoutTimes implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,5 +36,10 @@ public class LoginLogoutTimes {
 
   @Column(name = "logout_time", nullable = false)
   private LocalDateTime logoutTime;
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 
 }

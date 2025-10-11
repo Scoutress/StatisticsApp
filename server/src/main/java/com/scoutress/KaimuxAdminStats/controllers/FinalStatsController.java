@@ -17,13 +17,13 @@ import com.scoutress.KaimuxAdminStats.services.TaskService;
 public class FinalStatsController {
 
   private final FinalStatsService finalStatsService;
-  private final TaskService taskService;
+  // private final TaskService taskService;
 
   public FinalStatsController(
       FinalStatsService finalStatsService,
       TaskService taskService) {
     this.finalStatsService = finalStatsService;
-    this.taskService = taskService;
+    // this.taskService = taskService;
   }
 
   @GetMapping("/productivity")
@@ -31,10 +31,11 @@ public class FinalStatsController {
     return finalStatsService.getAllFinalStats();
   }
 
+  // Will be removed later
   @PostMapping("/update")
   public ResponseEntity<String> triggerMethods() {
     // taskService.runScheduledTasks();
-    taskService.runBackupDataUploadingTasks();
+    // taskService.runBackupDataUploadingTasks();
     return ResponseEntity.ok("Tasks completed successfully.");
   }
 }

@@ -17,7 +17,7 @@ public class DataFilterServiceImpl implements DataFilterService {
       List<SessionDataItem> data, short aid) {
     return data
         .stream()
-        .filter(item -> item.getAid() == aid)
+        .filter(item -> item.getEmployeeId() == aid)
         .collect(Collectors.toList());
   }
 
@@ -44,7 +44,7 @@ public class DataFilterServiceImpl implements DataFilterService {
       List<SanitizedSessionData> data, short aid) {
     return data
         .stream()
-        .filter(item -> item.getAid() == aid)
+        .filter(item -> item.getEmployeeId() == aid)
         .collect(Collectors.toList());
   }
 

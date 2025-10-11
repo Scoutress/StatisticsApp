@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.entity.playtime;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "segment_count_all_servers")
-public class SegmentCountAllServers {
+public class SegmentCountAllServers implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,4 +32,8 @@ public class SegmentCountAllServers {
   @Column(name = "count", nullable = false)
   private Integer count;
 
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }

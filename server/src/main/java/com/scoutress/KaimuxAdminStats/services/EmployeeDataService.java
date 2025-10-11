@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface EmployeeDataService {
 
-  void updateEmployeeCodes();
-
   List<Short> checkNessesaryEmployeeData();
+
+  void removeNotEmployeesData();
 }

@@ -81,11 +81,7 @@ const LatestActivityPage = () => {
             <h3>
               {endpoint.title}
               {endpoint.valueKey === "daysSinceLastMinecraftTicket" &&
-                helpopDays !== null && (
-                  <div className={styles.note}>
-                    Helpop is turned off for {helpopDays} days!
-                  </div>
-                )}
+                helpopDays !== null}
             </h3>
             <table className={styles.table}>
               <thead>

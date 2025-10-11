@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.entity.discordMessages;
 
+import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AverageDiscordMessagesCompared {
+public class AverageDiscordMessagesCompared implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +28,9 @@ public class AverageDiscordMessagesCompared {
 
   @Column(name = "value", nullable = false)
   private Double value;
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }

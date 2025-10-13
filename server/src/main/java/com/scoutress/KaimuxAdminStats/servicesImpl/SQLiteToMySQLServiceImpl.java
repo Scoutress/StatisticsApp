@@ -9,17 +9,20 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.entity.playtime.RawPlaytimeSession;
 import com.scoutress.KaimuxAdminStats.services.SQLiteToMySQLService;
 
 @Service
 public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
-  private final String SQLITE_DB_PATH = "C:\\Users\\Asus\\Desktop\\KAIMUX databases\\uploadToDatabase\\";
+  private static final Logger log = LoggerFactory.getLogger(SQLiteToMySQLServiceImpl.class);
+  private static final String SQLITE_DB_PATH = "C:\\Users\\Asus\\Desktop\\KAIMUX databases\\uploadToDatabase\\";
+
   private final JdbcTemplate mysqlJdbcTemplate;
 
   public SQLiteToMySQLServiceImpl(JdbcTemplate mysqlJdbcTemplate) {
@@ -28,137 +31,143 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
   @Override
   public void initializeUsersDatabase(List<String> servers) {
+    log.info("Initializing users database for servers: {}", servers);
     dropAndCreateUsersTable(servers);
     transferUsersData(servers);
   }
 
   private void dropAndCreateUsersTable(List<String> servers) {
     for (String server : servers) {
-      String dropQuery = "DROP TABLE IF EXISTS raw_user_data_" + server.toLowerCase();
-      String createQuery = "CREATE TABLE raw_user_data_" + server.toLowerCase() + " (" +
-          "user_id INT PRIMARY KEY, " +
-          "username VARCHAR(255) NOT NULL" +
-          ")";
+      if (!isValidServerName(server))
+        continue;
+      String tableName = "raw_user_data_" + server.toLowerCase();
       try {
-        mysqlJdbcTemplate.execute(dropQuery);
-        mysqlJdbcTemplate.execute(createQuery);
+        mysqlJdbcTemplate.execute("DROP TABLE IF EXISTS " + tableName);
+        mysqlJdbcTemplate.execute("""
+            CREATE TABLE %s (
+              user_id INT PRIMARY KEY,
+              username VARCHAR(255) NOT NULL
+            )
+            """.formatted(tableName));
+        log.info("✅ Table {} created successfully.", tableName);
       } catch (DataAccessException e) {
+        log.error("❌ Failed to create table for server {}: {}", server, e.getMessage());
       }
     }
   }
 
   private void transferUsersData(List<String> servers) {
     for (String server : servers) {
-      String sqliteUrl = "jdbc:sqlite:" + SQLITE_DB_PATH + server + ".db";
-      File sqliteFile = new File(SQLITE_DB_PATH + server + ".db");
+      if (!isValidServerName(server))
+        continue;
 
+      File sqliteFile = new File(SQLITE_DB_PATH + server + ".db");
       if (!sqliteFile.exists()) {
+        log.warn("⚠️ SQLite DB not found for server: {}", server);
         continue;
       }
 
-      try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl)) {
-        String checkTableQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name='co_user'";
+      String sqliteUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
+      log.info("Transferring users data from {}", sqliteFile.getName());
 
-        try (Statement stmt = sqliteConnection.createStatement(); ResultSet rs = stmt.executeQuery(checkTableQuery)) {
-          if (!rs.next()) {
-            continue;
-          }
-        } catch (SQLException e) {
-          continue;
+      try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl);
+          Statement stmt = sqliteConnection.createStatement();
+          ResultSet rs = stmt.executeQuery("SELECT id, user FROM co_user")) {
+
+        List<Object[]> batchArgs = new ArrayList<>();
+        while (rs.next()) {
+          int userId = rs.getInt("id");
+          String username = rs.getString("user");
+          batchArgs.add(new Object[] { userId, username, username });
         }
 
-        String query = "SELECT id, user FROM co_user";
-        try (Statement stmt = sqliteConnection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
-          while (rs.next()) {
-            int userId = rs.getInt("id");
-            String username = rs.getString("user");
-            saveUsersDataToMySQL(userId, username, server);
-          }
-        } catch (SQLException e) {
-          System.out.println("Error executing SELECT query for server " + server + ": " + e.getMessage());
+        if (!batchArgs.isEmpty()) {
+          String insertQuery = "INSERT INTO raw_user_data_" + server.toLowerCase()
+              + " (user_id, username) VALUES (?, ?) ON DUPLICATE KEY UPDATE username = ?";
+          mysqlJdbcTemplate.batchUpdate(insertQuery, batchArgs);
+          log.info("✅ Inserted {} users for server {}", batchArgs.size(), server);
+        } else {
+          log.info("ℹ️ No users found for server {}", server);
         }
 
       } catch (SQLException e) {
-        System.out.println("Error connecting to SQLite database for server " + server + ": " + e.getMessage());
+        log.error("❌ Error transferring users for server {}: {}", server, e.getMessage());
       }
     }
   }
 
-  private void saveUsersDataToMySQL(int userId, String username, String server) {
-    String insertQuery = "INSERT INTO raw_user_data_" + server.toLowerCase() + " (user_id, username) VALUES (?, ?) " +
-        "ON DUPLICATE KEY UPDATE username = ?";
-    mysqlJdbcTemplate.update(insertQuery, userId, username, username);
-  }
-
   @Override
   public void initializePlaytimeSessionsDatabase(List<String> servers) {
+    log.info("Initializing playtime sessions database...");
     dropAndCreatePlaytimeSessionsTable(servers);
     transferPlaytimeSessionsData(servers);
   }
 
   private void dropAndCreatePlaytimeSessionsTable(List<String> servers) {
     for (String server : servers) {
-      String dropQuery = "DROP TABLE IF EXISTS raw_playtime_sessions_data_" + server.toLowerCase();
-      String createQuery = "CREATE TABLE raw_playtime_sessions_data_" + server.toLowerCase() + " (" +
-          "id INT AUTO_INCREMENT PRIMARY KEY," +
-          "time INT NOT NULL, " +
-          "user_id INT NOT NULL, " +
-          "action TINYINT(1) NOT NULL" +
-          ")";
+      if (!isValidServerName(server))
+        continue;
+      String tableName = "raw_playtime_sessions_data_" + server.toLowerCase();
       try {
-        mysqlJdbcTemplate.execute(dropQuery);
-        mysqlJdbcTemplate.execute(createQuery);
+        mysqlJdbcTemplate.execute("DROP TABLE IF EXISTS " + tableName);
+        mysqlJdbcTemplate.execute("""
+            CREATE TABLE %s (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              user_id INT NOT NULL,
+              time INT NOT NULL,
+              action TINYINT(1) NOT NULL
+            )
+            """.formatted(tableName));
+        log.info("✅ Table {} created successfully.", tableName);
       } catch (DataAccessException e) {
+        log.error("❌ Failed to create playtime table for {}: {}", server, e.getMessage());
       }
     }
   }
 
   private void transferPlaytimeSessionsData(List<String> servers) {
     for (String server : servers) {
-      String sqliteUrl = "jdbc:sqlite:" + SQLITE_DB_PATH + server + ".db";
+      if (!isValidServerName(server))
+        continue;
 
-      try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl)) {
-        String query = "SELECT time, user, action FROM co_session";
+      File sqliteFile = new File(SQLITE_DB_PATH + server + ".db");
+      if (!sqliteFile.exists()) {
+        log.warn("⚠️ SQLite DB not found for server: {}", server);
+        continue;
+      }
 
-        try (Statement stmt = sqliteConnection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+      String sqliteUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
+      log.info("Transferring playtime sessions from {}", sqliteFile.getName());
 
-          List<RawPlaytimeSession> sessions = new ArrayList<>();
-          while (rs.next()) {
-            int userId = rs.getInt("user");
-            int time = rs.getInt("time");
-            int action = rs.getInt("action");
+      try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl);
+          Statement stmt = sqliteConnection.createStatement();
+          ResultSet rs = stmt.executeQuery("SELECT user, time, action FROM co_session")) {
 
-            sessions.add(new RawPlaytimeSession(null, userId, time, action));
-          }
+        List<Object[]> batchArgs = new ArrayList<>();
+        while (rs.next()) {
+          batchArgs.add(new Object[] {
+              rs.getInt("user"),
+              rs.getInt("time"),
+              rs.getInt("action")
+          });
+        }
 
-          if (!sessions.isEmpty()) {
-            batchInsertPlaytimeSessionsDataToMySQL(sessions, server);
-          }
-
-        } catch (SQLException e) {
-          System.out.println("Error executing query for server " + server + ": " + e.getMessage());
+        if (!batchArgs.isEmpty()) {
+          String insertQuery = "INSERT INTO raw_playtime_sessions_data_" + server.toLowerCase()
+              + " (user_id, time, action) VALUES (?, ?, ?)";
+          mysqlJdbcTemplate.batchUpdate(insertQuery, batchArgs);
+          log.info("✅ Inserted {} playtime sessions for {}", batchArgs.size(), server);
+        } else {
+          log.info("ℹ️ No playtime sessions found for {}", server);
         }
 
       } catch (SQLException e) {
-        System.out.println("Error connecting to SQLite database for server " + server + ": " + e.getMessage());
+        log.error("❌ Error transferring playtime sessions for {}: {}", server, e.getMessage());
       }
     }
   }
 
-  private void batchInsertPlaytimeSessionsDataToMySQL(List<RawPlaytimeSession> sessions, String server) {
-    String insertQuery = "INSERT INTO raw_playtime_sessions_data_" + server.toLowerCase()
-        + " (user_id, time, action) VALUES (?, ?, ?)";
-
-    try {
-      List<Object[]> batchArgs = new ArrayList<>();
-
-      for (RawPlaytimeSession session : sessions) {
-        batchArgs.add(new Object[] { session.getUserId(), session.getTime(), session.getAction() });
-      }
-
-      mysqlJdbcTemplate.batchUpdate(insertQuery, batchArgs);
-
-    } catch (DataAccessException e) {
-    }
+  private boolean isValidServerName(String name) {
+    return name != null && name.matches("^[a-zA-Z0-9_]+$");
   }
 }

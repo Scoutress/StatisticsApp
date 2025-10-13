@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.services.playtime.PlaytimeHandlingService;
@@ -10,12 +12,17 @@ import com.scoutress.KaimuxAdminStats.servicesImpl.SQLiteToMySQLServiceImpl;
 @Service
 public class PlaytimeHandlingServiceImpl implements PlaytimeHandlingService {
 
+  private static final Logger log = LoggerFactory.getLogger(PlaytimeHandlingServiceImpl.class);
+
   private final SQLiteToMySQLServiceImpl sqLiteToMySQLServiceImpl;
   private final SessionDurationServiceImpl sessionDurationServiceImpl;
   private final DailyPlaytimeServiceImpl dailyPlaytimeServiceImpl;
   private final AnnualPlaytimeServiceImpl annualPlaytimeServiceImpl;
   private final AveragePlaytimeOverallServiceImpl averagePlaytimeOverallServiceImpl;
   private final TimeOfDayPlaytimeServiceImpl timeOfDayPlaytimeServiceImpl;
+
+  private static final List<String> SERVERS = List.of(
+      "Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events", "Lobby");
 
   public PlaytimeHandlingServiceImpl(
       SQLiteToMySQLServiceImpl sqLiteToMySQLServiceImpl,
@@ -32,67 +39,59 @@ public class PlaytimeHandlingServiceImpl implements PlaytimeHandlingService {
     this.timeOfDayPlaytimeServiceImpl = timeOfDayPlaytimeServiceImpl;
   }
 
-  private static final List<String> servers = List.of(
-      "Survival", "Skyblock", "Creative", "Boxpvp", "Prison", "Events", "Lobby");
-
   @Override
   public void handlePlaytime() {
-    long startTime = System.currentTimeMillis();
+    long totalStart = System.currentTimeMillis();
+    log.info("=== Starting full playtime handling process ===");
 
-    System.out.println("Starting playtime handling process...");
+    runStage("SQLite database initialization", () -> {
+      sqLiteToMySQLServiceImpl.initializeUsersDatabase(SERVERS);
+      sqLiteToMySQLServiceImpl.initializePlaytimeSessionsDatabase(SERVERS);
+    });
 
-    // Initialize databases
-    long initStartTime = System.currentTimeMillis();
-    sqLiteToMySQLServiceImpl.initializeUsersDatabase(servers);
-    sqLiteToMySQLServiceImpl.initializePlaytimeSessionsDatabase(servers);
-    long initEndTime = System.currentTimeMillis();
-    System.out.println("Database initialization completed in " + (initEndTime - initStartTime) + " ms");
+    runStage("Login/Logout session processing", () -> {
+      sessionDurationServiceImpl.processLoginLogouts(SERVERS);
+      sessionDurationServiceImpl.removeLoginLogoutsDupe();
+    });
 
-    // Process login logouts
-    long loginLogoutsStartTime = System.currentTimeMillis();
-    sessionDurationServiceImpl.processLoginLogouts(servers);
-    sessionDurationServiceImpl.removeLoginLogoutsDupe();
-    long loginLogoutsEndTime = System.currentTimeMillis();
-    System.out.println("Login/Logout processing completed in " + (loginLogoutsEndTime - loginLogoutsStartTime) + " ms");
+    runStage("Session duration processing", () -> {
+      sessionDurationServiceImpl.processSessions(SERVERS);
+      sessionDurationServiceImpl.removeDuplicateSessionData();
+    });
 
-    // Process sessions
-    long sessionStartTime = System.currentTimeMillis();
-    sessionDurationServiceImpl.processSessions(servers);
-    sessionDurationServiceImpl.removeDuplicateSessionData();
-    long sessionEndTime = System.currentTimeMillis();
-    System.out.println("Session processing completed in " + (sessionEndTime - sessionStartTime) + " ms");
+    runStage("Daily playtime calculation", () -> {
+      dailyPlaytimeServiceImpl.handleDailyPlaytime();
+      dailyPlaytimeServiceImpl.removeDuplicateDailyPlaytimes();
+    });
 
-    // Handle daily playtime
-    long dailyPlaytimeStartTime = System.currentTimeMillis();
-    dailyPlaytimeServiceImpl.handleDailyPlaytime();
-    dailyPlaytimeServiceImpl.removeDuplicateDailyPlaytimes();
-    long dailyPlaytimeEndTime = System.currentTimeMillis();
-    System.out
-        .println("Daily playtime handling completed in " + (dailyPlaytimeEndTime - dailyPlaytimeStartTime) + " ms");
+    runStage("Annual playtime calculation", () -> {
+      annualPlaytimeServiceImpl.handleAnnualPlaytime();
+    });
 
-    // Handle annual playtime
-    long annualPlaytimeStartTime = System.currentTimeMillis();
-    annualPlaytimeServiceImpl.handleAnnualPlaytime();
-    long annualPlaytimeEndTime = System.currentTimeMillis();
-    System.out
-        .println("Annual playtime handling completed in " + (annualPlaytimeEndTime - annualPlaytimeStartTime) + " ms");
+    runStage("Average overall playtime calculation", () -> {
+      averagePlaytimeOverallServiceImpl.handleAveragePlaytime();
+    });
 
-    // Handle average playtime overall
-    long avgPlaytimeStartTime = System.currentTimeMillis();
-    averagePlaytimeOverallServiceImpl.handleAveragePlaytime();
-    long avgPlaytimeEndTime = System.currentTimeMillis();
-    System.out.println(
-        "Average playtime overall handling completed in " + (avgPlaytimeEndTime - avgPlaytimeStartTime) + " ms");
+    runStage("Time-of-day playtime analysis", () -> {
+      timeOfDayPlaytimeServiceImpl.handleTimeOfDayPlaytime();
+      timeOfDayPlaytimeServiceImpl.handleProcessedTimeOfDayPlaytime(SERVERS);
+    });
 
-    // Handle time of day playtime
-    long timeOfDayPlaytimeStartTime = System.currentTimeMillis();
-    timeOfDayPlaytimeServiceImpl.handleTimeOfDayPlaytime();
-    timeOfDayPlaytimeServiceImpl.handleProcessedTimeOfDayPlaytime(servers);
-    long timeOfDayPlaytimeEndTime = System.currentTimeMillis();
-    System.out.println("Time of day playtime handling completed in "
-        + (timeOfDayPlaytimeEndTime - timeOfDayPlaytimeStartTime) + " ms");
+    long totalEnd = System.currentTimeMillis();
+    log.info("✅ Total playtime handling completed in {} ms ({} s).",
+        (totalEnd - totalStart), (totalEnd - totalStart) / 1000.0);
+  }
 
-    long endTime = System.currentTimeMillis();
-    System.out.println("Total playtime handling process completed in " + (endTime - startTime) + " ms");
+  private void runStage(String stageName, Runnable stageAction) {
+    long start = System.currentTimeMillis();
+    log.info("▶️ Starting stage: {}", stageName);
+
+    try {
+      stageAction.run();
+      long end = System.currentTimeMillis();
+      log.info("✅ Completed '{}' in {} ms ({} s).", stageName, (end - start), (end - start) / 1000.0);
+    } catch (Exception e) {
+      log.error("❌ Error during stage '{}': {}", stageName, e.getMessage(), e);
+    }
   }
 }

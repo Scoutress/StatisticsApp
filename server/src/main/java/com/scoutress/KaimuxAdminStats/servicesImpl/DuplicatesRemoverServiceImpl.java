@@ -1,10 +1,13 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessages;
@@ -25,6 +28,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class DuplicatesRemoverServiceImpl implements DuplicatesRemoverService {
+
+  private static final Logger log = LoggerFactory.getLogger(DuplicatesRemoverServiceImpl.class);
 
   private final DailyDiscordMessagesRepository dailyDiscordMessagesRepository;
   private final DailyMinecraftTicketsRepository dailyMinecraftTicketsRepository;
@@ -48,118 +53,167 @@ public class DuplicatesRemoverServiceImpl implements DuplicatesRemoverService {
     this.averageMinecraftTicketsComparedRepository = averageMinecraftTicketsComparedRepository;
   }
 
+  // ------------------------------------------------------------
+  // DAILY DISCORD MESSAGES
+  // ------------------------------------------------------------
   @Override
   @Transactional
   public void removeDailyDiscordMessagesDuplicates() {
-    List<DailyDiscordMessages> dailyMessages = dailyDiscordMessagesRepository.findAll();
+    log.info("🧹 Removing duplicates from DailyDiscordMessages...");
+    List<DailyDiscordMessages> records = dailyDiscordMessagesRepository
+        .findAll();
+    if (records.isEmpty()) {
+      log.info("No DailyDiscordMessages found, skipping.");
+      return;
+    }
 
-    Map<String, List<DailyDiscordMessages>> groupedByEmployeeIdAndDate = dailyMessages
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getDate()));
+    int duplicates = removeDuplicatesGeneric(
+        records,
+        msg -> msg.getEmployeeId() + "-" + msg.getDate(),
+        dailyDiscordMessagesRepository::deleteAllInBatch);
 
-    groupedByEmployeeIdAndDate.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(DailyDiscordMessages::getId))
-          .skip(1)
-          .forEach(msg -> {
-            dailyDiscordMessagesRepository.delete(msg);
-          });
-    });
+    log.info("✅ Removed {} duplicates from DailyDiscordMessages.", duplicates);
   }
 
+  // ------------------------------------------------------------
+  // DAILY MINECRAFT TICKETS
+  // ------------------------------------------------------------
   @Override
   @Transactional
   public void removeDuplicatesFromDailyMcTickets() {
-    List<DailyMinecraftTickets> dailyTickets = dailyMinecraftTicketsRepository.findAll();
+    log.info("🧹 Removing duplicates from DailyMinecraftTickets...");
+    List<DailyMinecraftTickets> records = dailyMinecraftTicketsRepository
+        .findAll();
+    if (records.isEmpty()) {
+      log.info("No DailyMinecraftTickets found, skipping.");
+      return;
+    }
 
-    Map<String, List<DailyMinecraftTickets>> groupedByEmployeeIdAndDate = dailyTickets
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getDate()));
+    int duplicates = removeDuplicatesGeneric(
+        records,
+        msg -> msg.getEmployeeId() + "-" + msg.getDate(),
+        dailyMinecraftTicketsRepository::deleteAllInBatch);
 
-    groupedByEmployeeIdAndDate.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(DailyMinecraftTickets::getId))
-          .skip(1)
-          .forEach(msg -> {
-            dailyMinecraftTicketsRepository.delete(msg);
-          });
-    });
+    log.info("✅ Removed {} duplicates from DailyMinecraftTickets.", duplicates);
   }
 
+  // ------------------------------------------------------------
+  // AVERAGE DAILY MINECRAFT TICKETS
+  // ------------------------------------------------------------
   @Override
   @Transactional
   public void removeDuplicatesFromAvgDailyMcTickets() {
-    List<AverageDailyMinecraftTickets> avgDailyTickets = averageDailyMinecraftTicketsRepository.findAll();
+    log.info("🧹 Removing duplicates from AverageDailyMinecraftTickets...");
+    List<AverageDailyMinecraftTickets> records = averageDailyMinecraftTicketsRepository
+        .findAll();
+    if (records.isEmpty()) {
+      log.info("No AverageDailyMinecraftTickets found, skipping.");
+      return;
+    }
 
-    Map<String, List<AverageDailyMinecraftTickets>> groupedByEmployeeIdAndTickets = avgDailyTickets
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getTickets()));
+    int duplicates = removeDuplicatesGeneric(
+        records,
+        msg -> msg.getEmployeeId() + "-" + msg.getTickets(),
+        averageDailyMinecraftTicketsRepository::deleteAllInBatch);
 
-    groupedByEmployeeIdAndTickets.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(AverageDailyMinecraftTickets::getId))
-          .skip(1)
-          .forEach(msg -> {
-            averageDailyMinecraftTicketsRepository.delete(msg);
-          });
-    });
+    log.info("✅ Removed {} duplicates from AverageDailyMinecraftTickets.", duplicates);
   }
 
+  // ------------------------------------------------------------
+  // AVERAGE TICKETS PER PLAYTIME
+  // ------------------------------------------------------------
   @Override
   @Transactional
   public void removeDuplicatesFromMcTicketsPerPlaytime() {
-    List<AverageMinecraftTicketsPerPlaytime> ticketsPerPlaytime = averageMinecraftTicketsPerPlaytimeRepository
+    log.info("🧹 Removing duplicates from AverageMinecraftTicketsPerPlaytime...");
+    List<AverageMinecraftTicketsPerPlaytime> records = averageMinecraftTicketsPerPlaytimeRepository
         .findAll();
+    if (records.isEmpty()) {
+      log.info("No AverageMinecraftTicketsPerPlaytime found, skipping.");
+      return;
+    }
 
-    Map<String, List<AverageMinecraftTicketsPerPlaytime>> groupedByEmployeeIdAndValue = ticketsPerPlaytime
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getValue()));
+    int duplicates = removeDuplicatesGeneric(
+        records,
+        msg -> msg.getEmployeeId() + "-" + msg.getValue(),
+        averageMinecraftTicketsPerPlaytimeRepository::deleteAllInBatch);
 
-    groupedByEmployeeIdAndValue.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(AverageMinecraftTicketsPerPlaytime::getId))
-          .skip(1)
-          .forEach(msg -> {
-            averageMinecraftTicketsPerPlaytimeRepository.delete(msg);
-          });
-    });
+    log.info("✅ Removed {} duplicates from AverageMinecraftTicketsPerPlaytime.", duplicates);
   }
 
+  // ------------------------------------------------------------
+  // TOTAL MINECRAFT TICKETS
+  // ------------------------------------------------------------
   @Override
   @Transactional
   public void removeDuplicatesFromTotalMcTickets() {
-    List<TotalMinecraftTickets> ticketsPerPlaytime = totalMinecraftTicketsRepository.findAll();
+    log.info("🧹 Removing duplicates from TotalMinecraftTickets...");
+    List<TotalMinecraftTickets> records = totalMinecraftTicketsRepository
+        .findAll();
+    if (records.isEmpty()) {
+      log.info("No TotalMinecraftTickets found, skipping.");
+      return;
+    }
 
-    Map<String, List<TotalMinecraftTickets>> groupedByEmployeeIdAndValue = ticketsPerPlaytime
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getTicketCount()));
+    int duplicates = removeDuplicatesGeneric(
+        records,
+        msg -> msg.getEmployeeId() + "-" + msg.getTicketCount(),
+        totalMinecraftTicketsRepository::deleteAllInBatch);
 
-    groupedByEmployeeIdAndValue.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(TotalMinecraftTickets::getId))
-          .skip(1)
-          .forEach(msg -> {
-            totalMinecraftTicketsRepository.delete(msg);
-          });
-    });
+    log.info("✅ Removed {} duplicates from TotalMinecraftTickets.", duplicates);
   }
 
+  // ------------------------------------------------------------
+  // COMPARED MINECRAFT TICKETS
+  // ------------------------------------------------------------
   @Override
   @Transactional
   public void removeDuplicatesFromComparedMcTickets() {
-    List<AverageMinecraftTicketsCompared> ticketsPerPlaytime = averageMinecraftTicketsComparedRepository.findAll();
+    log.info("🧹 Removing duplicates from AverageMinecraftTicketsCompared...");
+    List<AverageMinecraftTicketsCompared> records = averageMinecraftTicketsComparedRepository
+        .findAll();
+    if (records.isEmpty()) {
+      log.info("No AverageMinecraftTicketsCompared found, skipping.");
+      return;
+    }
 
-    Map<String, List<AverageMinecraftTicketsCompared>> groupedByEmployeeIdAndValue = ticketsPerPlaytime
-        .stream()
-        .collect(Collectors.groupingBy(message -> message.getEmployeeId() + "-" + message.getValue()));
+    int duplicates = removeDuplicatesGeneric(
+        records,
+        msg -> msg.getEmployeeId() + "-" + msg.getValue(),
+        averageMinecraftTicketsComparedRepository::deleteAllInBatch);
 
-    groupedByEmployeeIdAndValue.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(AverageMinecraftTicketsCompared::getId))
-          .skip(1)
-          .forEach(msg -> {
-            averageMinecraftTicketsComparedRepository.delete(msg);
-          });
-    });
+    log.info("✅ Removed {} duplicates from AverageMinecraftTicketsCompared.", duplicates);
+  }
+
+  // ------------------------------------------------------------
+  // GENERIC DUPLICATE REMOVAL METHOD
+  // ------------------------------------------------------------
+  private <T> int removeDuplicatesGeneric(
+      List<T> records,
+      java.util.function.Function<T, String> groupingKey,
+      java.util.function.Consumer<List<T>> batchDeleteFn) {
+
+    Map<String, List<T>> grouped = records.stream()
+        .collect(Collectors.groupingBy(groupingKey));
+
+    List<T> duplicates = grouped.values().stream()
+        .flatMap(list -> list.stream()
+            .sorted(Comparator.comparingInt(obj -> getEntityId(obj)))
+            .skip(1))
+        .toList();
+
+    if (!duplicates.isEmpty()) {
+      batchDeleteFn.accept(duplicates);
+    }
+
+    return duplicates.size();
+  }
+
+  private int getEntityId(Object entity) {
+    try {
+      return (int) entity.getClass().getMethod("getId").invoke(entity);
+    } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+      return Integer.MAX_VALUE;
+    }
   }
 }

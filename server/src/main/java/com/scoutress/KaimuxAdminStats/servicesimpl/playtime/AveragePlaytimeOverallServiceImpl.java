@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
@@ -23,6 +25,8 @@ import com.scoutress.KaimuxAdminStats.services.playtime.AveragePlaytimeOverallSe
 
 @Service
 public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverallService {
+
+  private static final Logger log = LoggerFactory.getLogger(AveragePlaytimeOverallServiceImpl.class);
 
   private final AveragePlaytimeOverallRepository averagePlaytimeOverallRepository;
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
@@ -42,102 +46,115 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
 
   @Override
   public void handleAveragePlaytime() {
-    List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
-    List<EmployeeCodes> allEmployeeCodes = getAllEmployeeCodes();
-    List<Employee> allEmployees = getAllEmployees();
-    List<AveragePlaytimeOverall> averagePlaytime = calculateAveragePlaytime(
-        allPlaytime, allEmployeeCodes, allEmployees);
+    long startTime = System.currentTimeMillis();
+    log.info("=== Starting average playtime calculation ===");
 
-    saveAveragePlaytime(averagePlaytime);
-  }
+    try {
+      List<DailyPlaytime> allPlaytime = dailyPlaytimeRepository.findAll();
+      List<EmployeeCodes> allEmployeeCodes = employeeCodesRepository.findAll();
+      List<Employee> allEmployees = employeeRepository.findAll();
 
-  private List<DailyPlaytime> getDailyPlaytimeData() {
-    return dailyPlaytimeRepository.findAll();
-  }
+      if (allPlaytime.isEmpty()) {
+        log.warn("⚠️ No playtime data found. Exiting early.");
+        return;
+      }
 
-  private List<EmployeeCodes> getAllEmployeeCodes() {
-    return employeeCodesRepository.findAll();
-  }
+      Map<Short, List<DailyPlaytime>> playtimeByEmployee = allPlaytime
+          .stream()
+          .collect(Collectors.groupingBy(DailyPlaytime::getEmployeeId));
 
-  private List<Employee> getAllEmployees() {
-    return employeeRepository.findAll();
-  }
+      Set<Short> validEmployeeIds = allEmployeeCodes
+          .stream()
+          .map(EmployeeCodes::getEmployeeId)
+          .collect(Collectors.toSet());
 
-  private List<AveragePlaytimeOverall> calculateAveragePlaytime(
-      List<DailyPlaytime> allPlaytimes,
-      List<EmployeeCodes> allEmployeeCodes,
-      List<Employee> allEmployees) {
+      Map<Short, Employee> employeeMap = allEmployees
+          .stream()
+          .collect(Collectors.toMap(Employee::getId, emp -> emp));
 
-    List<AveragePlaytimeOverall> handledAveragePlaytimeData = new ArrayList<>();
-    LocalDate today = LocalDate.now();
+      log.debug("Loaded {} employees, {} employee codes, and {} playtime entries.",
+          allEmployees.size(), allEmployeeCodes.size(), allPlaytime.size());
 
-    Map<Short, Employee> employeeMap = allEmployees
-        .stream()
-        .collect(Collectors.toMap(Employee::getId, emp -> emp));
+      List<AveragePlaytimeOverall> results = new ArrayList<>();
+      LocalDate today = LocalDate.now();
 
-    Set<Short> allEmployeeIds = allEmployeeCodes
-        .stream()
-        .map(EmployeeCodes::getEmployeeId)
-        .collect(Collectors.toSet());
+      int processed = 0;
+      for (Map.Entry<Short, List<DailyPlaytime>> entry : playtimeByEmployee.entrySet()) {
+        Short employeeId = entry.getKey();
 
-    Set<Short> uniqueEmployeeIdsInPlaytime = allPlaytimes
-        .stream()
-        .map(DailyPlaytime::getEmployeeId)
-        .collect(Collectors.toSet());
+        if (!validEmployeeIds.contains(employeeId)) {
+          continue;
+        }
 
-    for (Short employeeId : uniqueEmployeeIdsInPlaytime) {
-      if (allEmployeeIds.contains(employeeId)) {
         Employee employee = employeeMap.get(employeeId);
+        if (employee == null || employee.getJoinDate() == null) {
+          log.warn("⚠️ Missing employee or join date for ID {} — skipping.", employeeId);
+          continue;
+        }
 
-        if (employee != null) {
-          LocalDate joinDate = employee.getJoinDate();
+        List<DailyPlaytime> empPlaytime = entry.getValue();
+        LocalDate joinDate = employee.getJoinDate();
 
-          double playtimesSum = allPlaytimes
-              .stream()
-              .filter(pt -> pt.getEmployeeId().equals(employeeId))
-              .filter(pt -> !pt.getDate().isBefore(joinDate))
-              .mapToDouble(DailyPlaytime::getTimeInHours)
-              .sum();
+        double totalPlaytime = empPlaytime
+            .stream()
+            .filter(pt -> !pt.getDate().isBefore(joinDate))
+            .mapToDouble(DailyPlaytime::getTimeInHours)
+            .sum();
 
-          LocalDate oldestDateFromData = allPlaytimes
-              .stream()
-              .filter(date -> date.getEmployeeId().equals(employeeId))
-              .map(DailyPlaytime::getDate)
-              .min(LocalDate::compareTo)
-              .orElse(LocalDate.of(1970, 1, 1));
+        LocalDate oldestDateFromData = empPlaytime
+            .stream()
+            .map(DailyPlaytime::getDate)
+            .min(LocalDate::compareTo)
+            .orElse(joinDate);
 
-          LocalDate processingDate = oldestDateFromData.isAfter(joinDate) ? oldestDateFromData : joinDate;
+        LocalDate effectiveStart = oldestDateFromData.isAfter(joinDate) ? oldestDateFromData : joinDate;
+        long daysBetween = Math.max(ChronoUnit.DAYS.between(effectiveStart, today), 1);
+        double average = totalPlaytime / daysBetween;
 
-          long daysAfterJoin = ChronoUnit.DAYS.between(processingDate, today);
+        AveragePlaytimeOverall avgEntity = new AveragePlaytimeOverall();
+        avgEntity.setEmployeeId(employeeId);
+        avgEntity.setPlaytime(average);
+        results.add(avgEntity);
 
-          double averagePlaytimeValue = daysAfterJoin > 0 ? playtimesSum / daysAfterJoin : 0;
-
-          AveragePlaytimeOverall averagePlaytimeData = new AveragePlaytimeOverall();
-          averagePlaytimeData.setEmployeeId(employeeId);
-          averagePlaytimeData.setPlaytime(averagePlaytimeValue);
-          handledAveragePlaytimeData.add(averagePlaytimeData);
+        processed++;
+        if (processed % 20 == 0 || processed == playtimeByEmployee.size()) {
+          int percent = (int) ((processed / (double) playtimeByEmployee.size()) * 100);
+          log.info("Progress: {}/{} employees processed ({}%)", processed, playtimeByEmployee.size(), percent);
         }
       }
+
+      results.sort(Comparator.comparing(AveragePlaytimeOverall::getEmployeeId));
+      saveAveragePlaytime(results);
+
+      long elapsed = System.currentTimeMillis() - startTime;
+      log.info("✅ Average playtime calculation completed. Processed {} employees in {} ms ({} s).",
+          results.size(), elapsed, elapsed / 1000.0);
+
+    } catch (Exception e) {
+      log.error("❌ Critical error during average playtime calculation: {}", e.getMessage(), e);
     }
-
-    handledAveragePlaytimeData.sort(Comparator.comparing(AveragePlaytimeOverall::getEmployeeId));
-
-    return handledAveragePlaytimeData;
   }
 
   private void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
-    averagePlaytimeData.forEach(averagePlaytimeOverall -> {
-      Short employeeId = averagePlaytimeOverall.getEmployeeId();
+    log.info("Saving {} average playtime entries...", averagePlaytimeData.size());
 
-      AveragePlaytimeOverall existingPlaytime = averagePlaytimeOverallRepository
-          .findByEmployeeId(employeeId);
+    for (AveragePlaytimeOverall avg : averagePlaytimeData) {
+      try {
+        AveragePlaytimeOverall existing = averagePlaytimeOverallRepository
+            .findByEmployeeId(avg.getEmployeeId());
 
-      if (existingPlaytime != null) {
-        existingPlaytime.setPlaytime(averagePlaytimeOverall.getPlaytime());
-        averagePlaytimeOverallRepository.save(existingPlaytime);
-      } else {
-        averagePlaytimeOverallRepository.save(averagePlaytimeOverall);
+        if (existing != null) {
+          existing.setPlaytime(avg.getPlaytime());
+          averagePlaytimeOverallRepository.save(existing);
+        } else {
+          averagePlaytimeOverallRepository.save(avg);
+        }
+
+      } catch (Exception e) {
+        log.error("❌ Failed to save average playtime for employee {}: {}", avg.getEmployeeId(), e.getMessage(), e);
       }
-    });
+    }
+
+    log.info("✅ Finished saving all average playtime entries.");
   }
 }

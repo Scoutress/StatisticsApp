@@ -10,4 +10,6 @@ import com.scoutress.KaimuxAdminStats.entity.playtime.LoginLogoutTimes;
 public interface LoginLogoutTimesRepository extends JpaRepository<LoginLogoutTimes, Long> {
 
   List<LoginLogoutTimes> findByLoginTimeGreaterThanEqual(LocalDateTime loginTime);
+
+  List<LoginLogoutTimes> findTop5000ByIdGreaterThanOrderByIdAsc(long lastId);
 }

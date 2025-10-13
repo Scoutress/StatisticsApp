@@ -12,6 +12,4 @@ public interface SessionDurationService {
 
   void removeDuplicateSessionData();
 
-  // temp. method
-  void processSessionsFromBackup();
 }

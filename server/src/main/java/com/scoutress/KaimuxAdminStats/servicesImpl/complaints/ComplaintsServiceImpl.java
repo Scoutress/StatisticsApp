@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.complaints;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.complaints.Complaints;
@@ -12,6 +14,8 @@ import com.scoutress.KaimuxAdminStats.services.complaints.ComplaintsService;
 
 @Service
 public class ComplaintsServiceImpl implements ComplaintsService {
+
+  private static final Logger log = LoggerFactory.getLogger(ComplaintsServiceImpl.class);
 
   private final ComplaintsRepository complaintsRepository;
   private final ComplaintsSumRepository complaintsSumRepository;
@@ -25,19 +29,36 @@ public class ComplaintsServiceImpl implements ComplaintsService {
 
   @Override
   public void handleComplaints() {
+    log.info("=== Starting complaints processing ===");
+
     List<Complaints> rawData = getAllComplaints();
+    log.debug("Fetched {} raw complaints records from database.", rawData != null ? rawData.size() : 0);
 
-    if (rawData != null && !rawData.isEmpty()) {
-      List<Short> allEmployees = getAllEmployeesFromComplaintsData(rawData);
+    if (rawData == null || rawData.isEmpty()) {
+      log.warn("No complaints data found. Skipping processing.");
+      return;
+    }
 
-      if (allEmployees != null && !allEmployees.isEmpty()) {
+    List<Short> allEmployees = getAllEmployeesFromComplaintsData(rawData);
+    log.debug("Found {} distinct employees in complaints data.", allEmployees.size());
 
-        for (Short employee : allEmployees) {
-          int allComplaintsForThisEmployee = calculateAllComplaintsForThisEmployee(rawData, employee);
-          saveComplaintsSumForThisEmployee(allComplaintsForThisEmployee, employee);
-        }
+    if (allEmployees.isEmpty()) {
+      log.warn("No employees found in complaints data. Skipping processing.");
+      return;
+    }
+
+    for (Short employee : allEmployees) {
+      try {
+        int allComplaintsForThisEmployee = calculateAllComplaintsForThisEmployee(rawData, employee);
+        log.debug("Employee ID {} has {} complaints.", employee, allComplaintsForThisEmployee);
+
+        saveComplaintsSumForThisEmployee(allComplaintsForThisEmployee, employee);
+      } catch (Exception e) {
+        log.error("❌ Error processing complaints for employee ID {}: {}", employee, e.getMessage(), e);
       }
     }
+
+    log.info("✅ Complaints processing completed successfully.");
   }
 
   private List<Complaints> getAllComplaints() {
@@ -66,11 +87,15 @@ public class ComplaintsServiceImpl implements ComplaintsService {
     if (existingRecord != null) {
       existingRecord.setValue(allComplaintsForThisEmployee);
       complaintsSumRepository.save(existingRecord);
+      log.debug("Updated complaint summary for employee ID {} ({} complaints).", employeeId,
+          allComplaintsForThisEmployee);
     } else {
       ComplaintsSum newRecord = new ComplaintsSum();
       newRecord.setEmployeeId(employeeId);
       newRecord.setValue(allComplaintsForThisEmployee);
       complaintsSumRepository.save(newRecord);
+      log.debug("Inserted new complaint summary for employee ID {} ({} complaints).", employeeId,
+          allComplaintsForThisEmployee);
     }
   }
 }

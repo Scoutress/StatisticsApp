@@ -1,11 +1,9 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,169 +12,249 @@ import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.playtime.DailyPlaytime;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDuration;
+import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.DailyPlaytimeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.ProcessedPlaytimeSessionsRepository;
+import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.services.playtime.DailyPlaytimeService;
 
 @Service
 public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
 
-  private static final Logger logger = LoggerFactory.getLogger(SessionDurationServiceImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(DailyPlaytimeServiceImpl.class);
 
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
   private final ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository;
+  private final EmployeeRepository employeeRepository;
 
   public DailyPlaytimeServiceImpl(
       DailyPlaytimeRepository dailyPlaytimeRepository,
-      ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository) {
+      ProcessedPlaytimeSessionsRepository processedPlaytimeSessionsRepository,
+      EmployeeRepository employeeRepository) {
     this.dailyPlaytimeRepository = dailyPlaytimeRepository;
     this.processedPlaytimeSessionsRepository = processedPlaytimeSessionsRepository;
+    this.employeeRepository = employeeRepository;
   }
 
+  // ===============================================================
+  // MAIN PROCESS
+  // ===============================================================
   @Override
   public void handleDailyPlaytime() {
-    List<SessionDuration> allSessions = getSessionDurations();
-    List<DailyPlaytime> dailyPlaytimeData = calculateDailyPlaytime(allSessions);
-    saveCalculatedPlaytime(dailyPlaytimeData);
-  }
+    long start = System.currentTimeMillis();
 
-  private List<SessionDuration> getSessionDurations() {
-    return processedPlaytimeSessionsRepository.findAll();
-  }
+    log.info("=== Starting daily playtime calculation ===");
 
-  private List<DailyPlaytime> calculateDailyPlaytime(List<SessionDuration> sessions) {
-    List<DailyPlaytime> handledDailyPlaytimeData = new ArrayList<>();
+    try {
+      List<Employee> employees = employeeRepository.findAll();
 
-    Set<Short> allEmployeeIds = sessions
-        .stream()
-        .map(SessionDuration::getEmployeeId)
-        .collect(Collectors.toSet());
+      if (employees.isEmpty()) {
+        log.warn("⚠️ No employees found. Exiting early.");
+        return;
+      }
 
-    Set<String> uniqueServers = sessions
-        .stream()
-        .map(SessionDuration::getServer)
-        .collect(Collectors.toSet());
+      List<DailyPlaytime> results = new ArrayList<>();
+      int totalProcessed = 0;
 
-    Set<LocalDate> uniqueDates = sessions
-        .stream()
-        .map(SessionDuration::getDate)
-        .collect(Collectors.toSet());
+      for (Employee employee : employees) {
+        Short employeeId = employee.getId();
+        List<SessionDuration> sessions = processedPlaytimeSessionsRepository.findByEmployeeId(employeeId);
 
-    for (Short employeeId : allEmployeeIds) {
-      for (String server : uniqueServers) {
-        for (LocalDate date : uniqueDates) {
-          int sessionPlaytimeInSec = sessions
-              .stream()
-              .filter(session -> session.getEmployeeId().equals(employeeId))
-              .filter(session -> session.getServer().equals(server))
-              .filter(session -> session.getDate().equals(date))
-              .mapToInt(SessionDuration::getSingleSessionDurationInSec)
-              .sum();
+        if (sessions.isEmpty())
+          continue;
 
-          if (sessionPlaytimeInSec < 0) {
-            throw new IllegalArgumentException("Playtime can not be less than 0!");
-          }
+        Map<String, Double> groupedPlaytime = sessions
+            .stream()
+            .collect(Collectors.groupingBy(
+                s -> s.getServer().trim().toLowerCase() + "|" + s.getDate(),
+                Collectors.summingDouble(SessionDuration::getSingleSessionDurationInSec)));
 
-          double sessionPlaytimeInHours = sessionPlaytimeInSec / 3600.0;
+        for (Map.Entry<String, Double> entry : groupedPlaytime.entrySet()) {
+          try {
+            String[] parts = entry.getKey().split("\\|");
 
-          if (sessionPlaytimeInSec > 0) {
-            DailyPlaytime dailyPlaytimeData = new DailyPlaytime();
-            dailyPlaytimeData.setEmployeeId(employeeId);
-            dailyPlaytimeData.setServer(server);
-            dailyPlaytimeData.setDate(date);
-            dailyPlaytimeData.setTimeInHours(sessionPlaytimeInHours);
-            handledDailyPlaytimeData.add(dailyPlaytimeData);
+            if (parts.length < 2) {
+              log.warn("⚠️ Invalid grouped key format for employee {}: {}", employeeId, entry.getKey());
+              continue;
+            }
+
+            String server = parts[0];
+            LocalDate date = safeParseDate(parts[1]);
+
+            if (date == null) {
+              log.warn("⚠️ Skipping invalid date '{}' for employee {}", parts[1], employeeId);
+              continue;
+            }
+
+            double hours = entry.getValue() / 3600.0;
+
+            if (hours <= 0)
+              continue;
+
+            DailyPlaytime dp = new DailyPlaytime();
+            dp.setEmployeeId(employeeId);
+            dp.setServer(server);
+            dp.setDate(date);
+            dp.setTimeInHours(hours);
+            results.add(dp);
+
+          } catch (Exception e) {
+            log.error("❌ Error processing playtime for employee {}: {}", employeeId, e.getMessage());
           }
         }
+
+        totalProcessed++;
+        if (totalProcessed % 5 == 0 || totalProcessed == employees.size()) {
+
+          int percent = (int) ((totalProcessed / (double) employees.size()) * 100);
+
+          log.info("Progress: processed {}/{} employees ({}%)", totalProcessed, employees.size(), percent);
+        }
+      }
+
+      if (results.isEmpty()) {
+        log.warn("⚠️ No valid playtime data calculated.");
+        return;
+      }
+
+      results.sort(Comparator.comparing(DailyPlaytime::getDate));
+      saveCalculatedPlaytime(results);
+
+      long elapsed = System.currentTimeMillis() - start;
+
+      log.info("✅ Daily playtime calculation completed in {} ms ({} s). Total saved records: {}",
+          elapsed, elapsed / 1000.0, results.size());
+
+    } catch (Exception e) {
+      log.error("❌ Critical error in handleDailyPlaytime: {}", e.getMessage(), e);
+    }
+  }
+
+  // ===============================================================
+  // SAFE DATE PARSER
+  // ===============================================================
+  private LocalDate safeParseDate(String input) {
+    if (input == null || input.isBlank())
+      return null;
+
+    try {
+      if (input.matches("\\d{4}-\\d{2}-\\d{2}")) {
+        return LocalDate.parse(input);
+      }
+      if (input.matches("\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}:\\d{2}")) {
+        String normalized = input.replace(' ', 'T');
+        return LocalDateTime.parse(normalized, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate();
+      }
+      if (input.matches("\\d{4}")) {
+        return LocalDate.of(Integer.parseInt(input), 1, 1);
+      }
+      if (input.matches("\\d{4}-\\d{2}")) {
+        String fullDate = input + "-01";
+        return LocalDate.parse(fullDate);
+      }
+
+      log.warn("⚠️ Unrecognized date format: {}", input);
+      return null;
+
+    } catch (Exception e) {
+      log.error("❌ Failed to parse date '{}': {}", input, e.getMessage());
+      return null;
+    }
+  }
+
+  // ===============================================================
+  // SAVE RESULTS
+  // ===============================================================
+  private void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
+    log.info("Saving {} daily playtime records...", dailyPlaytimeData.size());
+    int updated = 0, inserted = 0;
+
+    for (DailyPlaytime playtime : dailyPlaytimeData) {
+      try {
+        DailyPlaytime existing = dailyPlaytimeRepository.findByEmployeeIdAndDateAndServer(
+            playtime.getEmployeeId(), playtime.getDate(), playtime.getServer());
+
+        if (existing != null) {
+          if (!existing.getTimeInHours().equals(playtime.getTimeInHours())) {
+            existing.setTimeInHours(playtime.getTimeInHours());
+            dailyPlaytimeRepository.save(existing);
+            updated++;
+          }
+        } else {
+          dailyPlaytimeRepository.save(playtime);
+          inserted++;
+        }
+      } catch (Exception e) {
+        log.error("Error saving playtime for employee {} on {}: {}",
+            playtime.getEmployeeId(), playtime.getDate(), e.getMessage());
       }
     }
 
-    handledDailyPlaytimeData.sort(Comparator.comparing(DailyPlaytime::getDate));
-
-    return handledDailyPlaytimeData;
+    log.info("✅ Saved playtime records — inserted: {}, updated: {}", inserted, updated);
   }
 
-  private void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
-    dailyPlaytimeData.forEach(dailyPlaytime -> {
-      DailyPlaytime existingPlaytime = dailyPlaytimeRepository.findByEmployeeIdAndDateAndServer(
-          dailyPlaytime.getEmployeeId(),
-          dailyPlaytime.getDate(),
-          dailyPlaytime.getServer());
-
-      if (existingPlaytime != null) {
-        if (!existingPlaytime.getTimeInHours().equals(dailyPlaytime.getTimeInHours())) {
-          existingPlaytime.setTimeInHours(dailyPlaytime.getTimeInHours());
-          dailyPlaytimeRepository.save(existingPlaytime);
-        }
-      } else {
-        dailyPlaytimeRepository.save(dailyPlaytime);
-      }
-    });
-  }
-
+  // ===============================================================
+  // DUPLICATES REMOVAL
+  // ===============================================================
   @Override
   public void removeDuplicateDailyPlaytimes() {
-    List<DailyPlaytime> allDailyPlaytimes = getDailyPlaytimes();
-    Map<String, List<DailyPlaytime>> groupedDailyPlaytimes = groupDailyPlaytimesByUniqueFields(allDailyPlaytimes);
-    removeDuplicateDailyPlaytimes(groupedDailyPlaytimes);
-  }
+    long start = System.currentTimeMillis();
+    log.info("=== Starting duplicate removal for DailyPlaytime ===");
 
-  private List<DailyPlaytime> getDailyPlaytimes() {
-    return dailyPlaytimeRepository.findAll();
-  }
-
-  private Map<String, List<DailyPlaytime>> groupDailyPlaytimesByUniqueFields(List<DailyPlaytime> allDailyPlaytimes) {
-    return allDailyPlaytimes
-        .stream()
-        .collect(Collectors.groupingBy(playtime -> playtime.getEmployeeId() + "-" +
-            playtime.getTimeInHours() + "-" +
-            playtime.getDate() + "-" +
-            playtime.getServer()));
-  }
-
-  private void removeDuplicateDailyPlaytimes(Map<String, List<DailyPlaytime>> groupedDailyPlaytimes) {
-    int totalDuplicatesRemoved = 0;
-
-    for (List<DailyPlaytime> group : groupedDailyPlaytimes.values()) {
-      if (group.size() > 1) {
-        totalDuplicatesRemoved += group.size() - 1;
-
-        logger.info("Removing {} duplicates from group: {}", group.size() - 1, group.get(0));
-
-        group.subList(1, group.size()).forEach(session -> {
-          logger.debug("Removing session: {}", session);
-          dailyPlaytimeRepository.delete(session);
-        });
+    try {
+      List<DailyPlaytime> all = dailyPlaytimeRepository.findAll();
+      if (all.isEmpty()) {
+        log.info("No playtime data found, skipping duplicate removal.");
+        return;
       }
-    }
 
-    logger.info("Total duplicates removed: {}", totalDuplicatesRemoved);
+      Map<String, List<DailyPlaytime>> grouped = all
+          .stream()
+          .collect(Collectors.groupingBy(
+              p -> p.getEmployeeId()
+                  + "|"
+                  + p.getServer().trim().toLowerCase()
+                  + "|"
+                  + p.getDate()
+                  + "|"
+                  + p.getTimeInHours()));
+
+      List<DailyPlaytime> toRemove = new ArrayList<>();
+      int duplicates = 0;
+
+      for (List<DailyPlaytime> group : grouped.values()) {
+        if (group.size() > 1) {
+          duplicates += group.size() - 1;
+          toRemove.addAll(group.subList(1, group.size()));
+        }
+      }
+
+      if (!toRemove.isEmpty()) {
+        dailyPlaytimeRepository.deleteAll(toRemove);
+
+        log.info("Removed {} duplicate playtime records.", duplicates);
+      } else {
+        log.info("No duplicates found.");
+      }
+
+      long elapsed = System.currentTimeMillis() - start;
+      log.info("✅ Duplicate cleanup finished in {} ms ({} s).", elapsed, elapsed / 1000.0);
+
+    } catch (Exception e) {
+      log.error("❌ Error removing duplicates: {}", e.getMessage(), e);
+    }
   }
 
+  // ===============================================================
+  // METRICS
+  // ===============================================================
   @Override
   public Double getSumOfPlaytimeByEmployeeIdAndDuration(Short employeeId, Short days) {
-    List<DailyPlaytime> rawPlaytimeData = getRawPlaytimeData();
-    List<DailyPlaytime> playtimeDataThisEmployee = getPlaytimeDataForThisEmployee(rawPlaytimeData, employeeId);
-
-    return calculatePlaytime(playtimeDataThisEmployee, days);
-  }
-
-  private List<DailyPlaytime> getRawPlaytimeData() {
-    return dailyPlaytimeRepository.findAll();
-  }
-
-  private List<DailyPlaytime> getPlaytimeDataForThisEmployee(
-      List<DailyPlaytime> rawPlaytimeData, Short employeeId) {
-    return rawPlaytimeData
+    return dailyPlaytimeRepository
+        .findAll()
         .stream()
-        .filter(playtimeData -> playtimeData.getEmployeeId().equals(employeeId))
-        .collect(Collectors.toList());
-  }
-
-  private Double calculatePlaytime(List<DailyPlaytime> playtimeData, Short days) {
-    return playtimeData
-        .stream()
-        .filter(data -> data.getDate().isAfter(LocalDate.now().minusDays(days)))
+        .filter(p -> p.getEmployeeId().equals(employeeId))
+        .filter(p -> p.getDate().isAfter(LocalDate.now().minusDays(days)))
         .mapToDouble(DailyPlaytime::getTimeInHours)
         .sum();
   }

@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,6 +30,8 @@ import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordBotService
 
 @Service
 public class DiscordBotServiceImpl implements DiscordBotService {
+
+  private static final Logger log = LoggerFactory.getLogger(DiscordBotServiceImpl.class);
 
   private final DcBotConfig dcBotConfig;
   private final RestTemplate restTemplate;
@@ -51,25 +55,32 @@ public class DiscordBotServiceImpl implements DiscordBotService {
       LocalDate todaysDate,
       List<Short> employeeIdsWithoutData) {
 
+    log.info("=== Starting Discord bot message count requests ===");
+
     List<Short> allEmployeeIds = getAllEmployeeIds(employeeCodesData);
+    log.debug("Found {} employees with Discord codes.", allEmployeeIds.size());
 
     for (Short employeeId : allEmployeeIds) {
       Long dcUserId = getDiscordUserIdForThisEmployee(employeeCodesData, employeeId);
 
       if (employeeIdsWithoutData.contains(employeeId)) {
-
         LocalDate joinDate = checkEmployeeWhenStartedWorking(employeeId);
-        List<LocalDate> allDatesFromJoinTillTodays = getAllDatesBetween(
-            joinDate, todaysDate);
-        processDiscordMessagesCount(dcUserId, allDatesFromJoinTillTodays);
-
+        if (joinDate == null) {
+          log.warn("Skipping employee ID {} – join date not found.", employeeId);
+          continue;
+        }
+        List<LocalDate> allDates = getAllDatesBetween(joinDate, todaysDate);
+        log.debug("Employee {} missing data; fetching {} days of messages.", employeeId, allDates.size());
+        processDiscordMessagesCount(dcUserId, allDates);
       } else {
-
-        List<LocalDate> allDatesFromLatestTillTodays = getAllDatesBetween(
-            latestDateFromDcMsgsData, todaysDate);
-        processDiscordMessagesCount(dcUserId, allDatesFromLatestTillTodays);
+        List<LocalDate> allDates = getAllDatesBetween(latestDateFromDcMsgsData, todaysDate);
+        log.debug("Employee {} updating data from {} to {} ({} days).",
+            employeeId, latestDateFromDcMsgsData, todaysDate, allDates.size());
+        processDiscordMessagesCount(dcUserId, allDates);
       }
     }
+
+    log.info("✅ Finished Discord bot message count requests.");
   }
 
   private List<Short> getAllEmployeeIds(List<EmployeeCodes> employeeCodesData) {
@@ -81,20 +92,14 @@ public class DiscordBotServiceImpl implements DiscordBotService {
         .toList();
   }
 
-  private List<LocalDate> getAllDatesBetween(
-      LocalDate latestDate, LocalDate todaysDate) {
-
-    return Stream
-        .iterate(
-            latestDate.plusDays(1),
-            date -> date.plusDays(1))
+  private List<LocalDate> getAllDatesBetween(LocalDate latestDate, LocalDate todaysDate) {
+    return Stream.iterate(latestDate.plusDays(1), date -> date.plusDays(1))
         .limit(java.time.temporal.ChronoUnit.DAYS.between(latestDate, todaysDate.minusDays(1)))
         .collect(Collectors.toList());
   }
 
   private LocalDate checkEmployeeWhenStartedWorking(Short employeeId) {
-    return employeeRepository
-        .findAll()
+    return employeeRepository.findAll()
         .stream()
         .filter(employee -> employee.getId().equals(employeeId))
         .map(Employee::getJoinDate)
@@ -102,10 +107,7 @@ public class DiscordBotServiceImpl implements DiscordBotService {
         .orElse(null);
   }
 
-  private Long getDiscordUserIdForThisEmployee(
-      List<EmployeeCodes> employeeCodesData,
-      Short employeeId) {
-
+  private Long getDiscordUserIdForThisEmployee(List<EmployeeCodes> employeeCodesData, Short employeeId) {
     return employeeCodesData
         .stream()
         .filter(employeeCodes -> employeeCodes.getEmployeeId().equals(employeeId))
@@ -118,7 +120,7 @@ public class DiscordBotServiceImpl implements DiscordBotService {
     String botApiUrl = dcBotConfig.getDcBotApi();
 
     if (botApiUrl == null || !botApiUrl.startsWith("http")) {
-      System.err.println("Invalid bot API URL: " + botApiUrl);
+      log.error("Invalid bot API URL: {}", botApiUrl);
       return;
     }
 
@@ -138,12 +140,12 @@ public class DiscordBotServiceImpl implements DiscordBotService {
         ResponseEntity<String> response = restTemplate.postForEntity(botApiUrl, requestEntity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-          System.out.println("Response: " + response.getBody());
+          log.debug("✅ [{}] Discord API response for user {}: {}", date, dcUserId, response.getBody());
         } else {
-          System.err.println("Error: " + response.getBody());
+          log.warn("⚠️ [{}] Discord API returned error for user {}: {}", date, dcUserId, response.getBody());
         }
       } catch (RestClientException e) {
-        System.err.println("Error making POST request: " + e.getMessage());
+        log.error("❌ [{}] Failed to send POST to Discord API for user {}: {}", date, dcUserId, e.getMessage());
       }
     }
   }
@@ -151,29 +153,23 @@ public class DiscordBotServiceImpl implements DiscordBotService {
   @Override
   public void checkOrStartDiscordBot() {
     Path pidPath = Path.of(PID_FILE_PATH);
-
     try {
       if (Files.exists(pidPath)) {
         String pidStr = Files.readString(pidPath).trim();
-
         if (!pidStr.isEmpty()) {
           long pid = Long.parseLong(pidStr);
-          boolean isRunning = isProcessRunning(pid);
-
-          if (isRunning) {
-            System.out.println("Bot is already running with PID: " + pid);
+          if (isProcessRunning(pid)) {
+            log.info("Bot is already running with PID: {}", pid);
             return;
           } else {
-            System.out.println("Found stale PID. Bot not running. Restarting...");
+            log.warn("Found stale PID {} – bot not running. Restarting...", pid);
             Files.delete(pidPath);
           }
         }
       }
-
       startBot();
-
     } catch (IOException | NumberFormatException e) {
-      System.err.println("Failed to verify or start bot: " + e.getMessage());
+      log.error("Failed to verify or start bot: {}", e.getMessage(), e);
     }
   }
 
@@ -182,10 +178,12 @@ public class DiscordBotServiceImpl implements DiscordBotService {
       ProcessHandle handle = ProcessHandle.of(pid).orElse(null);
       return handle != null && handle.isAlive();
     } catch (Exception e) {
+      log.error("Error checking if process is running for PID {}: {}", pid, e.getMessage());
       return false;
     }
   }
 
+  @Override
   public void startBot() {
     String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
     ProcessBuilder processBuilder;
@@ -205,9 +203,9 @@ public class DiscordBotServiceImpl implements DiscordBotService {
       long pid = botProcess.pid();
       Files.writeString(Path.of(PID_FILE_PATH), Long.toString(pid));
 
-      System.out.println("Bot started with PID: " + pid);
+      log.info("🤖 Discord bot started successfully (PID: {}).", pid);
     } catch (IOException | UnsupportedOperationException e) {
-      System.err.println("Failed to start bot: " + e.getMessage());
+      log.error("❌ Failed to start bot: {}", e.getMessage(), e);
     }
   }
 
@@ -215,11 +213,14 @@ public class DiscordBotServiceImpl implements DiscordBotService {
   public void sleepForHalfMin() {
     try {
       Thread.sleep(30000);
+      log.debug("⏱ Slept for 30 seconds.");
     } catch (InterruptedException e) {
-      System.err.println(e);
+      log.error("Sleep interrupted: {}", e.getMessage());
+      Thread.currentThread().interrupt();
     }
   }
 
+  @Override
   public void stopBot() {
     try {
       Path pidPath = Path.of(PID_FILE_PATH);
@@ -228,22 +229,19 @@ public class DiscordBotServiceImpl implements DiscordBotService {
         long pid = Long.parseLong(pidStr);
 
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-        ProcessBuilder killBuilder;
-
-        if (os.contains("win")) {
-          killBuilder = new ProcessBuilder("taskkill", "/PID", String.valueOf(pid), "/F");
-        } else {
-          killBuilder = new ProcessBuilder("kill", "-9", String.valueOf(pid));
-        }
+        ProcessBuilder killBuilder = os.contains("win")
+            ? new ProcessBuilder("taskkill", "/PID", String.valueOf(pid), "/F")
+            : new ProcessBuilder("kill", "-9", String.valueOf(pid));
 
         killBuilder.start();
         Files.deleteIfExists(pidPath);
-        System.out.println("Bot stopped (PID: " + pid + ")");
+
+        log.info("🛑 Bot stopped (PID: {}).", pid);
       } else {
-        System.out.println("PID file not found. Bot may not have been started.");
+        log.warn("PID file not found – bot may not be running.");
       }
     } catch (IOException | NumberFormatException e) {
-      System.err.println("Failed to stop bot: " + e.getMessage());
+      log.error("❌ Failed to stop bot: {}", e.getMessage(), e);
     }
   }
 }

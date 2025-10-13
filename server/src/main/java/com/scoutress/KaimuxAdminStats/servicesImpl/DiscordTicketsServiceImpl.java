@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.scoutress.KaimuxAdminStats.entity.discordTickets.DailyDiscordTickets;
@@ -26,6 +29,9 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class DiscordTicketsServiceImpl implements DiscordTicketsService {
+
+  private static final Logger log = LoggerFactory.getLogger(DiscordTicketsServiceImpl.class);
+  private static final int BATCH_SIZE = 1000;
 
   private final DiscordTicketsReactionsRepository discordTicketsReactionsRepository;
   private final EmployeeCodesRepository employeeCodesRepository;
@@ -51,182 +57,211 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
 
   @Override
   public void processDiscordTickets() {
+    long startTime = System.currentTimeMillis();
+    log.info("=== [START] Discord tickets data processing ===");
+
     removeOldProcessedDcTicketsData();
 
-    List<EmployeeCodes> employeeCodes = extractEmployeeCodes();
-    List<Short> allEmployeeIds = getAllEmployeeIdsFromEmployeeCodes(employeeCodes);
-    List<DiscordTicketsRawData> allDcTicketsRawData = getDiscordTicketsRawData();
+    List<EmployeeCodes> employeeCodes = employeeCodesRepository.findAll();
+
+    List<Short> employeeIds = employeeCodes
+        .stream()
+        .map(EmployeeCodes::getEmployeeId)
+        .distinct()
+        .toList();
+
+    List<DiscordTicketsRawData> allRawData = discordTicketsRawDataRepository.findAll();
+
+    if (employeeIds.isEmpty()) {
+      log.warn("⚠ No employees found — skipping Discord tickets processing.");
+      return;
+    }
 
     List<LocalDate> allLatestDates = new ArrayList<>();
+    for (Short employeeId : employeeIds) {
+      try {
+        Short employeeCode = getEmployeeCodeByEmployeeId(employeeCodes, employeeId);
+        LocalDate latestDateForEmployee = determineLatestDateForEmployee(employeeId, employeeCode, allRawData);
 
-    for (Short employeeId : allEmployeeIds) {
-      Short employeeCode = getEmployeeCodeByEmployeeId(employeeCodes, employeeId);
-      boolean hasEmployeeData = hasEmployeeDcTicketsData(employeeCode, allDcTicketsRawData);
-
-      LocalDate latestDateForEmployee = null;
-
-      if (hasEmployeeData) {
-        LocalDateTime latestDateTime = getLatestDateFromThisEmployeeData(employeeCode, allDcTicketsRawData);
-        latestDateForEmployee = latestDateTime != null ? latestDateTime.toLocalDate() : null;
-      } else {
-        LocalDate latestDateRaw = getJoinDateOfEmployeeWithoutData(employeeId);
-
-        if (latestDateRaw != null) {
-          latestDateForEmployee = latestDateRaw.minusDays(1);
-        } else {
-          System.out.println("ALERT: Skipping employee " + employeeId + " because no tickets and no join date");
+        if (latestDateForEmployee != null) {
+          allLatestDates.add(latestDateForEmployee);
         }
-      }
-
-      if (latestDateForEmployee != null) {
-        allLatestDates.add(latestDateForEmployee);
+      } catch (Exception e) {
+        log.error("❌ Error processing employee ID {}: {}", employeeId, e.getMessage(), e);
       }
     }
 
-    LocalDate oldestDate = allLatestDates
-        .stream()
-        .min(LocalDate::compareTo)
-        .orElse(LocalDate.now());
+    LocalDate oldestDate = allLatestDates.stream().min(LocalDate::compareTo).orElse(LocalDate.now());
+    log.info("📅 Starting extraction from oldest date: {}", oldestDate);
 
-    System.out.println("Processing Discord tickets from oldest date: " + oldestDate);
     apiDataExtractionServiceImpl.extractDiscordTicketsFromAPI(oldestDate);
     moveDcTicketsReactionsToRawData();
 
     removeDcTicketsRawDataDuplicates();
 
-    List<DiscordTicketsRawData> allDcTicketsRawDataAfterAddedNewData = getDiscordTicketsRawData();
-    processDailyDiscordTickets(allDcTicketsRawDataAfterAddedNewData);
+    List<DiscordTicketsRawData> updatedRawData = discordTicketsRawDataRepository.findAll();
+    processDailyDiscordTickets(updatedRawData);
 
     removeDailyDiscordTicketsDuplicates();
+
+    long totalMs = System.currentTimeMillis() - startTime;
+    log.info("✅ Discord tickets processing completed in {} ms", totalMs);
   }
 
   private void removeOldProcessedDcTicketsData() {
+    log.info("🧹 Clearing temporary reactions table...");
     discordTicketsReactionsRepository.truncateTable();
-  }
-
-  private List<EmployeeCodes> extractEmployeeCodes() {
-    return employeeCodesRepository.findAll();
-  }
-
-  private List<Short> getAllEmployeeIdsFromEmployeeCodes(List<EmployeeCodes> employeeCodes) {
-    return employeeCodes
-        .stream()
-        .map(EmployeeCodes::getEmployeeId)
-        .distinct()
-        .toList();
-  }
-
-  private List<DiscordTicketsRawData> getDiscordTicketsRawData() {
-    return discordTicketsRawDataRepository.findAll();
   }
 
   private Short getEmployeeCodeByEmployeeId(List<EmployeeCodes> employeeCodes, Short employeeId) {
     return employeeCodes
         .stream()
-        .filter(employeeCode -> employeeCode.getEmployeeId().equals(employeeId))
+        .filter(c -> c.getEmployeeId().equals(employeeId))
         .map(EmployeeCodes::getKmxWebApi)
         .findFirst()
         .orElse(null);
   }
 
-  private boolean hasEmployeeDcTicketsData(
-      Short employeeCode, List<DiscordTicketsRawData> allDcTicketsRawData) {
-    return allDcTicketsRawData
-        .stream()
-        .filter(employee -> employee.getDiscordId() != null && employee.getDiscordId().equals(employeeCode.longValue()))
-        .anyMatch(employee -> employee.getDateTime() != null);
-  }
+  private LocalDate determineLatestDateForEmployee(Short employeeId, Short employeeCode,
+      List<DiscordTicketsRawData> allRawData) {
+    if (employeeCode == null)
+      return null;
 
-  private LocalDateTime getLatestDateFromThisEmployeeData(
-      Short employeeCode, List<DiscordTicketsRawData> allDcTicketsRawData) {
-    return allDcTicketsRawData
+    boolean hasData = allRawData
         .stream()
-        .filter(employee -> employee.getDiscordId() != null && employee.getDiscordId().equals(employeeCode.longValue()))
-        .map(DiscordTicketsRawData::getDateTime)
-        .max(LocalDateTime::compareTo)
-        .orElse(null);
-  }
+        .anyMatch(d -> d.getDiscordId() != null && d.getDiscordId().equals(employeeCode.longValue()));
 
-  private LocalDate getJoinDateOfEmployeeWithoutData(Short employeeId) {
-    return employeeRepository
+    if (hasData) {
+      LocalDateTime latestDateTime = allRawData
+          .stream()
+          .filter(d -> d.getDiscordId() != null && d.getDiscordId().equals(employeeCode.longValue()))
+          .map(DiscordTicketsRawData::getDateTime)
+          .filter(Objects::nonNull)
+          .max(LocalDateTime::compareTo)
+          .orElse(null);
+      return latestDateTime != null ? latestDateTime.toLocalDate() : null;
+    }
+
+    LocalDate joinDate = employeeRepository
         .findAll()
         .stream()
-        .filter(employee -> employee.getId().equals(employeeId))
+        .filter(e -> e.getId().equals(employeeId))
         .map(Employee::getJoinDate)
         .findFirst()
         .orElse(null);
+
+    if (joinDate == null) {
+      log.warn("⚠ Employee {} has no join date — skipping.", employeeId);
+      return null;
+    }
+
+    return joinDate.minusDays(1);
   }
 
   private void moveDcTicketsReactionsToRawData() {
-    List<DiscordTicketsReactions> allDcTicketsReactions = discordTicketsReactionsRepository.findAll();
+    List<DiscordTicketsReactions> reactions = discordTicketsReactionsRepository.findAll();
 
-    for (DiscordTicketsReactions reaction : allDcTicketsReactions) {
-      DiscordTicketsRawData rawData = new DiscordTicketsRawData();
-      rawData.setDiscordId(reaction.getDiscordId());
-      rawData.setTicketId(reaction.getTicketId());
-      rawData.setDateTime(reaction.getDateTime());
-      discordTicketsRawDataRepository.save(rawData);
+    if (reactions.isEmpty()) {
+      log.info("No new Discord reactions to move.");
+      return;
     }
+
+    List<DiscordTicketsRawData> batch = new ArrayList<>();
+    for (DiscordTicketsReactions reaction : reactions) {
+      DiscordTicketsRawData raw = new DiscordTicketsRawData();
+      raw.setDiscordId(reaction.getDiscordId());
+      raw.setTicketId(reaction.getTicketId());
+      raw.setDateTime(reaction.getDateTime());
+      batch.add(raw);
+
+      if (batch.size() >= BATCH_SIZE) {
+        discordTicketsRawDataRepository.saveAll(batch);
+        batch.clear();
+      }
+    }
+    if (!batch.isEmpty()) {
+      discordTicketsRawDataRepository.saveAll(batch);
+    }
+
     discordTicketsReactionsRepository.deleteAll();
+    log.info("✅ Moved {} Discord reactions to raw data.", reactions.size());
   }
 
   @Transactional
   private void removeDcTicketsRawDataDuplicates() {
-    List<DiscordTicketsRawData> allDcTicketsRawData = getDiscordTicketsRawData();
+    log.info("🧩 Removing duplicate raw Discord ticket entries...");
+    List<DiscordTicketsRawData> all = discordTicketsRawDataRepository.findAll();
 
-    Map<String, List<DiscordTicketsRawData>> grouped = allDcTicketsRawData
+    Map<String, List<DiscordTicketsRawData>> grouped = all
         .stream()
-        .collect(Collectors.groupingBy(msg -> msg.getDiscordId() + "-" +
-            (msg.getTicketId() != null ? msg.getTicketId() : "null") + "-" +
-            (msg.getDateTime() != null ? msg.getDateTime().toString() : "null")));
+        .collect(Collectors.groupingBy(d -> d.getDiscordId() + "-" +
+            (d.getTicketId() != null ? d.getTicketId() : "null") + "-" +
+            (d.getDateTime() != null ? d.getDateTime().toString() : "null")));
 
-    grouped.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(DiscordTicketsRawData::getId))
-          .skip(1)
-          .forEach(discordTicketsRawDataRepository::delete);
-    });
+    int duplicates = 0;
+    for (List<DiscordTicketsRawData> group : grouped.values()) {
+      if (group.size() > 1) {
+        group.stream()
+            .sorted(Comparator.comparing(DiscordTicketsRawData::getId))
+            .skip(1)
+            .forEach(entry -> {
+              discordTicketsRawDataRepository.delete(entry);
+            });
+        duplicates += group.size() - 1;
+      }
+    }
+
+    log.info("✅ Removed {} duplicate raw Discord entries.", duplicates);
   }
 
   private void processDailyDiscordTickets(List<DiscordTicketsRawData> rawData) {
-    List<Long> allDiscordIds = rawData
+    log.info("📊 Aggregating Discord tickets per day...");
+
+    Map<Long, List<DiscordTicketsRawData>> byDiscordId = rawData
         .stream()
-        .map(DiscordTicketsRawData::getDiscordId)
-        .filter(java.util.Objects::nonNull)
-        .distinct()
-        .toList();
+        .filter(r -> r.getDiscordId() != null && r.getDateTime() != null)
+        .collect(Collectors.groupingBy(DiscordTicketsRawData::getDiscordId));
 
-    for (Long discordId : allDiscordIds) {
-      List<DiscordTicketsRawData> employeeTickets = rawData
-          .stream()
-          .filter(ticket -> ticket.getDiscordId() != null && ticket.getDiscordId().equals(discordId))
-          .toList();
+    int totalEntries = 0;
+    List<DailyDiscordTickets> batch = new ArrayList<>();
 
-      Map<LocalDate, Long> ticketsCountByDate = employeeTickets
-          .stream()
-          .collect(Collectors.groupingBy(
-              ticket -> ticket.getDateTime().toLocalDate(),
-              Collectors.counting()));
-
+    for (Map.Entry<Long, List<DiscordTicketsRawData>> entry : byDiscordId.entrySet()) {
+      Long discordId = entry.getKey();
       Short employeeId = getEmployeeIdByDiscordId(discordId);
       if (employeeId == null)
         continue;
 
-      for (Map.Entry<LocalDate, Long> entry : ticketsCountByDate.entrySet()) {
-        DailyDiscordTickets dailyTicket = new DailyDiscordTickets();
-        dailyTicket.setEmployeeId(employeeId);
-        dailyTicket.setDate(entry.getKey());
-        dailyTicket.setDcTicketCount(entry.getValue().intValue());
-        dailyDiscordTicketsRepository.save(dailyTicket);
+      Map<LocalDate, Long> dailyCounts = entry
+          .getValue()
+          .stream()
+          .collect(Collectors.groupingBy(r -> r.getDateTime().toLocalDate(), Collectors.counting()));
+
+      for (Map.Entry<LocalDate, Long> dateEntry : dailyCounts.entrySet()) {
+        DailyDiscordTickets daily = new DailyDiscordTickets();
+        daily.setEmployeeId(employeeId);
+        daily.setDate(dateEntry.getKey());
+        daily.setDcTicketCount(dateEntry.getValue().intValue());
+        batch.add(daily);
+        totalEntries++;
+
+        if (batch.size() >= BATCH_SIZE) {
+          dailyDiscordTicketsRepository.saveAll(batch);
+          batch.clear();
+        }
       }
     }
+
+    if (!batch.isEmpty())
+      dailyDiscordTicketsRepository.saveAll(batch);
+    log.info("✅ Created {} daily Discord ticket records.", totalEntries);
   }
 
   private Short getEmployeeIdByDiscordId(Long discordId) {
     return employeeCodesRepository
         .findAll()
         .stream()
-        .filter(code -> code.getDiscordUserId() != null && code.getKmxWebApi().longValue() == discordId.longValue())
+        .filter(code -> code.getDiscordUserId() != null &&
+            code.getKmxWebApi().longValue() == discordId.longValue())
         .map(EmployeeCodes::getEmployeeId)
         .findFirst()
         .orElse(null);
@@ -234,19 +269,29 @@ public class DiscordTicketsServiceImpl implements DiscordTicketsService {
 
   @Transactional
   private void removeDailyDiscordTicketsDuplicates() {
-    List<DailyDiscordTickets> allDailyDiscordTickets = dailyDiscordTicketsRepository.findAll();
+    log.info("🧩 Removing duplicate daily Discord ticket entries...");
+    List<DailyDiscordTickets> all = dailyDiscordTicketsRepository.findAll();
 
-    Map<String, List<DailyDiscordTickets>> grouped = allDailyDiscordTickets
+    Map<String, List<DailyDiscordTickets>> grouped = all
         .stream()
-        .collect(Collectors.groupingBy(msg -> msg.getEmployeeId() + "-" +
-            (msg.getDate() != null ? msg.getDate().toString() : "null") + "-" +
-            (msg.getDcTicketCount() != null ? msg.getDcTicketCount().toString() : "null")));
+        .collect(Collectors.groupingBy(d -> d.getEmployeeId() + "-" +
+            (d.getDate() != null ? d.getDate() : "null") + "-" +
+            (d.getDcTicketCount() != null ? d.getDcTicketCount() : "null")));
 
-    grouped.forEach((key, messages) -> {
-      messages.stream()
-          .sorted(Comparator.comparing(DailyDiscordTickets::getId))
-          .skip(1)
-          .forEach(dailyDiscordTicketsRepository::delete);
-    });
+    int duplicates = 0;
+    for (List<DailyDiscordTickets> group : grouped.values()) {
+      if (group.size() > 1) {
+        group
+            .stream()
+            .sorted(Comparator.comparing(DailyDiscordTickets::getId))
+            .skip(1)
+            .forEach(entry -> {
+              dailyDiscordTicketsRepository.delete(entry);
+            });
+        duplicates += group.size() - 1;
+      }
+    }
+
+    log.info("✅ Removed {} duplicate daily ticket entries.", duplicates);
   }
 }

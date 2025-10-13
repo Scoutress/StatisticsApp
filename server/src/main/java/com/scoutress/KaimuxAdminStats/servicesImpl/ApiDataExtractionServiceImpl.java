@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -26,6 +28,9 @@ import com.scoutress.KaimuxAdminStats.services.ApiDataExtractionService;
 @Service
 public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
 
+  private static final Logger log = LoggerFactory.getLogger(ApiDataExtractionServiceImpl.class);
+  private static final int REQUEST_DELAY_MS = 2000;
+
   private final RestTemplate restTemplate;
   private final KaimuxWebsiteConfig kaimuxWebsiteConfig;
   private final MinecraftTicketsAnswersRepository minecraftTicketsAnswersRepository;
@@ -42,26 +47,42 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
     this.discordTicketsReactionsRepository = discordTicketsReactionsRepository;
   }
 
+  // ===========================================================
+  // MINECRAFT TICKETS EXTRACTION
+  // ===========================================================
+
   @Override
   public void extractMinecraftTicketsFromAPI(LocalDate newestDateFromDailyMcTickets) {
+    log.info("=== [START] Fetching Minecraft tickets from API ===");
+    long start = System.currentTimeMillis();
+
     fetchAndSaveMcTicketsData(1, newestDateFromDailyMcTickets);
+
+    log.info("✅ Minecraft ticket extraction completed in {} ms", System.currentTimeMillis() - start);
   }
 
   private void fetchAndSaveMcTicketsData(int level, LocalDate newestDateFromDailyMcTickets) {
     try {
+      log.info("Fetching Minecraft ticket batch level {}", level);
       String jsonData = fetchDataFromMcTicketsApi(level);
-      if (!isMcTicketsDataEmpty(jsonData)) {
-        boolean moreData = saveMcTicketsDataToDatabase(jsonData, newestDateFromDailyMcTickets);
-        if (moreData) {
-          Thread.sleep(2000);
-          fetchAndSaveMcTicketsData(level + 1, newestDateFromDailyMcTickets);
-        }
+
+      if (isJsonDataEmpty(jsonData)) {
+        log.info("No more Minecraft ticket data at level {}", level);
+        return;
       }
+
+      boolean hasNewerData = saveMcTicketsDataToDatabase(jsonData, newestDateFromDailyMcTickets, level);
+
+      if (hasNewerData) {
+        Thread.sleep(REQUEST_DELAY_MS);
+        fetchAndSaveMcTicketsData(level + 1, newestDateFromDailyMcTickets);
+      }
+
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      System.err.println("Thread was interrupted: " + e);
+      log.error("Thread interrupted while processing Minecraft tickets: {}", e.getMessage());
     } catch (JSONException | HttpClientErrorException e) {
-      System.err.println("Error fetching data for level " + level + ": " + e);
+      log.error("Error fetching Minecraft tickets (level {}): {}", level, e.getMessage(), e);
     }
   }
 
@@ -77,75 +98,73 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
 
     HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
-    try {
-      ResponseEntity<String> response = restTemplate.exchange(
-          url + level,
-          HttpMethod.POST,
-          entity,
-          String.class);
-      return response.getBody();
-    } catch (HttpClientErrorException e) {
-      System.err.println("Error during API request for level " + level + ": " + e);
-      throw e;
-    }
+    ResponseEntity<String> response = restTemplate.exchange(url + level, HttpMethod.POST, entity, String.class);
+    return response.getBody();
   }
 
-  private boolean isMcTicketsDataEmpty(String jsonData) throws JSONException {
-    JSONObject jsonObject = new JSONObject(jsonData);
-    JSONArray dataArray = jsonObject.getJSONArray("data");
-    return dataArray.length() == 0;
-  }
-
-  private boolean saveMcTicketsDataToDatabase(String jsonData, LocalDate newestDateFromDailyMcTickets)
+  private boolean saveMcTicketsDataToDatabase(String jsonData, LocalDate newestDateFromDailyMcTickets, int level)
       throws JSONException {
+
     JSONObject jsonObject = new JSONObject(jsonData);
     JSONArray dataArray = jsonObject.getJSONArray("data");
-    boolean moreData = true;
+    boolean hasNewerData = false;
+    int savedCount = 0;
 
     for (int i = 0; i < dataArray.length(); i++) {
       JSONObject item = dataArray.getJSONObject(i);
-      LocalDateTime dateTime = parseMcTicketsDate(item.getString("created_at"));
+      LocalDateTime dateTime = parseApiDate(item.getString("created_at"));
       LocalDate date = dateTime.toLocalDate();
 
-      if (!date.isAfter(newestDateFromDailyMcTickets)) {
-        moreData = false;
-        break;
+      if (date.isAfter(newestDateFromDailyMcTickets)) {
+        hasNewerData = true;
+        MinecraftTicketsAnswers entity = new MinecraftTicketsAnswers();
+        entity.setKmxWebApiMcTickets((short) item.getInt("player_id"));
+        entity.setDateTime(dateTime);
+        minecraftTicketsAnswersRepository.save(entity);
+        savedCount++;
       }
-
-      MinecraftTicketsAnswers entity = new MinecraftTicketsAnswers();
-      entity.setKmxWebApiMcTickets((short) item.getInt("player_id"));
-      entity.setDateTime(dateTime);
-
-      minecraftTicketsAnswersRepository.save(entity);
     }
 
-    return moreData;
+    log.info("Saved {} new Minecraft ticket entries (batch level {})", savedCount, level);
+    return hasNewerData;
   }
 
-  private LocalDateTime parseMcTicketsDate(String dateStr) {
-    return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME);
-  }
+  // ===========================================================
+  // DISCORD TICKETS EXTRACTION
+  // ===========================================================
 
   @Override
   public void extractDiscordTicketsFromAPI(LocalDate newestDateFromDcTicketsRawData) {
+    log.info("=== [START] Fetching Discord tickets from API ===");
+    long start = System.currentTimeMillis();
+
     fetchAndSaveDcTicketsData(1, newestDateFromDcTicketsRawData);
+
+    log.info("✅ Discord ticket extraction completed in {} ms", System.currentTimeMillis() - start);
   }
 
   private void fetchAndSaveDcTicketsData(int level, LocalDate newestDateFromDcTicketsRawData) {
     try {
+      log.info("Fetching Discord ticket batch level {}", level);
       String jsonData = fetchDataFromDcTicketsApi(level);
-      if (!isDcTicketsDataEmpty(jsonData)) {
-        boolean moreData = saveDcTicketsDataToDatabase(jsonData, newestDateFromDcTicketsRawData);
-        if (moreData) {
-          Thread.sleep(2000);
-          fetchAndSaveDcTicketsData(level + 1, newestDateFromDcTicketsRawData);
-        }
+
+      if (isJsonDataEmpty(jsonData)) {
+        log.info("No more Discord ticket data at level {}", level);
+        return;
       }
+
+      boolean hasNewerData = saveDcTicketsDataToDatabase(jsonData, newestDateFromDcTicketsRawData, level);
+
+      if (hasNewerData) {
+        Thread.sleep(REQUEST_DELAY_MS);
+        fetchAndSaveDcTicketsData(level + 1, newestDateFromDcTicketsRawData);
+      }
+
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      System.err.println("Thread was interrupted: " + e);
+      log.error("Thread interrupted while processing Discord tickets: {}", e.getMessage());
     } catch (JSONException | HttpClientErrorException e) {
-      System.err.println("Error fetching data for level " + level + ": " + e);
+      log.error("Error fetching Discord tickets (level {}): {}", level, e.getMessage(), e);
     }
   }
 
@@ -161,53 +180,63 @@ public class ApiDataExtractionServiceImpl implements ApiDataExtractionService {
 
     HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
-    try {
-      ResponseEntity<String> response = restTemplate.exchange(
-          url + level,
-          HttpMethod.POST,
-          entity,
-          String.class);
-      return response.getBody();
-    } catch (HttpClientErrorException e) {
-      System.err.println("Error during API request for level " + level + ": " + e);
-      throw e;
-    }
+    ResponseEntity<String> response = restTemplate.exchange(url + level, HttpMethod.POST, entity, String.class);
+    return response.getBody();
   }
 
-  private boolean isDcTicketsDataEmpty(String jsonData) throws JSONException {
-    JSONObject jsonObject = new JSONObject(jsonData);
-    JSONArray dataArray = jsonObject.getJSONArray("data");
-    return dataArray.length() == 0;
-  }
-
-  private boolean saveDcTicketsDataToDatabase(String jsonData, LocalDate newestDateFromDailyDcTickets)
+  private boolean saveDcTicketsDataToDatabase(String jsonData, LocalDate newestDateFromDailyDcTickets, int level)
       throws JSONException {
+
     JSONObject jsonObject = new JSONObject(jsonData);
     JSONArray dataArray = jsonObject.getJSONArray("data");
-    boolean moreData = true;
+    boolean hasNewerData = false;
+    int savedCount = 0;
 
     for (int i = 0; i < dataArray.length(); i++) {
       JSONObject item = dataArray.getJSONObject(i);
-      LocalDateTime dateTime = parseDcTicketsDate(item.getString("created_at"));
+      LocalDateTime dateTime = parseApiDate(item.getString("created_at"));
       LocalDate date = dateTime.toLocalDate();
 
-      if (!date.isAfter(newestDateFromDailyDcTickets)) {
-        moreData = false;
-        break;
+      if (date.isAfter(newestDateFromDailyDcTickets)) {
+        hasNewerData = true;
+        DiscordTicketsReactions entity = new DiscordTicketsReactions();
+        entity.setDiscordId(item.getLong("player_id"));
+        entity.setTicketId(item.getString("ticket_id"));
+        entity.setDateTime(dateTime);
+        discordTicketsReactionsRepository.save(entity);
+        savedCount++;
       }
-
-      DiscordTicketsReactions entity = new DiscordTicketsReactions();
-      entity.setDiscordId(item.getLong("player_id"));
-      entity.setTicketId(item.getString("ticket_id"));
-      entity.setDateTime(dateTime);
-
-      discordTicketsReactionsRepository.save(entity);
     }
 
-    return moreData;
+    log.info("Saved {} new Discord ticket entries (batch level {})", savedCount, level);
+    return hasNewerData;
   }
 
-  private LocalDateTime parseDcTicketsDate(String dateStr) {
+  // ===========================================================
+  // COMMON UTILITIES
+  // ===========================================================
+
+  private LocalDateTime parseApiDate(String dateStr) {
     return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME);
+  }
+
+  private boolean isJsonDataEmpty(String jsonData) {
+    if (jsonData == null || jsonData.isBlank()) {
+      return true;
+    }
+
+    try {
+      JSONObject jsonObject = new JSONObject(jsonData);
+      if (!jsonObject.has("data")) {
+        return true;
+      }
+
+      JSONArray dataArray = jsonObject.getJSONArray("data");
+      return dataArray.length() == 0;
+
+    } catch (JSONException e) {
+      log.warn("⚠️ Invalid JSON format while checking API data: {}", e.getMessage());
+      return true;
+    }
   }
 }

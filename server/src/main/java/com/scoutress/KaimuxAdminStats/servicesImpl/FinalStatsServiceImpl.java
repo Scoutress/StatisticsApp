@@ -1,11 +1,17 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scoutress.KaimuxAdminStats.entity.FinalStats;
 import com.scoutress.KaimuxAdminStats.entity.Recommendations;
@@ -31,6 +37,8 @@ import com.scoutress.KaimuxAdminStats.services.FinalStatsService;
 
 @Service
 public class FinalStatsServiceImpl implements FinalStatsService {
+
+  private static final Logger log = LoggerFactory.getLogger(FinalStatsServiceImpl.class);
 
   private final EmployeeRepository employeeRepository;
   private final AnnualPlaytimeRepository annualPlaytimeRepository;
@@ -67,271 +75,86 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   }
 
   @Override
+  @Transactional
   public void handleFinalStats() {
-    List<Employee> rawEmployeesData = getRawEmployeesData();
-    List<AnnualPlaytime> rawAnnualPlaytimeData = getRawAnnualPlaytimeData();
-    List<AverageDailyMinecraftTickets> rawMinecraftTicketsData = getRawMinecraftTicketsData();
-    List<AverageMinecraftTicketsCompared> rawMinecraftTicketsComparedData = getRawMinecraftTicketsComparedData();
-    List<AverageDailyDiscordMessages> rawDiscordMessagesData = getRawDiscordMessagesData();
-    List<AverageDiscordMessagesCompared> rawDiscordMessagesComparedData = getRawDiscordMessagesComparedData();
-    List<AveragePlaytimeOverall> rawPlaytimeData = getRawPlaytimeData();
-    List<Productivity> rawProductivityData = getRawProductivityData();
-    List<Recommendations> rawRecommendationsData = getRawRecommendationsData();
+    long start = System.currentTimeMillis();
+    log.info("📊 Starting final stats calculation...");
 
-    List<Short> allEmployeeIds = getAllEmployeeIds(rawEmployeesData);
+    List<Employee> employees = employeeRepository.findAll();
+    if (employees.isEmpty()) {
+      log.warn("No employees found. Aborting.");
+      return;
+    }
 
-    for (Short employeeId : allEmployeeIds) {
-      String employeeLevel = getEmployeeLevel(
-          rawEmployeesData, employeeId);
-      String employeeUsername = getEmployeeUsername(
-          rawEmployeesData, employeeId);
-      double annualPlaytimeForThisEmployee = getAnnualPlaytimeForThisEmployee(
-          rawAnnualPlaytimeData, employeeId);
-      double minecraftTicketsForThisEmployee = getMinecraftTicketsForThisEmployee(
-          rawMinecraftTicketsData, employeeId);
-      double minecraftTicketsComparedForThisEmployee = getMinecraftTicketsComparedForThisEmployee(
-          rawMinecraftTicketsComparedData, employeeId);
-      double discordMessagesForThisEmployee = getDiscordMessagesForThisEmployee(
-          rawDiscordMessagesData, employeeId);
-      double discordMessagesComparedForThisEmployee = getDiscordMessagesComparedForThisEmployee(
-          rawDiscordMessagesComparedData, employeeId);
-      double playtimeForThisEmployee = getPlaytimeForThisEmployee(
-          rawPlaytimeData, employeeId);
-      double productivityForThisEmployee = getProductivityForThisEmployee(
-          rawProductivityData, employeeId);
-      String recommendationsForThisEmployee = getRecommendationsForThisEmployee(
-          rawRecommendationsData, employeeId);
+    Map<Short, Double> annualPlaytime = mapOf(annualPlaytimeRepository.findAll(), AnnualPlaytime::getEmployeeId,
+        AnnualPlaytime::getPlaytimeInHours);
+    Map<Short, Double> avgMcTickets = mapOf(averageDailyMinecraftTicketsRepository.findAll(),
+        AverageDailyMinecraftTickets::getEmployeeId, AverageDailyMinecraftTickets::getTickets);
+    Map<Short, Double> avgMcTicketsCompared = mapOf(averageMinecraftTicketsComparedRepository.findAll(),
+        AverageMinecraftTicketsCompared::getEmployeeId, AverageMinecraftTicketsCompared::getValue);
+    Map<Short, Double> avgDcMessages = mapOf(averageDailyDiscordMessagesRepository.findAll(),
+        AverageDailyDiscordMessages::getEmployeeId, AverageDailyDiscordMessages::getValue);
+    Map<Short, Double> avgDcMessagesCompared = mapOf(averageDiscordMessagesComparedRepository.findAll(),
+        AverageDiscordMessagesCompared::getEmployeeId, AverageDiscordMessagesCompared::getValue);
+    Map<Short, Double> avgPlaytime = mapOf(averagePlaytimeOverallRepository.findAll(),
+        AveragePlaytimeOverall::getEmployeeId, AveragePlaytimeOverall::getPlaytime);
+    Map<Short, Double> productivity = mapOf(productivityRepository.findAll(), Productivity::getEmployeeId,
+        Productivity::getValue);
+    Map<Short, String> recommendations = mapOf(recommendationsRepository.findAll(), Recommendations::getEmployeeId,
+        Recommendations::getValue);
 
-      if (employeeLevel.equals("Owner") || employeeLevel.equals("Operator")) {
-        saveNewFinalStatsDataAsAdmin(employeeId, employeeLevel, employeeUsername,
-            annualPlaytimeForThisEmployee, playtimeForThisEmployee);
+    List<FinalStats> results = new ArrayList<>();
+
+    for (Employee e : employees) {
+      short id = e.getId();
+      String level = e.getLevel();
+      String username = e.getUsername();
+
+      FinalStats stats = finalStatsRepository.findByEmployeeId(id);
+      if (stats == null)
+        stats = new FinalStats();
+
+      stats.setEmployeeId(id);
+      stats.setLevel(level);
+      stats.setUsername(username);
+
+      stats.setAnnualPlaytime(annualPlaytime.getOrDefault(id, 0.0));
+      stats.setPlaytime(avgPlaytime.getOrDefault(id, 0.0));
+
+      if (isAdmin(level)) {
+        stats.setMinecraftTickets(0.0);
+        stats.setMinecraftTicketsCompared(0.0);
+        stats.setDiscordMessages(0.0);
+        stats.setDiscordMessagesCompared(0.0);
+        stats.setProductivity(0.0);
+        stats.setRecommendation("-");
       } else {
-        saveNewFinalStatsDataAsModerator(employeeId, employeeLevel, employeeUsername, annualPlaytimeForThisEmployee,
-            minecraftTicketsForThisEmployee, minecraftTicketsComparedForThisEmployee,
-            discordMessagesForThisEmployee, discordMessagesComparedForThisEmployee,
-            playtimeForThisEmployee, productivityForThisEmployee, recommendationsForThisEmployee);
+        stats.setMinecraftTickets(avgMcTickets.getOrDefault(id, 0.0));
+        stats.setMinecraftTicketsCompared(avgMcTicketsCompared.getOrDefault(id, 0.0));
+        stats.setDiscordMessages(avgDcMessages.getOrDefault(id, 0.0));
+        stats.setDiscordMessagesCompared(avgDcMessagesCompared.getOrDefault(id, 0.0));
+        stats.setProductivity(productivity.getOrDefault(id, 0.0));
+        stats.setRecommendation(recommendations.getOrDefault(id, "-"));
       }
+
+      results.add(stats);
     }
+
+    finalStatsRepository.saveAll(results);
+    long end = System.currentTimeMillis();
+    log.info("✅ Final stats recalculated for {} employees in {} ms.", results.size(), (end - start));
   }
 
-  private List<Employee> getRawEmployeesData() {
-    return employeeRepository.findAll();
+  private boolean isAdmin(String level) {
+    return level.equalsIgnoreCase("Owner") || level.equalsIgnoreCase("Operator");
   }
 
-  private List<AnnualPlaytime> getRawAnnualPlaytimeData() {
-    return annualPlaytimeRepository.findAll();
-  }
-
-  private List<AverageDailyMinecraftTickets> getRawMinecraftTicketsData() {
-    return averageDailyMinecraftTicketsRepository.findAll();
-  }
-
-  private List<AverageMinecraftTicketsCompared> getRawMinecraftTicketsComparedData() {
-    return averageMinecraftTicketsComparedRepository.findAll();
-  }
-
-  private List<AverageDailyDiscordMessages> getRawDiscordMessagesData() {
-    return averageDailyDiscordMessagesRepository.findAll();
-  }
-
-  private List<AverageDiscordMessagesCompared> getRawDiscordMessagesComparedData() {
-    return averageDiscordMessagesComparedRepository.findAll();
-  }
-
-  private List<AveragePlaytimeOverall> getRawPlaytimeData() {
-    return averagePlaytimeOverallRepository.findAll();
-  }
-
-  private List<Productivity> getRawProductivityData() {
-    return productivityRepository.findAll();
-  }
-
-  private List<Recommendations> getRawRecommendationsData() {
-    return recommendationsRepository.findAll();
-  }
-
-  private List<Short> getAllEmployeeIds(List<Employee> rawEmployeesData) {
-    return rawEmployeesData
+  private <T, K, V> Map<K, V> mapOf(List<T> list, java.util.function.Function<T, K> keyMapper,
+      java.util.function.Function<T, V> valueMapper) {
+    return list
         .stream()
-        .map(Employee::getId)
-        .distinct()
-        .sorted()
-        .toList();
-  }
-
-  private String getEmployeeLevel(List<Employee> rawEmployeesData, Short employeeId) {
-    return rawEmployeesData
-        .stream()
-        .filter(employee -> employee.getId().equals(employeeId))
-        .map(Employee::getLevel)
-        .findFirst()
-        .orElse("Error");
-  }
-
-  private String getEmployeeUsername(List<Employee> rawEmployeesData, Short employeeId) {
-    return rawEmployeesData
-        .stream()
-        .filter(employee -> employee.getId().equals(employeeId))
-        .map(Employee::getUsername)
-        .findFirst()
-        .orElse("Error");
-  }
-
-  private double getAnnualPlaytimeForThisEmployee(List<AnnualPlaytime> rawAnnualPlaytimeData, Short employeeId) {
-    return rawAnnualPlaytimeData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AnnualPlaytime::getPlaytimeInHours)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getMinecraftTicketsForThisEmployee(
-      List<AverageDailyMinecraftTickets> rawMinecraftTicketsData, Short employeeId) {
-    return rawMinecraftTicketsData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AverageDailyMinecraftTickets::getTickets)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getMinecraftTicketsComparedForThisEmployee(
-      List<AverageMinecraftTicketsCompared> rawMinecraftTicketsComparedData, Short employeeId) {
-    return rawMinecraftTicketsComparedData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AverageMinecraftTicketsCompared::getValue)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getDiscordMessagesForThisEmployee(
-      List<AverageDailyDiscordMessages> rawDiscordMessagesData, Short employeeId) {
-    return rawDiscordMessagesData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AverageDailyDiscordMessages::getValue)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getDiscordMessagesComparedForThisEmployee(
-      List<AverageDiscordMessagesCompared> rawDiscordMessagesComparedData, Short employeeId) {
-    return rawDiscordMessagesComparedData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AverageDiscordMessagesCompared::getValue)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getPlaytimeForThisEmployee(List<AveragePlaytimeOverall> rawPlaytimeData, Short employeeId) {
-    return rawPlaytimeData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(AveragePlaytimeOverall::getPlaytime)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getProductivityForThisEmployee(List<Productivity> rawProductivityData, Short employeeId) {
-    return rawProductivityData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(Productivity::getValue)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private String getRecommendationsForThisEmployee(List<Recommendations> rawRecommendationsData, Short employeeId) {
-    return rawRecommendationsData
-        .stream()
-        .filter(employee -> employee.getEmployeeId().equals(employeeId))
-        .map(Recommendations::getValue)
-        .findFirst()
-        .orElse("Error");
-  }
-
-  private void saveNewFinalStatsDataAsModerator(Short employeeId, String employeeLevel,
-      String employeeUsername, double annualPlaytimeForThisEmployee,
-      double minecraftTicketsForThisEmployee, double minecraftTicketsComparedForThisEmployee,
-      double discordMessages, double discordMessagesCompared,
-      double playtimeForThisEmployee, double productivityForThisEmployee, String recommendationsForThisEmployee) {
-
-    FinalStats existingRecord = finalStatsRepository.findByEmployeeId(employeeId);
-
-    if (existingRecord != null) {
-      if (existingRecord.getEmployeeId().equals(employeeId)) {
-        existingRecord.setLevel(employeeLevel);
-        existingRecord.setUsername(employeeUsername);
-        existingRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
-        existingRecord.setMinecraftTickets(minecraftTicketsForThisEmployee);
-        existingRecord.setMinecraftTicketsCompared(minecraftTicketsComparedForThisEmployee);
-        existingRecord.setDiscordMessages(discordMessages);
-        existingRecord.setDiscordMessagesCompared(discordMessagesCompared);
-        existingRecord.setPlaytime(playtimeForThisEmployee);
-        existingRecord.setProductivity(productivityForThisEmployee);
-        existingRecord.setRecommendation(recommendationsForThisEmployee);
-
-        finalStatsRepository.save(existingRecord);
-      }
-    } else {
-      FinalStats newRecord = new FinalStats();
-
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setLevel(employeeLevel);
-      newRecord.setUsername(employeeUsername);
-      newRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
-      newRecord.setMinecraftTickets(minecraftTicketsForThisEmployee);
-      newRecord.setMinecraftTicketsCompared(minecraftTicketsComparedForThisEmployee);
-      newRecord.setDiscordMessages(discordMessages);
-      newRecord.setDiscordMessagesCompared(discordMessagesCompared);
-      newRecord.setPlaytime(playtimeForThisEmployee);
-      newRecord.setProductivity(productivityForThisEmployee);
-      newRecord.setRecommendation(recommendationsForThisEmployee);
-
-      finalStatsRepository.save(newRecord);
-    }
-  }
-
-  private void saveNewFinalStatsDataAsAdmin(Short employeeId, String employeeLevel,
-      String employeeUsername, double annualPlaytimeForThisEmployee, double playtimeForThisEmployee) {
-
-    FinalStats existingRecord = finalStatsRepository.findByEmployeeId(employeeId);
-
-    if (existingRecord != null) {
-      if (existingRecord.getEmployeeId().equals(employeeId)) {
-        existingRecord.setLevel(employeeLevel);
-        existingRecord.setUsername(employeeUsername);
-        existingRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
-        existingRecord.setMinecraftTickets(0.0);
-        existingRecord.setMinecraftTicketsCompared(0.0);
-        existingRecord.setDiscordMessages(0.0);
-        existingRecord.setDiscordMessagesCompared(0.0);
-        existingRecord.setPlaytime(playtimeForThisEmployee);
-        existingRecord.setProductivity(0.0);
-        existingRecord.setRecommendation("-");
-
-        finalStatsRepository.save(existingRecord);
-      }
-    } else {
-      FinalStats newRecord = new FinalStats();
-
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setLevel(employeeLevel);
-      newRecord.setUsername(employeeUsername);
-      newRecord.setAnnualPlaytime(annualPlaytimeForThisEmployee);
-      newRecord.setMinecraftTickets(0.0);
-      newRecord.setMinecraftTicketsCompared(0.0);
-      newRecord.setDiscordMessages(0.0);
-      newRecord.setDiscordMessagesCompared(0.0);
-      newRecord.setPlaytime(playtimeForThisEmployee);
-      newRecord.setProductivity(0.0);
-      newRecord.setRecommendation("-");
-
-      finalStatsRepository.save(newRecord);
-    }
+        .filter(Objects::nonNull)
+        .collect(Collectors.toMap(keyMapper, valueMapper, (a, b) -> a));
   }
 
   @Override
@@ -342,24 +165,22 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   @Override
   public double getProductivity(Short employeeId) {
     FinalStats stats = finalStatsRepository.findByEmployeeId(employeeId);
-    return stats.getProductivity();
+    return stats != null ? stats.getProductivity() : 0.0;
   }
 
   @Override
   public Map<String, Object> getEmployeeRanking(Short employeeId) {
-    List<FinalStats> productivityData = finalStatsRepository.findAll();
-    productivityData.sort(Comparator.comparingDouble(FinalStats::getProductivity).reversed());
-    int totalEmployees = productivityData.size();
+    List<FinalStats> all = finalStatsRepository.findAll();
+    all.sort(Comparator.comparingDouble(FinalStats::getProductivity).reversed());
     int rank = 1;
-    for (FinalStats p : productivityData) {
-      if (p.getEmployeeId().equals(employeeId)) {
+    for (FinalStats s : all) {
+      if (s.getEmployeeId().equals(employeeId))
         break;
-      }
       rank++;
     }
     Map<String, Object> result = new HashMap<>();
     result.put("rank", rank);
-    result.put("totalEmployees", totalEmployees);
+    result.put("totalEmployees", all.size());
     return result;
   }
 }

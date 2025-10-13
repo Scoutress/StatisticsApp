@@ -1,7 +1,7 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
@@ -13,56 +13,68 @@ import com.scoutress.KaimuxAdminStats.services.DataFilterService;
 public class DataFilterServiceImpl implements DataFilterService {
 
   @Override
-  public List<SessionDataItem> filterSessionsByAid(
-      List<SessionDataItem> data, short aid) {
+  public List<SessionDataItem> filterSessionsByAid(List<SessionDataItem> data, short aid) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
         .filter(item -> item.getEmployeeId() == aid)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
-  public List<SessionDataItem> filterSessionsByServer(
-      List<SessionDataItem> data, String server) {
+  public List<SessionDataItem> filterSessionsByServer(List<SessionDataItem> data, String server) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
-        .filter(item -> item.getServer().equals(server))
-        .collect(Collectors.toList());
+        .filter(item -> Objects.equals(item.getServer(), server))
+        .toList();
   }
 
   @Override
-  public List<SessionDataItem> filterSessionsByAction(
-      List<SessionDataItem> data, boolean action) {
+  public List<SessionDataItem> filterSessionsByAction(List<SessionDataItem> data, boolean action) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
         .filter(item -> item.getActionAsBoolean() == action)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
-  public List<SanitizedSessionData> filterSanitizedSessionsByAid(
-      List<SanitizedSessionData> data, short aid) {
+  public List<SanitizedSessionData> filterSanitizedSessionsByAid(List<SanitizedSessionData> data, short aid) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
         .filter(item -> item.getEmployeeId() == aid)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
-  public List<SanitizedSessionData> filterSanitizedSessionsByServer(
-      List<SanitizedSessionData> data, String server) {
+  public List<SanitizedSessionData> filterSanitizedSessionsByServer(List<SanitizedSessionData> data, String server) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
-        .filter(item -> item.getServer().equals(server))
-        .collect(Collectors.toList());
+        .filter(item -> Objects.equals(item.getServer(), server))
+        .toList();
   }
 
   @Override
-  public List<SanitizedSessionData> filterSanitizedSessionsByAction(
-      List<SanitizedSessionData> data, boolean action) {
+  public List<SanitizedSessionData> filterSanitizedSessionsByAction(List<SanitizedSessionData> data, boolean action) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
         .filter(item -> item.getActionAsBoolean() == action)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

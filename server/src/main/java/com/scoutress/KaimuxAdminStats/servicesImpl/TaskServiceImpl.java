@@ -1,8 +1,14 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scoutress.KaimuxAdminStats.services.TaskService;
 import com.scoutress.KaimuxAdminStats.servicesImpl.complaints.ComplaintsServiceImpl;
@@ -12,10 +18,11 @@ import com.scoutress.KaimuxAdminStats.servicesImpl.playtime.PlaytimeHandlingServ
 import com.scoutress.KaimuxAdminStats.servicesImpl.productivity.ProductivityServiceImpl;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 
 @Service
 public class TaskServiceImpl implements TaskService {
+
+  private static final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
 
   private final EmployeeDataServiceImpl employeeDataServiceImpl;
   private final DiscordMessagesHandlingServiceImpl discordMessagesHandlingServiceImpl;
@@ -53,62 +60,50 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   @PostConstruct
-  @Transactional
   public void processCalculations() {
-    System.out.println("-----------------------------------------------");
-    System.out.println("Started calculations at: " + getCurrentTimestamp());
-    System.out.println("");
+    log.info("-------------------------------------------------");
+    log.info("🧮 Starting full calculations at: {}", LocalDateTime.now());
+
+    Instant start = Instant.now();
 
     try {
-      System.out.println("Checking necessary employee data");
-      List<Short> employeeIdsWithoutData = employeeDataServiceImpl.checkNessesaryEmployeeData();
-      System.out.println("Employee IDs without data: " + employeeIdsWithoutData);
+      executeStep("Checking employee data", () -> {
+        List<Short> missing = employeeDataServiceImpl.checkNessesaryEmployeeData();
+        log.info("Employees missing data: {}", missing);
+        employeeDataServiceImpl.removeNotEmployeesData();
+      });
 
-      runOtherTasks();
-
-      System.out.println("Handling Discord messages");
-      discordMessagesHandlingServiceImpl.handleDiscordMessages();
-
-      System.out.println("Handling Playtime");
-      playtimeHandlingServiceImpl.handlePlaytime();
-
-      System.out.println("Handling Minecraft tickets");
-      minecraftTicketsRawServiceImpl.handleMinecraftTickets();
-
-      System.out.println("Handling Complaints");
-      complaintsServiceImpl.handleComplaints();
-
-      System.out.println("Handling productivity");
-      productivityServiceImpl.handleProductivity();
-
-      System.out.println("Handling recommendation");
-      recommendationsServiceImpl.handleRecommendations();
-
-      System.out.println("Handling final stats");
-      finalStatsServiceImpl.handleFinalStats();
-
-      System.out.println("Handling user recommendation");
-      recommendationUserServiceImpl.handleUserRecommendations();
-
-      System.out.println("Handling latest activity");
-      latestActivityServiceImpl.calculateLatestActivity();
+      executeStep("Handling Discord messages", discordMessagesHandlingServiceImpl::handleDiscordMessages);
+      executeStep("Handling Playtime", playtimeHandlingServiceImpl::handlePlaytime);
+      executeStep("Handling Minecraft tickets", minecraftTicketsRawServiceImpl::handleMinecraftTickets);
+      executeStep("Handling Complaints", complaintsServiceImpl::handleComplaints);
+      executeStep("Handling Productivity", productivityServiceImpl::handleProductivity);
+      executeStep("Handling Recommendations", recommendationsServiceImpl::handleRecommendations);
+      executeStep("Handling Final Stats", finalStatsServiceImpl::handleFinalStats);
+      executeStep("Handling User Recommendations", recommendationUserServiceImpl::handleUserRecommendations);
+      executeStep("Handling Latest Activity", latestActivityServiceImpl::calculateLatestActivity);
 
     } catch (Exception e) {
-      System.out.println("ALERT: Error during processCalculations at startup: " + e.getMessage());
-      e.printStackTrace(System.out);
+      log.error("🚨 Unexpected error in processCalculations: {}", e.getMessage(), e);
     }
 
-    System.out.println("");
-    System.out.println("Calculations completed at: " + getCurrentTimestamp());
-    System.out.println("-----------------------------------------------");
+    Duration total = Duration.between(start, Instant.now());
+    log.info("✅ All calculations completed at: {} (took {} seconds)",
+        LocalDateTime.now(), total.toSeconds());
+    log.info("-------------------------------------------------");
   }
 
-  private String getCurrentTimestamp() {
-    return java.time.LocalDateTime.now().toString();
-  }
+  @Transactional
+  private void executeStep(String name, Runnable task) {
+    log.info("➡️ {}", name);
+    Instant stepStart = Instant.now();
 
-  public void runOtherTasks() {
-    System.out.println("Removing NOT employees data");
-    employeeDataServiceImpl.removeNotEmployeesData();
+    try {
+      task.run();
+      long seconds = Duration.between(stepStart, Instant.now()).toSeconds();
+      log.info("✅ {} completed in {}s", name, seconds);
+    } catch (Exception e) {
+      log.error("❌ Error during {}: {}", name, e.getMessage(), e);
+    }
   }
 }

@@ -1,6 +1,6 @@
 package com.scoutress.KaimuxAdminStats.entity.playtime;
 
-import com.scoutress.KaimuxAdminStats.servicesImpl.EmployeeDataServiceImpl.HasEmployeeId;
+import com.scoutress.KaimuxAdminStats.services.HasEmployeeId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,5 +35,11 @@ public class SegmentCountAllServers implements HasEmployeeId {
   @Override
   public Short getEmployeeId() {
     return employeeId;
+  }
+
+  public SegmentCountAllServers(Short empId, Integer key, Integer value) {
+    this.employeeId = empId;
+    this.timeSegment = key;
+    this.count = value;
   }
 }

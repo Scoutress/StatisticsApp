@@ -3,10 +3,15 @@ package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.AverageDiscordMessagesCompared;
 import com.scoutress.KaimuxAdminStats.entity.discordMessages.DailyDiscordMessages;
@@ -19,6 +24,8 @@ import com.scoutress.KaimuxAdminStats.services.discordMessages.DiscordMessagesCo
 
 @Service
 public class DiscordMessagesComparedServiceImp implements DiscordMessagesComparedService {
+
+  private static final Logger log = LoggerFactory.getLogger(DiscordMessagesComparedServiceImp.class);
 
   private final DailyDiscordMessagesComparedRepository dailyDiscordMessagesComparedRepository;
   private final AverageDiscordMessagesComparedRepository averageDiscordMessagesComparedRepository;
@@ -34,146 +41,130 @@ public class DiscordMessagesComparedServiceImp implements DiscordMessagesCompare
   }
 
   @Override
+  @Transactional
   public void compareEachEmployeeDailyDiscordMessagesValues(
       List<DailyDiscordMessages> allDailyDcMessages,
       List<Short> allEmployeesFromDailyDcMessages,
       List<Short> employeeIdsWithoutData) {
 
-    if (allDailyDcMessages != null && !allDailyDcMessages.isEmpty()) {
-      if (allEmployeesFromDailyDcMessages != null && !allEmployeesFromDailyDcMessages.isEmpty()) {
-        for (Short employeeId : allEmployeesFromDailyDcMessages) {
-          if (!employeeIdsWithoutData.contains(employeeId)) {
-            double messagesRatioSumThisEmployee = 0;
-            int datesCount = 0;
+    log.info("=== [START] Discord messages comparison (multithreaded) ===");
 
-            LocalDate joinDateThisEmployee = getJoinDateThisEmployee(employeeId);
-            LocalDate oldestDateThisEmployee = getOldestDateThisEmployee(allDailyDcMessages, employeeId);
+    if (allDailyDcMessages == null || allDailyDcMessages.isEmpty()) {
+      log.warn("⚠ No Discord messages found — skipping comparison.");
+      return;
+    }
 
-            if (oldestDateThisEmployee == null || joinDateThisEmployee == null) {
-              System.out.println("No data found for employee ID: " + employeeId);
-              System.out.println("Skipping employee ID: " + employeeId);
-              continue;
-            }
+    if (allEmployeesFromDailyDcMessages == null || allEmployeesFromDailyDcMessages.isEmpty()) {
+      log.warn("⚠ No employees found in Discord messages dataset.");
+      return;
+    }
 
-            List<LocalDate> allDatesSinceJoinDateOrOldestDate = getAllDatesSinceJoinDateOrOldestDate(
-                employeeId, allDailyDcMessages, oldestDateThisEmployee, joinDateThisEmployee);
+    // ================================
+    // Pre-group data in memory
+    // ================================
+    Map<Short, List<DailyDiscordMessages>> messagesByEmployee = allDailyDcMessages
+        .stream()
+        .collect(Collectors.groupingBy(DailyDiscordMessages::getEmployeeId));
 
-            for (LocalDate date : allDatesSinceJoinDateOrOldestDate) {
-              int messagesThisDateThisEmployee = getMessagesCountThisDateThisEmployee(
-                  allDailyDcMessages, date, employeeId);
-              int messagesThisDateAllEmployees = getMessagesCountThisDateAllEmployees(
-                  allDailyDcMessages, date);
-              double messagesRatioThisDateThisEmployee = calculateMessagesRatioThisDate(
-                  messagesThisDateThisEmployee, messagesThisDateAllEmployees);
+    Map<LocalDate, Integer> totalMessagesByDate = allDailyDcMessages
+        .stream()
+        .collect(Collectors.groupingBy(DailyDiscordMessages::getDate,
+            Collectors.summingInt(DailyDiscordMessages::getMsgCount)));
 
-              saveMessagesRatioThisDateThisEmployee(messagesRatioThisDateThisEmployee, date, employeeId);
+    Queue<DailyDiscordMessagesCompared> dailyBatch = new ConcurrentLinkedQueue<>();
+    Queue<AverageDiscordMessagesCompared> avgBatch = new ConcurrentLinkedQueue<>();
 
-              messagesRatioSumThisEmployee += messagesRatioThisDateThisEmployee;
-              datesCount++;
-            }
+    long start = System.currentTimeMillis();
 
-            if (datesCount > 0) {
-              double averageValueOfMessagesRatiosThisEmployee = calculateAverageMessagesRatioThisEmployee(
-                  messagesRatioSumThisEmployee, datesCount);
-
-              saveAverageMessagesRatioThisEmployee(averageValueOfMessagesRatiosThisEmployee, employeeId);
-            }
+    allEmployeesFromDailyDcMessages
+        .parallelStream()
+        .filter(id -> !employeeIdsWithoutData.contains(id))
+        .forEach(employeeId -> {
+          try {
+            processEmployee(employeeId, messagesByEmployee, totalMessagesByDate, dailyBatch, avgBatch);
+          } catch (Exception e) {
+            log.error("❌ Error processing employee {}: {}", employeeId, e.getMessage(), e);
           }
-        }
-      }
+        });
+
+    // ================================
+    // Save results in batches
+    // ================================
+    log.info("💾 Saving {} daily ratios and {} averages...", dailyBatch.size(), avgBatch.size());
+
+    if (!dailyBatch.isEmpty())
+      dailyDiscordMessagesComparedRepository.saveAll(dailyBatch);
+
+    if (!avgBatch.isEmpty())
+      averageDiscordMessagesComparedRepository.saveAll(avgBatch);
+
+    long elapsed = System.currentTimeMillis() - start;
+    log.info("✅ Discord messages comparison completed in {} ms ({} s)", elapsed, elapsed / 1000.0);
+  }
+
+  private void processEmployee(
+      Short employeeId,
+      Map<Short, List<DailyDiscordMessages>> messagesByEmployee,
+      Map<LocalDate, Integer> totalMessagesByDate,
+      Queue<DailyDiscordMessagesCompared> dailyBatch,
+      Queue<AverageDiscordMessagesCompared> avgBatch) {
+
+    LocalDate joinDate = getJoinDateThisEmployee(employeeId);
+    List<DailyDiscordMessages> empMessages = messagesByEmployee.get(employeeId);
+
+    if (empMessages == null || empMessages.isEmpty() || joinDate == null)
+      return;
+
+    LocalDate oldestDate = empMessages
+        .stream()
+        .map(DailyDiscordMessages::getDate)
+        .min(Comparator.naturalOrder())
+        .orElse(joinDate);
+
+    LocalDate startDate = joinDate.isAfter(oldestDate) ? joinDate : oldestDate;
+    LocalDate today = LocalDate.now();
+
+    double sumRatio = 0;
+    int count = 0;
+
+    for (LocalDate date = startDate; date.isBefore(today); date = date.plusDays(1)) {
+      final LocalDate currentDate = date;
+
+      int empCount = empMessages
+          .stream()
+          .filter(m -> m.getDate().equals(currentDate))
+          .mapToInt(DailyDiscordMessages::getMsgCount)
+          .sum();
+
+      int totalCount = totalMessagesByDate.getOrDefault(currentDate, 0);
+      if (totalCount == 0)
+        continue;
+
+      double ratio = (double) empCount / totalCount;
+      sumRatio += ratio;
+      count++;
+
+      DailyDiscordMessagesCompared dailyRecord = new DailyDiscordMessagesCompared();
+      dailyRecord.setEmployeeId(employeeId);
+      dailyRecord.setDate(currentDate);
+      dailyRecord.setValue(ratio);
+      dailyBatch.add(dailyRecord);
+    }
+
+    if (count > 0) {
+      double avg = sumRatio / count;
+
+      AverageDiscordMessagesCompared avgRecord = new AverageDiscordMessagesCompared();
+      avgRecord.setEmployeeId(employeeId);
+      avgRecord.setValue(avg);
+      avgBatch.add(avgRecord);
     }
   }
 
-  public List<LocalDate> getAllDatesSinceJoinDateOrOldestDate(
-      Short employeeId, List<DailyDiscordMessages> rawData, LocalDate oldestDate, LocalDate joinDate) {
-    LocalDate startDate = joinDate.isAfter(oldestDate) ? joinDate : oldestDate;
-
-    return startDate
-        .datesUntil(LocalDate.now())
-        .collect(Collectors.toList());
-  }
-
-  public LocalDate getJoinDateThisEmployee(Short employeeId) {
+  private LocalDate getJoinDateThisEmployee(Short employeeId) {
     return employeeRepository
         .findById(employeeId)
         .map(Employee::getJoinDate)
-        .filter(Objects::nonNull)
-        .orElseGet(() -> {
-          System.err.println("ALERT: Employee ID " + employeeId + " has no join date — returning null.");
-          return null;
-        });
-  }
-
-  public LocalDate getOldestDateThisEmployee(List<DailyDiscordMessages> rawData, Short employeeId) {
-    return rawData
-        .stream()
-        .filter(message -> message.getEmployeeId().equals(employeeId))
-        .map(DailyDiscordMessages::getDate)
-        .min(Comparator.naturalOrder())
-        .orElseThrow(() -> new IllegalArgumentException("No data found for the given employee ID"));
-  }
-
-  public int getMessagesCountThisDateThisEmployee(
-      List<DailyDiscordMessages> data, LocalDate thisDate, Short thisEmployee) {
-    return data
-        .stream()
-        .filter(messages -> messages.getEmployeeId().equals(thisEmployee) && messages.getDate().equals(thisDate))
-        .map(DailyDiscordMessages::getMsgCount)
-        .findFirst()
-        .orElse(0);
-  }
-
-  public int getMessagesCountThisDateAllEmployees(List<DailyDiscordMessages> data, LocalDate thisDate) {
-    return data
-        .stream()
-        .filter(messages -> messages.getDate().equals(thisDate))
-        .mapToInt(DailyDiscordMessages::getMsgCount)
-        .sum();
-  }
-
-  public double calculateMessagesRatioThisDate(int messagesThisDateThisEmployee, int messagesThisDateAllEmployees) {
-    if (messagesThisDateAllEmployees == 0) {
-      return 0;
-    }
-    return (double) messagesThisDateThisEmployee / messagesThisDateAllEmployees;
-  }
-
-  public void saveMessagesRatioThisDateThisEmployee(
-      double messagesRatioThisDateThisEmployee, LocalDate date, Short employee) {
-    DailyDiscordMessagesCompared existingRecord = dailyDiscordMessagesComparedRepository
-        .findByEmployeeIdAndDate(employee, date);
-
-    if (existingRecord != null) {
-      existingRecord.setValue(messagesRatioThisDateThisEmployee);
-      dailyDiscordMessagesComparedRepository.save(existingRecord);
-    } else {
-      DailyDiscordMessagesCompared newRecord = new DailyDiscordMessagesCompared();
-      newRecord.setEmployeeId(employee);
-      newRecord.setValue(messagesRatioThisDateThisEmployee);
-      newRecord.setDate(date);
-      dailyDiscordMessagesComparedRepository.save(newRecord);
-    }
-  }
-
-  public double calculateAverageMessagesRatioThisEmployee(double messagesRatioSumThisEmployee, int datesCount) {
-    if (datesCount == 0) {
-      return 0;
-    }
-    return (double) messagesRatioSumThisEmployee / datesCount;
-  }
-
-  public void saveAverageMessagesRatioThisEmployee(double averageValueOfTicketRatiosThisEmployee, Short employee) {
-    AverageDiscordMessagesCompared existingRecord = averageDiscordMessagesComparedRepository
-        .findByEmployeeId(employee);
-
-    if (existingRecord != null) {
-      existingRecord.setValue(averageValueOfTicketRatiosThisEmployee);
-      averageDiscordMessagesComparedRepository.save(existingRecord);
-    } else {
-      AverageDiscordMessagesCompared newRecord = new AverageDiscordMessagesCompared();
-      newRecord.setEmployeeId(employee);
-      newRecord.setValue(averageValueOfTicketRatiosThisEmployee);
-      averageDiscordMessagesComparedRepository.save(newRecord);
-    }
+        .orElse(null);
   }
 }

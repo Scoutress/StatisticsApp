@@ -1,24 +1,33 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl.playtime;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scoutress.KaimuxAdminStats.entity.employees.Employee;
 import com.scoutress.KaimuxAdminStats.entity.playtime.LoginLogoutTimes;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SegmentCountAllServers;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SegmentCountByServer;
-import com.scoutress.KaimuxAdminStats.entity.playtime.TimeOfDaySegments;
 import com.scoutress.KaimuxAdminStats.repositories.employees.EmployeeRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.LoginLogoutTimesRepository;
 import com.scoutress.KaimuxAdminStats.repositories.playtime.SegmentCountAllServersRepository;
@@ -27,300 +36,296 @@ import com.scoutress.KaimuxAdminStats.repositories.playtime.TimeOfDaySegmentsRep
 import com.scoutress.KaimuxAdminStats.services.playtime.TimeOfDayPlaytimeService;
 import com.scoutress.KaimuxAdminStats.utils.TimeUtils;
 
-import jakarta.transaction.Transactional;
-
 @Service
 public class TimeOfDayPlaytimeServiceImpl implements TimeOfDayPlaytimeService {
 
-  private final int BATCH_SIZE = 1000;
-  private final int PAGE_SIZE = 5000;
+  private static final Logger log = LoggerFactory.getLogger(TimeOfDayPlaytimeServiceImpl.class);
+
+  private static final int BATCH_SIZE = 1_000;
+  private static final int FETCH_SIZE = 5_000;
+  private static final int MAX_RETRIES = 3;
+  private static final int THREAD_COUNT = Math.max(4, Runtime.getRuntime().availableProcessors() - 1);
+
+  private static final Set<String> VALID_SERVERS = Set.of(
+      "survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby");
+
+  private static final String INSERT_SEGMENT_SQL = "INSERT INTO time_of_day_segments (employee_id, server, date, time_segment) VALUES (?, ?, ?, ?)";
 
   private final TimeOfDaySegmentsRepository timeOfDaySegmentsRepository;
   private final LoginLogoutTimesRepository loginLogoutTimesRepository;
   private final EmployeeRepository employeeRepository;
   private final SegmentCountByServerRepository segmentCountByServerRepository;
   private final SegmentCountAllServersRepository segmentCountAllServersRepository;
+  private final JdbcTemplate jdbcTemplate;
 
   public TimeOfDayPlaytimeServiceImpl(
       TimeOfDaySegmentsRepository timeOfDaySegmentsRepository,
       LoginLogoutTimesRepository loginLogoutTimesRepository,
       EmployeeRepository employeeRepository,
       SegmentCountByServerRepository segmentCountByServerRepository,
-      SegmentCountAllServersRepository segmentCountAllServersRepository) {
+      SegmentCountAllServersRepository segmentCountAllServersRepository,
+      JdbcTemplate jdbcTemplate) {
     this.timeOfDaySegmentsRepository = timeOfDaySegmentsRepository;
     this.loginLogoutTimesRepository = loginLogoutTimesRepository;
     this.employeeRepository = employeeRepository;
     this.segmentCountByServerRepository = segmentCountByServerRepository;
     this.segmentCountAllServersRepository = segmentCountAllServersRepository;
+    this.jdbcTemplate = jdbcTemplate;
   }
 
+  // ============================================================
+  // STAGE 1: Raw sessions → minute-level segments
+  // ============================================================
   @Override
   public void handleTimeOfDayPlaytime() {
-    System.out.println("=== [START] Time-of-day playtime batch processing ===");
+    final long totalStart = System.currentTimeMillis();
+    log.info("=== [START] Time-of-day segment generation (multi-threaded streaming) ===");
 
-    System.out.println("Truncating all TimeOfDaySegments...");
     truncateAllTimeOfDaySegments();
-    System.out.println("✔ All existing time-of-day segments truncated.");
 
-    int totalRecords = (int) loginLogoutTimesRepository.count();
-    System.out.println("Total login/logout records found: " + totalRecords);
-
+    final long totalRecords = loginLogoutTimesRepository.count();
     if (totalRecords == 0) {
-      System.out.println("⚠ No records found in loginLogoutTimesRepository — exiting early.");
+      log.warn("⚠ No login/logout records found — skipping.");
       return;
     }
 
-    int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
-    System.out.println("Total pages to process: " + totalPages + " (page size = " + PAGE_SIZE + ")");
+    log.info("Total records: {} | Using {} threads | Fetch size = {}", totalRecords, THREAD_COUNT, FETCH_SIZE);
 
-    int processedRecords = 0;
+    ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
+    List<Future<Integer>> futures = new ArrayList<>();
 
-    for (int page = 0; page < totalPages; page++) {
-      System.out.println("\n--- Processing page " + (page + 1) + " of " + totalPages + " ---");
+    long lastId = 0;
+    int batchIndex = 0;
 
-      Page<LoginLogoutTimes> pageData = loginLogoutTimesRepository.findAll(PageRequest.of(page, PAGE_SIZE));
-      int pageSize = pageData.getNumberOfElements();
-      System.out.println("Fetched " + pageSize + " records from database.");
+    while (true) {
+      List<LoginLogoutTimes> batch = loginLogoutTimesRepository.findTop5000ByIdGreaterThanOrderByIdAsc(lastId);
+      if (batch.isEmpty())
+        break;
 
-      if (pageSize == 0) {
-        System.out.println("⚠ Page " + (page + 1) + " returned no data — skipping.");
-        continue;
-      }
+      long minId = batch.get(0).getId();
+      long maxId = batch.get(batch.size() - 1).getId();
+      batchIndex++;
 
-      try {
-        processSessions(pageData.getContent());
-        System.out.println("✔ Page " + (page + 1) + " processed successfully.");
-      } catch (Exception e) {
-        System.err.println("❌ Error processing page " + (page + 1) + ": " + e.getMessage());
-        e.printStackTrace();
-      }
+      final int currentBatchIndex = batchIndex;
+      final List<LoginLogoutTimes> safeBatch = new ArrayList<>(batch);
 
-      processedRecords += pageSize;
+      futures.add(executor.submit(() -> processBatch(currentBatchIndex, minId, maxId, safeBatch)));
 
-      int progress = (int) (((double) processedRecords / totalRecords) * 100);
-      System.out
-          .println("Progress: " + progress + "% (" + processedRecords + "/" + totalRecords + " records processed)");
+      lastId = maxId;
     }
 
-    System.out.println("=== [DONE] Time-of-day playtime batch processing completed successfully ===");
+    int totalInserted = 0;
+    for (Future<Integer> f : futures) {
+      try {
+        totalInserted += f.get();
+      } catch (InterruptedException | ExecutionException e) {
+        log.error("❌ Thread task failed: {}", e.getMessage(), e);
+      }
+    }
+
+    executor.shutdown();
+
+    long elapsed = System.currentTimeMillis() - totalStart;
+    log.info("✅ Finished processing {} sessions, total inserted rows: {} ({} s)",
+        totalRecords, totalInserted, elapsed / 1000);
+  }
+
+  private int processBatch(int batchIndex, long minId, long maxId, List<LoginLogoutTimes> sessions) {
+    long start = System.currentTimeMillis();
+    log.info("▶️ [Batch {}] Processing {} sessions (IDs {}–{})", batchIndex, sessions.size(), minId, maxId);
+
+    int inserted = processSessionsBatchJdbc(sessions);
+
+    long elapsed = System.currentTimeMillis() - start;
+    log.info("✅ [Batch {}] Done — {} rows inserted in {} ms ({} rows/s)",
+        batchIndex, inserted, elapsed, (inserted * 1000L) / Math.max(1, elapsed));
+
+    return inserted;
   }
 
   @Transactional
   public void truncateAllTimeOfDaySegments() {
-    timeOfDaySegmentsRepository.deleteAll();
+    log.info("Truncating all TimeOfDaySegments...");
+    try {
+      jdbcTemplate.execute("TRUNCATE TABLE time_of_day_segments");
+      log.info("✔ TimeOfDaySegments table truncated.");
+    } catch (DataAccessException e) {
+      log.warn("⚠ TRUNCATE failed, fallback to deleteAllInBatch: {}", e.getMessage());
+      timeOfDaySegmentsRepository.deleteAllInBatch();
+      log.info("✔ Table cleared using deleteAllInBatch.");
+    }
   }
 
-  private void processSessions(List<LoginLogoutTimes> sessions) {
-    if (sessions == null || sessions.isEmpty()) {
-      System.err.println("⚠️ No sessions to process!");
-      return;
-    }
+  private int processSessionsBatchJdbc(List<LoginLogoutTimes> sessions) {
+    List<Object[]> batchArgs = new ArrayList<>(BATCH_SIZE * 2);
+    int totalInserted = 0;
 
-    System.out.println("Processing " + sessions.size() + " sessions in batches of 100...");
-
-    int batchSize = 100;
-    int totalSessions = sessions.size();
-    int processed = 0;
-
-    for (int i = 0; i < totalSessions; i += batchSize) {
-      int end = Math.min(i + batchSize, totalSessions);
-      List<LoginLogoutTimes> batch = sessions.subList(i, end);
+    for (LoginLogoutTimes s : sessions) {
+      if (!isSessionValid(s))
+        continue;
 
       try {
-        for (LoginLogoutTimes session : batch) {
-          try {
-            processSingleSession(session);
-          } catch (Exception e) {
-            System.err.println("❌ Error processing session ID " + session.getId() + ": " + e.getMessage());
-            e.printStackTrace();
+        short employeeId = s.getEmployeeId();
+        String server = s.getServerName().toLowerCase(Locale.ROOT).trim();
+        LocalDateTime login = s.getLoginTime();
+        LocalDateTime logout = s.getLogoutTime();
+
+        if (logout.isBefore(login))
+          continue;
+
+        LocalDateTime cursor = login;
+        while (!cursor.toLocalDate().isAfter(logout.toLocalDate())) {
+          LocalDate currentDate = cursor.toLocalDate();
+          LocalDateTime dayStart = currentDate.atStartOfDay();
+          LocalDateTime dayEnd = currentDate.atTime(23, 59, 59);
+
+          LocalDateTime from = cursor.isBefore(dayStart) ? dayStart : cursor;
+          LocalDateTime to = logout.isBefore(dayEnd) ? logout : dayEnd;
+
+          int fromMin = TimeUtils.toMinutesOfDay(from);
+          int toMin = TimeUtils.toMinutesOfDay(to);
+          if (toMin < fromMin) {
+            cursor = currentDate.plusDays(1).atStartOfDay();
+            continue;
           }
+
+          for (int m = fromMin; m <= toMin; m++) {
+            batchArgs.add(new Object[] { employeeId, server, Date.valueOf(currentDate), m });
+            if (batchArgs.size() >= BATCH_SIZE) {
+              totalInserted += flushSegments(batchArgs);
+            }
+          }
+          cursor = currentDate.plusDays(1).atStartOfDay();
         }
 
-        processed += batch.size();
-        System.out.println(
-            "✔ Processed batch of " + batch.size() + " sessions. Total processed: " + processed + "/" + totalSessions);
-
       } catch (Exception e) {
-        System.err.println("❌ Unexpected error while processing batch " + (i / batchSize + 1) + ": " + e.getMessage());
-        e.printStackTrace();
+        log.error("❌ Failed to process session ID {}: {}", s.getId(), e.getMessage(), e);
       }
+    }
 
+    if (!batchArgs.isEmpty())
+      totalInserted += flushSegments(batchArgs);
+    return totalInserted;
+  }
+
+  private int flushSegments(List<Object[]> batchArgs) {
+    for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        Thread.sleep(50);
-      } catch (InterruptedException ignored) {
+        int[] counts = jdbcTemplate.batchUpdate(INSERT_SEGMENT_SQL, batchArgs);
+        int total = Arrays.stream(counts).sum();
+        log.debug("💾 Batch inserted {} rows successfully (attempt {})", total, attempt);
+        batchArgs.clear();
+        return total;
+      } catch (DataAccessException e) {
+        log.warn("⚠️ Batch insert failed (attempt {}/{}): {}", attempt, MAX_RETRIES, e.getMessage());
+        if (attempt < MAX_RETRIES) {
+          long delay = 500L * attempt;
+          log.debug("⏳ Retrying in {} ms...", delay);
+          LockSupport.parkNanos(delay * 1_000_000);
+        }
       }
     }
-
-    System.out.println("✅ Completed processing of all " + totalSessions + " sessions.");
+    log.error("❌ Batch insert failed after {} retries. Skipping batch ({} rows)", MAX_RETRIES, batchArgs.size());
+    batchArgs.clear();
+    return 0;
   }
 
-  private void processSingleSession(LoginLogoutTimes session) {
-    if (session == null) {
-      System.err.println("Skipping NULL session.");
-      return;
-    }
-
-    if (!isSessionValid(session)) {
-      System.err.println("Skipping invalid session. Employee ID: " + session.getEmployeeId());
-      return;
-    }
-
-    saveSessionSegments(session);
+  private boolean isSessionValid(LoginLogoutTimes s) {
+    if (s == null)
+      return false;
+    if (s.getLoginTime() == null || s.getLogoutTime() == null)
+      return false;
+    if (s.getServerName() == null || s.getServerName().isBlank())
+      return false;
+    return VALID_SERVERS.contains(s.getServerName().toLowerCase(Locale.ROOT).trim());
   }
 
-  private boolean isSessionValid(LoginLogoutTimes session) {
-    return session.getServerName() != null &&
-        !session.getServerName().isEmpty() &&
-        session.getLoginTime() != null &&
-        session.getLogoutTime() != null &&
-        isServerNameValid(session.getServerName());
-  }
-
-  private boolean isServerNameValid(String serverName) {
-    List<String> validServerNames = List.of("survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby");
-    return validServerNames.contains(serverName.toLowerCase());
-  }
-
-  private void saveSessionSegments(LoginLogoutTimes session) {
-    List<TimeOfDaySegments> segmentsToSave = new ArrayList<>();
-
-    short employeeId = session.getEmployeeId();
-    String serverName = session.getServerName();
-    LocalDate sessionDate = session.getLoginTime().toLocalDate();
-    int sessionStartMinute = TimeUtils.toMinutesOfDay(session.getLoginTime());
-    int sessionEndMinute = TimeUtils.toMinutesOfDay(session.getLogoutTime());
-
-    for (int minute = sessionStartMinute; minute <= sessionEndMinute; minute++) {
-      segmentsToSave.add(new TimeOfDaySegments(employeeId, serverName, sessionDate, minute));
-
-      if (segmentsToSave.size() >= BATCH_SIZE) {
-        saveSegments(segmentsToSave);
-        segmentsToSave.clear();
-      }
-    }
-
-    if (!segmentsToSave.isEmpty()) {
-      saveSegments(segmentsToSave);
-    }
-  }
-
-  private void saveSegments(List<TimeOfDaySegments> segments) {
-    timeOfDaySegmentsRepository.saveAll(segments);
-  }
-
+  // ============================================================
+  // STAGE 2: Aggregation → counts per segment per employee/server
+  // ============================================================
   @Override
   public void handleProcessedTimeOfDayPlaytime(List<String> servers) {
-    System.out.println("Starting processing of time-of-day playtime...");
+    long start = System.currentTimeMillis();
+    log.info("=== [START] Aggregating time-of-day playtime ===");
 
     truncateAllSegmentData();
 
-    List<Object[]> results = timeOfDaySegmentsRepository.findAllSegmentCounts();
-
-    Set<String> validServers = getValidServers();
-    Set<Short> validEmployeeIds = getValidEmployeeIds();
-
-    Map<Short, Map<String, Map<Integer, Integer>>> employeeServerData = new HashMap<>();
-
-    for (Object[] row : results) {
-      Short employeeId = (Short) row[0];
-      String server = (String) row[1];
-      int timeSegment = (int) row[2];
-      int count = ((Number) row[3]).intValue();
-
-      if (!validServers.contains(server.trim().toLowerCase())) {
-        System.err.println("Invalid server name: " + server + " for Employee ID: " + employeeId);
-        continue;
-      }
-
-      if (!validEmployeeIds.contains(employeeId)) {
-        System.err.println("Invalid Employee ID: " + employeeId + " for Server: " + server);
-        continue;
-      }
-
-      employeeServerData
-          .computeIfAbsent(employeeId, k -> new HashMap<>())
-          .computeIfAbsent(server, k -> new HashMap<>())
-          .put(timeSegment, count);
+    List<Object[]> counts = timeOfDaySegmentsRepository.findAllSegmentCounts();
+    if (counts.isEmpty()) {
+      log.warn("⚠ No segment data found — skipping aggregation.");
+      return;
     }
 
-    System.out.println("Data aggregation completed. Starting to save segment counts...");
-
-    employeeServerData.forEach((employeeId, serverData) -> {
-      serverData.forEach((server, segmentCounts) -> {
-        saveSegmentCounts(segmentCounts, employeeId, server);
-      });
-
-      Map<Integer, Integer> combinedCounts = new HashMap<>();
-      serverData.forEach((server, segmentCounts) -> {
-        segmentCounts.forEach((minute, count) -> {
-          combinedCounts.merge(minute, count, Integer::sum);
-        });
-      });
-
-      saveAllServerSegmentCounts(combinedCounts, employeeId);
-    });
-
-    System.out.println("Completed processing of time-of-day playtime.");
-  }
-
-  @Transactional
-  public void truncateAllSegmentData() {
-    segmentCountByServerRepository.deleteAll();
-    segmentCountAllServersRepository.deleteAll();
-  }
-
-  private void saveSegmentCounts(Map<Integer, Integer> segmentCounts, Short employeeId, String server) {
-    List<SegmentCountByServer> batch = new ArrayList<>();
-
-    for (Map.Entry<Integer, Integer> entry : segmentCounts.entrySet()) {
-      SegmentCountByServer segment = new SegmentCountByServer();
-      segment.setEmployeeId(employeeId);
-      segment.setServerName(server);
-      segment.setTimeSegment(entry.getKey());
-      segment.setCount(entry.getValue());
-      batch.add(segment);
-
-      if (batch.size() >= BATCH_SIZE) {
-        segmentCountByServerRepository.saveAll(batch);
-        batch.clear();
-      }
-    }
-
-    if (!batch.isEmpty()) {
-      segmentCountByServerRepository.saveAll(batch);
-    }
-  }
-
-  private void saveAllServerSegmentCounts(Map<Integer, Integer> segmentCounts, Short employeeId) {
-    List<SegmentCountAllServers> batch = new ArrayList<>();
-
-    for (Map.Entry<Integer, Integer> entry : segmentCounts.entrySet()) {
-      SegmentCountAllServers segment = new SegmentCountAllServers();
-      segment.setEmployeeId(employeeId);
-      segment.setTimeSegment(entry.getKey());
-      segment.setCount(entry.getValue());
-      batch.add(segment);
-
-      if (batch.size() >= BATCH_SIZE) {
-        segmentCountAllServersRepository.saveAll(batch);
-        batch.clear();
-      }
-    }
-
-    if (!batch.isEmpty()) {
-      segmentCountAllServersRepository.saveAll(batch);
-    }
-  }
-
-  private Set<String> getValidServers() {
-    return new HashSet<>(Arrays.asList("survival", "skyblock", "creative", "boxpvp", "prison", "events", "lobby"));
-  }
-
-  private Set<Short> getValidEmployeeIds() {
-    return employeeRepository
+    Set<Short> validEmployees = employeeRepository
         .findAll()
         .stream()
         .map(Employee::getId)
         .collect(Collectors.toSet());
+
+    Map<Short, Map<String, Map<Integer, Integer>>> data = new HashMap<>();
+    for (Object[] row : counts) {
+      Short empId = (Short) row[0];
+      String server = ((String) row[1]).toLowerCase(Locale.ROOT).trim();
+      int segment = (int) row[2];
+      int count = ((Number) row[3]).intValue();
+
+      if (!VALID_SERVERS.contains(server) || !validEmployees.contains(empId))
+        continue;
+
+      data.computeIfAbsent(empId, e -> new HashMap<>())
+          .computeIfAbsent(server, s -> new HashMap<>())
+          .merge(segment, count, Integer::sum);
+    }
+
+    log.info("Data aggregated. Starting batch save ({} employees)...", data.size());
+    int processed = 0;
+    for (var entry : data.entrySet()) {
+      Short empId = entry.getKey();
+      Map<String, Map<Integer, Integer>> serverMap = entry.getValue();
+      serverMap.forEach((server, countsMap) -> saveSegmentCounts(countsMap, empId, server));
+      saveAllServerSegmentCounts(mergeServerCounts(serverMap), empId);
+      if (++processed % 50 == 0)
+        log.info("Progress: processed {}/{} employees...", processed, data.size());
+    }
+
+    log.info("✅ Aggregation completed in {} s", (System.currentTimeMillis() - start) / 1000);
+  }
+
+  @Transactional
+  public void truncateAllSegmentData() {
+    segmentCountByServerRepository.deleteAllInBatch();
+    segmentCountAllServersRepository.deleteAllInBatch();
+  }
+
+  private void saveSegmentCounts(Map<Integer, Integer> counts, Short empId, String server) {
+    List<SegmentCountByServer> buffer = new ArrayList<>(Math.min(counts.size(), BATCH_SIZE));
+    for (var entry : counts.entrySet()) {
+      buffer.add(new SegmentCountByServer(empId, server, entry.getKey(), entry.getValue()));
+      if (buffer.size() >= BATCH_SIZE) {
+        segmentCountByServerRepository.saveAll(buffer);
+        buffer.clear();
+      }
+    }
+    if (!buffer.isEmpty())
+      segmentCountByServerRepository.saveAll(buffer);
+  }
+
+  private void saveAllServerSegmentCounts(Map<Integer, Integer> counts, Short empId) {
+    List<SegmentCountAllServers> buffer = new ArrayList<>(Math.min(counts.size(), BATCH_SIZE));
+    for (var entry : counts.entrySet()) {
+      buffer.add(new SegmentCountAllServers(empId, entry.getKey(), entry.getValue()));
+      if (buffer.size() >= BATCH_SIZE) {
+        segmentCountAllServersRepository.saveAll(buffer);
+        buffer.clear();
+      }
+    }
+    if (!buffer.isEmpty())
+      segmentCountAllServersRepository.saveAll(buffer);
+  }
+
+  private Map<Integer, Integer> mergeServerCounts(Map<String, Map<Integer, Integer>> serverMap) {
+    Map<Integer, Integer> merged = new HashMap<>();
+    serverMap.values().forEach(map -> map.forEach((minute, count) -> merged.merge(minute, count, Integer::sum)));
+    return merged;
   }
 }

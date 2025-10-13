@@ -1,8 +1,14 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scoutress.KaimuxAdminStats.constants.CalculationConstants;
 import com.scoutress.KaimuxAdminStats.entity.Recommendations;
@@ -17,6 +23,8 @@ import com.scoutress.KaimuxAdminStats.services.RecommendationsService;
 
 @Service
 public class RecommendationsServiceImpl implements RecommendationsService {
+
+  private static final Logger log = LoggerFactory.getLogger(RecommendationsServiceImpl.class);
 
   private final ProductivityRepository productivityRepository;
   private final EmployeeRepository employeeRepository;
@@ -39,131 +47,90 @@ public class RecommendationsServiceImpl implements RecommendationsService {
   }
 
   @Override
+  @Transactional
   public void handleRecommendations() {
-    List<Productivity> rawProductivityData = getAllProductivityData();
-    List<AnnualPlaytime> rawAnnualPlaytimeData = getAllAnnualPlaytimeData();
-    List<Employee> rawEmployeesData = getAllEmployeesData();
-    List<Short> allEmployeeIds = getAllEmployeeIds(rawEmployeesData);
-    String recommendation;
+    long start = System.currentTimeMillis();
+    log.info("📊 Starting recommendation calculation...");
 
-    for (Short employeeId : allEmployeeIds) {
-      String levelForThisEmployee = getLevelForThisEmployee(rawEmployeesData, employeeId);
-      double annualPlaytimeForThisEmployee = getAnnualPlaytimeForThisEmployee(rawAnnualPlaytimeData, employeeId);
-      double productivityForThisEmployee = getProductivityForThisEmployee(rawProductivityData, employeeId);
-
-      if (isValidEmployeeData(levelForThisEmployee, annualPlaytimeForThisEmployee, productivityForThisEmployee)) {
-        if (levelForThisEmployee.equals("Owner") ||
-            levelForThisEmployee.equals("Operator") ||
-            levelForThisEmployee.equals("Organizer")) {
-
-          recommendation = "-";
-          saveRecommendationForThisEmployee(recommendation, employeeId);
-        } else {
-
-          if (annualPlaytimeForThisEmployee < MIN_ANNUAL_PLAYTIME) {
-            recommendation = "Dismiss";
-
-          } else {
-
-            if (productivityForThisEmployee > PROMOTION_VALUE) {
-              recommendation = "Promote";
-            } else if (productivityForThisEmployee < DEMOTION_VALUE) {
-              recommendation = "Demote";
-            } else {
-              recommendation = "-";
-            }
-          }
-          saveRecommendationForThisEmployee(recommendation, employeeId);
-        }
-
-      } else {
-        recommendation = "Error";
-        saveRecommendationForThisEmployee(recommendation, employeeId);
-      }
-    }
-  }
-
-  private List<Productivity> getAllProductivityData() {
-    return productivityRepository.findAll();
-  }
-
-  private List<AnnualPlaytime> getAllAnnualPlaytimeData() {
-    return annualPlaytimeRepository.findAll();
-  }
-
-  private List<Employee> getAllEmployeesData() {
-    return employeeRepository.findAll();
-  }
-
-  private List<Short> getAllEmployeeIds(List<Employee> rawEmployeesData) {
-    return rawEmployeesData
-        .stream()
-        .map(Employee::getId)
-        .distinct()
-        .sorted()
-        .toList();
-  }
-
-  private String getLevelForThisEmployee(List<Employee> rawEmployeesData, Short employeeId) {
-    if (rawEmployeesData == null) {
-      return "n/a";
-    }
-
-    return rawEmployeesData
-        .stream()
-        .filter(employee -> employee.getId().equals(employeeId))
-        .map(Employee::getLevel)
-        .findFirst()
-        .orElse("n/a");
-  }
-
-  private double getAnnualPlaytimeForThisEmployee(List<AnnualPlaytime> rawAnnualPlaytimeData, Short employeeId) {
-    if (rawAnnualPlaytimeData == null) {
-      return 0.0;
-    }
-
-    return rawAnnualPlaytimeData
-        .stream()
-        .filter(playtime -> playtime.getEmployeeId().equals(employeeId))
-        .map(AnnualPlaytime::getPlaytimeInHours)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private double getProductivityForThisEmployee(List<Productivity> rawProductivityData, Short employeeId) {
-    if (rawProductivityData == null) {
-      return 0.0;
-    }
-
-    return rawProductivityData
-        .stream()
-        .filter(productivity -> productivity.getEmployeeId().equals(employeeId))
-        .map(Productivity::getValue)
-        .findFirst()
-        .orElse(0.0);
-  }
-
-  private boolean isValidEmployeeData(String level, double playtime, double productivity) {
-    return level != null && playtime >= 0.0 && productivity >= 0.0;
-  }
-
-  private void saveRecommendationForThisEmployee(String recommendation, Short employeeId) {
-    if (recommendation == null) {
+    List<Employee> employees = employeeRepository
+        .findAll();
+    if (employees.isEmpty()) {
+      log.warn("No employees found, skipping recommendations.");
       return;
     }
 
-    Recommendations existingRecord = recommendationsRepository.findByEmployeeId(employeeId);
+    Map<Short, Double> playtimeMap = annualPlaytimeRepository
+        .findAll()
+        .stream()
+        .collect(Collectors.toMap(
+            AnnualPlaytime::getEmployeeId,
+            AnnualPlaytime::getPlaytimeInHours,
+            (a, b) -> a));
 
-    if (existingRecord != null) {
-      if (!existingRecord.getValue().equals(recommendation)) {
-        existingRecord.setValue(recommendation);
-        recommendationsRepository.save(existingRecord);
-      }
-    } else {
-      Recommendations newRecord = new Recommendations();
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setValue(recommendation);
-      recommendationsRepository.save(newRecord);
+    Map<Short, Double> productivityMap = productivityRepository
+        .findAll()
+        .stream()
+        .collect(Collectors.toMap(
+            Productivity::getEmployeeId,
+            Productivity::getValue,
+            (a, b) -> a));
+
+    Map<Short, Recommendations> existing = recommendationsRepository
+        .findAll()
+        .stream()
+        .collect(Collectors.toMap(
+            Recommendations::getEmployeeId,
+            r -> r,
+            (a, b) -> a));
+
+    List<Recommendations> updated = new ArrayList<>();
+
+    for (Employee emp : employees) {
+      short id = emp.getId();
+      String level = emp.getLevel();
+      double playtime = playtimeMap.getOrDefault(id, 0.0);
+      double productivity = productivityMap.getOrDefault(id, 0.0);
+
+      String newValue = calculateRecommendation(level, playtime, productivity);
+
+      Recommendations record = existing.getOrDefault(id, new Recommendations());
+      record.setEmployeeId(id);
+      record.setValue(newValue);
+      updated.add(record);
     }
+
+    recommendationsRepository.saveAll(updated);
+    long end = System.currentTimeMillis();
+    log.info("✅ Recommendations calculated for {} employees in {} ms.", updated.size(), (end - start));
+  }
+
+  private String calculateRecommendation(String level, double playtime, double productivity) {
+    if (level == null)
+      return "Error";
+
+    if (isAdmin(level)) {
+      return "-";
+    }
+
+    if (playtime < MIN_ANNUAL_PLAYTIME) {
+      return "Dismiss";
+    }
+
+    if (productivity > PROMOTION_VALUE) {
+      return "Promote";
+    }
+
+    if (productivity < DEMOTION_VALUE) {
+      return "Demote";
+    }
+
+    return "-";
+  }
+
+  private boolean isAdmin(String level) {
+    return switch (level) {
+      case "Owner", "Operator", "Organizer" -> true;
+      default -> false;
+    };
   }
 }

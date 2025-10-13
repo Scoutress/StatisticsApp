@@ -1,9 +1,15 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scoutress.KaimuxAdminStats.entity.LatestActivity;
 import com.scoutress.KaimuxAdminStats.repositories.LatestActivityRepository;
@@ -16,6 +22,8 @@ import com.scoutress.KaimuxAdminStats.services.LatestActivityService;
 
 @Service
 public class LatestActivityServiceImpl implements LatestActivityService {
+
+  private static final Logger log = LoggerFactory.getLogger(LatestActivityServiceImpl.class);
 
   private final EmployeeRepository employeeRepository;
   private final DailyPlaytimeRepository dailyPlaytimeRepository;
@@ -40,114 +48,82 @@ public class LatestActivityServiceImpl implements LatestActivityService {
   }
 
   @Override
+  @Transactional
   public void calculateLatestActivity() {
-    List<Short> employeeIds = getAllEmployeeIds();
+    long startTime = System.currentTimeMillis();
+    log.info("🕒 Starting LatestActivity calculation...");
 
-    for (Short employeeId : employeeIds) {
-      LocalDate lastPlaytime = getLastPlaytime(employeeId);
-      LocalDate lastMinecraftTicket = getLastMinecraftTicket(employeeId);
-      LocalDate lastDiscordChat = getLastDiscordChat(employeeId);
-
-      LocalDate lastDiscordTicketDate = getLastDiscordTicket(employeeId);
-
-      saveLatestActivity(
-          employeeId,
-          lastPlaytime,
-          lastDiscordTicketDate,
-          lastMinecraftTicket,
-          lastDiscordChat);
-    }
-  }
-
-  private List<Short> getAllEmployeeIds() {
-    return employeeRepository
+    List<Short> employeeIds = employeeRepository
         .findAll()
         .stream()
-        .map(employee -> employee.getId())
+        .map(e -> e.getId())
         .toList();
-  }
 
-  private LocalDate getLastPlaytime(Short employeeId) {
-    return dailyPlaytimeRepository
-        .findAll()
-        .stream()
-        .filter(playtime -> playtime.getEmployeeId().equals(employeeId))
-        .filter(playtime -> playtime.getTimeInHours() > 0)
-        .map(playtime -> playtime.getDate())
-        .max(LocalDate::compareTo)
-        .orElse(null);
-  }
-
-  private LocalDate getLastMinecraftTicket(Short employeeId) {
-    return dailyMinecraftTicketsRepository
-        .findAll()
-        .stream()
-        .filter(ticket -> ticket.getEmployeeId().equals(employeeId))
-        .map(ticket -> ticket.getDate())
-        .max(LocalDate::compareTo)
-        .orElse(null);
-  }
-
-  private LocalDate getLastDiscordChat(Short employeeId) {
-    return dailyDiscordMessagesRepository
-        .findAll()
-        .stream()
-        .filter(chat -> chat.getEmployeeId().equals(employeeId))
-        .filter(chat -> chat.getMsgCount() > 0)
-        .map(chat -> chat.getDate())
-        .max(LocalDate::compareTo)
-        .orElse(null);
-  }
-
-  private LocalDate getLastDiscordTicket(Short employeeId) {
-    return dailyDiscordTicketsRepository
-        .findAll()
-        .stream()
-        .filter(ticket -> ticket.getEmployeeId() != null && ticket.getEmployeeId().equals(employeeId))
-        .map(ticket -> ticket.getDate())
-        .max(LocalDate::compareTo)
-        .orElse(null);
-  }
-
-  private void saveLatestActivity(
-      Short employeeId,
-      LocalDate lastPlaytime,
-      LocalDate lastDiscordTicket,
-      LocalDate lastMinecraftTicket,
-      LocalDate lastDiscordChat) {
-
-    Short daysSinceLastPlaytime = (lastPlaytime != null)
-        ? (short) (LocalDate.now().toEpochDay() - lastPlaytime.toEpochDay())
-        : (short) -1;
-
-    Short daysSinceLastDiscordTicket = (lastDiscordTicket != null)
-        ? (short) (LocalDate.now().toEpochDay() - lastDiscordTicket.toEpochDay())
-        : (short) -1;
-
-    Short daysSinceLastMinecraftTicket = (lastMinecraftTicket != null)
-        ? (short) (LocalDate.now().toEpochDay() - lastMinecraftTicket.toEpochDay())
-        : (short) -1;
-
-    Short daysSinceLastDiscordChat = (lastDiscordChat != null)
-        ? (short) (LocalDate.now().toEpochDay() - lastDiscordChat.toEpochDay())
-        : (short) -1;
-
-    LatestActivity existingActivity = latestActivityRepository.findByEmployeeId(employeeId);
-
-    if (existingActivity != null) {
-      existingActivity.setDaysSinceLastPlaytime(daysSinceLastPlaytime);
-      existingActivity.setDaysSinceLastDiscordTicket(daysSinceLastDiscordTicket);
-      existingActivity.setDaysSinceLastMinecraftTicket(daysSinceLastMinecraftTicket);
-      existingActivity.setDaysSinceLastDiscordChat(daysSinceLastDiscordChat);
-      latestActivityRepository.save(existingActivity);
-    } else {
-      LatestActivity newActivity = new LatestActivity();
-      newActivity.setEmployeeId(employeeId);
-      newActivity.setDaysSinceLastPlaytime(daysSinceLastPlaytime);
-      newActivity.setDaysSinceLastDiscordTicket(daysSinceLastDiscordTicket);
-      newActivity.setDaysSinceLastMinecraftTicket(daysSinceLastMinecraftTicket);
-      newActivity.setDaysSinceLastDiscordChat(daysSinceLastDiscordChat);
-      latestActivityRepository.save(newActivity);
+    if (employeeIds.isEmpty()) {
+      log.warn("No employees found. Skipping LatestActivity calculation.");
+      return;
     }
+
+    Map<Short, LocalDate> lastPlaytime = dailyPlaytimeRepository
+        .findAll()
+        .stream()
+        .filter(p -> p.getTimeInHours() > 0)
+        .collect(Collectors.toMap(
+            p -> p.getEmployeeId(),
+            p -> p.getDate(),
+            (a, b) -> a.isAfter(b) ? a : b));
+
+    Map<Short, LocalDate> lastMcTickets = dailyMinecraftTicketsRepository
+        .findAll()
+        .stream()
+        .collect(Collectors.toMap(
+            t -> t.getEmployeeId(),
+            t -> t.getDate(),
+            (a, b) -> a.isAfter(b) ? a : b));
+
+    Map<Short, LocalDate> lastDcChats = dailyDiscordMessagesRepository
+        .findAll()
+        .stream()
+        .filter(m -> m.getMsgCount() > 0)
+        .collect(Collectors.toMap(
+            m -> m.getEmployeeId(),
+            m -> m.getDate(),
+            (a, b) -> a.isAfter(b) ? a : b));
+
+    Map<Short, LocalDate> lastDcTickets = dailyDiscordTicketsRepository
+        .findAll()
+        .stream()
+        .filter(t -> t.getEmployeeId() != null)
+        .collect(Collectors.toMap(
+            t -> t.getEmployeeId(),
+            t -> t.getDate(),
+            (a, b) -> a.isAfter(b) ? a : b));
+
+    List<LatestActivity> activities = new ArrayList<>();
+
+    for (Short id : employeeIds) {
+      LatestActivity a = latestActivityRepository.findByEmployeeId(id);
+      if (a == null)
+        a = new LatestActivity();
+
+      a.setEmployeeId(id);
+      a.setDaysSinceLastPlaytime(daysSince(lastPlaytime.get(id)));
+      a.setDaysSinceLastMinecraftTicket(daysSince(lastMcTickets.get(id)));
+      a.setDaysSinceLastDiscordChat(daysSince(lastDcChats.get(id)));
+      a.setDaysSinceLastDiscordTicket(daysSince(lastDcTickets.get(id)));
+
+      activities.add(a);
+    }
+
+    latestActivityRepository.saveAll(activities);
+
+    long duration = System.currentTimeMillis() - startTime;
+    log.info("✅ LatestActivity updated for {} employees in {} ms.", activities.size(), duration);
+  }
+
+  private Short daysSince(LocalDate date) {
+    return (date != null)
+        ? (short) (LocalDate.now().toEpochDay() - date.toEpochDay())
+        : (short) -1;
   }
 }

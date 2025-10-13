@@ -72,22 +72,19 @@ public class ProductivityServiceImpl implements ProductivityService {
       return;
     }
 
-    List<Short> employeeIds = employees.stream()
+    List<Short> employeeIds = employees
+        .stream()
         .map(Employee::getId)
-        .distinct()
         .sorted()
         .collect(Collectors.toList());
 
     log.info("Found {} employees to process.", employeeIds.size());
 
-    int processed = 0;
-    long avgPerEmployeeMs = 0;
-
     for (Short employeeId : employeeIds) {
-      long empStart = System.currentTimeMillis();
 
       try {
-        String level = employees.stream()
+        String level = employees
+            .stream()
             .filter(e -> e.getId().equals(employeeId))
             .map(Employee::getLevel)
             .findFirst()
@@ -109,11 +106,7 @@ public class ProductivityServiceImpl implements ProductivityService {
             discordMessages, discordMessagesCompared, minecraftTickets,
             minecraftTicketsCompared, playtime, level);
 
-        double afterComplaints = calculateFinalProductivityValue(average, complaints);
-
-        double finalProductivity = level.equals("Organizer")
-            ? afterComplaints + 0.1
-            : afterComplaints;
+        double finalProductivity = calculateFinalProductivityValue(average, complaints);
 
         saveProductivityValueForThisEmployee(finalProductivity, employeeId);
 
@@ -127,36 +120,18 @@ public class ProductivityServiceImpl implements ProductivityService {
       } catch (Exception e) {
         log.error("❌ Error while calculating productivity for employee ID {}: {}", employeeId, e.getMessage(), e);
       }
-
-      processed++;
-      long empTime = System.currentTimeMillis() - empStart;
-      avgPerEmployeeMs = (avgPerEmployeeMs * (processed - 1) + empTime) / processed;
-
-      int progress = (int) ((processed / (double) employeeIds.size()) * 100);
-      long remaining = avgPerEmployeeMs * (employeeIds.size() - processed);
-      String eta = formatMillis(remaining);
-
-      if (processed % 5 == 0 || processed == employeeIds.size()) {
-        log.info("Progress: {}% ({}/{}) employees processed | ETA: {}", progress, processed, employeeIds.size(), eta);
-      }
     }
 
     log.info("✅ Productivity calculation completed for {} employees in {} ms",
         employeeIds.size(), System.currentTimeMillis() - startTime);
   }
 
-  // === Utility method for ETA ===
-  private String formatMillis(long ms) {
-    long sec = ms / 1000;
-    long min = sec / 60;
-    sec = sec % 60;
-    return String.format("%dm %ds", min, sec);
-  }
-
   // === Calculations ===
 
   private double getComplaintsFinalValueForThisEmployee(Short employeeId) {
-    return complaintsSumRepository.findAll().stream()
+    return complaintsSumRepository
+        .findAll()
+        .stream()
         .filter(c -> c.getEmployeeId().equals(employeeId))
         .mapToDouble(ComplaintsSum::getValue)
         .findFirst()
@@ -210,7 +185,9 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private double getAverageValueOfDiscordMessages(Short id) {
-    return averageDailyDiscordMessagesRepository.findAll().stream()
+    return averageDailyDiscordMessagesRepository
+        .findAll()
+        .stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageDailyDiscordMessages::getValue)
         .filter(Objects::nonNull)
@@ -248,7 +225,9 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private double getAverageValueOfComparedDiscordMessages(Short id) {
-    return averageDiscordMessagesComparedRepository.findAll().stream()
+    return averageDiscordMessagesComparedRepository
+        .findAll()
+        .stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageDiscordMessagesCompared::getValue)
         .findFirst()
@@ -285,7 +264,9 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private double getAverageValueOfMinecraftTickets(Short id) {
-    return averageDailyMinecraftTicketsRepository.findAll().stream()
+    return averageDailyMinecraftTicketsRepository
+        .findAll()
+        .stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageDailyMinecraftTickets::getTickets)
         .findFirst()
@@ -320,7 +301,9 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private double getAverageValueOfMinecraftTicketsCompared(Short id) {
-    return averageMinecraftTicketsComparedRepository.findAll().stream()
+    return averageMinecraftTicketsComparedRepository
+        .findAll()
+        .stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageMinecraftTicketsCompared::getValue)
         .findFirst()
@@ -355,7 +338,9 @@ public class ProductivityServiceImpl implements ProductivityService {
   }
 
   private double getAverageValueOfPlaytime(Short id) {
-    return averagePlaytimeOverallRepository.findAll().stream()
+    return averagePlaytimeOverallRepository
+        .findAll()
+        .stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AveragePlaytimeOverall::getPlaytime)
         .findFirst()

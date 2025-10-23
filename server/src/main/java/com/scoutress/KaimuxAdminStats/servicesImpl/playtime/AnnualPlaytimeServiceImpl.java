@@ -37,10 +37,7 @@ public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
     long startTime = System.currentTimeMillis();
 
     try {
-      // ======================================================
-      // 1. Duomenų nuskaitymas
-      // ======================================================
-      List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
+      List<DailyPlaytime> allPlaytime = dailyPlaytimeRepository.findAll();
       log.debug("Fetched {} daily playtime records from database.", allPlaytime.size());
 
       if (allPlaytime.isEmpty()) {
@@ -48,15 +45,9 @@ public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
         return;
       }
 
-      // ======================================================
-      // 2. Skaičiavimas
-      // ======================================================
       List<AnnualPlaytime> annualPlaytime = calculateAnnualPlaytime(allPlaytime);
       log.debug("Calculated {} annual playtime records.", annualPlaytime.size());
 
-      // ======================================================
-      // 3. Įrašymas į duomenų bazę
-      // ======================================================
       saveAnnualPlaytime(annualPlaytime);
 
       long elapsed = System.currentTimeMillis() - startTime;
@@ -68,20 +59,6 @@ public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
     }
   }
 
-  // ======================================================
-  // DUOMENŲ NUSKAITYMAS
-  // ======================================================
-  private List<DailyPlaytime> getDailyPlaytimeData() {
-    List<DailyPlaytime> data = dailyPlaytimeRepository.findAll();
-    log.trace("Loaded {} entries from DailyPlaytimeRepository.", data.size());
-    data.stream().limit(5)
-        .forEach(d -> log.trace("Sample: emp={} date={} hours={}", d.getEmployeeId(), d.getDate(), d.getTimeInHours()));
-    return data;
-  }
-
-  // ======================================================
-  // SKAIČIAVIMAS
-  // ======================================================
   private List<AnnualPlaytime> calculateAnnualPlaytime(List<DailyPlaytime> allPlaytime) {
     LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
     log.info("Calculating total playtime since {}", dateOneYearAgo);
@@ -111,9 +88,6 @@ public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
     return handledAnnualPlaytimeData;
   }
 
-  // ======================================================
-  // ĮRAŠYMAS Į DUOMENŲ BAZĘ
-  // ======================================================
   private void saveAnnualPlaytime(List<AnnualPlaytime> annualPlaytimeData) {
     log.info("Saving {} annual playtime records to database...", annualPlaytimeData.size());
 

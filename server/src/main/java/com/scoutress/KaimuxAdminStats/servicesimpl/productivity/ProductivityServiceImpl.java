@@ -66,24 +66,28 @@ public class ProductivityServiceImpl implements ProductivityService {
     log.info("=== [START] Productivity calculation ===");
 
     List<Employee> employees = employeeRepository.findAll();
+
     if (employees.isEmpty()) {
       log.warn("⚠ No employee data found — skipping productivity calculation.");
       return;
     }
 
-    List<Short> employeeIds = employees.stream()
+    List<Short> employeeIds = employees
+        .stream()
         .map(Employee::getId)
         .sorted()
         .collect(Collectors.toList());
 
     log.info("Found {} employees to process.", employeeIds.size());
+
     int processed = 0;
 
     for (Short employeeId : employeeIds) {
       long empStart = System.currentTimeMillis();
 
       try {
-        Employee employee = employees.stream()
+        Employee employee = employees
+            .stream()
             .filter(e -> e.getId().equals(employeeId))
             .findFirst()
             .orElse(null);
@@ -99,7 +103,6 @@ public class ProductivityServiceImpl implements ProductivityService {
           log.debug("➡️ Processing Employee {} [{}]", employeeId, level);
         }
 
-        // === Step-by-step calculation
         double discordMessages = calculateDiscordMessagesFinalValueForThisEmployee(employeeId, level);
         double discordMessagesCompared = calculateDiscordMessagesComparedFinalValueForThisEmployee(employeeId, level);
         double minecraftTickets = calculateMinecraftTicketsFinalValueForThisEmployee(employeeId, level);

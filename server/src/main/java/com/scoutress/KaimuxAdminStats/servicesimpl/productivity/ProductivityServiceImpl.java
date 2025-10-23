@@ -66,41 +66,53 @@ public class ProductivityServiceImpl implements ProductivityService {
     log.info("=== [START] Productivity calculation ===");
 
     List<Employee> employees = employeeRepository.findAll();
-
     if (employees.isEmpty()) {
       log.warn("⚠ No employee data found — skipping productivity calculation.");
       return;
     }
 
-    List<Short> employeeIds = employees
-        .stream()
+    List<Short> employeeIds = employees.stream()
         .map(Employee::getId)
         .sorted()
         .collect(Collectors.toList());
 
     log.info("Found {} employees to process.", employeeIds.size());
+    int processed = 0;
 
     for (Short employeeId : employeeIds) {
+      long empStart = System.currentTimeMillis();
 
       try {
-        String level = employees
-            .stream()
+        Employee employee = employees.stream()
             .filter(e -> e.getId().equals(employeeId))
-            .map(Employee::getLevel)
             .findFirst()
             .orElse(null);
 
-        if (level == null) {
-          log.warn("Employee ID {} has no level defined — skipping.", employeeId);
+        if (employee == null || employee.getLevel() == null) {
+          log.warn("⚠ Employee ID {} missing data or level — skipping.", employeeId);
           continue;
         }
 
+        String level = employee.getLevel();
+
+        if (log.isDebugEnabled()) {
+          log.debug("➡️ Processing Employee {} [{}]", employeeId, level);
+        }
+
+        // === Step-by-step calculation
         double discordMessages = calculateDiscordMessagesFinalValueForThisEmployee(employeeId, level);
         double discordMessagesCompared = calculateDiscordMessagesComparedFinalValueForThisEmployee(employeeId, level);
         double minecraftTickets = calculateMinecraftTicketsFinalValueForThisEmployee(employeeId, level);
         double minecraftTicketsCompared = calculateMinecraftTicketsComparedFinalValueForThisEmployee(employeeId, level);
         double playtime = calculatePlaytimeFinalValueForThisEmployee(employeeId, level);
         double complaints = getComplaintsFinalValueForThisEmployee(employeeId);
+
+        if (log.isTraceEnabled()) {
+          log.trace(
+              "[Employee {}] Raw metrics → Discord={}, DiscordComp={}, MC={}, MCComp={}, Playtime={}, Complaints={}",
+              employeeId, discordMessages, discordMessagesCompared, minecraftTickets,
+              minecraftTicketsCompared, playtime, complaints);
+        }
 
         double average = calculateAverageValueOfAllFinals(
             discordMessages, discordMessagesCompared, minecraftTickets,
@@ -110,15 +122,26 @@ public class ProductivityServiceImpl implements ProductivityService {
 
         saveProductivityValueForThisEmployee(finalProductivity, employeeId);
 
+        long empElapsed = System.currentTimeMillis() - empStart;
+
+        log.info("✅ Employee {} [{}] -> Final productivity = {} ({} ms)",
+            employeeId, level, String.format("%.4f", finalProductivity), empElapsed);
+
         if (log.isDebugEnabled()) {
           log.debug(
-              "Employee {} [{}]: Discord={}, DiscordComp={}, Tickets={}, TicketsComp={}, Playtime={}, Complaints={}, Final={}",
+              "Details for Employee {} [{}]: Discord={}, DiscordComp={}, Tickets={}, TicketsComp={}, Playtime={}, Complaints={}, Average={}, Final={}",
               employeeId, level, discordMessages, discordMessagesCompared,
-              minecraftTickets, minecraftTicketsCompared, playtime, complaints, finalProductivity);
+              minecraftTickets, minecraftTicketsCompared, playtime, complaints,
+              String.format("%.4f", average), String.format("%.4f", finalProductivity));
         }
 
       } catch (Exception e) {
-        log.error("❌ Error while calculating productivity for employee ID {}: {}", employeeId, e.getMessage(), e);
+        log.error("❌ Error calculating productivity for employee ID {}: {}", employeeId, e.getMessage(), e);
+      }
+
+      processed++;
+      if (processed % 10 == 0 || processed == employeeIds.size()) {
+        log.info("Progress: processed {}/{} employees.", processed, employeeIds.size());
       }
     }
 
@@ -126,18 +149,19 @@ public class ProductivityServiceImpl implements ProductivityService {
         employeeIds.size(), System.currentTimeMillis() - startTime);
   }
 
-  // === Calculations ===
-
+  // === Complaints ===
   private double getComplaintsFinalValueForThisEmployee(Short employeeId) {
-    return complaintsSumRepository
-        .findAll()
-        .stream()
+    double val = complaintsSumRepository.findAll().stream()
         .filter(c -> c.getEmployeeId().equals(employeeId))
         .mapToDouble(ComplaintsSum::getValue)
         .findFirst()
         .orElse(0);
+    if (log.isTraceEnabled())
+      log.trace("[Complaints] emp={} val={}", employeeId, val);
+    return val;
   }
 
+  // === Average Calculation ===
   private double calculateAverageValueOfAllFinals(
       double discordMessages, double discordMessagesCompared,
       double minecraftTickets, double minecraftTicketsCompared,
@@ -146,7 +170,7 @@ public class ProductivityServiceImpl implements ProductivityService {
     double sum;
     int count;
 
-    if (level.equals("Helper")) {
+    if ("Helper".equals(level)) {
       sum = discordMessages + discordMessagesCompared + playtime;
       count = 3;
     } else {
@@ -154,26 +178,43 @@ public class ProductivityServiceImpl implements ProductivityService {
       count = 5;
     }
 
-    return sum / count;
+    double result = sum / count;
+    if (log.isTraceEnabled()) {
+      log.trace("[Average] lvl={} sum={} count={} → {}", level, sum, count, result);
+    }
+    return result;
   }
 
   private double calculateFinalProductivityValue(double avg, double complaints) {
-    return avg - (complaints * 0.01);
+    double result = avg - (complaints * 0.01);
+    if (log.isTraceEnabled()) {
+      log.trace("[FinalProductivity] avg={} complaints={} → {}", avg, complaints, result);
+    }
+    return result;
   }
 
   private void saveProductivityValueForThisEmployee(double value, Short employeeId) {
-    Productivity existing = productivityRepository.findByEmployeeId(employeeId);
+    long start = System.currentTimeMillis();
 
+    Productivity existing = productivityRepository.findByEmployeeId(employeeId);
     if (existing != null) {
       if (existing.getValue() != value) {
         existing.setValue(value);
         productivityRepository.save(existing);
+        log.debug("[DB] Updated existing productivity emp={} val={}", employeeId, value);
+      } else {
+        log.trace("[DB] No change for emp={} (existing={})", employeeId, existing.getValue());
       }
     } else {
       Productivity record = new Productivity();
       record.setEmployeeId(employeeId);
       record.setValue(value);
       productivityRepository.save(record);
+      log.debug("[DB] Inserted new productivity emp={} val={}", employeeId, value);
+    }
+
+    if (log.isTraceEnabled()) {
+      log.trace("[DB timing] emp={} saved in {} ms", employeeId, System.currentTimeMillis() - start);
     }
   }
 
@@ -181,22 +222,27 @@ public class ProductivityServiceImpl implements ProductivityService {
   private double calculateDiscordMessagesFinalValueForThisEmployee(Short id, String level) {
     double avg = getAverageValueOfDiscordMessages(id);
     double capped = getMaxOrCurrentValueOfDiscordMessages(avg, level);
-    return calculateAverageValueOfDiscordMessagesWithCoef(capped, level);
+    double result = calculateAverageValueOfDiscordMessagesWithCoef(capped, level);
+    if (log.isTraceEnabled()) {
+      log.trace("[Discord] emp={} lvl={} avg={} capped={} result={}", id, level, avg, capped, result);
+    }
+    return result;
   }
 
   private double getAverageValueOfDiscordMessages(Short id) {
-    return averageDailyDiscordMessagesRepository
-        .findAll()
-        .stream()
+    double val = averageDailyDiscordMessagesRepository.findAll().stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageDailyDiscordMessages::getValue)
         .filter(Objects::nonNull)
         .findFirst()
         .orElse(0.0);
+    if (log.isTraceEnabled())
+      log.trace("[DiscordAvg] emp={} val={}", id, val);
+    return val;
   }
 
   private double getMaxOrCurrentValueOfDiscordMessages(double val, String lvl) {
-    return switch (lvl) {
+    double capped = switch (lvl) {
       case "Manager" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_MAX_MANAGER);
       case "Overseer", "Organizer" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_MAX_OVERSEER);
       case "ChatMod" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_MAX_CHATMOD);
@@ -204,10 +250,13 @@ public class ProductivityServiceImpl implements ProductivityService {
       case "Helper" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_MAX_HELPER);
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[DiscordCap] lvl={} val={} → {}", lvl, val, capped);
+    return capped;
   }
 
   private double calculateAverageValueOfDiscordMessagesWithCoef(double val, String lvl) {
-    return switch (lvl) {
+    double result = switch (lvl) {
       case "Manager" -> val * CalculationConstants.DISCORD_MESSAGES_MANAGER;
       case "Overseer", "Organizer" -> val * CalculationConstants.DISCORD_MESSAGES_OVERSEER;
       case "ChatMod" -> val * CalculationConstants.DISCORD_MESSAGES_CHATMOD;
@@ -215,27 +264,34 @@ public class ProductivityServiceImpl implements ProductivityService {
       case "Helper" -> val * CalculationConstants.DISCORD_MESSAGES_HELPER;
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[DiscordCoef] lvl={} val={} → {}", lvl, val, result);
+    return result;
   }
 
   // === Discord Compared ===
   private double calculateDiscordMessagesComparedFinalValueForThisEmployee(Short id, String lvl) {
     double avg = getAverageValueOfComparedDiscordMessages(id);
     double capped = getMaxOrCurrentValueOfComparedDiscordMessages(avg, lvl);
-    return calculateAverageValueOfComparedDiscordMessagesWithCoef(capped, lvl);
+    double result = calculateAverageValueOfComparedDiscordMessagesWithCoef(capped, lvl);
+    if (log.isTraceEnabled())
+      log.trace("[DiscordComp] emp={} lvl={} avg={} capped={} result={}", id, lvl, avg, capped, result);
+    return result;
   }
 
   private double getAverageValueOfComparedDiscordMessages(Short id) {
-    return averageDiscordMessagesComparedRepository
-        .findAll()
-        .stream()
+    double val = averageDiscordMessagesComparedRepository.findAll().stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageDiscordMessagesCompared::getValue)
         .findFirst()
         .orElse(0.0);
+    if (log.isTraceEnabled())
+      log.trace("[DiscordCompAvg] emp={} val={}", id, val);
+    return val;
   }
 
   private double getMaxOrCurrentValueOfComparedDiscordMessages(double val, String lvl) {
-    return switch (lvl) {
+    double capped = switch (lvl) {
       case "Manager" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_MANAGER);
       case "Overseer", "Organizer" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_OVERSEER);
       case "ChatMod" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_CHATMOD);
@@ -243,10 +299,13 @@ public class ProductivityServiceImpl implements ProductivityService {
       case "Helper" -> Math.min(val, CalculationConstants.DISCORD_MESSAGES_COMPARED_MAX_HELPER);
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[DiscordCompCap] lvl={} val={} → {}", lvl, val, capped);
+    return capped;
   }
 
   private double calculateAverageValueOfComparedDiscordMessagesWithCoef(double val, String lvl) {
-    return switch (lvl) {
+    double result = switch (lvl) {
       case "Manager" -> val * CalculationConstants.DISCORD_MESSAGES_COMPARED_MANAGER;
       case "Overseer", "Organizer" -> val * CalculationConstants.DISCORD_MESSAGES_COMPARED_OVERSEER;
       case "ChatMod" -> val * CalculationConstants.DISCORD_MESSAGES_COMPARED_CHATMOD;
@@ -254,101 +313,128 @@ public class ProductivityServiceImpl implements ProductivityService {
       case "Helper" -> val * CalculationConstants.DISCORD_MESSAGES_COMPARED_HELPER;
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[DiscordCompCoef] lvl={} val={} → {}", lvl, val, result);
+    return result;
   }
 
   // === Minecraft Tickets ===
   private double calculateMinecraftTicketsFinalValueForThisEmployee(Short id, String lvl) {
     double avg = getAverageValueOfMinecraftTickets(id);
     double capped = getMaxOrCurrentValueOfMinecraftTickets(avg, lvl);
-    return calculateAverageValueOfMinecraftTicketsWithCoef(capped, lvl);
+    double result = calculateAverageValueOfMinecraftTicketsWithCoef(capped, lvl);
+    if (log.isTraceEnabled())
+      log.trace("[Tickets] emp={} lvl={} avg={} capped={} result={}", id, lvl, avg, capped, result);
+    return result;
   }
 
   private double getAverageValueOfMinecraftTickets(Short id) {
-    return averageDailyMinecraftTicketsRepository
-        .findAll()
-        .stream()
+    double val = averageDailyMinecraftTicketsRepository.findAll().stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageDailyMinecraftTickets::getTickets)
         .findFirst()
         .orElse(0.0);
+    if (log.isTraceEnabled())
+      log.trace("[TicketsAvg] emp={} val={}", id, val);
+    return val;
   }
 
   private double getMaxOrCurrentValueOfMinecraftTickets(double val, String lvl) {
-    return switch (lvl) {
+    double capped = switch (lvl) {
       case "Manager" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_MAX_MANAGER);
       case "Overseer", "Organizer" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_MAX_OVERSEER);
       case "ChatMod" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_MAX_CHATMOD);
       case "Support" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_MAX_SUPPORT);
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[TicketsCap] lvl={} val={} → {}", lvl, val, capped);
+    return capped;
   }
 
   private double calculateAverageValueOfMinecraftTicketsWithCoef(double val, String lvl) {
-    return switch (lvl) {
+    double result = switch (lvl) {
       case "Manager" -> val * CalculationConstants.MINECRAFT_TICKETS_MANAGER;
       case "Overseer", "Organizer" -> val * CalculationConstants.MINECRAFT_TICKETS_OVERSEER;
       case "ChatMod" -> val * CalculationConstants.MINECRAFT_TICKETS_CHATMOD;
       case "Support" -> val * CalculationConstants.MINECRAFT_TICKETS_SUPPORT;
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[TicketsCoef] lvl={} val={} → {}", lvl, val, result);
+    return result;
   }
 
   // === Minecraft Tickets Compared ===
   private double calculateMinecraftTicketsComparedFinalValueForThisEmployee(Short id, String lvl) {
     double avg = getAverageValueOfMinecraftTicketsCompared(id);
     double capped = getMaxOrCurrentValueOfMinecraftTicketsCompared(avg, lvl);
-    return calculateAverageValueOfMinecraftTicketsComparedWithCoef(capped, lvl);
+    double result = calculateAverageValueOfMinecraftTicketsComparedWithCoef(capped, lvl);
+    if (log.isTraceEnabled())
+      log.trace("[TicketsComp] emp={} lvl={} avg={} capped={} result={}", id, lvl, avg, capped, result);
+    return result;
   }
 
   private double getAverageValueOfMinecraftTicketsCompared(Short id) {
-    return averageMinecraftTicketsComparedRepository
-        .findAll()
-        .stream()
+    double val = averageMinecraftTicketsComparedRepository.findAll().stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AverageMinecraftTicketsCompared::getValue)
         .findFirst()
         .orElse(0.0);
+    if (log.isTraceEnabled())
+      log.trace("[TicketsCompAvg] emp={} val={}", id, val);
+    return val;
   }
 
   private double getMaxOrCurrentValueOfMinecraftTicketsCompared(double val, String lvl) {
-    return switch (lvl) {
+    double capped = switch (lvl) {
       case "Manager" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_MANAGER);
       case "Overseer", "Organizer" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_OVERSEER);
       case "ChatMod" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_CHATMOD);
       case "Support" -> Math.min(val, CalculationConstants.MINECRAFT_TICKETS_COMPARED_MAX_SUPPORT);
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[TicketsCompCap] lvl={} val={} → {}", lvl, val, capped);
+    return capped;
   }
 
   private double calculateAverageValueOfMinecraftTicketsComparedWithCoef(double val, String lvl) {
-    return switch (lvl) {
+    double result = switch (lvl) {
       case "Manager" -> val * CalculationConstants.MINECRAFT_TICKETS_COMPARED_MANAGER;
       case "Overseer", "Organizer" -> val * CalculationConstants.MINECRAFT_TICKETS_COMPARED_OVERSEER;
       case "ChatMod" -> val * CalculationConstants.MINECRAFT_TICKETS_COMPARED_CHATMOD;
       case "Support" -> val * CalculationConstants.MINECRAFT_TICKETS_COMPARED_SUPPORT;
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[TicketsCompCoef] lvl={} val={} → {}", lvl, val, result);
+    return result;
   }
 
   // === Playtime ===
   private double calculatePlaytimeFinalValueForThisEmployee(Short id, String lvl) {
     double avg = getAverageValueOfPlaytime(id);
     double capped = getMaxOrCurrentValueOfPlaytime(avg, lvl);
-    return calculateAverageValueOfPlaytimeWithCoef(capped, lvl);
+    double result = calculateAverageValueOfPlaytimeWithCoef(capped, lvl);
+    if (log.isTraceEnabled())
+      log.trace("[Playtime] emp={} lvl={} avg={} capped={} result={}", id, lvl, avg, capped, result);
+    return result;
   }
 
   private double getAverageValueOfPlaytime(Short id) {
-    return averagePlaytimeOverallRepository
-        .findAll()
-        .stream()
+    double val = averagePlaytimeOverallRepository.findAll().stream()
         .filter(v -> v.getEmployeeId().equals(id))
         .map(AveragePlaytimeOverall::getPlaytime)
         .findFirst()
         .orElse(0.0);
+    if (log.isTraceEnabled())
+      log.trace("[PlaytimeAvg] emp={} val={}", id, val);
+    return val;
   }
 
   private double getMaxOrCurrentValueOfPlaytime(double val, String lvl) {
-    return switch (lvl) {
+    double capped = switch (lvl) {
       case "Manager" -> Math.min(val, CalculationConstants.PLAYTIME_MAX_MANAGER);
       case "Overseer", "Organizer" -> Math.min(val, CalculationConstants.PLAYTIME_MAX_OVERSEER);
       case "ChatMod" -> Math.min(val, CalculationConstants.PLAYTIME_MAX_CHATMOD);
@@ -356,10 +442,13 @@ public class ProductivityServiceImpl implements ProductivityService {
       case "Helper" -> Math.min(val, CalculationConstants.PLAYTIME_MAX_HELPER);
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[PlaytimeCap] lvl={} val={} → {}", lvl, val, capped);
+    return capped;
   }
 
   private double calculateAverageValueOfPlaytimeWithCoef(double val, String lvl) {
-    return switch (lvl) {
+    double result = switch (lvl) {
       case "Manager" -> val * CalculationConstants.PLAYTIME_MANAGER;
       case "Overseer", "Organizer" -> val * CalculationConstants.PLAYTIME_OVERSEER;
       case "ChatMod" -> val * CalculationConstants.PLAYTIME_CHATMOD;
@@ -367,5 +456,8 @@ public class ProductivityServiceImpl implements ProductivityService {
       case "Helper" -> val * CalculationConstants.PLAYTIME_HELPER;
       default -> 0;
     };
+    if (log.isTraceEnabled())
+      log.trace("[PlaytimeCoef] lvl={} val={} → {}", lvl, val, result);
+    return result;
   }
 }

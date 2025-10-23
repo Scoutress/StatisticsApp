@@ -50,38 +50,40 @@ public class RecommendationsServiceImpl implements RecommendationsService {
   @Transactional
   public void handleRecommendations() {
     long start = System.currentTimeMillis();
-    log.info("📊 Starting recommendation calculation...");
+    log.info("🧮 [START] Starting recommendation calculation...");
 
-    List<Employee> employees = employeeRepository
-        .findAll();
+    List<Employee> employees = employeeRepository.findAll();
     if (employees.isEmpty()) {
-      log.warn("No employees found, skipping recommendations.");
+      log.warn("⚠ No employees found. Skipping recommendations.");
       return;
     }
 
-    Map<Short, Double> playtimeMap = annualPlaytimeRepository
-        .findAll()
+    log.info("Found {} employees for recommendation processing.", employees.size());
+
+    // === Load data sources ===
+    Map<Short, Double> playtimeMap = annualPlaytimeRepository.findAll()
         .stream()
         .collect(Collectors.toMap(
             AnnualPlaytime::getEmployeeId,
             AnnualPlaytime::getPlaytimeInHours,
             (a, b) -> a));
 
-    Map<Short, Double> productivityMap = productivityRepository
-        .findAll()
+    Map<Short, Double> productivityMap = productivityRepository.findAll()
         .stream()
         .collect(Collectors.toMap(
             Productivity::getEmployeeId,
             Productivity::getValue,
             (a, b) -> a));
 
-    Map<Short, Recommendations> existing = recommendationsRepository
-        .findAll()
+    Map<Short, Recommendations> existing = recommendationsRepository.findAll()
         .stream()
         .collect(Collectors.toMap(
             Recommendations::getEmployeeId,
             r -> r,
             (a, b) -> a));
+
+    log.debug("📊 Data loaded: {} playtime, {} productivity, {} existing recommendations.",
+        playtimeMap.size(), productivityMap.size(), existing.size());
 
     List<Recommendations> updated = new ArrayList<>();
 
@@ -97,40 +99,61 @@ public class RecommendationsServiceImpl implements RecommendationsService {
       record.setEmployeeId(id);
       record.setValue(newValue);
       updated.add(record);
+
+      if (log.isTraceEnabled()) {
+        log.trace("🧾 Employee {} ({}) → Playtime: {}, Productivity: {}, Recommendation: {}",
+            id, level, playtime, productivity, newValue);
+      }
     }
 
     recommendationsRepository.saveAll(updated);
-    long end = System.currentTimeMillis();
-    log.info("✅ Recommendations calculated for {} employees in {} ms.", updated.size(), (end - start));
+    long duration = System.currentTimeMillis() - start;
+    log.info("✅ [DONE] Recommendations calculated for {} employees in {} ms.", updated.size(), duration);
   }
 
   private String calculateRecommendation(String level, double playtime, double productivity) {
-    if (level == null)
+    if (level == null) {
+      log.warn("⚠ Employee level is null — returning 'Error'.");
       return "Error";
+    }
 
     if (isAdmin(level)) {
+      if (log.isTraceEnabled())
+        log.trace("Level '{}' detected as admin — recommendation set to '-'", level);
       return "-";
     }
 
     if (playtime < MIN_ANNUAL_PLAYTIME) {
+      if (log.isTraceEnabled())
+        log.trace("Playtime {} < MIN_ANNUAL_PLAYTIME {} → Dismiss", playtime, MIN_ANNUAL_PLAYTIME);
       return "Dismiss";
     }
 
     if (productivity > PROMOTION_VALUE) {
+      if (log.isTraceEnabled())
+        log.trace("Productivity {} > PROMOTION_VALUE {} → Promote", productivity, PROMOTION_VALUE);
       return "Promote";
     }
 
     if (productivity < DEMOTION_VALUE) {
+      if (log.isTraceEnabled())
+        log.trace("Productivity {} < DEMOTION_VALUE {} → Demote", productivity, DEMOTION_VALUE);
       return "Demote";
     }
+
+    if (log.isTraceEnabled())
+      log.trace("Playtime={} and Productivity={} within neutral range → '-'", playtime, productivity);
 
     return "-";
   }
 
   private boolean isAdmin(String level) {
-    return switch (level) {
+    boolean admin = switch (level) {
       case "Owner", "Operator", "Organizer" -> true;
       default -> false;
     };
+    if (log.isTraceEnabled())
+      log.trace("Checked level '{}' → isAdmin={}", level, admin);
+    return admin;
   }
 }

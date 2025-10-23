@@ -53,87 +53,106 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
 
   @Override
   public void handleDiscordMessages() {
-    log.info("=== Starting Discord messages handling process ===");
+    log.info("=== [START] Discord messages handling process ===");
+    long start = System.currentTimeMillis();
 
     try {
       List<DailyDiscordMessages> dailyMessages = getAllDailyDcMessages();
+      log.debug("Loaded {} existing DailyDiscordMessages records.", dailyMessages.size());
+
       List<EmployeeCodes> employeeCodes = getAllEmployeeCodes();
+      log.debug("Loaded {} EmployeeCodes records.", employeeCodes.size());
+
       List<Short> employeeIds = getAllEmployeeIds(employeeCodes);
       LocalDate todaysDate = LocalDate.now();
-
-      log.debug("Loaded {} employee codes and {} daily Discord message records.",
-          employeeCodes.size(),
-          dailyMessages.size());
+      log.info("Total employees: {}, Today's date: {}", employeeIds.size(), todaysDate);
 
       removeOldRawDcMessagesData();
 
       List<Short> employeeIdsWithoutData = lookForEmployeesWhereDataIsEmpty(employeeIds, dailyMessages);
-      log.debug("{} employees have no daily Discord data.", employeeIdsWithoutData.size());
+      log.debug("{} employees found without Discord data: {}", employeeIdsWithoutData.size(), employeeIdsWithoutData);
 
       LocalDate latestDate = checkLatestDateFromData(employeeIdsWithoutData);
-      log.info("Latest date found in Discord message data: {}", latestDate);
+      log.info("Latest Discord message date found across dataset: {}", latestDate);
 
+      // ======================
+      // DISCORD BOT OPERATIONS
+      // ======================
       log.info("🤖 Starting Discord bot message collection...");
       discordBotServiceImpl.checkOrStartDiscordBot();
       discordBotServiceImpl.sleepForHalfMin();
+
+      log.info("🕐 Discord bot now collecting messages between {} and {}", latestDate, todaysDate);
       discordBotServiceImpl.handleDcBotRequests(employeeCodes, latestDate, todaysDate, employeeIdsWithoutData);
       discordBotServiceImpl.sleepForHalfMin();
       discordBotServiceImpl.stopBot();
-      log.info("✅ Discord bot data collection completed.");
+      log.info("✅ Discord bot data collection completed successfully.");
 
+      // ======================
+      // DATA HANDLING SECTION
+      // ======================
       List<DiscordRawMessagesCounts> rawMessages = getAllRawDcMessagesData();
-      log.debug("Fetched {} raw Discord message count records.", rawMessages.size());
+      log.debug("Fetched {} raw Discord messages from temporary table.", rawMessages.size());
+      rawMessages.forEach(msg -> log.trace("RAW_MSG -> userId={}, date={}, count={}", msg.getDcUserId(),
+          msg.getMessageDate(), msg.getMessageCount()));
 
       discordMessagesService.convertDailyDiscordMessages(rawMessages, employeeCodes);
-      log.info("Converted raw Discord data into daily message records.");
+      log.info("Converted raw Discord message data into daily records.");
 
       duplicatesRemoverService.removeDailyDiscordMessagesDuplicates();
-      log.info("Removed duplicate daily Discord message entries.");
+      log.info("Removed any duplicate entries from DailyDiscordMessages table.");
 
       discordMessagesService.calculateAverageValueOfDailyDiscordMessages(dailyMessages, employeeIds);
-      log.info("Calculated average Discord message values per employee.");
+      log.info("Calculated average Discord message counts per employee per day.");
 
-      discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues(dailyMessages, employeeIds,
-          employeeIdsWithoutData);
-      log.info("Compared employee Discord activity ratios successfully.");
+      discordMessagesComparedService.compareEachEmployeeDailyDiscordMessagesValues(
+          dailyMessages, employeeIds, employeeIdsWithoutData);
+      log.info("Completed Discord message ratio comparison per employee.");
 
     } catch (Exception e) {
       log.error("❌ Error during Discord messages handling: {}", e.getMessage(), e);
     }
 
-    log.info("=== Discord messages handling process completed ===");
+    log.info("=== [END] Discord messages handling process completed in {} ms ===",
+        System.currentTimeMillis() - start);
   }
 
   private void removeOldRawDcMessagesData() {
+    log.debug("🧹 Removing old raw Discord message data...");
     try {
-      discordRawMessagesCountsRepository
-          .truncateTable();
-      log.info("Old raw Discord messages data removed.");
+      discordRawMessagesCountsRepository.truncateTable();
+      log.info("Old raw Discord message data truncated successfully.");
     } catch (Exception e) {
       log.error("Failed to truncate raw Discord messages table: {}", e.getMessage(), e);
     }
   }
 
   private List<DailyDiscordMessages> getAllDailyDcMessages() {
-    return dailyDiscordMessagesRepository
-        .findAll();
+    List<DailyDiscordMessages> data = dailyDiscordMessagesRepository.findAll();
+    data.forEach(msg -> log.trace("DAILY_MSG -> employeeId={}, date={}, msgCount={}", msg.getEmployeeId(),
+        msg.getDate(), msg.getMsgCount()));
+    return data;
   }
 
   private List<Short> getAllEmployeeIds(List<EmployeeCodes> employeeCodes) {
-    return employeeCodes
-        .stream()
+    List<Short> ids = employeeCodes.stream()
         .map(EmployeeCodes::getEmployeeId)
         .distinct()
         .collect(Collectors.toList());
+    log.trace("Collected {} distinct employee IDs: {}", ids.size(), ids);
+    return ids;
   }
 
   private List<EmployeeCodes> getAllEmployeeCodes() {
-    return employeeCodesRepository
-        .findAll();
+    List<EmployeeCodes> codes = employeeCodesRepository.findAll();
+    codes.forEach(
+        code -> log.trace("EMP_CODE -> employeeId={}, code={}", code.getEmployeeId(), code.getDiscordUserId()));
+    return codes;
   }
 
   private List<Short> lookForEmployeesWhereDataIsEmpty(List<Short> employeeIds,
       List<DailyDiscordMessages> dailyMessages) {
+    log.debug("🔍 Searching for employees without any daily Discord messages...");
     List<Short> employeeIdsWithoutDailyDcMsgsData = new ArrayList<>();
 
     for (Short employeeId : employeeIds) {
@@ -141,7 +160,9 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
 
       if (!hasData) {
         employeeIdsWithoutDailyDcMsgsData.add(employeeId);
-        log.warn("Employee {} has no daily Discord message data.", employeeId);
+        log.warn("⚠ Employee {} has no daily Discord message data.", employeeId);
+      } else {
+        log.trace("Employee {} has valid daily Discord message data.", employeeId);
       }
     }
 
@@ -149,13 +170,15 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
   }
 
   private boolean hasDailyDcMsgsData(Short employeeId, List<DailyDiscordMessages> allDailyDiscordMessagesData) {
-    return allDailyDiscordMessagesData
-        .stream()
+    boolean result = allDailyDiscordMessagesData.stream()
         .filter(msg -> msg.getEmployeeId().equals(employeeId))
         .anyMatch(msg -> msg.getDate() != null && msg.getMsgCount() >= 0);
+    log.trace("Employee {} daily data check -> {}", employeeId, result ? "HAS DATA" : "NO DATA");
+    return result;
   }
 
   private LocalDate checkLatestDateFromData(List<Short> employeeIdsWithoutData) {
+    log.debug("🧭 Checking latest date from Discord messages (excluding employees with no data)...");
     List<DailyDiscordMessages> dailyMessages = getAllDailyDcMessages();
     List<EmployeeCodes> employeeCodes = getAllEmployeeCodes();
     List<Short> employeeIds = getAllEmployeeIds(employeeCodes);
@@ -167,63 +190,74 @@ public class DiscordMessagesHandlingServiceImpl implements DiscordMessagesHandli
         if (!employeeData.isEmpty()) {
           LocalDate latestDate = getLatestDateFromData(employeeData);
           latestDcMsgDates.add(latestDate);
+          log.trace("Employee {} latest date: {}", employeeId, latestDate);
         }
       }
     }
 
-    return findOldestDateFromList(latestDcMsgDates);
+    LocalDate oldest = findOldestDateFromList(latestDcMsgDates);
+    log.info("Earliest common Discord message date across employees: {}", oldest);
+    return oldest;
   }
 
   private List<DailyDiscordMessages> getAllDcMsgDataForThisEmployee(Short employeeId,
       List<DailyDiscordMessages> allData) {
-    return allData
-        .stream()
+    List<DailyDiscordMessages> filtered = allData.stream()
         .filter(msg -> msg.getEmployeeId().equals(employeeId))
         .toList();
+    log.trace("Employee {} -> {} records found.", employeeId, filtered.size());
+    return filtered;
   }
 
   private LocalDate getLatestDateFromData(List<DailyDiscordMessages> employeeData) {
-    return employeeData
-        .stream()
+    LocalDate date = employeeData.stream()
         .map(DailyDiscordMessages::getDate)
         .max(Comparator.naturalOrder())
         .orElse(LocalDate.MIN);
+    log.trace("Latest date from {} records: {}", employeeData.size(), date);
+    return date;
   }
 
   private LocalDate findOldestDateFromList(List<LocalDate> dates) {
-    return dates
-        .stream()
+    LocalDate date = dates.stream()
         .min(LocalDate::compareTo)
         .orElse(LocalDate.parse("1970-01-01"));
+    log.trace("Oldest date found across {} entries: {}", dates.size(), date);
+    return date;
   }
 
   public List<EmployeeCodes> getAddEmployeeCodesData() {
-    return employeeCodesRepository
-        .findAll();
+    List<EmployeeCodes> data = employeeCodesRepository.findAll();
+    log.debug("Fetched {} EmployeeCodes from DB.", data.size());
+    return data;
   }
 
   public LocalDate getLatestDateFromDiscordMessagesData() {
-    return dailyDiscordMessagesRepository
-        .findMaxDate()
+    LocalDate date = dailyDiscordMessagesRepository.findMaxDate()
         .orElse(LocalDate.parse("1970-01-01"));
+    log.info("Latest date from DailyDiscordMessages: {}", date);
+    return date;
   }
 
   public List<DiscordRawMessagesCounts> getAllRawDcMessagesData() {
-    return discordRawMessagesCountsRepository
-        .findAll();
+    List<DiscordRawMessagesCounts> data = discordRawMessagesCountsRepository.findAll();
+    log.trace("Fetched {} DiscordRawMessagesCounts entries.", data.size());
+    return data;
   }
 
   public List<DailyDiscordMessages> getAllDailyDiscordMessages() {
-    return dailyDiscordMessagesRepository
-        .findAll();
+    List<DailyDiscordMessages> data = dailyDiscordMessagesRepository.findAll();
+    log.trace("Fetched {} DailyDiscordMessages entries.", data.size());
+    return data;
   }
 
   public List<Short> getAllEmployeesFromDailyDcMessages(List<DailyDiscordMessages> dailyMessages) {
-    return dailyMessages
-        .stream()
+    List<Short> ids = dailyMessages.stream()
         .map(DailyDiscordMessages::getEmployeeId)
         .distinct()
         .sorted()
         .toList();
+    log.trace("Found {} employees from daily Discord messages: {}", ids.size(), ids);
+    return ids;
   }
 }

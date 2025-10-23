@@ -133,6 +133,7 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
         recommendationsRepository);
   }
 
+  @Override
   public List<Short> checkNessesaryEmployeeData() {
     List<Employee> employees = employeeRepository.findAll();
     List<EmployeeCodes> codes = employeeCodesRepository.findAll();
@@ -156,21 +157,36 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
         .toList();
 
     log.info("=== [START] Cleaning invalid employee data ===");
-    log.info("Valid employees count: {}", validEmployeeIds.size());
+    log.info("🧾 Valid employees found: {}", validEmployeeIds.size());
+    log.info("🧹 Total repositories to clean: {}", repositories.size());
 
     int totalDeleted = 0;
     int processed = 0;
 
     for (JpaRepository<? extends HasEmployeeId, ?> repo : repositories) {
-      String repoName = repo.getClass().getSimpleName().replace("Repository", "");
+      String repoName = getRepositoryName(repo);
+      long repoStart = System.currentTimeMillis();
+
       try {
         int deleted = cleanInvalidData(repo, validEmployeeIds);
         totalDeleted += deleted;
         processed++;
-        log.info("✅ [{} / {}] {} cleaned ({} invalid records removed)", processed, repositories.size(), repoName,
-            deleted);
+
+        long elapsed = System.currentTimeMillis() - repoStart;
+        log.info("✅ [{}/{}] {} cleaned — {} invalid records removed ({} ms)",
+            processed, repositories.size(), repoName, deleted, elapsed);
+
+        if (log.isDebugEnabled()) {
+          log.debug("Repository {} finished cleanup with {} deletions in {} ms", repoName, deleted, elapsed);
+        }
+
       } catch (Exception e) {
-        log.error("❌ Error cleaning repository {}: {}", repoName, e.getMessage(), e);
+        processed++;
+        log.error("❌ [{}/{}] Error cleaning repository {}: {}", processed, repositories.size(), repoName,
+            e.getMessage());
+        if (log.isDebugEnabled()) {
+          log.debug("Stack trace for repository {} cleanup error:", repoName, e);
+        }
       }
     }
 
@@ -199,10 +215,40 @@ public class EmployeeDataServiceImpl implements EmployeeDataService {
       if (!invalidRecords.isEmpty()) {
         repository.deleteAllInBatch(invalidRecords);
         totalDeleted += invalidRecords.size();
+
+        if (log.isTraceEnabled()) {
+          log.trace("Deleted {} invalid entries in page {} from repository {}",
+              invalidRecords.size(), page, getRepositoryName(repository));
+        }
       }
+
       page++;
     } while (pageData.hasNext());
 
     return totalDeleted;
+  }
+
+  private String getRepositoryName(JpaRepository<?, ?> repo) {
+    try {
+      // Pirmiausia ieškome interfeiso iš tavo repo paketo
+      for (Class<?> iface : repo.getClass().getInterfaces()) {
+        String name = iface.getName();
+        if (name.startsWith("com.scoutress.KaimuxAdminStats.repositories")) {
+          return iface.getSimpleName();
+        }
+      }
+
+      // Jei neradome – bandome ultimate target klasę
+      Class<?> targetClass = org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass(repo);
+      if (targetClass != null && targetClass.getSimpleName().endsWith("Repository")) {
+        return targetClass.getSimpleName();
+      }
+
+      // Fallback
+      return repo.getClass().getSimpleName();
+    } catch (Exception e) {
+      log.warn("⚠️ Unable to resolve repository name for {}: {}", repo.getClass(), e.getMessage());
+      return repo.getClass().getSimpleName();
+    }
   }
 }

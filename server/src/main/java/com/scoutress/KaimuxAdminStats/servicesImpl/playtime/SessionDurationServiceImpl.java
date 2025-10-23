@@ -54,16 +54,22 @@ public class SessionDurationServiceImpl implements SessionDurationService {
   @Transactional
   public void processLoginLogouts(List<String> servers) {
     long start = System.currentTimeMillis();
-    log.info("=== Starting login/logout processing for {} servers ===", servers.size());
+    log.info("=== [START] Login/Logout processing for {} servers ===", servers.size());
 
     Map<String, Short> usernameToEmployee = employeeRepository.findAll().stream()
         .collect(Collectors.toMap(Employee::getUsername, Employee::getId));
 
     for (String server : servers) {
-      try {
-        log.info("Processing server: {}", server);
+      long serverStart = System.currentTimeMillis();
+      log.info("▶️ Processing login/logout for server '{}'", server);
 
+      try {
         List<RawPlaytimeSession> sessions = fetchAllPlaytimeSessions(server);
+        if (sessions.isEmpty()) {
+          log.warn("⚠️ No raw playtime data found for {}", server);
+          continue;
+        }
+
         Map<Integer, List<RawPlaytimeSession>> sessionsByUser = sessions.stream()
             .collect(Collectors.groupingBy(RawPlaytimeSession::getUserId));
 
@@ -71,6 +77,7 @@ public class SessionDurationServiceImpl implements SessionDurationService {
         for (Map.Entry<Integer, List<RawPlaytimeSession>> entry : sessionsByUser.entrySet()) {
           int rawUserId = entry.getKey();
           String username = getUsernameByUserId(server, rawUserId);
+
           if (username == null || !usernameToEmployee.containsKey(username))
             continue;
 
@@ -78,16 +85,21 @@ public class SessionDurationServiceImpl implements SessionDurationService {
           processUserSessions(entry.getValue(), server, employeeId);
           processedUsers++;
 
-          if (processedUsers % 100 == 0)
-            log.info("Progress: processed {} users for {}", processedUsers, server);
+          if (processedUsers % 100 == 0) {
+            log.debug("Server {} — processed {} users so far", server, processedUsers);
+          }
         }
+
+        log.info("✅ Server '{}' — processed {} users", server, processedUsers);
+
       } catch (Exception e) {
-        log.error("❌ Error processing server {}: {}", server, e.getMessage(), e);
+        log.error("❌ Error processing server '{}': {}", server, e.getMessage(), e);
       }
+
+      log.info("⏱ Completed server '{}' in {} ms", server, System.currentTimeMillis() - serverStart);
     }
 
-    long end = System.currentTimeMillis();
-    log.info("✅ Login/logout processing completed in {} ms", end - start);
+    log.info("✅ [END] Login/logout processing finished in {} ms", System.currentTimeMillis() - start);
   }
 
   private List<RawPlaytimeSession> fetchAllPlaytimeSessions(String server) {
@@ -111,12 +123,22 @@ public class SessionDurationServiceImpl implements SessionDurationService {
 
   private void processUserSessions(List<RawPlaytimeSession> sessions, String server, Short employeeId) {
     sessions.sort(Comparator.comparing(RawPlaytimeSession::getTime));
+
     for (int i = 0; i < sessions.size() - 1; i++) {
       RawPlaytimeSession current = sessions.get(i);
       RawPlaytimeSession next = sessions.get(i + 1);
+
       if (current.getAction() == 1 && next.getAction() == 0 && next.getTime() > current.getTime()) {
         LocalDateTime login = toDateTime(current.getTime());
         LocalDateTime logout = toDateTime(next.getTime());
+        Duration duration = Duration.between(login, logout);
+
+        // Skip abnormal sessions (>24h, negative or zero duration)
+        if (duration.isNegative() || duration.isZero() || duration.toHours() > 24) {
+          log.trace("⚠️ Abnormal session for Employee {} | {} | Duration: {}", employeeId, server, duration);
+          continue;
+        }
+
         saveLoginLogout(employeeId, server, login, logout);
       }
     }
@@ -134,8 +156,9 @@ public class SessionDurationServiceImpl implements SessionDurationService {
       record.setLoginTime(login);
       record.setLogoutTime(logout);
       loginLogoutTimesRepository.save(record);
+      log.trace("Employee {} | {} — login={}, logout={}", employeeId, server, login, logout);
     } catch (Exception e) {
-      log.error("❌ Failed to save login/logout for employee {} on {}: {}", employeeId, server, e.getMessage());
+      log.error("❌ Failed to save login/logout for emp {} on {}: {}", employeeId, server, e.getMessage());
     }
   }
 
@@ -145,43 +168,53 @@ public class SessionDurationServiceImpl implements SessionDurationService {
   @Override
   public void processSessions(List<String> servers) {
     long start = System.currentTimeMillis();
-    log.info("=== Starting session duration processing ===");
+    log.info("=== [START] Session duration calculation ===");
 
     for (String server : servers) {
+      long serverStart = System.currentTimeMillis();
+      log.info("▶️ Processing session durations for server '{}'", server);
+
       try {
-        List<LoginLogoutTimes> logs = loginLogoutTimesRepository.findAll()
-            .stream()
+        List<LoginLogoutTimes> logs = loginLogoutTimesRepository.findAll().stream()
             .filter(l -> l.getServerName().equals(server))
             .sorted(Comparator.comparing(LoginLogoutTimes::getLoginTime))
             .toList();
 
-        List<SessionDuration> newSessions = new ArrayList<>();
+        if (logs.isEmpty()) {
+          log.warn("⚠️ No login/logout entries found for {}", server);
+          continue;
+        }
 
-        for (LoginLogoutTimes log : logs) {
-          long duration = Duration.between(log.getLoginTime(), log.getLogoutTime()).getSeconds();
-          if (duration <= 0)
+        List<SessionDuration> sessions = new ArrayList<>();
+
+        for (LoginLogoutTimes logEntity : logs) {
+          long duration = Duration.between(logEntity.getLoginTime(), logEntity.getLogoutTime()).getSeconds();
+          if (duration <= 0 || duration > 86400) // >24h invalid
             continue;
 
           SessionDuration sd = new SessionDuration();
-          sd.setEmployeeId(log.getEmployeeId());
+          sd.setEmployeeId(logEntity.getEmployeeId());
           sd.setServer(server);
-          sd.setDate(log.getLoginTime().toLocalDate());
+          sd.setDate(logEntity.getLoginTime().toLocalDate());
           sd.setSingleSessionDurationInSec((int) duration);
-          newSessions.add(sd);
+          sessions.add(sd);
         }
 
-        if (!newSessions.isEmpty()) {
-          processedPlaytimeSessionsRepository.saveAll(newSessions);
-          log.info("Saved {} new session durations for {}", newSessions.size(), server);
+        if (!sessions.isEmpty()) {
+          processedPlaytimeSessionsRepository.saveAll(sessions);
+          log.info("💾 Saved {} valid sessions for {}", sessions.size(), server);
+        } else {
+          log.info("ℹ️ No valid sessions to save for {}", server);
         }
 
       } catch (Exception e) {
-        log.error("❌ Error processing sessions for {}: {}", server, e.getMessage(), e);
+        log.error("❌ Error processing session durations for '{}': {}", server, e.getMessage(), e);
       }
+
+      log.info("⏱ Completed server '{}' in {} ms", server, System.currentTimeMillis() - serverStart);
     }
 
-    long end = System.currentTimeMillis();
-    log.info("✅ Session duration processing finished in {} ms", end - start);
+    log.info("✅ [END] Session duration processing finished in {} ms", System.currentTimeMillis() - start);
   }
 
   // ===============================================================
@@ -190,21 +223,25 @@ public class SessionDurationServiceImpl implements SessionDurationService {
   @Override
   public void removeLoginLogoutsDupe() {
     log.info("🧹 Removing duplicate login/logout entries...");
-    removeDuplicates(loginLogoutTimesRepository.findAll(), loginLogoutTimesRepository, "login/logout");
+    removeDuplicates(loginLogoutTimesRepository.findAll(), loginLogoutTimesRepository, "login/logout",
+        e -> ((LoginLogoutTimes) e).getEmployeeId() + "|" + ((LoginLogoutTimes) e).getServerName() + "|"
+            + ((LoginLogoutTimes) e).getLoginTime() + "|" + ((LoginLogoutTimes) e).getLogoutTime());
   }
 
   @Override
   public void removeDuplicateSessionData() {
-    log.info("🧹 Removing duplicate session durations...");
-    removeDuplicates(processedPlaytimeSessionsRepository.findAll(), processedPlaytimeSessionsRepository, "session");
+    log.info("🧹 Removing duplicate session duration entries...");
+    removeDuplicates(processedPlaytimeSessionsRepository.findAll(), processedPlaytimeSessionsRepository, "session",
+        e -> ((SessionDuration) e).getEmployeeId() + "|" + ((SessionDuration) e).getServer() + "|"
+            + ((SessionDuration) e).getDate() + "|" + ((SessionDuration) e).getSingleSessionDurationInSec());
   }
 
   private <T> void removeDuplicates(List<T> all, org.springframework.data.jpa.repository.JpaRepository<T, ?> repo,
-      String type) {
+      String type, java.util.function.Function<T, String> keyExtractor) {
     long start = System.currentTimeMillis();
+    log.debug("Starting duplicate cleanup for {} entries ({})...", all.size(), type);
 
-    Map<Integer, List<T>> grouped = all.stream()
-        .collect(Collectors.groupingBy(Object::hashCode)); // simple hash-based grouping
+    Map<String, List<T>> grouped = all.stream().collect(Collectors.groupingBy(keyExtractor));
     List<T> toDelete = grouped.values().stream()
         .filter(list -> list.size() > 1)
         .flatMap(list -> list.subList(1, list.size()).stream())
@@ -212,11 +249,11 @@ public class SessionDurationServiceImpl implements SessionDurationService {
 
     if (!toDelete.isEmpty()) {
       repo.deleteAllInBatch(toDelete);
-      log.info("Removed {} duplicate {} entries", toDelete.size(), type);
+      log.info("🗑 Removed {} duplicate {} entries.", toDelete.size(), type);
     } else {
-      log.info("No duplicate {} entries found", type);
+      log.info("✅ No duplicate {} entries found.", type);
     }
 
-    log.debug("Duplicate cleanup took {} ms", System.currentTimeMillis() - start);
+    log.debug("Duplicate cleanup for '{}' took {} ms", type, System.currentTimeMillis() - start);
   }
 }

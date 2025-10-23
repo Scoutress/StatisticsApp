@@ -1,7 +1,6 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl.discordMessages;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -46,19 +45,25 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
       List<DiscordRawMessagesCounts> rawDcMessagesData,
       List<EmployeeCodes> employeeCodesData) {
 
-    log.info("=== Starting Discord message data conversion ===");
+    log.info("=== [START] Discord raw → daily message conversion ===");
 
     List<String> allUserIds = getAllUserIdsFromRawData(rawDcMessagesData);
-    log.debug("Found {} unique Discord user IDs.", allUserIds.size());
+    log.debug("Detected {} unique Discord user IDs for conversion.", allUserIds.size());
+    allUserIds.forEach(uid -> log.trace("User ID detected: {}", uid));
 
     for (String userID : allUserIds) {
+      log.debug("Processing user ID: {}", userID);
       try {
         Long userIdAsLong = Long.valueOf(userID);
         Short employeeId = getEmployeeIdByUserId(employeeCodesData, userIdAsLong);
+        log.trace("User {} matched with employee ID {}", userID, employeeId);
+
         List<LocalDate> listOfDatesThisUser = getAllDatesForThisUserFromRawData(rawDcMessagesData, userID);
+        log.trace("User {} has {} message dates: {}", userID, listOfDatesThisUser.size(), listOfDatesThisUser);
 
         for (LocalDate date : listOfDatesThisUser) {
           int messagesValue = getMessagesValueForThisUserThisDate(rawDcMessagesData, userID, date);
+          log.trace("User {} → Date {} → Message count: {}", userID, date, messagesValue);
           saveConvertedValue(messagesValue, employeeId, date);
         }
 
@@ -67,7 +72,7 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
       }
     }
 
-    log.info("✅ Discord message data conversion completed.");
+    log.info("✅ [END] Discord message conversion completed.");
   }
 
   public List<String> getAllUserIdsFromRawData(List<DiscordRawMessagesCounts> rawDcMessagesData) {
@@ -80,33 +85,39 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
   }
 
   public Short getEmployeeIdByUserId(List<EmployeeCodes> allEmployeeCodes, Long userIdAsLong) {
-    return allEmployeeCodes
+    Short id = allEmployeeCodes
         .stream()
         .filter(employee -> employee.getDiscordUserId().equals(userIdAsLong))
         .map(EmployeeCodes::getEmployeeId)
         .findFirst()
         .orElseThrow(() -> new RuntimeException("Employee not found for Discord user ID: " + userIdAsLong));
+    log.trace("Mapped Discord user {} to employee ID {}", userIdAsLong, id);
+    return id;
   }
 
   public List<LocalDate> getAllDatesForThisUserFromRawData(
       List<DiscordRawMessagesCounts> rawDcMessagesData, String userID) {
-    return rawDcMessagesData
+    List<LocalDate> dates = rawDcMessagesData
         .stream()
         .filter(dcMessage -> dcMessage.getDcUserId().equals(userID))
         .map(DiscordRawMessagesCounts::getMessageDate)
         .distinct()
         .sorted()
         .toList();
+    log.trace("User {} → {} distinct message dates.", userID, dates.size());
+    return dates;
   }
 
   public int getMessagesValueForThisUserThisDate(
       List<DiscordRawMessagesCounts> rawDcMessagesData, String userID, LocalDate date) {
-    return rawDcMessagesData
+    int total = rawDcMessagesData
         .stream()
         .filter(dcMessage -> dcMessage.getDcUserId().equals(userID))
         .filter(dcMessage -> dcMessage.getMessageDate().equals(date))
         .mapToInt(DiscordRawMessagesCounts::getMessageCount)
         .sum();
+    log.trace("User {} on {} → total messages: {}", userID, date, total);
+    return total;
   }
 
   public void saveConvertedValue(int messagesValue, Short employeeId, LocalDate date) {
@@ -116,14 +127,14 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
       if (existingRecord != null) {
         existingRecord.setMsgCount(messagesValue);
         dailyDiscordMessagesRepository.save(existingRecord);
-        log.debug("Updated daily message record for employee {} on {}: {}", employeeId, date, messagesValue);
+        log.debug("Updated record → employee={}, date={}, messages={}", employeeId, date, messagesValue);
       } else {
         DailyDiscordMessages newRecord = new DailyDiscordMessages();
         newRecord.setEmployeeId(employeeId);
         newRecord.setMsgCount(messagesValue);
         newRecord.setDate(date);
         dailyDiscordMessagesRepository.save(newRecord);
-        log.trace("Inserted new daily message record for employee {} on {}: {}", employeeId, date, messagesValue);
+        log.trace("Inserted new record → employee={}, date={}, messages={}", employeeId, date, messagesValue);
       }
     } catch (IncorrectResultSizeDataAccessException e) {
       log.error("❌ Duplicate record issue for employee {} on {}: {}", employeeId, date, e.getMessage());
@@ -138,7 +149,7 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
       List<DailyDiscordMessages> allDailyDcMessages,
       List<Short> allEmployeesFromDailyDcMessages) {
 
-    log.info("=== Starting Discord average message value calculation ===");
+    log.info("=== [START] Calculating average Discord message values per employee ===");
 
     if (allDailyDcMessages == null || allDailyDcMessages.isEmpty()) {
       log.warn("⚠️ No Discord message data found — skipping calculation.");
@@ -151,79 +162,93 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
     }
 
     LocalDate oldestDate = getOldestDateFromMessagesData(allDailyDcMessages);
-    log.debug("Oldest message date in dataset: {}", oldestDate);
+    log.debug("Oldest date in Discord dataset: {}", oldestDate);
 
     for (Short employeeId : allEmployeesFromDailyDcMessages) {
+      log.debug("Calculating average for employee ID {}", employeeId);
       try {
         LocalDate joinDate = getJoinDateThisEmployee(employeeId);
+        log.trace("Employee {} → join date: {}", employeeId, joinDate);
 
         if (joinDate == null) {
-          log.warn("[{}] Skipping employee {} — join date missing.", LocalDateTime.now(), employeeId);
+          log.warn("Skipping employee {} — join date missing.", employeeId);
           continue;
         }
 
         LocalDate effectiveStartDate = checkIfJoinDateIsAfterOldestDateFromMsgData(oldestDate, joinDate);
+        log.trace("Employee {} → effective start date for avg calc: {}", employeeId, effectiveStartDate);
 
         double avgValue = calculateAverageValueOfDiscordMessagesThisEmployee(allDailyDcMessages, effectiveStartDate,
             employeeId);
+        log.trace("Employee {} → calculated avg: {}", employeeId, avgValue);
 
         saveAverageValueForThisEmployee(avgValue, employeeId);
-
-        log.debug("Employee {} — average daily messages: {}", employeeId, avgValue);
+        log.debug("Employee {} → average value saved: {}", employeeId, avgValue);
 
       } catch (Exception e) {
         log.error("❌ Error processing employee {}: {}", employeeId, e.getMessage(), e);
       }
     }
 
-    log.info("✅ Completed Discord average message value calculation.");
+    log.info("✅ [END] Discord average message calculation completed.");
   }
 
   public LocalDate getOldestDateFromMessagesData(List<DailyDiscordMessages> rawData) {
-    return rawData
+    LocalDate oldest = rawData
         .stream()
         .map(DailyDiscordMessages::getDate)
         .min(LocalDate::compareTo)
         .orElse(LocalDate.now());
+    log.trace("Oldest date detected in message data: {}", oldest);
+    return oldest;
   }
 
   public LocalDate getJoinDateThisEmployee(Short employeeId) {
-    return employeeRepository
-        .findAll()
+    LocalDate joinDate = employeeRepository.findAll()
         .stream()
         .filter(e -> e.getId().equals(employeeId))
         .map(Employee::getJoinDate)
         .findFirst()
         .orElse(null);
+    log.trace("Employee {} → join date fetched: {}", employeeId, joinDate);
+    return joinDate;
   }
 
   public LocalDate checkIfJoinDateIsAfterOldestDateFromMsgData(LocalDate oldestDate, LocalDate joinDate) {
-    return joinDate.isAfter(oldestDate) ? joinDate : oldestDate;
+    LocalDate result = joinDate.isAfter(oldestDate) ? joinDate : oldestDate;
+    log.trace("Comparing join vs oldest date: join={}, oldest={} → using {}", joinDate, oldestDate, result);
+    return result;
   }
 
   public double calculateAverageValueOfDiscordMessagesThisEmployee(List<DailyDiscordMessages> rawData,
       LocalDate startDate, Short employee) {
     int totalMessages = calculateDiscordMessagesSumForThisEmployee(rawData, employee);
     int daysCount = calculateDaysAfterOldestDate(startDate);
-    return calculateAverageValue(totalMessages, daysCount);
+    double avg = calculateAverageValue(totalMessages, daysCount);
+    log.trace("Employee {} → total={}, days={}, avg={}", employee, totalMessages, daysCount, avg);
+    return avg;
   }
 
   public int calculateDiscordMessagesSumForThisEmployee(List<DailyDiscordMessages> rawData, Short employee) {
-    return rawData
+    int total = rawData
         .stream()
         .filter(messages -> messages.getEmployeeId().equals(employee))
         .mapToInt(DailyDiscordMessages::getMsgCount)
         .sum();
+    log.trace("Employee {} → total messages sum: {}", employee, total);
+    return total;
   }
 
   public int calculateDaysAfterOldestDate(LocalDate oldestDate) {
-    return (int) ChronoUnit.DAYS.between(oldestDate, LocalDate.now());
+    int days = (int) ChronoUnit.DAYS.between(oldestDate, LocalDate.now());
+    log.trace("Days between {} and today: {}", oldestDate, days);
+    return days;
   }
 
   public double calculateAverageValue(int totalMessages, int daysCount) {
-    if (daysCount == 0)
-      return 0;
-    return (double) totalMessages / daysCount;
+    double avg = (daysCount == 0) ? 0 : (double) totalMessages / daysCount;
+    log.trace("Calculating average → total={}, days={}, avg={}", totalMessages, daysCount, avg);
+    return avg;
   }
 
   public void saveAverageValueForThisEmployee(double avgValue, Short employeeId) {
@@ -232,13 +257,13 @@ public class DiscordMessagesServiceImpl implements DiscordMessagesService {
     if (record != null) {
       record.setValue(avgValue);
       averageDailyDiscordMessagesRepository.save(record);
-      log.trace("Updated average message record for employee {}: {}", employeeId, avgValue);
+      log.debug("Updated average record → employee={}, avg={}", employeeId, avgValue);
     } else {
       AverageDailyDiscordMessages newRecord = new AverageDailyDiscordMessages();
       newRecord.setEmployeeId(employeeId);
       newRecord.setValue(avgValue);
       averageDailyDiscordMessagesRepository.save(newRecord);
-      log.trace("Inserted new average message record for employee {}: {}", employeeId, avgValue);
+      log.trace("Inserted new average record → employee={}, avg={}", employeeId, avgValue);
     }
   }
 }

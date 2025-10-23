@@ -33,27 +33,58 @@ public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
 
   @Override
   public void handleAnnualPlaytime() {
-    log.info("=== Starting annual playtime calculation ===");
+    log.info("=== [START] Annual playtime calculation process ===");
+    long startTime = System.currentTimeMillis();
 
-    List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
-    log.debug("Fetched {} daily playtime records from database.", allPlaytime.size());
+    try {
+      // ======================================================
+      // 1. Duomenų nuskaitymas
+      // ======================================================
+      List<DailyPlaytime> allPlaytime = getDailyPlaytimeData();
+      log.debug("Fetched {} daily playtime records from database.", allPlaytime.size());
 
-    List<AnnualPlaytime> annualPlaytime = calculateAnnualPlaytime(allPlaytime);
-    log.debug("Calculated {} annual playtime records.", annualPlaytime.size());
+      if (allPlaytime.isEmpty()) {
+        log.warn("⚠️ No daily playtime records found — skipping process.");
+        return;
+      }
 
-    saveAnnualPlaytime(annualPlaytime);
+      // ======================================================
+      // 2. Skaičiavimas
+      // ======================================================
+      List<AnnualPlaytime> annualPlaytime = calculateAnnualPlaytime(allPlaytime);
+      log.debug("Calculated {} annual playtime records.", annualPlaytime.size());
 
-    log.info("✅ Annual playtime processing completed successfully.");
+      // ======================================================
+      // 3. Įrašymas į duomenų bazę
+      // ======================================================
+      saveAnnualPlaytime(annualPlaytime);
+
+      long elapsed = System.currentTimeMillis() - startTime;
+      log.info("✅ [END] Annual playtime processing completed successfully in {} ms ({} s).",
+          elapsed, elapsed / 1000.0);
+
+    } catch (Exception e) {
+      log.error("❌ Critical error during annual playtime calculation: {}", e.getMessage(), e);
+    }
   }
 
+  // ======================================================
+  // DUOMENŲ NUSKAITYMAS
+  // ======================================================
   private List<DailyPlaytime> getDailyPlaytimeData() {
-    return dailyPlaytimeRepository.findAll();
+    List<DailyPlaytime> data = dailyPlaytimeRepository.findAll();
+    log.trace("Loaded {} entries from DailyPlaytimeRepository.", data.size());
+    data.stream().limit(5)
+        .forEach(d -> log.trace("Sample: emp={} date={} hours={}", d.getEmployeeId(), d.getDate(), d.getTimeInHours()));
+    return data;
   }
 
+  // ======================================================
+  // SKAIČIAVIMAS
+  // ======================================================
   private List<AnnualPlaytime> calculateAnnualPlaytime(List<DailyPlaytime> allPlaytime) {
     LocalDate dateOneYearAgo = LocalDate.now().minusYears(1).minusDays(1);
-
-    log.debug("Filtering playtime data from {} until now.", dateOneYearAgo);
+    log.info("Calculating total playtime since {}", dateOneYearAgo);
 
     Map<Short, Double> annualPlaytimeMap = allPlaytime
         .stream()
@@ -62,48 +93,60 @@ public class AnnualPlaytimeServiceImpl implements AnnualPlaytimeService {
             DailyPlaytime::getEmployeeId,
             Collectors.summingDouble(DailyPlaytime::getTimeInHours)));
 
-    List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap
-        .entrySet()
+    log.debug("Aggregated playtime for {} employees.", annualPlaytimeMap.size());
+
+    List<AnnualPlaytime> handledAnnualPlaytimeData = annualPlaytimeMap.entrySet()
         .stream()
         .map(entry -> {
-          AnnualPlaytime annualPlaytime = new AnnualPlaytime();
-          annualPlaytime.setEmployeeId(entry.getKey());
-          annualPlaytime.setPlaytimeInHours(entry.getValue());
-          return annualPlaytime;
+          AnnualPlaytime ap = new AnnualPlaytime();
+          ap.setEmployeeId(entry.getKey());
+          ap.setPlaytimeInHours(entry.getValue());
+          log.trace("Employee {} — total annual playtime: {} hours", entry.getKey(), entry.getValue());
+          return ap;
         })
         .sorted(Comparator.comparing(AnnualPlaytime::getEmployeeId))
         .collect(Collectors.toList());
 
-    log.debug("Aggregated annual playtime for {} employees.", handledAnnualPlaytimeData.size());
-
+    log.info("✅ Aggregated annual playtime data prepared for {} employees.", handledAnnualPlaytimeData.size());
     return handledAnnualPlaytimeData;
   }
 
+  // ======================================================
+  // ĮRAŠYMAS Į DUOMENŲ BAZĘ
+  // ======================================================
   private void saveAnnualPlaytime(List<AnnualPlaytime> annualPlaytimeData) {
-
     log.info("Saving {} annual playtime records to database...", annualPlaytimeData.size());
 
-    annualPlaytimeData.forEach(annualPlaytime -> {
+    int processed = 0;
+    for (AnnualPlaytime annualPlaytime : annualPlaytimeData) {
       try {
-        AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByEmployeeId(annualPlaytime.getEmployeeId());
+        Short empId = annualPlaytime.getEmployeeId();
+        double hours = annualPlaytime.getPlaytimeInHours();
+
+        AnnualPlaytime existingPlaytime = annualPlaytimeRepository.findByEmployeeId(empId);
 
         if (existingPlaytime != null) {
-          existingPlaytime.setPlaytimeInHours(annualPlaytime.getPlaytimeInHours());
+          double oldValue = existingPlaytime.getPlaytimeInHours();
+          existingPlaytime.setPlaytimeInHours(hours);
           annualPlaytimeRepository.save(existingPlaytime);
-
-          log.debug("Updated playtime for employee ID {}", annualPlaytime.getEmployeeId());
-
+          log.trace("Updated employee {} — old={}h → new={}h", empId, oldValue, hours);
         } else {
           annualPlaytimeRepository.save(annualPlaytime);
-
-          log.debug("Inserted new playtime record for employee ID {}", annualPlaytime.getEmployeeId());
+          log.trace("Inserted new record for employee {} — {} hours", empId, hours);
         }
-      } catch (Exception e) {
-        log.error("❌ Failed to save playtime for employee ID {}: {}", annualPlaytime.getEmployeeId(), e.getMessage(),
-            e);
-      }
-    });
 
-    log.info("✅ All annual playtime records saved successfully.");
+      } catch (Exception e) {
+        log.error("❌ Failed to save annual playtime for employee {}: {}", annualPlaytime.getEmployeeId(),
+            e.getMessage(), e);
+      }
+
+      processed++;
+      if (processed % 25 == 0 || processed == annualPlaytimeData.size()) {
+        int percent = (int) ((processed / (double) annualPlaytimeData.size()) * 100);
+        log.info("Progress: {}/{} employees processed ({}%)", processed, annualPlaytimeData.size(), percent);
+      }
+    }
+
+    log.info("✅ All annual playtime records saved successfully ({} total).", annualPlaytimeData.size());
   }
 }

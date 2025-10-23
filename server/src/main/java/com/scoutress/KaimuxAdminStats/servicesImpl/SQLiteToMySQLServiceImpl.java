@@ -29,17 +29,26 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
     this.mysqlJdbcTemplate = mysqlJdbcTemplate;
   }
 
+  // ===========================================================
+  // USERS DATABASE INITIALIZATION
+  // ===========================================================
   @Override
   public void initializeUsersDatabase(List<String> servers) {
-    log.info("Initializing users database for servers: {}", servers);
+    long start = System.currentTimeMillis();
+    log.info("🗂️ [START] Initializing users database for servers: {}", servers);
+
     dropAndCreateUsersTable(servers);
     transferUsersData(servers);
+
+    log.info("✅ [DONE] Users database initialized in {} ms", System.currentTimeMillis() - start);
   }
 
   private void dropAndCreateUsersTable(List<String> servers) {
     for (String server : servers) {
-      if (!isValidServerName(server))
+      if (!isValidServerName(server)) {
+        log.warn("⚠️ Invalid server name '{}', skipping.", server);
         continue;
+      }
       String tableName = "raw_user_data_" + server.toLowerCase();
       try {
         mysqlJdbcTemplate.execute("DROP TABLE IF EXISTS " + tableName);
@@ -49,9 +58,9 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
               username VARCHAR(255) NOT NULL
             )
             """.formatted(tableName));
-        log.info("✅ Table {} created successfully.", tableName);
+        log.info("✅ Table '{}' created successfully.", tableName);
       } catch (DataAccessException e) {
-        log.error("❌ Failed to create table for server {}: {}", server, e.getMessage());
+        log.error("❌ Failed to create users table for '{}': {}", server, e.getMessage(), e);
       }
     }
   }
@@ -63,12 +72,12 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
       File sqliteFile = new File(SQLITE_DB_PATH + server + ".db");
       if (!sqliteFile.exists()) {
-        log.warn("⚠️ SQLite DB not found for server: {}", server);
+        log.warn("⚠️ SQLite DB file not found for server '{}': {}", server, sqliteFile.getAbsolutePath());
         continue;
       }
 
       String sqliteUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
-      log.info("Transferring users data from {}", sqliteFile.getName());
+      log.info("📤 Transferring user data from {}", sqliteFile.getName());
 
       try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl);
           Statement stmt = sqliteConnection.createStatement();
@@ -79,34 +88,49 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
           int userId = rs.getInt("id");
           String username = rs.getString("user");
           batchArgs.add(new Object[] { userId, username, username });
+
+          if (log.isTraceEnabled())
+            log.trace("User row → id={}, username={}", userId, username);
         }
 
         if (!batchArgs.isEmpty()) {
           String insertQuery = "INSERT INTO raw_user_data_" + server.toLowerCase()
               + " (user_id, username) VALUES (?, ?) ON DUPLICATE KEY UPDATE username = ?";
+          log.debug("Executing batch insert into {} ({} records)", server, batchArgs.size());
           mysqlJdbcTemplate.batchUpdate(insertQuery, batchArgs);
-          log.info("✅ Inserted {} users for server {}", batchArgs.size(), server);
+          log.info("✅ Inserted/updated {} user entries for server '{}'.", batchArgs.size(), server);
         } else {
-          log.info("ℹ️ No users found for server {}", server);
+          log.info("ℹ️ No user records found in '{}'", sqliteFile.getName());
         }
 
       } catch (SQLException e) {
-        log.error("❌ Error transferring users for server {}: {}", server, e.getMessage());
+        log.error("❌ SQL error transferring users for '{}': {}", server, e.getMessage(), e);
+      } catch (Exception e) {
+        log.error("❌ Unexpected error while transferring users for '{}': {}", server, e.getMessage(), e);
       }
     }
   }
 
+  // ===========================================================
+  // PLAYTIME SESSIONS DATABASE INITIALIZATION
+  // ===========================================================
   @Override
   public void initializePlaytimeSessionsDatabase(List<String> servers) {
-    log.info("Initializing playtime sessions database...");
+    long start = System.currentTimeMillis();
+    log.info("🕒 [START] Initializing playtime sessions database for servers: {}", servers);
+
     dropAndCreatePlaytimeSessionsTable(servers);
     transferPlaytimeSessionsData(servers);
+
+    log.info("✅ [DONE] Playtime sessions initialized in {} ms", System.currentTimeMillis() - start);
   }
 
   private void dropAndCreatePlaytimeSessionsTable(List<String> servers) {
     for (String server : servers) {
-      if (!isValidServerName(server))
+      if (!isValidServerName(server)) {
+        log.warn("⚠️ Invalid server name '{}', skipping.", server);
         continue;
+      }
       String tableName = "raw_playtime_sessions_data_" + server.toLowerCase();
       try {
         mysqlJdbcTemplate.execute("DROP TABLE IF EXISTS " + tableName);
@@ -118,9 +142,9 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
               action TINYINT(1) NOT NULL
             )
             """.formatted(tableName));
-        log.info("✅ Table {} created successfully.", tableName);
+        log.info("✅ Table '{}' created successfully.", tableName);
       } catch (DataAccessException e) {
-        log.error("❌ Failed to create playtime table for {}: {}", server, e.getMessage());
+        log.error("❌ Failed to create playtime table for '{}': {}", server, e.getMessage(), e);
       }
     }
   }
@@ -132,12 +156,12 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
       File sqliteFile = new File(SQLITE_DB_PATH + server + ".db");
       if (!sqliteFile.exists()) {
-        log.warn("⚠️ SQLite DB not found for server: {}", server);
+        log.warn("⚠️ SQLite DB file not found for '{}': {}", server, sqliteFile.getAbsolutePath());
         continue;
       }
 
       String sqliteUrl = "jdbc:sqlite:" + sqliteFile.getAbsolutePath();
-      log.info("Transferring playtime sessions from {}", sqliteFile.getName());
+      log.info("📤 Transferring playtime sessions from {}", sqliteFile.getName());
 
       try (Connection sqliteConnection = DriverManager.getConnection(sqliteUrl);
           Statement stmt = sqliteConnection.createStatement();
@@ -145,29 +169,41 @@ public class SQLiteToMySQLServiceImpl implements SQLiteToMySQLService {
 
         List<Object[]> batchArgs = new ArrayList<>();
         while (rs.next()) {
-          batchArgs.add(new Object[] {
-              rs.getInt("user"),
-              rs.getInt("time"),
-              rs.getInt("action")
-          });
+          int userId = rs.getInt("user");
+          int time = rs.getInt("time");
+          int action = rs.getInt("action");
+
+          batchArgs.add(new Object[] { userId, time, action });
+
+          if (log.isTraceEnabled())
+            log.trace("Session row → userId={}, time={}, action={}", userId, time, action);
         }
 
         if (!batchArgs.isEmpty()) {
           String insertQuery = "INSERT INTO raw_playtime_sessions_data_" + server.toLowerCase()
               + " (user_id, time, action) VALUES (?, ?, ?)";
+          log.debug("Executing batch insert into {} ({} records)", server, batchArgs.size());
           mysqlJdbcTemplate.batchUpdate(insertQuery, batchArgs);
-          log.info("✅ Inserted {} playtime sessions for {}", batchArgs.size(), server);
+          log.info("✅ Inserted {} playtime session entries for '{}'.", batchArgs.size(), server);
         } else {
-          log.info("ℹ️ No playtime sessions found for {}", server);
+          log.info("ℹ️ No playtime sessions found in '{}'", sqliteFile.getName());
         }
 
       } catch (SQLException e) {
-        log.error("❌ Error transferring playtime sessions for {}: {}", server, e.getMessage());
+        log.error("❌ SQL error transferring playtime sessions for '{}': {}", server, e.getMessage(), e);
+      } catch (Exception e) {
+        log.error("❌ Unexpected error transferring playtime sessions for '{}': {}", server, e.getMessage(), e);
       }
     }
   }
 
+  // ===========================================================
+  // VALIDATION
+  // ===========================================================
   private boolean isValidServerName(String name) {
-    return name != null && name.matches("^[a-zA-Z0-9_]+$");
+    boolean valid = name != null && name.matches("^[a-zA-Z0-9_]+$");
+    if (!valid)
+      log.warn("⚠️ Invalid server name '{}'. Must be alphanumeric.", name);
+    return valid;
   }
 }

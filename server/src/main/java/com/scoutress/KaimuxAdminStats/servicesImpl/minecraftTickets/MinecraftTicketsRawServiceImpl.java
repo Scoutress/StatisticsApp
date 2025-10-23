@@ -72,68 +72,105 @@ public class MinecraftTicketsRawServiceImpl implements MinecraftTicketsRawServic
 
   @Override
   public void handleMinecraftTickets() {
-    log.info("=== Starting Minecraft Tickets data handling process ===");
+    log.info("=== [START] Minecraft Tickets data handling process ===");
+    long startTime = System.currentTimeMillis();
 
     try {
+      // ======================================================
+      // 1. Išvalyti senus duomenis
+      // ======================================================
       removeRawMcTicketsData();
 
+      // ======================================================
+      // 2. Paruošti pradinius duomenis
+      // ======================================================
       List<EmployeeCodes> employeeCodes = extractEmployeeCodes();
       List<Short> allEmployeeIds = getAllEmployeeIdsFromEmployeeCodes(employeeCodes);
       LocalDate newestDateFromDailyMcTickets = getNewestDateFromDailyMcTickets();
       List<DailyMinecraftTickets> allDailyMcTickets = getDailyMinecraftTicketsData();
 
-      log.debug("Loaded {} employee codes and {} daily ticket entries.", employeeCodes.size(),
-          allDailyMcTickets.size());
+      log.debug("Loaded {} employee codes, {} employee IDs, {} daily tickets (latest date {}).",
+          employeeCodes.size(), allEmployeeIds.size(), allDailyMcTickets.size(), newestDateFromDailyMcTickets);
 
+      // ======================================================
+      // 3. Patikrinti darbuotojus be duomenų
+      // ======================================================
       List<LocalDate> joinDates = new ArrayList<>();
       int processed = 0;
+      int total = allEmployeeIds.size();
 
       for (Short employeeId : allEmployeeIds) {
         boolean hasEmployeeData = hasEmployeeMcTicketsData(employeeId, allDailyMcTickets);
+        log.trace("Employee {} → hasData={}", employeeId, hasEmployeeData);
 
         if (!hasEmployeeData) {
           boolean wasChecked = wasEmployeeCheckedBefore(employeeId);
+          log.trace("Employee {} → wasCheckedBefore={}", employeeId, wasChecked);
 
           if (!wasChecked) {
             LocalDate joinDate = getJoinDateOfEmployeeWithoutData(employeeId);
-            if (joinDate != null)
+            if (joinDate != null) {
               joinDates.add(joinDate);
+              log.debug("Employee {} → join date {} added to API extraction list.", employeeId, joinDate);
+            }
           }
         }
 
         processed++;
-        if (processed % 10 == 0 || processed == allEmployeeIds.size()) {
-          int percent = (int) ((processed / (double) allEmployeeIds.size()) * 100);
-          log.info("Progress: Processed {}/{} employees ({}%)", processed, allEmployeeIds.size(), percent);
+        if (processed % 10 == 0 || processed == total) {
+          int percent = (int) ((processed / (double) total) * 100);
+          log.info("Progress: {}/{} employees checked ({}%)", processed, total, percent);
         }
       }
 
+      // ======================================================
+      // 4. Išgauti duomenis iš API
+      // ======================================================
       if (!joinDates.isEmpty()) {
         LocalDate oldestJoinDate = getOldestJoinDate(joinDates);
-        log.info("Oldest join date found: {} — extracting data from API...", oldestJoinDate);
+        log.info("🗓 Oldest join date found: {} — extracting Minecraft tickets from API...", oldestJoinDate);
         apiDataExtractionServiceImpl.extractMinecraftTicketsFromAPI(oldestJoinDate);
       } else {
-        log.info("No missing join dates — extracting data from latest known date: {}", newestDateFromDailyMcTickets);
+        log.info("No join dates missing — extracting from latest known date: {}", newestDateFromDailyMcTickets);
         apiDataExtractionServiceImpl.extractMinecraftTicketsFromAPI(newestDateFromDailyMcTickets);
       }
 
+      // ======================================================
+      // 5. Atnaujinti paskutinį tikrinimą
+      // ======================================================
       updateMcTicketsLastCheck(allEmployeeIds);
 
+      // ======================================================
+      // 6. Konvertuoti naujus duomenis
+      // ======================================================
       List<MinecraftTicketsAnswers> rawMcTicketsData = extractRawMcTicketsData();
-      log.debug("Fetched {} raw Minecraft ticket entries from API.", rawMcTicketsData.size());
-      minecraftTicketsServiceImpl.convertRawMcTicketsData(rawMcTicketsData, employeeCodes, allEmployeeIds);
+      log.debug("Fetched {} raw Minecraft ticket entries.", rawMcTicketsData.size());
+      rawMcTicketsData.forEach(raw -> log.trace("RAW → empCode={}, date={}",
+          raw.getKmxWebApiMcTickets(), raw.getDateTime()));
 
+      minecraftTicketsServiceImpl.convertRawMcTicketsData(rawMcTicketsData, employeeCodes, allEmployeeIds);
+      log.info("Converted raw Minecraft ticket data into daily records.");
+
+      // ======================================================
+      // 7. Išvalyti pasikartojimus
+      // ======================================================
       duplicatesRemoverServiceImpl.removeDuplicatesFromDailyMcTickets();
 
+      // ======================================================
+      // 8. Skaičiuoti vidurkius, palyginimus ir bendrą statistiką
+      // ======================================================
       List<DailyMinecraftTickets> rawDailyMcTicketsData = getDailyMinecraftTicketsData();
       List<Employee> rawEmployeesData = getEmployeesData();
       LocalDate oldestDateFromData = checkForOldestDate(rawDailyMcTicketsData);
+      log.debug("Oldest date from daily tickets dataset: {}", oldestDateFromData);
 
-      minecraftTicketsServiceImpl.calcAvgDailyMcTicketsPerEmployee(allEmployeeIds, rawEmployeesData, oldestDateFromData,
-          rawDailyMcTicketsData);
+      minecraftTicketsServiceImpl.calcAvgDailyMcTicketsPerEmployee(allEmployeeIds, rawEmployeesData,
+          oldestDateFromData, rawDailyMcTicketsData);
       duplicatesRemoverServiceImpl.removeDuplicatesFromAvgDailyMcTickets();
 
       List<DailyPlaytime> allPlaytimeData = getAllPlaytimeData();
+      log.debug("Loaded {} playtime entries.", allPlaytimeData.size());
+
       minecraftTicketsServiceImpl.calcAvgMcTicketsPerPlaytime(rawDailyMcTicketsData, rawEmployeesData, allEmployeeIds,
           oldestDateFromData, allPlaytimeData);
       duplicatesRemoverServiceImpl.removeDuplicatesFromMcTicketsPerPlaytime();
@@ -145,11 +182,17 @@ public class MinecraftTicketsRawServiceImpl implements MinecraftTicketsRawServic
 
       List<LocalDate> allDatesFromDailyMcTickets = getAllMinecraftTicketsDates(rawDailyMcTicketsData);
       List<Short> allEmployeesFromDailyMcTickets = getAllEmployeesFromDailyMinecraftTickets(rawDailyMcTicketsData);
-      minecraftTicketsComparedServiceImpl.compareEachEmployeeDailyMcTicketsValues(rawDailyMcTicketsData,
-          allPlaytimeData, allDatesFromDailyMcTickets, allEmployeesFromDailyMcTickets);
+
+      minecraftTicketsComparedServiceImpl.compareEachEmployeeDailyMcTicketsValues(
+          rawDailyMcTicketsData, allPlaytimeData, allDatesFromDailyMcTickets, allEmployeesFromDailyMcTickets);
       duplicatesRemoverServiceImpl.removeDuplicatesFromComparedMcTickets();
 
-      log.info("✅ Minecraft Tickets data processing completed successfully.");
+      // ======================================================
+      // 9. Baigta
+      // ======================================================
+      long elapsed = System.currentTimeMillis() - startTime;
+      log.info("✅ [END] Minecraft Tickets data processing completed successfully in {} ms ({} s).",
+          elapsed, elapsed / 1000.0);
 
     } catch (Exception e) {
       log.error("❌ Critical error while handling Minecraft tickets: {}", e.getMessage(), e);
@@ -157,38 +200,39 @@ public class MinecraftTicketsRawServiceImpl implements MinecraftTicketsRawServic
   }
 
   // ======================================================
-  // SUPPORTING METHODS WITH LIGHT LOGGING
+  // SUPPORTING METHODS (praplėstas logavimas)
   // ======================================================
 
   private void removeRawMcTicketsData() {
     try {
-      minecraftTicketsAnswersRepository
-          .truncateTable();
-      log.info("Cleared raw Minecraft ticket table.");
+      minecraftTicketsAnswersRepository.truncateTable();
+      log.info("🧹 Cleared raw Minecraft ticket table before import.");
     } catch (Exception e) {
-      log.error("Failed to truncate Minecraft tickets table: {}", e.getMessage(), e);
+      log.error("❌ Failed to truncate Minecraft tickets table: {}", e.getMessage(), e);
     }
   }
 
   private LocalDate getNewestDateFromDailyMcTickets() {
-    return dailyMinecraftTicketsRepository
-        .findAll()
+    LocalDate date = dailyMinecraftTicketsRepository.findAll()
         .stream()
         .map(DailyMinecraftTickets::getDate)
         .max(LocalDate::compareTo)
         .orElse(LocalDate.parse("1970-01-01"));
+    log.trace("Newest date from DailyMinecraftTickets: {}", date);
+    return date;
   }
 
   private boolean hasEmployeeMcTicketsData(Short employeeId, List<DailyMinecraftTickets> allDailyMcTickets) {
-    return allDailyMcTickets
+    boolean result = allDailyMcTickets
         .stream()
         .filter(e -> e.getEmployeeId().equals(employeeId))
         .anyMatch(e -> e.getDate() != null && e.getTicketCount() > 0);
+    log.trace("Employee {} → hasData={}", employeeId, result);
+    return result;
   }
 
   private LocalDate getJoinDateOfEmployeeWithoutData(Short employeeId) {
-    return employeeRepository
-        .findById(employeeId)
+    return employeeRepository.findById(employeeId)
         .map(Employee::getJoinDate)
         .filter(Objects::nonNull)
         .orElseGet(() -> {
@@ -198,90 +242,101 @@ public class MinecraftTicketsRawServiceImpl implements MinecraftTicketsRawServic
   }
 
   private LocalDate getOldestJoinDate(List<LocalDate> joinDates) {
-    LocalDate oldest = joinDates
-        .stream()
+    LocalDate oldest = joinDates.stream()
         .filter(Objects::nonNull)
         .min(LocalDate::compareTo)
         .orElse(null);
     if (oldest == null)
-      log.warn("⚠️ No valid join dates found — skipping API extraction.");
+      log.warn("⚠️ No valid join dates found for API extraction.");
+    else
+      log.trace("Oldest join date from list: {}", oldest);
     return oldest;
   }
 
   private boolean wasEmployeeCheckedBefore(Short employeeId) {
-    return mcTicketsLastCheckRepository
-        .findAll()
+    boolean result = mcTicketsLastCheckRepository.findAll()
         .stream()
         .filter(e -> employeeId.equals(e.getEmployeeId()))
         .anyMatch(e -> e.getDate() != null);
+    log.trace("Employee {} previously checked: {}", employeeId, result);
+    return result;
   }
 
   private List<MinecraftTicketsAnswers> extractRawMcTicketsData() {
-    return minecraftTicketsAnswersRepository
-        .findAll();
+    List<MinecraftTicketsAnswers> data = minecraftTicketsAnswersRepository.findAll();
+    log.trace("Extracted {} raw MinecraftTicketsAnswers entries.", data.size());
+    return data;
   }
 
   private void updateMcTicketsLastCheck(List<Short> allEmployeeIds) {
-    mcTicketsLastCheckRepository
-        .deleteAll();
+    mcTicketsLastCheckRepository.deleteAll();
     allEmployeeIds.forEach(id -> mcTicketsLastCheckRepository.save(new McTicketsLastCheck(id, LocalDate.now())));
-    log.info("Updated {} employee records in McTicketsLastCheck.", allEmployeeIds.size());
+    log.info("Updated {} employee entries in McTicketsLastCheck with current date.", allEmployeeIds.size());
   }
 
   private List<EmployeeCodes> extractEmployeeCodes() {
-    return employeeCodesRepository
-        .findAll();
+    List<EmployeeCodes> codes = employeeCodesRepository.findAll();
+    log.trace("Fetched {} EmployeeCodes from DB.", codes.size());
+    return codes;
   }
 
   private List<Short> getAllEmployeeIdsFromEmployeeCodes(List<EmployeeCodes> employeeCodes) {
-    return employeeCodes
-        .stream()
+    List<Short> ids = employeeCodes.stream()
         .map(EmployeeCodes::getEmployeeId)
         .distinct()
         .collect(Collectors.toList());
+    log.trace("Collected {} distinct employee IDs.", ids.size());
+    return ids;
   }
 
   private List<DailyMinecraftTickets> getDailyMinecraftTicketsData() {
-    return dailyMinecraftTicketsRepository
-        .findAll();
+    List<DailyMinecraftTickets> data = dailyMinecraftTicketsRepository.findAll();
+    log.trace("Fetched {} DailyMinecraftTickets entries.", data.size());
+    return data;
   }
 
   private List<Employee> getEmployeesData() {
-    return employeeRepository
-        .findAll();
+    List<Employee> data = employeeRepository.findAll();
+    log.trace("Fetched {} Employee entries.", data.size());
+    return data;
   }
 
   private LocalDate checkForOldestDate(List<DailyMinecraftTickets> rawData) {
-    return rawData
-        .stream()
+    LocalDate oldest = rawData.stream()
         .map(DailyMinecraftTickets::getDate)
         .min(LocalDate::compareTo)
         .orElse(LocalDate.of(2100, 1, 1));
+    log.trace("Oldest date detected: {}", oldest);
+    return oldest;
   }
 
   private List<DailyPlaytime> getAllPlaytimeData() {
-    return dailyPlaytimeRepository
-        .findAll();
+    List<DailyPlaytime> data = dailyPlaytimeRepository.findAll();
+    log.trace("Fetched {} DailyPlaytime entries.", data.size());
+    return data;
   }
 
   private List<TotalOldMinecraftTickets> getOldTotalDailyMinecraftTicketsData() {
-    return totalOldMinecraftTicketsRepository
-        .findAll();
+    List<TotalOldMinecraftTickets> data = totalOldMinecraftTicketsRepository.findAll();
+    log.trace("Fetched {} TotalOldMinecraftTickets entries.", data.size());
+    return data;
   }
 
   private List<LocalDate> getAllMinecraftTicketsDates(List<DailyMinecraftTickets> data) {
-    return data
-        .stream()
+    List<LocalDate> dates = data.stream()
         .map(DailyMinecraftTickets::getDate)
         .distinct()
         .collect(Collectors.toList());
+    log.trace("Extracted {} distinct dates from ticket data.", dates.size());
+    return dates;
   }
 
   private List<Short> getAllEmployeesFromDailyMinecraftTickets(List<DailyMinecraftTickets> data) {
-    return data
-        .stream()
+    List<Short> employees = data.stream()
         .map(DailyMinecraftTickets::getEmployeeId)
         .distinct()
         .collect(Collectors.toList());
+    log.trace("Extracted {} unique employees from ticket data.", employees.size());
+    return employees;
   }
 }

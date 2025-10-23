@@ -78,31 +78,44 @@ public class FinalStatsServiceImpl implements FinalStatsService {
   @Transactional
   public void handleFinalStats() {
     long start = System.currentTimeMillis();
-    log.info("📊 Starting final stats calculation...");
+    log.info("📊 [START] Final stats calculation initiated...");
 
     List<Employee> employees = employeeRepository.findAll();
     if (employees.isEmpty()) {
-      log.warn("No employees found. Aborting.");
+      log.warn("⚠ No employees found. Aborting final stats calculation.");
       return;
     }
 
-    Map<Short, Double> annualPlaytime = mapOf(annualPlaytimeRepository.findAll(), AnnualPlaytime::getEmployeeId,
-        AnnualPlaytime::getPlaytimeInHours);
-    Map<Short, Double> avgMcTickets = mapOf(averageDailyMinecraftTicketsRepository.findAll(),
-        AverageDailyMinecraftTickets::getEmployeeId, AverageDailyMinecraftTickets::getTickets);
-    Map<Short, Double> avgMcTicketsCompared = mapOf(averageMinecraftTicketsComparedRepository.findAll(),
-        AverageMinecraftTicketsCompared::getEmployeeId, AverageMinecraftTicketsCompared::getValue);
-    Map<Short, Double> avgDcMessages = mapOf(averageDailyDiscordMessagesRepository.findAll(),
-        AverageDailyDiscordMessages::getEmployeeId, AverageDailyDiscordMessages::getValue);
-    Map<Short, Double> avgDcMessagesCompared = mapOf(averageDiscordMessagesComparedRepository.findAll(),
-        AverageDiscordMessagesCompared::getEmployeeId, AverageDiscordMessagesCompared::getValue);
-    Map<Short, Double> avgPlaytime = mapOf(averagePlaytimeOverallRepository.findAll(),
-        AveragePlaytimeOverall::getEmployeeId, AveragePlaytimeOverall::getPlaytime);
-    Map<Short, Double> productivity = mapOf(productivityRepository.findAll(), Productivity::getEmployeeId,
-        Productivity::getValue);
-    Map<Short, String> recommendations = mapOf(recommendationsRepository.findAll(), Recommendations::getEmployeeId,
-        Recommendations::getValue);
+    log.info("Found {} employees for processing.", employees.size());
 
+    // === Load all required data maps ===
+    Map<Short, Double> annualPlaytime = mapOf("AnnualPlaytime", annualPlaytimeRepository.findAll(),
+        AnnualPlaytime::getEmployeeId, AnnualPlaytime::getPlaytimeInHours);
+
+    Map<Short, Double> avgMcTickets = mapOf("AvgDailyMcTickets", averageDailyMinecraftTicketsRepository.findAll(),
+        AverageDailyMinecraftTickets::getEmployeeId, AverageDailyMinecraftTickets::getTickets);
+
+    Map<Short, Double> avgMcTicketsCompared = mapOf("AvgMcTicketsCompared",
+        averageMinecraftTicketsComparedRepository.findAll(),
+        AverageMinecraftTicketsCompared::getEmployeeId, AverageMinecraftTicketsCompared::getValue);
+
+    Map<Short, Double> avgDcMessages = mapOf("AvgDailyDcMessages", averageDailyDiscordMessagesRepository.findAll(),
+        AverageDailyDiscordMessages::getEmployeeId, AverageDailyDiscordMessages::getValue);
+
+    Map<Short, Double> avgDcMessagesCompared = mapOf("AvgDcMessagesCompared",
+        averageDiscordMessagesComparedRepository.findAll(),
+        AverageDiscordMessagesCompared::getEmployeeId, AverageDiscordMessagesCompared::getValue);
+
+    Map<Short, Double> avgPlaytime = mapOf("AvgPlaytimeOverall", averagePlaytimeOverallRepository.findAll(),
+        AveragePlaytimeOverall::getEmployeeId, AveragePlaytimeOverall::getPlaytime);
+
+    Map<Short, Double> productivity = mapOf("Productivity", productivityRepository.findAll(),
+        Productivity::getEmployeeId, Productivity::getValue);
+
+    Map<Short, String> recommendations = mapOf("Recommendations", recommendationsRepository.findAll(),
+        Recommendations::getEmployeeId, Recommendations::getValue);
+
+    // === Calculate stats per employee ===
     List<FinalStats> results = new ArrayList<>();
 
     for (Employee e : employees) {
@@ -122,6 +135,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
       stats.setPlaytime(avgPlaytime.getOrDefault(id, 0.0));
 
       if (isAdmin(level)) {
+        if (log.isTraceEnabled())
+          log.trace("Employee {} ({}) is admin — zeroing data fields.", username, level);
         stats.setMinecraftTickets(0.0);
         stats.setMinecraftTicketsCompared(0.0);
         stats.setDiscordMessages(0.0);
@@ -137,35 +152,60 @@ public class FinalStatsServiceImpl implements FinalStatsService {
         stats.setRecommendation(recommendations.getOrDefault(id, "-"));
       }
 
+      if (log.isTraceEnabled()) {
+        log.trace(
+            "Finalized [{}] -> Playtime={}, McTickets={}, McTicketsComp={}, DcMsgs={}, DcMsgsComp={}, Prod={}, Rec={}",
+            username, stats.getPlaytime(), stats.getMinecraftTickets(), stats.getMinecraftTicketsCompared(),
+            stats.getDiscordMessages(), stats.getDiscordMessagesCompared(), stats.getProductivity(),
+            stats.getRecommendation());
+      }
+
       results.add(stats);
     }
 
+    // === Persist and finish ===
     finalStatsRepository.saveAll(results);
-    long end = System.currentTimeMillis();
-    log.info("✅ Final stats recalculated for {} employees in {} ms.", results.size(), (end - start));
+    long duration = System.currentTimeMillis() - start;
+    log.info("✅ [DONE] Final stats calculated and saved for {} employees in {} ms.", results.size(), duration);
   }
 
   private boolean isAdmin(String level) {
-    return level.equalsIgnoreCase("Owner") || level.equalsIgnoreCase("Operator");
+    boolean admin = level.equalsIgnoreCase("Owner") || level.equalsIgnoreCase("Operator");
+    if (log.isTraceEnabled())
+      log.trace("Checked if level '{}' is admin: {}", level, admin);
+    return admin;
   }
 
-  private <T, K, V> Map<K, V> mapOf(List<T> list, java.util.function.Function<T, K> keyMapper,
+  private <T, K, V> Map<K, V> mapOf(String name, List<T> list,
+      java.util.function.Function<T, K> keyMapper,
       java.util.function.Function<T, V> valueMapper) {
-    return list
-        .stream()
+
+    if (list == null || list.isEmpty()) {
+      log.warn("⚠ Data source [{}] is empty.", name);
+      return Map.of();
+    }
+
+    Map<K, V> map = list.stream()
         .filter(Objects::nonNull)
         .collect(Collectors.toMap(keyMapper, valueMapper, (a, b) -> a));
+
+    log.debug("📥 [{}] Loaded {} records into memory.", name, map.size());
+    return map;
   }
 
   @Override
   public List<FinalStats> getAllFinalStats() {
-    return finalStatsRepository.findAll();
+    List<FinalStats> stats = finalStatsRepository.findAll();
+    log.info("Fetched {} FinalStats entries.", stats.size());
+    return stats;
   }
 
   @Override
   public double getProductivity(Short employeeId) {
     FinalStats stats = finalStatsRepository.findByEmployeeId(employeeId);
-    return stats != null ? stats.getProductivity() : 0.0;
+    double value = stats != null ? stats.getProductivity() : 0.0;
+    log.debug("Productivity for employee {} = {}", employeeId, value);
+    return value;
   }
 
   @Override
@@ -181,6 +221,8 @@ public class FinalStatsServiceImpl implements FinalStatsService {
     Map<String, Object> result = new HashMap<>();
     result.put("rank", rank);
     result.put("totalEmployees", all.size());
+
+    log.info("🏅 Employee {} ranking: {}/{}", employeeId, rank, all.size());
     return result;
   }
 }

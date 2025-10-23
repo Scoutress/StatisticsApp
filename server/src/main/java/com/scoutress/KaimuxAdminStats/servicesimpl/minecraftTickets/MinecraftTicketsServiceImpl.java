@@ -53,24 +53,33 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       List<EmployeeCodes> employeeCodes,
       List<Short> allEmployeeIds) {
 
-    log.info("=== Starting raw Minecraft ticket data conversion ===");
+    log.info("=== [START] Converting raw Minecraft ticket data ===");
+    log.debug("Loaded {} raw entries, {} employee codes, {} employees.",
+        rawMcTicketsData.size(), employeeCodes.size(), allEmployeeIds.size());
 
     int processed = 0;
+
     for (Short employeeId : allEmployeeIds) {
       try {
         Short minecraftUserCode = getMinecraftUserCodeThisEmployee(employeeCodes, employeeId);
         if (minecraftUserCode == null) {
-          log.warn("⚠️ Skipping employee {}: no linked KMX Web API code found.", employeeId);
+          log.warn("⚠️ Skipping employee {} — no linked KMX Web API code found.", employeeId);
           continue;
         }
 
         List<MinecraftTicketsAnswers> rawDataThisEmployee = getRawDataForThisEmployee(rawMcTicketsData,
             minecraftUserCode);
+        if (rawDataThisEmployee.isEmpty()) {
+          log.trace("Employee {} — no raw data found.", employeeId);
+          continue;
+        }
 
         List<LocalDate> rawDataDates = getAllDatesFromRawDataThisEmployee(rawDataThisEmployee);
+        log.trace("Employee {} — found {} unique dates.", employeeId, rawDataDates.size());
 
         for (LocalDate date : rawDataDates) {
           int ticketsCount = getTicketsCountForThisEmployee(rawDataThisEmployee, date);
+          log.trace("Employee {} | Date {} | {} tickets", employeeId, date, ticketsCount);
 
           if (!date.equals(LocalDate.now())) {
             saveTicketCountForThisEmployeeThisDate(ticketsCount, date, employeeId);
@@ -78,7 +87,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
         }
 
       } catch (Exception e) {
-        log.error("❌ Error while converting tickets for employee {}: {}", employeeId, e.getMessage(), e);
+        log.error("❌ Error converting tickets for employee {}: {}", employeeId, e.getMessage(), e);
       }
 
       processed++;
@@ -88,52 +97,64 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       }
     }
 
-    log.info("✅ Raw Minecraft ticket conversion completed for {} employees.", allEmployeeIds.size());
+    log.info("✅ [END] Raw Minecraft ticket conversion completed for {} employees.", allEmployeeIds.size());
   }
 
   private Short getMinecraftUserCodeThisEmployee(List<EmployeeCodes> employeeCodes, Short employeeId) {
-    return employeeCodes
-        .stream()
-        .filter(code -> code.getEmployeeId().equals(employeeId))
+    Short code = employeeCodes.stream()
+        .filter(c -> c.getEmployeeId().equals(employeeId))
         .map(EmployeeCodes::getKmxWebApi)
         .findFirst()
         .orElse(null);
+    log.trace("Employee {} — KMX Web API code: {}", employeeId, code);
+    return code;
   }
 
   private List<MinecraftTicketsAnswers> getRawDataForThisEmployee(
       List<MinecraftTicketsAnswers> ticketsAnswers, Short minecraftUserCode) {
-    return ticketsAnswers
-        .stream()
+    List<MinecraftTicketsAnswers> result = ticketsAnswers.stream()
         .filter(t -> t.getKmxWebApiMcTickets().equals(minecraftUserCode))
         .toList();
+    log.trace("KMX Web API {} — found {} raw entries.", minecraftUserCode, result.size());
+    return result;
   }
 
   private List<LocalDate> getAllDatesFromRawDataThisEmployee(List<MinecraftTicketsAnswers> rawDataThisEmployee) {
-    return rawDataThisEmployee
-        .stream()
+    List<LocalDate> dates = rawDataThisEmployee.stream()
         .map(ans -> ans.getDateTime().toLocalDate())
         .sorted()
+        .distinct()
         .toList();
+    log.trace("Extracted {} unique dates from raw data for employee.", dates.size());
+    return dates;
   }
 
   private int getTicketsCountForThisEmployee(List<MinecraftTicketsAnswers> rawDataThisEmployee, LocalDate date) {
-    return (int) rawDataThisEmployee
-        .stream()
+    int count = (int) rawDataThisEmployee.stream()
         .filter(ans -> ans.getDateTime().toLocalDate().equals(date))
         .count();
+    log.trace("Tickets count for {} = {}", date, count);
+    return count;
   }
 
   private void saveTicketCountForThisEmployeeThisDate(int ticketsCount, LocalDate date, Short employeeId) {
-    DailyMinecraftTickets existingRecord = dailyMinecraftTicketsRepository
-        .findByEmployeeIdAndDateAndTicketCount(employeeId, date, ticketsCount);
+    try {
+      DailyMinecraftTickets existingRecord = dailyMinecraftTicketsRepository
+          .findByEmployeeIdAndDateAndTicketCount(employeeId, date, ticketsCount);
 
-    if (existingRecord == null) {
-      DailyMinecraftTickets newRecord = new DailyMinecraftTickets();
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setDate(date);
-      newRecord.setTicketCount(ticketsCount);
-      dailyMinecraftTicketsRepository.save(newRecord);
-      log.trace("Inserted ticket record for employee {} on {} with {} tickets.", employeeId, date, ticketsCount);
+      if (existingRecord == null) {
+        DailyMinecraftTickets newRecord = new DailyMinecraftTickets();
+        newRecord.setEmployeeId(employeeId);
+        newRecord.setDate(date);
+        newRecord.setTicketCount(ticketsCount);
+        dailyMinecraftTicketsRepository.save(newRecord);
+        log.trace("Inserted ticket record for employee {} on {} with {} tickets.", employeeId, date, ticketsCount);
+      } else {
+        log.trace("Record for employee {} on {} with {} tickets already exists, skipping.", employeeId, date,
+            ticketsCount);
+      }
+    } catch (Exception e) {
+      log.error("❌ Error saving ticket record (emp={}, date={}): {}", employeeId, date, e.getMessage(), e);
     }
   }
 
@@ -147,7 +168,8 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       LocalDate oldestDateFromData,
       List<DailyMinecraftTickets> rawData) {
 
-    log.info("=== Calculating average daily Minecraft tickets per employee ===");
+    log.info("=== [START] Calculating average daily Minecraft tickets per employee ===");
+    log.debug("Dataset: {} employees, {} daily ticket entries.", allEmployeeIds.size(), rawData.size());
 
     for (Short employeeId : allEmployeeIds) {
       try {
@@ -166,54 +188,64 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       }
     }
 
-    log.info("✅ Completed average daily ticket calculation.");
+    log.info("✅ [END] Completed average daily ticket calculation.");
   }
 
   private LocalDate getJoinDateForThisEmployee(List<Employee> rawEmployeesData, Short employee) {
-    return rawEmployeesData
-        .stream()
+    LocalDate date = rawEmployeesData.stream()
         .filter(e -> e.getId().equals(employee))
         .map(Employee::getJoinDate)
         .findFirst()
         .orElse(LocalDate.of(2100, 1, 1));
+    log.trace("Employee {} — join date: {}", employee, date);
+    return date;
   }
 
-  private LocalDate getOldestDateForThisEmployeeFromTickets(LocalDate oldestDateFromData,
-      LocalDate joinDateForThisEmployee) {
-    return joinDateForThisEmployee.isAfter(oldestDateFromData)
-        ? joinDateForThisEmployee
-        : oldestDateFromData;
+  private LocalDate getOldestDateForThisEmployeeFromTickets(LocalDate oldestDateFromData, LocalDate joinDate) {
+    LocalDate effective = joinDate.isAfter(oldestDateFromData) ? joinDate : oldestDateFromData;
+    log.trace("Effective start date = {}", effective);
+    return effective;
   }
 
   private int calculateDaysAfterOldestDate(LocalDate oldestDate) {
-    return (int) ChronoUnit.DAYS.between(oldestDate, LocalDate.now());
+    int days = (int) ChronoUnit.DAYS.between(oldestDate, LocalDate.now());
+    log.trace("Days since {} = {}", oldestDate, days);
+    return days;
   }
 
-  private int calculateAllTicketsSinceOldestDate(
-      List<DailyMinecraftTickets> rawData, int employeeId, LocalDate oldestDate) {
-    return rawData
-        .stream()
+  private int calculateAllTicketsSinceOldestDate(List<DailyMinecraftTickets> rawData, int employeeId,
+      LocalDate oldestDate) {
+    int sum = rawData.stream()
         .filter(ticket -> ticket.getEmployeeId() == employeeId)
         .filter(ticket -> ticket.getDate().isAfter(oldestDate))
         .mapToInt(DailyMinecraftTickets::getTicketCount)
         .sum();
+    log.trace("Employee {} — total tickets since {} = {}", employeeId, oldestDate, sum);
+    return sum;
   }
 
   private double calculateAverageTicketsValue(int total, int days) {
-    return days == 0 ? 0.0 : (double) total / days;
+    double avg = days == 0 ? 0.0 : (double) total / days;
+    log.trace("Calculated average: total={} days={} avg={}", total, days, avg);
+    return avg;
   }
 
   private void saveAverageValueData(double avg, Short employeeId) {
-    AverageDailyMinecraftTickets record = averageDailyMinecraftTicketsRepository.findByEmployeeId(employeeId);
-
-    if (record != null) {
-      record.setTickets(avg);
-      averageDailyMinecraftTicketsRepository.save(record);
-    } else {
-      AverageDailyMinecraftTickets newRecord = new AverageDailyMinecraftTickets();
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setTickets(avg);
-      averageDailyMinecraftTicketsRepository.save(newRecord);
+    try {
+      AverageDailyMinecraftTickets record = averageDailyMinecraftTicketsRepository.findByEmployeeId(employeeId);
+      if (record != null) {
+        record.setTickets(avg);
+        averageDailyMinecraftTicketsRepository.save(record);
+        log.trace("Updated avg daily tickets record for emp {}: {}", employeeId, avg);
+      } else {
+        AverageDailyMinecraftTickets newRecord = new AverageDailyMinecraftTickets();
+        newRecord.setEmployeeId(employeeId);
+        newRecord.setTickets(avg);
+        averageDailyMinecraftTicketsRepository.save(newRecord);
+        log.trace("Inserted avg daily tickets record for emp {}: {}", employeeId, avg);
+      }
+    } catch (Exception e) {
+      log.error("❌ Error saving average tickets for employee {}: {}", employeeId, e.getMessage(), e);
     }
   }
 
@@ -228,7 +260,8 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       LocalDate oldestDateFromData,
       List<DailyPlaytime> playtimeData) {
 
-    log.info("=== Calculating average tickets per playtime ===");
+    log.info("=== [START] Calculating tickets per playtime ratio ===");
+    log.debug("Dataset: {} employees, {} playtime entries.", allEmployeeIds.size(), playtimeData.size());
 
     for (Short employeeId : allEmployeeIds) {
       try {
@@ -238,49 +271,59 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
         int tickets = calculateAllTicketsSinceOldestDate(rawData, employeeId, oldestDate);
         double playtime = getAllPlaytimeSinceOldestDate(playtimeData, employeeId, oldestDate);
 
+        log.trace("Employee {} | totalTickets={} | totalPlaytime={}h", employeeId, tickets, playtime);
+
         if (playtime <= 0) {
-          log.warn("⚠️ Invalid playtime for employee {} ({}h). Skipping.", employeeId, playtime);
+          log.warn("⚠️ Skipping employee {} — invalid playtime: {}h", employeeId, playtime);
           continue;
         }
 
         double ratio = calculateTicketsPerPlaytime(tickets, playtime);
         saveTicketsPerPlaytime(ratio, employeeId);
-        log.debug("Employee {} — tickets per playtime: {}", employeeId, ratio);
+        log.debug("Employee {} — tickets/playtime ratio: {}", employeeId, ratio);
 
       } catch (Exception e) {
         log.error("❌ Error calculating tickets/playtime for employee {}: {}", employeeId, e.getMessage(), e);
       }
     }
 
-    log.info("✅ Completed tickets per playtime calculation.");
+    log.info("✅ [END] Completed tickets per playtime calculation.");
   }
 
   private double getAllPlaytimeSinceOldestDate(
       List<DailyPlaytime> playtimeData, Short targetEmployeeId, LocalDate oldestDate) {
-    return playtimeData
-        .stream()
+    double total = playtimeData.stream()
         .filter(p -> p.getEmployeeId().equals(targetEmployeeId))
         .filter(p -> !p.getDate().isBefore(oldestDate))
         .mapToDouble(DailyPlaytime::getTimeInHours)
         .sum();
+    log.trace("Employee {} — total playtime since {} = {}h", targetEmployeeId, oldestDate, total);
+    return total;
   }
 
   private double calculateTicketsPerPlaytime(int tickets, double playtime) {
-    return playtime == 0 ? 0.0 : tickets / playtime;
+    double result = playtime == 0 ? 0.0 : tickets / playtime;
+    log.trace("tickets={} / playtime={}h = {}", tickets, playtime, result);
+    return result;
   }
 
   private void saveTicketsPerPlaytime(double ratio, Short employeeId) {
-    AverageMinecraftTicketsPerPlaytime record = averageMinecraftTicketsPerPlaytimeRepository
-        .findByEmployeeId(employeeId);
-
-    if (record != null) {
-      record.setValue(ratio);
-      averageMinecraftTicketsPerPlaytimeRepository.save(record);
-    } else {
-      AverageMinecraftTicketsPerPlaytime newRecord = new AverageMinecraftTicketsPerPlaytime();
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setValue(ratio);
-      averageMinecraftTicketsPerPlaytimeRepository.save(newRecord);
+    try {
+      AverageMinecraftTicketsPerPlaytime record = averageMinecraftTicketsPerPlaytimeRepository
+          .findByEmployeeId(employeeId);
+      if (record != null) {
+        record.setValue(ratio);
+        averageMinecraftTicketsPerPlaytimeRepository.save(record);
+        log.trace("Updated tickets/playtime ratio for emp {}: {}", employeeId, ratio);
+      } else {
+        AverageMinecraftTicketsPerPlaytime newRecord = new AverageMinecraftTicketsPerPlaytime();
+        newRecord.setEmployeeId(employeeId);
+        newRecord.setValue(ratio);
+        averageMinecraftTicketsPerPlaytimeRepository.save(newRecord);
+        log.trace("Inserted tickets/playtime ratio for emp {}: {}", employeeId, ratio);
+      }
+    } catch (Exception e) {
+      log.error("❌ Error saving tickets/playtime for employee {}: {}", employeeId, e.getMessage(), e);
     }
   }
 
@@ -293,7 +336,9 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       List<DailyMinecraftTickets> rawDailyMcTicketsData,
       List<TotalOldMinecraftTickets> allOldTotalMinecraftTicketsData) {
 
-    log.info("=== Calculating total Minecraft tickets per employee ===");
+    log.info("=== [START] Calculating total Minecraft tickets ===");
+    log.debug("Dataset: {} employees, {} daily, {} old total records.",
+        allEmployeeIds.size(), rawDailyMcTicketsData.size(), allOldTotalMinecraftTicketsData.size());
 
     for (Short employeeId : allEmployeeIds) {
       try {
@@ -309,36 +354,43 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
       }
     }
 
-    log.info("✅ Total ticket calculation completed.");
+    log.info("✅ [END] Total ticket calculation completed.");
   }
 
   private int getTotalMinecraftTicketsThisEmployee(List<DailyMinecraftTickets> data, Short employeeId) {
-    return data
-        .stream()
+    int total = data.stream()
         .filter(t -> t.getEmployeeId().equals(employeeId))
         .mapToInt(DailyMinecraftTickets::getTicketCount)
         .sum();
+    log.trace("Employee {} — total new tickets: {}", employeeId, total);
+    return total;
   }
 
   private int getTotalOldMinecraftTicketsThisEmployee(List<TotalOldMinecraftTickets> oldData, Short employeeId) {
-    return oldData
-        .stream()
+    int total = oldData.stream()
         .filter(t -> t.getEmployeeId().equals(employeeId))
         .mapToInt(TotalOldMinecraftTickets::getTicketCount)
         .sum();
+    log.trace("Employee {} — total old tickets: {}", employeeId, total);
+    return total;
   }
 
   private void saveTotalMinecraftTicketsThisEmployee(int total, Short employeeId) {
-    TotalMinecraftTickets record = totalMinecraftTicketsRepository.findByEmployeeId(employeeId);
-
-    if (record != null) {
-      record.setTicketCount(total);
-      totalMinecraftTicketsRepository.save(record);
-    } else {
-      TotalMinecraftTickets newRecord = new TotalMinecraftTickets();
-      newRecord.setEmployeeId(employeeId);
-      newRecord.setTicketCount(total);
-      totalMinecraftTicketsRepository.save(newRecord);
+    try {
+      TotalMinecraftTickets record = totalMinecraftTicketsRepository.findByEmployeeId(employeeId);
+      if (record != null) {
+        record.setTicketCount(total);
+        totalMinecraftTicketsRepository.save(record);
+        log.trace("Updated total tickets record for emp {}: {}", employeeId, total);
+      } else {
+        TotalMinecraftTickets newRecord = new TotalMinecraftTickets();
+        newRecord.setEmployeeId(employeeId);
+        newRecord.setTicketCount(total);
+        totalMinecraftTicketsRepository.save(newRecord);
+        log.trace("Inserted total tickets record for emp {}: {}", employeeId, total);
+      }
+    } catch (Exception e) {
+      log.error("❌ Error saving total tickets for employee {}: {}", employeeId, e.getMessage(), e);
     }
   }
 
@@ -352,9 +404,7 @@ public class MinecraftTicketsServiceImpl implements MinecraftTicketsService {
         .filter(d -> d.getDate().isAfter(LocalDate.now().minusDays(days)))
         .toList();
 
-    double total = mcTicketsData
-        .stream()
-        .mapToDouble(DailyMinecraftTickets::getTicketCount).sum();
+    double total = mcTicketsData.stream().mapToDouble(DailyMinecraftTickets::getTicketCount).sum();
     log.debug("Queried {} days of tickets for employee {} — total: {}", days, employeeId, total);
     return total;
   }

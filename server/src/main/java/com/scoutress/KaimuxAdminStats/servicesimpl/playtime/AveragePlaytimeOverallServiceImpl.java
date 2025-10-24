@@ -50,7 +50,6 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
     log.info("=== [START] Average playtime calculation process ===");
 
     try {
-      // 1️⃣ — DUOMENŲ NUSKAITYMAS
       List<DailyPlaytime> allPlaytime = dailyPlaytimeRepository.findAll();
       List<EmployeeCodes> allEmployeeCodes = employeeCodesRepository.findAll();
       List<Employee> allEmployees = employeeRepository.findAll();
@@ -63,20 +62,21 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
         return;
       }
 
-      // 2️⃣ — DUOMENŲ PARUOŠIMAS
-      Map<Short, List<DailyPlaytime>> playtimeByEmployee = allPlaytime.stream()
+      Map<Short, List<DailyPlaytime>> playtimeByEmployee = allPlaytime
+          .stream()
           .collect(Collectors.groupingBy(DailyPlaytime::getEmployeeId));
 
-      Set<Short> validEmployeeIds = allEmployeeCodes.stream()
+      Set<Short> validEmployeeIds = allEmployeeCodes
+          .stream()
           .map(EmployeeCodes::getEmployeeId)
           .collect(Collectors.toSet());
 
-      Map<Short, Employee> employeeMap = allEmployees.stream()
+      Map<Short, Employee> employeeMap = allEmployees
+          .stream()
           .collect(Collectors.toMap(Employee::getId, emp -> emp));
 
       log.trace("Data grouped: {} employees have playtime data.", playtimeByEmployee.size());
 
-      // 3️⃣ — SKAIČIAVIMAS
       List<AveragePlaytimeOverall> results = new ArrayList<>();
       LocalDate today = LocalDate.now();
       int processed = 0;
@@ -84,7 +84,6 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
       for (Map.Entry<Short, List<DailyPlaytime>> entry : playtimeByEmployee.entrySet()) {
         Short employeeId = entry.getKey();
 
-        // Skip non-active / invalid employees
         if (!validEmployeeIds.contains(employeeId)) {
           log.trace("Skipping employee {} — not found in valid employee codes.", employeeId);
           continue;
@@ -99,14 +98,14 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
         List<DailyPlaytime> empPlaytime = entry.getValue();
         LocalDate joinDate = employee.getJoinDate();
 
-        // Bendras playtime nuo prisijungimo
-        double totalPlaytime = empPlaytime.stream()
+        double totalPlaytime = empPlaytime
+            .stream()
             .filter(pt -> !pt.getDate().isBefore(joinDate))
             .mapToDouble(DailyPlaytime::getTimeInHours)
             .sum();
 
-        // Seniausia data su duomenimis
-        LocalDate oldestDateFromData = empPlaytime.stream()
+        LocalDate oldestDateFromData = empPlaytime
+            .stream()
             .map(DailyPlaytime::getDate)
             .min(LocalDate::compareTo)
             .orElse(joinDate);
@@ -132,7 +131,6 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
 
       results.sort(Comparator.comparing(AveragePlaytimeOverall::getEmployeeId));
 
-      // 4️⃣ — DUOMENŲ SAUGOJIMAS
       saveAveragePlaytime(results);
 
       long elapsed = System.currentTimeMillis() - startTime;
@@ -144,9 +142,6 @@ public class AveragePlaytimeOverallServiceImpl implements AveragePlaytimeOverall
     }
   }
 
-  // ===========================================================
-  // DUOMENŲ SAUGOJIMAS
-  // ===========================================================
   private void saveAveragePlaytime(List<AveragePlaytimeOverall> averagePlaytimeData) {
     log.info("Saving {} average playtime entries to database...", averagePlaytimeData.size());
     int processed = 0;

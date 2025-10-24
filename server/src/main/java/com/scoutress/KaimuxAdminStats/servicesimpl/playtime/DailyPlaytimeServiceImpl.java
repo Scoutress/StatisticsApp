@@ -39,9 +39,6 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     this.employeeRepository = employeeRepository;
   }
 
-  // ===============================================================
-  // MAIN PROCESS
-  // ===============================================================
   @Override
   public void handleDailyPlaytime() {
     long start = System.currentTimeMillis();
@@ -49,6 +46,7 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
 
     try {
       List<Employee> employees = employeeRepository.findAll();
+
       if (employees.isEmpty()) {
         log.warn("⚠️ No employees found. Exiting early.");
         return;
@@ -68,8 +66,8 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
           continue;
         }
 
-        // Grouping by server and date
-        Map<String, Double> groupedPlaytime = sessions.stream()
+        Map<String, Double> groupedPlaytime = sessions
+            .stream()
             .collect(Collectors.groupingBy(
                 s -> s.getServer().trim().toLowerCase() + "|" + s.getDate(),
                 Collectors.summingDouble(SessionDuration::getSingleSessionDurationInSec)));
@@ -136,9 +134,6 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     }
   }
 
-  // ===============================================================
-  // SAFE DATE PARSER
-  // ===============================================================
   private LocalDate safeParseDate(String input) {
     if (input == null || input.isBlank())
       return null;
@@ -165,9 +160,6 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     }
   }
 
-  // ===============================================================
-  // SAVE RESULTS
-  // ===============================================================
   private void saveCalculatedPlaytime(List<DailyPlaytime> dailyPlaytimeData) {
     log.info("Saving {} daily playtime records to database...", dailyPlaytimeData.size());
     int updated = 0, inserted = 0;
@@ -204,9 +196,6 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     log.info("✅ Playtime save completed — inserted: {}, updated: {}", inserted, updated);
   }
 
-  // ===============================================================
-  // DUPLICATES REMOVAL
-  // ===============================================================
   @Override
   public void removeDuplicateDailyPlaytimes() {
     long start = System.currentTimeMillis();
@@ -219,7 +208,8 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
         return;
       }
 
-      Map<String, List<DailyPlaytime>> grouped = all.stream()
+      Map<String, List<DailyPlaytime>> grouped = all
+          .stream()
           .collect(Collectors.groupingBy(p -> p.getEmployeeId() + "|" + p.getServer().trim().toLowerCase() + "|"
               + p.getDate() + "|" + p.getTimeInHours()));
 
@@ -248,12 +238,11 @@ public class DailyPlaytimeServiceImpl implements DailyPlaytimeService {
     }
   }
 
-  // ===============================================================
-  // METRICS
-  // ===============================================================
   @Override
   public Double getSumOfPlaytimeByEmployeeIdAndDuration(Short employeeId, Short days) {
-    double total = dailyPlaytimeRepository.findAll().stream()
+    double total = dailyPlaytimeRepository
+        .findAll()
+        .stream()
         .filter(p -> p.getEmployeeId().equals(employeeId))
         .filter(p -> p.getDate().isAfter(LocalDate.now().minusDays(days)))
         .mapToDouble(DailyPlaytime::getTimeInHours)

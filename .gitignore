@@ -55,3 +55,5 @@ application.properties
 
 /.github/
 bot.pid
+
+/discordBotPy/v2bot.py

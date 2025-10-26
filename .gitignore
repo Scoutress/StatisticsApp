@@ -57,3 +57,5 @@ application.properties
 bot.pid
 
 /discordBotPy/v2bot.py
+
+/server/src/main/java/com/scoutress/KaimuxAdminStats/v1/*

@@ -30,6 +30,9 @@ import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
 @Service
 public class DataFetchingServiceImpl implements DataFetchingService {
 
+  // TODO: Remove this class after data fetching will be remade for Discord
+  // tickets and visitors.
+
   private final RestTemplate restTemplate;
   private final KaimuxWebsiteConfig kaimuxWebsiteConfig;
   private final DiscordTicketsReactionsRepository discordTicketsReactionsRepository;
@@ -125,7 +128,7 @@ public class DataFetchingServiceImpl implements DataFetchingService {
         }
         case "minecraft" -> {
           MinecraftTicketsAnswers entity = new MinecraftTicketsAnswers();
-          entity.setMinecraftTicketId(item.getLong("player_id"));
+          entity.setKmxWebApiMcTickets((short) item.getInt("player_id"));
 
           String createdAt = item.getString("created_at");
           LocalDateTime dateTime = parseDate(createdAt);

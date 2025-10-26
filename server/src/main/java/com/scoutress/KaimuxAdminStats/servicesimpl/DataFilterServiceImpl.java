@@ -1,12 +1,10 @@
 package com.scoutress.KaimuxAdminStats.servicesImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
-import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.AfkPlaytimeRawData;
-import com.scoutress.KaimuxAdminStats.entity.afkPlaytime.SanitizedAfkSessionData;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SanitizedSessionData;
 import com.scoutress.KaimuxAdminStats.entity.playtime.SessionDataItem;
 import com.scoutress.KaimuxAdminStats.services.DataFilterService;
@@ -15,110 +13,68 @@ import com.scoutress.KaimuxAdminStats.services.DataFilterService;
 public class DataFilterServiceImpl implements DataFilterService {
 
   @Override
-  public List<SessionDataItem> filterSessionsByAid(
-      List<SessionDataItem> data, short aid) {
+  public List<SessionDataItem> filterSessionsByAid(List<SessionDataItem> data, short aid) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
-        .filter(item -> item.getAid() == aid)
-        .collect(Collectors.toList());
+        .filter(item -> item.getEmployeeId() == aid)
+        .toList();
   }
 
   @Override
-  public List<SessionDataItem> filterSessionsByServer(
-      List<SessionDataItem> data, String server) {
+  public List<SessionDataItem> filterSessionsByServer(List<SessionDataItem> data, String server) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
-        .filter(item -> item.getServer().equals(server))
-        .collect(Collectors.toList());
+        .filter(item -> Objects.equals(item.getServer(), server))
+        .toList();
   }
 
   @Override
-  public List<SessionDataItem> filterSessionsByAction(
-      List<SessionDataItem> data, boolean action) {
+  public List<SessionDataItem> filterSessionsByAction(List<SessionDataItem> data, boolean action) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
         .filter(item -> item.getActionAsBoolean() == action)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
-  public List<SanitizedSessionData> filterSanitizedSessionsByAid(
-      List<SanitizedSessionData> data, short aid) {
+  public List<SanitizedSessionData> filterSanitizedSessionsByAid(List<SanitizedSessionData> data, short aid) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
-        .filter(item -> item.getAid() == aid)
-        .collect(Collectors.toList());
+        .filter(item -> item.getEmployeeId() == aid)
+        .toList();
   }
 
   @Override
-  public List<SanitizedSessionData> filterSanitizedSessionsByServer(
-      List<SanitizedSessionData> data, String server) {
+  public List<SanitizedSessionData> filterSanitizedSessionsByServer(List<SanitizedSessionData> data, String server) {
+    if (data == null || data.isEmpty())
+      return List.of();
+
     return data
         .stream()
-        .filter(item -> item.getServer().equals(server))
-        .collect(Collectors.toList());
+        .filter(item -> Objects.equals(item.getServer(), server))
+        .toList();
   }
 
   @Override
-  public List<SanitizedSessionData> filterSanitizedSessionsByAction(
-      List<SanitizedSessionData> data, boolean action) {
-    return data
-        .stream()
-        .filter(item -> item.getActionAsBoolean() == action)
-        .collect(Collectors.toList());
-  }
+  public List<SanitizedSessionData> filterSanitizedSessionsByAction(List<SanitizedSessionData> data, boolean action) {
+    if (data == null || data.isEmpty())
+      return List.of();
 
-  @Override
-  public List<AfkPlaytimeRawData> filterAfkSessionsByAid(
-      List<AfkPlaytimeRawData> data, Short aid) {
-    return data
-        .stream()
-        .filter(item -> item.getAid().equals(aid))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<AfkPlaytimeRawData> filterAfkSessionsByServer(
-      List<AfkPlaytimeRawData> data, String server) {
-    return data
-        .stream()
-        .filter(item -> item.getServer().equals(server))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<AfkPlaytimeRawData> filterAfkSessionsByAction(
-      List<AfkPlaytimeRawData> data, boolean action) {
     return data
         .stream()
         .filter(item -> item.getActionAsBoolean() == action)
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<SanitizedAfkSessionData> filterSanitizedAfkSessionsByServer(
-      List<SanitizedAfkSessionData> data, String server) {
-    return data
-        .stream()
-        .filter(item -> item.getServer().equals(server))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<SanitizedAfkSessionData> filterSanitizedAfkSessionsByAid(
-      List<SanitizedAfkSessionData> data, Short aid) {
-    return data
-        .stream()
-        .filter(item -> item.getAid().equals(aid))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<SanitizedAfkSessionData> filterSanitizedAfkSessionsByAction(
-      List<SanitizedAfkSessionData> data, boolean action) {
-    return data
-        .stream()
-        .filter(item -> item.getActionAsBoolean() == action)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

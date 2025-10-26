@@ -1,0 +1,562 @@
+[
+  {
+    "employeeId": 1,
+    "level": "Owner",
+    "name": "Owner_Employee_1",
+    "joinDate": "2023-04-29",
+    "discordUserId": "136642940499726745",
+    "kmxWebApiMcTickets": 1
+  },
+  {
+    "employeeId": 2,
+    "level": "Owner",
+    "name": "Owner_Employee_2",
+    "joinDate": "2022-02-19",
+    "discordUserId": "150094947228972415",
+    "kmxWebApiMcTickets": 2
+  },
+  {
+    "employeeId": 3,
+    "level": "Owner",
+    "name": "Owner_Employee_3",
+    "joinDate": "2022-07-10",
+    "discordUserId": "164492064018525753",
+    "kmxWebApiMcTickets": 3
+  },
+  {
+    "employeeId": 4,
+    "level": "Owner",
+    "name": "Owner_Employee_4",
+    "joinDate": "2023-04-30",
+    "discordUserId": "176310265645935262",
+    "kmxWebApiMcTickets": 4
+  },
+  {
+    "employeeId": 5,
+    "level": "Owner",
+    "name": "Owner_Employee_5",
+    "joinDate": "2022-10-25",
+    "discordUserId": "180191633762472432",
+    "kmxWebApiMcTickets": 5
+  },
+  {
+    "employeeId": 6,
+    "level": "Owner",
+    "name": "Owner_Employee_6",
+    "joinDate": "2022-05-21",
+    "discordUserId": "182321490621867435",
+    "kmxWebApiMcTickets": 6
+  },
+  {
+    "employeeId": 7,
+    "level": "Owner",
+    "name": "Owner_Employee_7",
+    "joinDate": "2022-01-08",
+    "discordUserId": "190850439815733523",
+    "kmxWebApiMcTickets": 7
+  },
+  {
+    "employeeId": 8,
+    "level": "Owner",
+    "name": "Owner_Employee_8",
+    "joinDate": "2024-02-04",
+    "discordUserId": "208023259460586094",
+    "kmxWebApiMcTickets": 8
+  },
+  {
+    "employeeId": 9,
+    "level": "Owner",
+    "name": "Owner_Employee_9",
+    "joinDate": "2023-04-19",
+    "discordUserId": "217840426440527737",
+    "kmxWebApiMcTickets": 9
+  },
+  {
+    "employeeId": 10,
+    "level": "Owner",
+    "name": "Owner_Employee_10",
+    "joinDate": "2023-08-14",
+    "discordUserId": "218168890076913833",
+    "kmxWebApiMcTickets": 10
+  },
+  {
+    "employeeId": 11,
+    "level": "Operator",
+    "name": "Operator_Employee_11",
+    "joinDate": "2024-06-04",
+    "discordUserId": "228355989445507485",
+    "kmxWebApiMcTickets": 11
+  },
+  {
+    "employeeId": 12,
+    "level": "Operator",
+    "name": "Operator_Employee_12",
+    "joinDate": "2022-08-19",
+    "discordUserId": "243914765730070149",
+    "kmxWebApiMcTickets": 12
+  },
+  {
+    "employeeId": 13,
+    "level": "Operator",
+    "name": "Operator_Employee_13",
+    "joinDate": "2024-07-06",
+    "discordUserId": "260876273137374942",
+    "kmxWebApiMcTickets": 13
+  },
+  {
+    "employeeId": 14,
+    "level": "Operator",
+    "name": "Operator_Employee_14",
+    "joinDate": "2023-03-18",
+    "discordUserId": "260982801390186462",
+    "kmxWebApiMcTickets": 14
+  },
+  {
+    "employeeId": 15,
+    "level": "Operator",
+    "name": "Operator_Employee_15",
+    "joinDate": "2023-07-18",
+    "discordUserId": "264719728713486505",
+    "kmxWebApiMcTickets": 15
+  },
+  {
+    "employeeId": 16,
+    "level": "Operator",
+    "name": "Operator_Employee_16",
+    "joinDate": "2022-09-11",
+    "discordUserId": "284074656725740477",
+    "kmxWebApiMcTickets": 16
+  },
+  {
+    "employeeId": 17,
+    "level": "Operator",
+    "name": "Operator_Employee_17",
+    "joinDate": "2022-05-04",
+    "discordUserId": "287527404810773569",
+    "kmxWebApiMcTickets": 17
+  },
+  {
+    "employeeId": 18,
+    "level": "Operator",
+    "name": "Operator_Employee_18",
+    "joinDate": "2022-04-27",
+    "discordUserId": "321693647224920511",
+    "kmxWebApiMcTickets": 18
+  },
+  {
+    "employeeId": 19,
+    "level": "Operator",
+    "name": "Operator_Employee_19",
+    "joinDate": "2024-03-07",
+    "discordUserId": "345141710811609815",
+    "kmxWebApiMcTickets": 19
+  },
+  {
+    "employeeId": 20,
+    "level": "Operator",
+    "name": "Operator_Employee_20",
+    "joinDate": "2023-10-18",
+    "discordUserId": "348239863311991088",
+    "kmxWebApiMcTickets": 20
+  },
+  {
+    "employeeId": 21,
+    "level": "Manager",
+    "name": "Manager_Employee_21",
+    "joinDate": "2023-11-04",
+    "discordUserId": "353199053319586361",
+    "kmxWebApiMcTickets": 21
+  },
+  {
+    "employeeId": 22,
+    "level": "Manager",
+    "name": "Manager_Employee_22",
+    "joinDate": "2024-02-02",
+    "discordUserId": "368239748164266123",
+    "kmxWebApiMcTickets": 22
+  },
+  {
+    "employeeId": 23,
+    "level": "Manager",
+    "name": "Manager_Employee_23",
+    "joinDate": "2024-02-29",
+    "discordUserId": "382247781897735636",
+    "kmxWebApiMcTickets": 23
+  },
+  {
+    "employeeId": 24,
+    "level": "Manager",
+    "name": "Manager_Employee_24",
+    "joinDate": "2022-10-16",
+    "discordUserId": "382341088111907415",
+    "kmxWebApiMcTickets": 24
+  },
+  {
+    "employeeId": 25,
+    "level": "Manager",
+    "name": "Manager_Employee_25",
+    "joinDate": "2024-04-11",
+    "discordUserId": "404971791897315843",
+    "kmxWebApiMcTickets": 25
+  },
+  {
+    "employeeId": 26,
+    "level": "Manager",
+    "name": "Manager_Employee_26",
+    "joinDate": "2023-08-22",
+    "discordUserId": "411228652046253559",
+    "kmxWebApiMcTickets": 26
+  },
+  {
+    "employeeId": 27,
+    "level": "Manager",
+    "name": "Manager_Employee_27",
+    "joinDate": "2022-09-19",
+    "discordUserId": "420363845452998774",
+    "kmxWebApiMcTickets": 27
+  },
+  {
+    "employeeId": 28,
+    "level": "Manager",
+    "name": "Manager_Employee_28",
+    "joinDate": "2022-11-21",
+    "discordUserId": "420732049773829548",
+    "kmxWebApiMcTickets": 28
+  },
+  {
+    "employeeId": 29,
+    "level": "Manager",
+    "name": "Manager_Employee_29",
+    "joinDate": "2022-08-06",
+    "discordUserId": "438011540564379889",
+    "kmxWebApiMcTickets": 29
+  },
+  {
+    "employeeId": 30,
+    "level": "Manager",
+    "name": "Manager_Employee_30",
+    "joinDate": "2022-12-03",
+    "discordUserId": "473872538075455791",
+    "kmxWebApiMcTickets": 30
+  },
+  {
+    "employeeId": 31,
+    "level": "Overseer",
+    "name": "Overseer_Employee_31",
+    "joinDate": "2023-03-03",
+    "discordUserId": "496553951827551251",
+    "kmxWebApiMcTickets": 31
+  },
+  {
+    "employeeId": 32,
+    "level": "Overseer",
+    "name": "Overseer_Employee_32",
+    "joinDate": "2023-12-28",
+    "discordUserId": "509599234334273032",
+    "kmxWebApiMcTickets": 32
+  },
+  {
+    "employeeId": 33,
+    "level": "Overseer",
+    "name": "Overseer_Employee_33",
+    "joinDate": "2023-04-13",
+    "discordUserId": "513875040606644119",
+    "kmxWebApiMcTickets": 33
+  },
+  {
+    "employeeId": 34,
+    "level": "Overseer",
+    "name": "Overseer_Employee_34",
+    "joinDate": "2022-02-14",
+    "discordUserId": "516936801523520193",
+    "kmxWebApiMcTickets": 34
+  },
+  {
+    "employeeId": 35,
+    "level": "Overseer",
+    "name": "Overseer_Employee_35",
+    "joinDate": "2022-09-26",
+    "discordUserId": "538026358954537233",
+    "kmxWebApiMcTickets": 35
+  },
+  {
+    "employeeId": 36,
+    "level": "Overseer",
+    "name": "Overseer_Employee_36",
+    "joinDate": "2024-08-29",
+    "discordUserId": "538255701653666512",
+    "kmxWebApiMcTickets": 36
+  },
+  {
+    "employeeId": 37,
+    "level": "Overseer",
+    "name": "Overseer_Employee_37",
+    "joinDate": "2023-05-22",
+    "discordUserId": "562511513199020028",
+    "kmxWebApiMcTickets": 37
+  },
+  {
+    "employeeId": 38,
+    "level": "Overseer",
+    "name": "Overseer_Employee_38",
+    "joinDate": "2023-10-06",
+    "discordUserId": "583673423642446070",
+    "kmxWebApiMcTickets": 38
+  },
+  {
+    "employeeId": 39,
+    "level": "Overseer",
+    "name": "Overseer_Employee_39",
+    "joinDate": "2024-03-10",
+    "discordUserId": "587241232158376826",
+    "kmxWebApiMcTickets": 39
+  },
+  {
+    "employeeId": 40,
+    "level": "Overseer",
+    "name": "Overseer_Employee_40",
+    "joinDate": "2023-08-06",
+    "discordUserId": "617902765409618912",
+    "kmxWebApiMcTickets": 40
+  },
+  {
+    "employeeId": 41,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_41",
+    "joinDate": "2022-04-20",
+    "discordUserId": "622746488039229241",
+    "kmxWebApiMcTickets": 41
+  },
+  {
+    "employeeId": 42,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_42",
+    "joinDate": "2022-03-02",
+    "discordUserId": "629680822053090256",
+    "kmxWebApiMcTickets": 42
+  },
+  {
+    "employeeId": 43,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_43",
+    "joinDate": "2022-11-18",
+    "discordUserId": "632949740704546543",
+    "kmxWebApiMcTickets": 43
+  },
+  {
+    "employeeId": 44,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_44",
+    "joinDate": "2023-10-03",
+    "discordUserId": "675574458552210453",
+    "kmxWebApiMcTickets": 44
+  },
+  {
+    "employeeId": 45,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_45",
+    "joinDate": "2024-05-14",
+    "discordUserId": "715821345167490561",
+    "kmxWebApiMcTickets": 45
+  },
+  {
+    "employeeId": 46,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_46",
+    "joinDate": "2022-03-25",
+    "discordUserId": "721398507906257531",
+    "kmxWebApiMcTickets": 46
+  },
+  {
+    "employeeId": 47,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_47",
+    "joinDate": "2023-10-29",
+    "discordUserId": "728764812031418704",
+    "kmxWebApiMcTickets": 47
+  },
+  {
+    "employeeId": 48,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_48",
+    "joinDate": "2023-12-09",
+    "discordUserId": "747071500822319027",
+    "kmxWebApiMcTickets": 48
+  },
+  {
+    "employeeId": 49,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_49",
+    "joinDate": "2022-04-09",
+    "discordUserId": "753914079150376932",
+    "kmxWebApiMcTickets": 49
+  },
+  {
+    "employeeId": 50,
+    "level": "ChatMod",
+    "name": "ChatMod_Employee_50",
+    "joinDate": "2023-04-30",
+    "discordUserId": "780791512660942722",
+    "kmxWebApiMcTickets": 50
+  },
+  {
+    "employeeId": 51,
+    "level": "Support",
+    "name": "Support_Employee_51",
+    "joinDate": "2023-04-25",
+    "discordUserId": "794080340840347345",
+    "kmxWebApiMcTickets": 51
+  },
+  {
+    "employeeId": 52,
+    "level": "Support",
+    "name": "Support_Employee_52",
+    "joinDate": "2024-02-17",
+    "discordUserId": "824772341738102066",
+    "kmxWebApiMcTickets": 52
+  },
+  {
+    "employeeId": 53,
+    "level": "Support",
+    "name": "Support_Employee_53",
+    "joinDate": "2022-05-27",
+    "discordUserId": "832080124566962803",
+    "kmxWebApiMcTickets": 53
+  },
+  {
+    "employeeId": 54,
+    "level": "Support",
+    "name": "Support_Employee_54",
+    "joinDate": "2023-09-20",
+    "discordUserId": "841157749712210533",
+    "kmxWebApiMcTickets": 54
+  },
+  {
+    "employeeId": 55,
+    "level": "Support",
+    "name": "Support_Employee_55",
+    "joinDate": "2023-05-21",
+    "discordUserId": "862384702718551449",
+    "kmxWebApiMcTickets": 55
+  },
+  {
+    "employeeId": 56,
+    "level": "Support",
+    "name": "Support_Employee_56",
+    "joinDate": "2024-08-09",
+    "discordUserId": "872659369000190126",
+    "kmxWebApiMcTickets": 56
+  },
+  {
+    "employeeId": 57,
+    "level": "Support",
+    "name": "Support_Employee_57",
+    "joinDate": "2024-01-07",
+    "discordUserId": "888076805772318793",
+    "kmxWebApiMcTickets": 57
+  },
+  {
+    "employeeId": 58,
+    "level": "Support",
+    "name": "Support_Employee_58",
+    "joinDate": "2023-03-09",
+    "discordUserId": "893396718494746152",
+    "kmxWebApiMcTickets": 58
+  },
+  {
+    "employeeId": 59,
+    "level": "Support",
+    "name": "Support_Employee_59",
+    "joinDate": "2023-01-28",
+    "discordUserId": "908572641880232841",
+    "kmxWebApiMcTickets": 59
+  },
+  {
+    "employeeId": 60,
+    "level": "Support",
+    "name": "Support_Employee_60",
+    "joinDate": "2023-05-23",
+    "discordUserId": "909143729152108677",
+    "kmxWebApiMcTickets": 60
+  },
+  {
+    "employeeId": 61,
+    "level": "Helper",
+    "name": "Helper_Employee_61",
+    "joinDate": "2022-01-06",
+    "discordUserId": "925514409025013289",
+    "kmxWebApiMcTickets": 61
+  },
+  {
+    "employeeId": 62,
+    "level": "Helper",
+    "name": "Helper_Employee_62",
+    "joinDate": "2022-04-26",
+    "discordUserId": "927698802236956910",
+    "kmxWebApiMcTickets": 62
+  },
+  {
+    "employeeId": 63,
+    "level": "Helper",
+    "name": "Helper_Employee_63",
+    "joinDate": "2022-04-03",
+    "discordUserId": "953931770133622125",
+    "kmxWebApiMcTickets": 63
+  },
+  {
+    "employeeId": 64,
+    "level": "Helper",
+    "name": "Helper_Employee_64",
+    "joinDate": "2022-02-15",
+    "discordUserId": "954949519964969681",
+    "kmxWebApiMcTickets": 64
+  },
+  {
+    "employeeId": 65,
+    "level": "Helper",
+    "name": "Helper_Employee_65",
+    "joinDate": "2023-12-02",
+    "discordUserId": "958913818680687352",
+    "kmxWebApiMcTickets": 65
+  },
+  {
+    "employeeId": 66,
+    "level": "Helper",
+    "name": "Helper_Employee_66",
+    "joinDate": "2022-01-11",
+    "discordUserId": "961248283799128252",
+    "kmxWebApiMcTickets": 66
+  },
+  {
+    "employeeId": 67,
+    "level": "Helper",
+    "name": "Helper_Employee_67",
+    "joinDate": "2023-09-27",
+    "discordUserId": "974845324523988767",
+    "kmxWebApiMcTickets": 67
+  },
+  {
+    "employeeId": 68,
+    "level": "Helper",
+    "name": "Helper_Employee_68",
+    "joinDate": "2024-02-03",
+    "discordUserId": "980248801192569443",
+    "kmxWebApiMcTickets": 68
+  },
+  {
+    "employeeId": 69,
+    "level": "Helper",
+    "name": "Helper_Employee_69",
+    "joinDate": "2022-08-10",
+    "discordUserId": "985805242841900197",
+    "kmxWebApiMcTickets": 69
+  },
+  {
+    "employeeId": 70,
+    "level": "Helper",
+    "name": "Helper_Employee_70",
+    "joinDate": "2022-03-28",
+    "discordUserId": "991287113119009422",
+    "kmxWebApiMcTickets": 70
+  }
+]

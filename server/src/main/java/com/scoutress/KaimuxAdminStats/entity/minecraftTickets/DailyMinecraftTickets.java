@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.entity.minecraftTickets;
 
 import java.time.LocalDate;
 
+import com.scoutress.KaimuxAdminStats.services.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,18 +15,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "daily_minecraft_tickets")
+@Table(name = "minecraft_tickets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyMinecraftTickets {
+public class DailyMinecraftTickets implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
   @Column(name = "ticket_count", nullable = false)
   private int ticketCount;
@@ -32,4 +34,8 @@ public class DailyMinecraftTickets {
   @Column(name = "date", nullable = false)
   private LocalDate date;
 
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }

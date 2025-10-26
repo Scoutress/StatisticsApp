@@ -2,14 +2,15 @@ package com.scoutress.KaimuxAdminStats.config;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.scoutress.KaimuxAdminStats.services.DataFetchingService;
-import com.scoutress.KaimuxAdminStats.services.discordTickets.DiscordTicketsService;
-import com.scoutress.KaimuxAdminStats.services.productivity.ProductivityService;
+import com.scoutress.KaimuxAdminStats.services.TaskService;
 
 import jakarta.transaction.Transactional;
 
@@ -17,105 +18,56 @@ import jakarta.transaction.Transactional;
 @EnableScheduling
 public class ScheduledTasksConfig {
 
-  private final DataFetchingService dataFetchingService;
-  private final DiscordTicketsService discordTicketsService;
-  private final ProductivityService productivityService;
+  private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+  private final TaskService taskService;
 
-  public ScheduledTasksConfig(
-      DataFetchingService dataFetchingService,
-      DiscordTicketsService discordTicketsService,
-      ProductivityService productivityService) {
-    this.dataFetchingService = dataFetchingService;
-    this.discordTicketsService = discordTicketsService;
-    this.productivityService = productivityService;
+  public ScheduledTasksConfig(TaskService taskService) {
+    this.taskService = taskService;
   }
 
-  @Scheduled(initialDelay = 1000, fixedRate = 86400000)
+  @Scheduled(cron = "0 0 0 * * ?")
   @Transactional
   public void runScheduledTasks() {
     System.out.println("-----------------------------------------------");
     System.out.println("Started scheduled tasks at: " + getCurrentTimestamp());
     System.out.println("");
 
-    // runDiscordDataExtractionFromAPI();
-    // runMinecraftDataExtractionFromAPI();
-    // runVisitorsDataExtractionFromAPI();
+    taskService.processCalculations();
 
-    // runDiscordTicketsRawDataDuplicateRemover();
-
-    // runDiscordTicketsDataConvertor();
-
-    // runDiscordTicketsConvertedDataDuplicateRemover();
-
-    runDailyObjectiveProductivityCalculations();
-    // runDailyProductivityCalculations();
-
+    System.out.println("");
     System.out.println("Scheduled tasks completed at: " + getCurrentTimestamp());
     System.out.println("-----------------------------------------------");
   }
 
-  @SuppressWarnings("unused")
-  private void runDiscordDataExtractionFromAPI() {
-    System.out.println("Running: runDiscordDataExtractionFromAPI");
-    dataFetchingService.fetchAndSaveData(1, "discord");
-    System.out.println("Completed: runDiscordDataExtractionFromAPI");
+  // @Scheduled(cron = "0 40 * * * *")
+  @Transactional
+  public void testTasks() {
+    System.out.println("-----------------------------------------------");
+    System.out.println("Started testing tasks at: " + getCurrentTimestamp());
     System.out.println("");
+
+    scheduledExecutorService.schedule(() -> runApiDataExtraction(), 0, TimeUnit.MINUTES);
+    scheduledExecutorService.schedule(() -> runConvertMinecraftTicketsAnswers(), 1, TimeUnit.MINUTES);
+    scheduledExecutorService.schedule(() -> runCalculateAverageDailyMinecraftTicketsValues(), 2, TimeUnit.MINUTES);
+
+    System.out.println("");
+    System.out.println("Testing tasks completed at: " + getCurrentTimestamp());
+    System.out.println("-----------------------------------------------");
   }
 
-  @SuppressWarnings("unused")
-  private void runMinecraftDataExtractionFromAPI() {
-    System.out.println("Running: runMinecraftDataExtractionFromAPI");
-    dataFetchingService.fetchAndSaveData(1, "minecraft");
-    System.out.println("Completed: runMinecraftDataExtractionFromAPI");
-    System.out.println("");
+  private void runApiDataExtraction() {
+    // apiDataExtractionService.handleMinecraftTicketsRawData();
+    System.out.println("handleMinecraftTicketsRawData completed at: " + getCurrentTimestamp());
   }
 
-  @SuppressWarnings("unused")
-  private void runVisitorsDataExtractionFromAPI() {
-    System.out.println("Running: runVisitorsDataExtractionFromAPI");
-    dataFetchingService.fetchAndSaveData(1, "visitors");
-    System.out.println("Completed: runVisitorsDataExtractionFromAPI");
-    System.out.println("");
+  private void runConvertMinecraftTicketsAnswers() {
+    // minecraftTicketsService.convertMinecraftTicketsAnswers();
+    System.out.println("convertMinecraftTicketsAnswers completed at: " + getCurrentTimestamp());
   }
 
-  @SuppressWarnings("unused")
-  private void runDiscordTicketsRawDataDuplicateRemover() {
-    System.out.println("Running: runDiscordTicketsRawDataDuplicateRemover");
-    discordTicketsService.removeDuplicateReactions();
-    System.out.println("Completed: runDiscordTicketsRawDataDuplicateRemover");
-    System.out.println("");
-  }
-
-  @SuppressWarnings("unused")
-  private void runDiscordTicketsDataConvertor() {
-    System.out.println("Running: runDiscordTicketsDataConvertor");
-    discordTicketsService.convertDiscordTicketsResponses();
-    System.out.println("Completed: runDiscordTicketsDataConvertor");
-    System.out.println("");
-  }
-
-  @SuppressWarnings("unused")
-  private void runDiscordTicketsConvertedDataDuplicateRemover() {
-    System.out.println("Running: runDiscordTicketsConvertedDataDuplicateRemover");
-    discordTicketsService.removeDuplicateTicketsData();
-    System.out.println("Completed: runDiscordTicketsConvertedDataDuplicateRemover");
-    System.out.println("");
-  }
-
-  @SuppressWarnings("unused")
-  private void runDailyObjectiveProductivityCalculations() {
-    System.out.println("Running: runDailyObjectiveProductivityCalculations");
-    productivityService.calculateDailyObjectiveProductivity();
-    System.out.println("Completed: runDailyObjectiveProductivityCalculations");
-    System.out.println("");
-  }
-
-  @SuppressWarnings("unused")
-  private void runDailyProductivityCalculations() {
-    System.out.println("Running: runProductivityCalculations");
-    productivityService.calculateDailyProductivity();
-    System.out.println("Completed: runProductivityCalculations");
-    System.out.println("");
+  private void runCalculateAverageDailyMinecraftTicketsValues() {
+    // minecraftTicketsService.calculateAverageDailyMinecraftTicketsValues();
+    System.out.println("calculateAverageDailyMinecraftTicketsValues completed at: " + getCurrentTimestamp());
   }
 
   private String getCurrentTimestamp() {

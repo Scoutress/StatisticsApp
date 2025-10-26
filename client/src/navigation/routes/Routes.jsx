@@ -7,6 +7,26 @@ const Routes = {
     link: "/stats/productivity",
     name: "Productivity",
   },
+  latestActivityPage: {
+    link: "/stats/latest-activities",
+    name: "Latest Activities",
+  },
+  employeePersonalStats: {
+    link: "/user/stats/:employeeId",
+    name: "Productivity",
+  },
+  complaintsSumPage: {
+    link: "/complaints/all-sums",
+    name: "Complaints sum",
+  },
+  complaintsDataPage: {
+    link: "/complaints/all-data",
+    name: "Complaints data",
+  },
+  complaintsAdd: {
+    link: "/complaints/add",
+    name: "Complaints add data",
+  },
   employeesPage: {
     link: "/employee/all",
     name: "Employees",
@@ -15,41 +35,9 @@ const Routes = {
     link: "/employee/add",
     name: "Employee Add",
   },
-  dcTicketsAddPage: {
-    link: "/dc-tickets/add",
-    name: "Dc Tickets Add",
-  },
-  dcTicketsPage: {
-    link: "/dc-tickets/all",
-    name: "Dc Tickets",
-  },
-  dcTicketsComparePage: {
-    link: "/dc-tickets/compare",
-    name: "Dc Tickets Compare",
-  },
-  mcTicketsPage: {
-    link: "/mc-tickets/all",
-    name: "Mc Tickets",
-  },
-  mcTicketsAddPage: {
-    link: "/mc-tickets/add",
-    name: "Mc Tickets Add",
-  },
-  playtimePage: {
-    link: "/playtime/all",
-    name: "Playtime",
-  },
-  playtimeAddPage: {
-    link: "/playtime/add",
-    name: "Playtime Add",
-  },
-  complainsPage: {
-    link: "/complains/all",
-    name: "Playtime",
-  },
-  promotionsPage: {
-    link: "/stats/promotions",
-    name: "Promotions",
+  playtimeSegments: {
+    link: "/stats/segments",
+    name: "Playtime Segments",
   },
 };
 

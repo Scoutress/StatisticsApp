@@ -43,9 +43,17 @@ yarn-error.log*
 
 # Logų failai
 *.log
+/.logs/
+.gz
 
 # Kiti nereikalingi failai
 *.bak
 *.backup
 
 ToDoList.txt
+application.properties
+
+/.github/
+bot.pid
+
+/discordBotPy/v2bot.py

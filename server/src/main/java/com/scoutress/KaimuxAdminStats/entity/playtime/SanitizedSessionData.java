@@ -1,5 +1,7 @@
 package com.scoutress.KaimuxAdminStats.entity.playtime;
 
+import com.scoutress.KaimuxAdminStats.services.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,14 +17,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SanitizedSessionData {
+public class SanitizedSessionData implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private short aid;
+  @Column(name = "employee_id", nullable = false)
+  private short employeeId;
 
   @Column(name = "time", nullable = false)
   private long time;
@@ -35,5 +37,10 @@ public class SanitizedSessionData {
 
   public boolean getActionAsBoolean() {
     return action;
+  }
+
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
   }
 }

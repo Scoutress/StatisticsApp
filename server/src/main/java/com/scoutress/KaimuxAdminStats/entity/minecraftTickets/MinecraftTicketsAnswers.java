@@ -23,8 +23,8 @@ public class MinecraftTicketsAnswers {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "minecraft_ticket_id", nullable = false)
-  private Long minecraftTicketId;
+  @Column(name = "kmx_web_api_mc_tickets", nullable = false)
+  private Short kmxWebApiMcTickets;
 
   @Column(name = "date_time", nullable = false)
   private LocalDateTime dateTime;

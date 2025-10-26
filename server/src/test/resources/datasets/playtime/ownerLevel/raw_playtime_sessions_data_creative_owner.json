@@ -1,0 +1,1202 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "time": 1722499740,
+    "action": 1
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "time": 1722500640,
+    "action": 0
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "time": 1722586800,
+    "action": 1
+  },
+  {
+    "id": 4,
+    "user_id": 1,
+    "time": 1722589020,
+    "action": 0
+  },
+  {
+    "id": 5,
+    "user_id": 1,
+    "time": 1759480260,
+    "action": 1
+  },
+  {
+    "id": 6,
+    "user_id": 1,
+    "time": 1759483380,
+    "action": 0
+  },
+  {
+    "id": 7,
+    "user_id": 1,
+    "time": 1759567320,
+    "action": 1
+  },
+  {
+    "id": 8,
+    "user_id": 1,
+    "time": 1759571820,
+    "action": 0
+  },
+  {
+    "id": 9,
+    "user_id": 1,
+    "time": 1759654380,
+    "action": 1
+  },
+  {
+    "id": 10,
+    "user_id": 1,
+    "time": 1759659780,
+    "action": 0
+  },
+  {
+    "id": 11,
+    "user_id": 1,
+    "time": 1759741440,
+    "action": 1
+  },
+  {
+    "id": 12,
+    "user_id": 1,
+    "time": 1759748820,
+    "action": 0
+  },
+  {
+    "id": 13,
+    "user_id": 1,
+    "time": 1759828500,
+    "action": 1
+  },
+  {
+    "id": 14,
+    "user_id": 1,
+    "time": 1759839300,
+    "action": 0
+  },
+  {
+    "id": 15,
+    "user_id": 1,
+    "time": 1759915560,
+    "action": 1
+  },
+  {
+    "id": 16,
+    "user_id": 1,
+    "time": 1759929960,
+    "action": 0
+  },
+  {
+    "id": 17,
+    "user_id": 1,
+    "time": 1760002620,
+    "action": 1
+  },
+  {
+    "id": 18,
+    "user_id": 1,
+    "time": 1760024220,
+    "action": 0
+  },
+  {
+    "id": 19,
+    "user_id": 1,
+    "time": 1760089680,
+    "action": 1
+  },
+  {
+    "id": 20,
+    "user_id": 1,
+    "time": 1760132880,
+    "action": 0
+  },
+  {
+    "id": 21,
+    "user_id": 2,
+    "time": 1722759120,
+    "action": 1
+  },
+  {
+    "id": 22,
+    "user_id": 2,
+    "time": 1722760020,
+    "action": 0
+  },
+  {
+    "id": 23,
+    "user_id": 2,
+    "time": 1759566180,
+    "action": 1
+  },
+  {
+    "id": 24,
+    "user_id": 2,
+    "time": 1759568400,
+    "action": 0
+  },
+  {
+    "id": 25,
+    "user_id": 2,
+    "time": 1759653240,
+    "action": 1
+  },
+  {
+    "id": 26,
+    "user_id": 2,
+    "time": 1759656360,
+    "action": 0
+  },
+  {
+    "id": 27,
+    "user_id": 2,
+    "time": 1759740300,
+    "action": 1
+  },
+  {
+    "id": 28,
+    "user_id": 2,
+    "time": 1759744800,
+    "action": 0
+  },
+  {
+    "id": 29,
+    "user_id": 2,
+    "time": 1759827360,
+    "action": 1
+  },
+  {
+    "id": 30,
+    "user_id": 2,
+    "time": 1759832760,
+    "action": 0
+  },
+  {
+    "id": 31,
+    "user_id": 2,
+    "time": 1759914420,
+    "action": 1
+  },
+  {
+    "id": 32,
+    "user_id": 2,
+    "time": 1759921800,
+    "action": 0
+  },
+  {
+    "id": 33,
+    "user_id": 2,
+    "time": 1760001480,
+    "action": 1
+  },
+  {
+    "id": 34,
+    "user_id": 2,
+    "time": 1760012280,
+    "action": 0
+  },
+  {
+    "id": 35,
+    "user_id": 2,
+    "time": 1760088540,
+    "action": 1
+  },
+  {
+    "id": 36,
+    "user_id": 2,
+    "time": 1760102940,
+    "action": 0
+  },
+  {
+    "id": 37,
+    "user_id": 2,
+    "time": 1760175600,
+    "action": 1
+  },
+  {
+    "id": 38,
+    "user_id": 2,
+    "time": 1760197200,
+    "action": 0
+  },
+  {
+    "id": 39,
+    "user_id": 2,
+    "time": 1760262660,
+    "action": 1
+  },
+  {
+    "id": 40,
+    "user_id": 2,
+    "time": 1760305860,
+    "action": 0
+  },
+  {
+    "id": 41,
+    "user_id": 3,
+    "time": 1723018500,
+    "action": 1
+  },
+  {
+    "id": 42,
+    "user_id": 3,
+    "time": 1723019400,
+    "action": 0
+  },
+  {
+    "id": 43,
+    "user_id": 3,
+    "time": 1723105560,
+    "action": 1
+  },
+  {
+    "id": 44,
+    "user_id": 3,
+    "time": 1723107780,
+    "action": 0
+  },
+  {
+    "id": 45,
+    "user_id": 3,
+    "time": 1759826220,
+    "action": 1
+  },
+  {
+    "id": 46,
+    "user_id": 3,
+    "time": 1759829340,
+    "action": 0
+  },
+  {
+    "id": 47,
+    "user_id": 3,
+    "time": 1759913280,
+    "action": 1
+  },
+  {
+    "id": 48,
+    "user_id": 3,
+    "time": 1759917780,
+    "action": 0
+  },
+  {
+    "id": 49,
+    "user_id": 3,
+    "time": 1760000340,
+    "action": 1
+  },
+  {
+    "id": 50,
+    "user_id": 3,
+    "time": 1760005740,
+    "action": 0
+  },
+  {
+    "id": 51,
+    "user_id": 3,
+    "time": 1760087400,
+    "action": 1
+  },
+  {
+    "id": 52,
+    "user_id": 3,
+    "time": 1760094780,
+    "action": 0
+  },
+  {
+    "id": 53,
+    "user_id": 3,
+    "time": 1760174460,
+    "action": 1
+  },
+  {
+    "id": 54,
+    "user_id": 3,
+    "time": 1760185260,
+    "action": 0
+  },
+  {
+    "id": 55,
+    "user_id": 3,
+    "time": 1760261520,
+    "action": 1
+  },
+  {
+    "id": 56,
+    "user_id": 3,
+    "time": 1760275920,
+    "action": 0
+  },
+  {
+    "id": 57,
+    "user_id": 3,
+    "time": 1760348580,
+    "action": 1
+  },
+  {
+    "id": 58,
+    "user_id": 3,
+    "time": 1760370180,
+    "action": 0
+  },
+  {
+    "id": 59,
+    "user_id": 3,
+    "time": 1760435640,
+    "action": 1
+  },
+  {
+    "id": 60,
+    "user_id": 3,
+    "time": 1760478840,
+    "action": 0
+  },
+  {
+    "id": 61,
+    "user_id": 4,
+    "time": 1723277880,
+    "action": 1
+  },
+  {
+    "id": 62,
+    "user_id": 4,
+    "time": 1723278780,
+    "action": 0
+  },
+  {
+    "id": 63,
+    "user_id": 4,
+    "time": 1759912140,
+    "action": 1
+  },
+  {
+    "id": 64,
+    "user_id": 4,
+    "time": 1759914360,
+    "action": 0
+  },
+  {
+    "id": 65,
+    "user_id": 4,
+    "time": 1759999200,
+    "action": 1
+  },
+  {
+    "id": 66,
+    "user_id": 4,
+    "time": 1760002320,
+    "action": 0
+  },
+  {
+    "id": 67,
+    "user_id": 4,
+    "time": 1760086260,
+    "action": 1
+  },
+  {
+    "id": 68,
+    "user_id": 4,
+    "time": 1760090760,
+    "action": 0
+  },
+  {
+    "id": 69,
+    "user_id": 4,
+    "time": 1760173320,
+    "action": 1
+  },
+  {
+    "id": 70,
+    "user_id": 4,
+    "time": 1760178720,
+    "action": 0
+  },
+  {
+    "id": 71,
+    "user_id": 4,
+    "time": 1760260380,
+    "action": 1
+  },
+  {
+    "id": 72,
+    "user_id": 4,
+    "time": 1760267760,
+    "action": 0
+  },
+  {
+    "id": 73,
+    "user_id": 4,
+    "time": 1760347440,
+    "action": 1
+  },
+  {
+    "id": 74,
+    "user_id": 4,
+    "time": 1760358240,
+    "action": 0
+  },
+  {
+    "id": 75,
+    "user_id": 4,
+    "time": 1760434500,
+    "action": 1
+  },
+  {
+    "id": 76,
+    "user_id": 4,
+    "time": 1760448900,
+    "action": 0
+  },
+  {
+    "id": 77,
+    "user_id": 4,
+    "time": 1760521560,
+    "action": 1
+  },
+  {
+    "id": 78,
+    "user_id": 4,
+    "time": 1760543160,
+    "action": 0
+  },
+  {
+    "id": 79,
+    "user_id": 4,
+    "time": 1760608620,
+    "action": 1
+  },
+  {
+    "id": 80,
+    "user_id": 4,
+    "time": 1760651820,
+    "action": 0
+  },
+  {
+    "id": 81,
+    "user_id": 5,
+    "time": 1723537260,
+    "action": 1
+  },
+  {
+    "id": 82,
+    "user_id": 5,
+    "time": 1723538160,
+    "action": 0
+  },
+  {
+    "id": 83,
+    "user_id": 5,
+    "time": 1723624320,
+    "action": 1
+  },
+  {
+    "id": 84,
+    "user_id": 5,
+    "time": 1723626540,
+    "action": 0
+  },
+  {
+    "id": 85,
+    "user_id": 5,
+    "time": 1760172180,
+    "action": 1
+  },
+  {
+    "id": 86,
+    "user_id": 5,
+    "time": 1760175300,
+    "action": 0
+  },
+  {
+    "id": 87,
+    "user_id": 5,
+    "time": 1760259240,
+    "action": 1
+  },
+  {
+    "id": 88,
+    "user_id": 5,
+    "time": 1760263740,
+    "action": 0
+  },
+  {
+    "id": 89,
+    "user_id": 5,
+    "time": 1760346300,
+    "action": 1
+  },
+  {
+    "id": 90,
+    "user_id": 5,
+    "time": 1760351700,
+    "action": 0
+  },
+  {
+    "id": 91,
+    "user_id": 5,
+    "time": 1760433360,
+    "action": 1
+  },
+  {
+    "id": 92,
+    "user_id": 5,
+    "time": 1760440740,
+    "action": 0
+  },
+  {
+    "id": 93,
+    "user_id": 5,
+    "time": 1760520420,
+    "action": 1
+  },
+  {
+    "id": 94,
+    "user_id": 5,
+    "time": 1760531220,
+    "action": 0
+  },
+  {
+    "id": 95,
+    "user_id": 5,
+    "time": 1760607480,
+    "action": 1
+  },
+  {
+    "id": 96,
+    "user_id": 5,
+    "time": 1760621880,
+    "action": 0
+  },
+  {
+    "id": 97,
+    "user_id": 5,
+    "time": 1760694540,
+    "action": 1
+  },
+  {
+    "id": 98,
+    "user_id": 5,
+    "time": 1760716140,
+    "action": 0
+  },
+  {
+    "id": 99,
+    "user_id": 5,
+    "time": 1760781600,
+    "action": 1
+  },
+  {
+    "id": 100,
+    "user_id": 5,
+    "time": 1760824800,
+    "action": 0
+  },
+  {
+    "id": 101,
+    "user_id": 6,
+    "time": 1723796640,
+    "action": 1
+  },
+  {
+    "id": 102,
+    "user_id": 6,
+    "time": 1723797540,
+    "action": 0
+  },
+  {
+    "id": 103,
+    "user_id": 6,
+    "time": 1760258100,
+    "action": 1
+  },
+  {
+    "id": 104,
+    "user_id": 6,
+    "time": 1760260320,
+    "action": 0
+  },
+  {
+    "id": 105,
+    "user_id": 6,
+    "time": 1760345160,
+    "action": 1
+  },
+  {
+    "id": 106,
+    "user_id": 6,
+    "time": 1760348280,
+    "action": 0
+  },
+  {
+    "id": 107,
+    "user_id": 6,
+    "time": 1760432220,
+    "action": 1
+  },
+  {
+    "id": 108,
+    "user_id": 6,
+    "time": 1760436720,
+    "action": 0
+  },
+  {
+    "id": 109,
+    "user_id": 6,
+    "time": 1760519280,
+    "action": 1
+  },
+  {
+    "id": 110,
+    "user_id": 6,
+    "time": 1760524680,
+    "action": 0
+  },
+  {
+    "id": 111,
+    "user_id": 6,
+    "time": 1760606340,
+    "action": 1
+  },
+  {
+    "id": 112,
+    "user_id": 6,
+    "time": 1760613720,
+    "action": 0
+  },
+  {
+    "id": 113,
+    "user_id": 6,
+    "time": 1760693400,
+    "action": 1
+  },
+  {
+    "id": 114,
+    "user_id": 6,
+    "time": 1760704200,
+    "action": 0
+  },
+  {
+    "id": 115,
+    "user_id": 6,
+    "time": 1760780460,
+    "action": 1
+  },
+  {
+    "id": 116,
+    "user_id": 6,
+    "time": 1760794860,
+    "action": 0
+  },
+  {
+    "id": 117,
+    "user_id": 6,
+    "time": 1760867520,
+    "action": 1
+  },
+  {
+    "id": 118,
+    "user_id": 6,
+    "time": 1760889120,
+    "action": 0
+  },
+  {
+    "id": 119,
+    "user_id": 6,
+    "time": 1760954580,
+    "action": 1
+  },
+  {
+    "id": 120,
+    "user_id": 6,
+    "time": 1760997780,
+    "action": 0
+  },
+  {
+    "id": 121,
+    "user_id": 7,
+    "time": 1724056020,
+    "action": 1
+  },
+  {
+    "id": 122,
+    "user_id": 7,
+    "time": 1724056920,
+    "action": 0
+  },
+  {
+    "id": 123,
+    "user_id": 7,
+    "time": 1724143080,
+    "action": 1
+  },
+  {
+    "id": 124,
+    "user_id": 7,
+    "time": 1724145300,
+    "action": 0
+  },
+  {
+    "id": 125,
+    "user_id": 7,
+    "time": 1760518140,
+    "action": 1
+  },
+  {
+    "id": 126,
+    "user_id": 7,
+    "time": 1760521260,
+    "action": 0
+  },
+  {
+    "id": 127,
+    "user_id": 7,
+    "time": 1760605200,
+    "action": 1
+  },
+  {
+    "id": 128,
+    "user_id": 7,
+    "time": 1760609700,
+    "action": 0
+  },
+  {
+    "id": 129,
+    "user_id": 7,
+    "time": 1760692260,
+    "action": 1
+  },
+  {
+    "id": 130,
+    "user_id": 7,
+    "time": 1760697660,
+    "action": 0
+  },
+  {
+    "id": 131,
+    "user_id": 7,
+    "time": 1760779320,
+    "action": 1
+  },
+  {
+    "id": 132,
+    "user_id": 7,
+    "time": 1760786700,
+    "action": 0
+  },
+  {
+    "id": 133,
+    "user_id": 7,
+    "time": 1760866380,
+    "action": 1
+  },
+  {
+    "id": 134,
+    "user_id": 7,
+    "time": 1760877180,
+    "action": 0
+  },
+  {
+    "id": 135,
+    "user_id": 7,
+    "time": 1760953440,
+    "action": 1
+  },
+  {
+    "id": 136,
+    "user_id": 7,
+    "time": 1760967840,
+    "action": 0
+  },
+  {
+    "id": 137,
+    "user_id": 7,
+    "time": 1761040500,
+    "action": 1
+  },
+  {
+    "id": 138,
+    "user_id": 7,
+    "time": 1761062100,
+    "action": 0
+  },
+  {
+    "id": 139,
+    "user_id": 7,
+    "time": 1761127560,
+    "action": 1
+  },
+  {
+    "id": 140,
+    "user_id": 7,
+    "time": 1761170760,
+    "action": 0
+  },
+  {
+    "id": 141,
+    "user_id": 8,
+    "time": 1724315400,
+    "action": 1
+  },
+  {
+    "id": 142,
+    "user_id": 8,
+    "time": 1724316300,
+    "action": 0
+  },
+  {
+    "id": 143,
+    "user_id": 8,
+    "time": 1760604060,
+    "action": 1
+  },
+  {
+    "id": 144,
+    "user_id": 8,
+    "time": 1760606280,
+    "action": 0
+  },
+  {
+    "id": 145,
+    "user_id": 8,
+    "time": 1760691120,
+    "action": 1
+  },
+  {
+    "id": 146,
+    "user_id": 8,
+    "time": 1760694240,
+    "action": 0
+  },
+  {
+    "id": 147,
+    "user_id": 8,
+    "time": 1760778180,
+    "action": 1
+  },
+  {
+    "id": 148,
+    "user_id": 8,
+    "time": 1760782680,
+    "action": 0
+  },
+  {
+    "id": 149,
+    "user_id": 8,
+    "time": 1760865240,
+    "action": 1
+  },
+  {
+    "id": 150,
+    "user_id": 8,
+    "time": 1760870640,
+    "action": 0
+  },
+  {
+    "id": 151,
+    "user_id": 8,
+    "time": 1760952300,
+    "action": 1
+  },
+  {
+    "id": 152,
+    "user_id": 8,
+    "time": 1760959680,
+    "action": 0
+  },
+  {
+    "id": 153,
+    "user_id": 8,
+    "time": 1761039360,
+    "action": 1
+  },
+  {
+    "id": 154,
+    "user_id": 8,
+    "time": 1761050160,
+    "action": 0
+  },
+  {
+    "id": 155,
+    "user_id": 8,
+    "time": 1761126420,
+    "action": 1
+  },
+  {
+    "id": 156,
+    "user_id": 8,
+    "time": 1761140820,
+    "action": 0
+  },
+  {
+    "id": 157,
+    "user_id": 8,
+    "time": 1761213480,
+    "action": 1
+  },
+  {
+    "id": 158,
+    "user_id": 8,
+    "time": 1761235080,
+    "action": 0
+  },
+  {
+    "id": 159,
+    "user_id": 8,
+    "time": 1761300540,
+    "action": 1
+  },
+  {
+    "id": 160,
+    "user_id": 8,
+    "time": 1761343740,
+    "action": 0
+  },
+  {
+    "id": 161,
+    "user_id": 9,
+    "time": 1724574780,
+    "action": 1
+  },
+  {
+    "id": 162,
+    "user_id": 9,
+    "time": 1724575680,
+    "action": 0
+  },
+  {
+    "id": 163,
+    "user_id": 9,
+    "time": 1724661840,
+    "action": 1
+  },
+  {
+    "id": 164,
+    "user_id": 9,
+    "time": 1724664060,
+    "action": 0
+  },
+  {
+    "id": 165,
+    "user_id": 9,
+    "time": 1760864100,
+    "action": 1
+  },
+  {
+    "id": 166,
+    "user_id": 9,
+    "time": 1760867220,
+    "action": 0
+  },
+  {
+    "id": 167,
+    "user_id": 9,
+    "time": 1760951160,
+    "action": 1
+  },
+  {
+    "id": 168,
+    "user_id": 9,
+    "time": 1760955660,
+    "action": 0
+  },
+  {
+    "id": 169,
+    "user_id": 9,
+    "time": 1761038220,
+    "action": 1
+  },
+  {
+    "id": 170,
+    "user_id": 9,
+    "time": 1761043620,
+    "action": 0
+  },
+  {
+    "id": 171,
+    "user_id": 9,
+    "time": 1761125280,
+    "action": 1
+  },
+  {
+    "id": 172,
+    "user_id": 9,
+    "time": 1761132660,
+    "action": 0
+  },
+  {
+    "id": 173,
+    "user_id": 9,
+    "time": 1761212340,
+    "action": 1
+  },
+  {
+    "id": 174,
+    "user_id": 9,
+    "time": 1761223140,
+    "action": 0
+  },
+  {
+    "id": 175,
+    "user_id": 9,
+    "time": 1761299400,
+    "action": 1
+  },
+  {
+    "id": 176,
+    "user_id": 9,
+    "time": 1761313800,
+    "action": 0
+  },
+  {
+    "id": 177,
+    "user_id": 9,
+    "time": 1761386460,
+    "action": 1
+  },
+  {
+    "id": 178,
+    "user_id": 9,
+    "time": 1761408060,
+    "action": 0
+  },
+  {
+    "id": 179,
+    "user_id": 9,
+    "time": 1761473520,
+    "action": 1
+  },
+  {
+    "id": 180,
+    "user_id": 9,
+    "time": 1761516720,
+    "action": 0
+  },
+  {
+    "id": 181,
+    "user_id": 10,
+    "time": 1724834160,
+    "action": 1
+  },
+  {
+    "id": 182,
+    "user_id": 10,
+    "time": 1724835060,
+    "action": 0
+  },
+  {
+    "id": 183,
+    "user_id": 10,
+    "time": 1760950020,
+    "action": 1
+  },
+  {
+    "id": 184,
+    "user_id": 10,
+    "time": 1760952240,
+    "action": 0
+  },
+  {
+    "id": 185,
+    "user_id": 10,
+    "time": 1761037080,
+    "action": 1
+  },
+  {
+    "id": 186,
+    "user_id": 10,
+    "time": 1761040200,
+    "action": 0
+  },
+  {
+    "id": 187,
+    "user_id": 10,
+    "time": 1761124140,
+    "action": 1
+  },
+  {
+    "id": 188,
+    "user_id": 10,
+    "time": 1761128640,
+    "action": 0
+  },
+  {
+    "id": 189,
+    "user_id": 10,
+    "time": 1761211200,
+    "action": 1
+  },
+  {
+    "id": 190,
+    "user_id": 10,
+    "time": 1761216600,
+    "action": 0
+  },
+  {
+    "id": 191,
+    "user_id": 10,
+    "time": 1761298260,
+    "action": 1
+  },
+  {
+    "id": 192,
+    "user_id": 10,
+    "time": 1761305640,
+    "action": 0
+  },
+  {
+    "id": 193,
+    "user_id": 10,
+    "time": 1761385320,
+    "action": 1
+  },
+  {
+    "id": 194,
+    "user_id": 10,
+    "time": 1761396120,
+    "action": 0
+  },
+  {
+    "id": 195,
+    "user_id": 10,
+    "time": 1761472380,
+    "action": 1
+  },
+  {
+    "id": 196,
+    "user_id": 10,
+    "time": 1761486780,
+    "action": 0
+  },
+  {
+    "id": 197,
+    "user_id": 10,
+    "time": 1761559440,
+    "action": 1
+  },
+  {
+    "id": 198,
+    "user_id": 10,
+    "time": 1761581040,
+    "action": 0
+  },
+  {
+    "id": 199,
+    "user_id": 10,
+    "time": 1761646500,
+    "action": 1
+  },
+  {
+    "id": 200,
+    "user_id": 10,
+    "time": 1761689700,
+    "action": 0
+  }
+]

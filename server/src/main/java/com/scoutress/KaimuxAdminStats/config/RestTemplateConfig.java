@@ -8,8 +8,11 @@ import org.springframework.web.client.RestTemplate;
 public class RestTemplateConfig {
 
   @Bean
-  @SuppressWarnings("unused")
   RestTemplate restTemplate() {
     return new RestTemplate();
+  }
+
+  public void demo() {
+    restTemplate();
   }
 }

@@ -2,6 +2,8 @@ package com.scoutress.KaimuxAdminStats.entity.discordMessages;
 
 import java.time.LocalDate;
 
+import com.scoutress.KaimuxAdminStats.services.HasEmployeeId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,14 +19,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyDiscordMessages {
+public class DailyDiscordMessages implements HasEmployeeId {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "aid", nullable = false)
-  private Short aid;
+  @Column(name = "employee_id", nullable = false)
+  private Short employeeId;
 
   @Column(name = "msg_count", nullable = false)
   private int msgCount;
@@ -32,4 +34,8 @@ public class DailyDiscordMessages {
   @Column(name = "date", nullable = false)
   private LocalDate date;
 
+  @Override
+  public Short getEmployeeId() {
+    return employeeId;
+  }
 }
